@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
  * Each knowledge unit contains:
  * <ul>
  *     <li>An identifier that uniquely identifies the knowledge unit</li>
- *     <li>A type that categorizes the knowledge unit (either "artifact" or "element")</li>
+ *     <li>A type that categorizes the knowledge unit (e.g., requirement)</li>
  *     <li>Content that represents the actual text or data</li>
  *     <li>A normalized version of the content with consistent line endings</li>
  * </ul>
@@ -41,7 +41,7 @@ public abstract sealed class Knowledge permits Artifact, Element {
     @JsonProperty
     private final String identifier;
 
-    /** The type of this knowledge unit (either "artifact" or "element") */
+    /** The type of this knowledge unit */
     @JsonProperty
     private final String type;
 
