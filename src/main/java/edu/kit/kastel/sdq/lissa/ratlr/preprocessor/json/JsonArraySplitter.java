@@ -8,6 +8,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,7 +26,10 @@ public class JsonArraySplitter extends JsonPreprocessor {
      */
     public JsonArraySplitter(ModuleConfiguration configuration, ContextStore contextStore) {
         super(contextStore);
-        this.remapper = configuration.argumentAsType("remapper", new TypeReference<>() {});
+        this.remapper = new HashMap<>();
+        for (String key : configuration.getArgumentKeys()) {
+            this.remapper.put(key, configuration.argumentAsString(key));
+        }
     }
 
     protected void preprocess(Element element, List<Element> elements) throws JsonProcessingException {
