@@ -126,8 +126,8 @@ public class Evaluation {
         targetArtifactProvider =
                 ArtifactProvider.createArtifactProvider(configuration.targetArtifactProvider(), contextStore);
 
-        sourcePreprocessor = Preprocessor.createPreprocessor(configuration.sourcePreprocessor(), contextStore);
-        targetPreprocessor = Preprocessor.createPreprocessor(configuration.targetPreprocessor(), contextStore);
+        sourcePreprocessor = configuration.createSourcePreprocessor(contextStore);
+        targetPreprocessor = configuration.createTargetPreprocessor(contextStore);
 
         embeddingCreator = EmbeddingCreator.createEmbeddingCreator(configuration.embeddingCreator(), contextStore);
         sourceStore = new ElementStore(configuration.sourceStore(), false);

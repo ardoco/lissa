@@ -59,7 +59,7 @@ public class EvaluateCommand implements Runnable {
                 var evaluation = new Evaluation(config);
                 evaluation.run();
             } catch (Exception e) {
-                logger.warn("Configuration '{}' threw an exception: {}", config, e.getMessage());
+                logger.warn("Configuration '{}' threw an exception: {}", config, e.toString());
             }
         }
     }

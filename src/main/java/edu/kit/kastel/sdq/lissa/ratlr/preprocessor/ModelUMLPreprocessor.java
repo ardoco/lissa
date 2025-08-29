@@ -52,7 +52,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
  *
  * <p>Context handling is managed by the {@link Preprocessor} superclass. Subclasses should not duplicate context parameter documentation.</p>
  */
-public class ModelUMLPreprocessor extends Preprocessor {
+public class ModelUMLPreprocessor extends SingleElementPreprocessor {
     /** Whether to include component usages in the extracted information */
     private final boolean includeUsages;
     /** Whether to include operations of components and interfaces */
@@ -84,30 +84,25 @@ public class ModelUMLPreprocessor extends Preprocessor {
      *     <li>Creates elements for each component and interface</li>
      * </ol>
      *
-     * @param artifacts The list of UML model artifacts to preprocess
+     * @param element The list of UML model artifacts to preprocess
      * @return A list of elements containing both the original models and their components/interfaces
      */
     @Override
-    public List<Element> preprocess(List<Artifact> artifacts) {
+    protected List<Element> preprocess(Element element) {
         List<Element> elements = new ArrayList<>();
 
-        for (Artifact artifact : artifacts) {
-            Element artifactAsElement =
-                    new Element(artifact.getIdentifier(), artifact.getType(), artifact.getContent(), 0, null, false);
-            elements.add(artifactAsElement);
+        String xml = element.getContent();
+        UmlModelRoot umlModel = new UmlModel(new ByteArrayInputStream(xml.getBytes())).getModel();
 
-            String xml = artifact.getContent();
-            UmlModelRoot umlModel = new UmlModel(new ByteArrayInputStream(xml.getBytes())).getModel();
-
-            AtomicInteger counter = new AtomicInteger(0);
-            for (UmlComponent umlComponent : umlModel.getComponents()) {
-                this.addComponent(counter, umlComponent, artifactAsElement, elements);
-            }
-
-            for (UmlInterface umlInterface : umlModel.getInterfaces()) {
-                this.addInterface(counter, umlInterface, artifactAsElement, elements);
-            }
+        AtomicInteger counter = new AtomicInteger(0);
+        for (UmlComponent umlComponent : umlModel.getComponents()) {
+            this.addComponent(counter, umlComponent, element, elements);
         }
+
+        for (UmlInterface umlInterface : umlModel.getInterfaces()) {
+            this.addInterface(counter, umlInterface, element, elements);
+        }
+            
         return elements;
     }
 

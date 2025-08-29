@@ -1,18 +1,25 @@
 /* Licensed under MIT 2025. */
 package edu.kit.kastel.sdq.lissa.ratlr.preprocessor;
 
-import static edu.kit.kastel.sdq.lissa.ratlr.classifier.Classifier.CONFIG_NAME_SEPARATOR;
-
-import java.util.List;
-import java.util.Objects;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
+import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Knowledge;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.json.JsonArraySplitter;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.json.JsonConverterText;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.nl.SentenceInformation;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.nl.TemplateRequest;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.nl.TextListSplitter;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.PipelinePreprocessor;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.text.TemplateReplacer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.Objects;
+
+import static edu.kit.kastel.sdq.lissa.ratlr.classifier.Classifier.CONFIG_NAME_SEPARATOR;
 
 /**
  * Abstract base class for preprocessors that extract elements from artifacts.
@@ -44,8 +51,10 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
  *
  * Each preprocessor type is created based on the module configuration and
  * implements its own strategy for extracting elements from artifacts.
+ * 
+ * @param <T> The type of knowledge that this preprocessor accepts
  */
-public abstract class Preprocessor {
+public abstract class Preprocessor<T extends Knowledge> {
     /** Separator used in element identifiers */
     public static final String SEPARATOR = "$";
 
@@ -74,7 +83,11 @@ public abstract class Preprocessor {
      * @param artifacts The list of artifacts to preprocess
      * @return A list of elements extracted from the artifacts
      */
-    public abstract List<Element> preprocess(List<Artifact> artifacts);
+    public abstract List<Element> preprocess(List<T> artifacts);
+
+    public static Preprocessor<Artifact> createPreprocessors(List<ModuleConfiguration> configurations, ContextStore contextStore) {
+        return new PipelinePreprocessor(configurations, contextStore);
+    }
 
     /**
      * Creates a preprocessor instance based on the module configuration.
@@ -87,26 +100,66 @@ public abstract class Preprocessor {
      * @throws IllegalArgumentException if the preprocessor name is not supported
      * @throws IllegalStateException if the configuration name is not recognized
      */
-    public static Preprocessor createPreprocessor(ModuleConfiguration configuration, ContextStore contextStore) {
-        return switch (configuration.name().split(CONFIG_NAME_SEPARATOR)[0]) {
-            case "sentence" -> new SentencePreprocessor(configuration, contextStore);
-            case "code" ->
-                switch (configuration.name()) {
-                    case "code_chunking" -> new CodeChunkingPreprocessor(configuration, contextStore);
-                    case "code_method" -> new CodeMethodPreprocessor(configuration, contextStore);
-                    case "code_tree" -> new CodeTreePreprocessor(configuration, contextStore);
-                    default ->
-                        throw new IllegalArgumentException("Unsupported preprocessor name: " + configuration.name());
-                };
-            case "model" ->
-                switch (configuration.name()) {
-                    case "model_uml" -> new ModelUMLPreprocessor(configuration, contextStore);
-                    default ->
-                        throw new IllegalArgumentException("Unsupported preprocessor name: " + configuration.name());
-                };
-            case "summarize" -> new SummarizePreprocessor(configuration, contextStore);
+    public static Preprocessor<Artifact> createPreprocessor(ModuleConfiguration configuration, ContextStore contextStore) {
+        return switch (configuration.name()) {
+            case "code_tree" -> new CodeTreePreprocessor(configuration, contextStore);
             case "artifact" -> new SingleArtifactPreprocessor(contextStore);
             default -> throw new IllegalStateException("Unexpected value: " + configuration.name());
         };
     }
+
+    /**
+     * Creates a preprocessor instance based on the module configuration.
+     * The type of preprocessor is determined by the first part of the configuration name
+     * (before the separator) and, for some types, the full configuration name.
+     *
+     * @param configuration The module configuration specifying the type of preprocessor
+     * @param contextStore The shared context store for pipeline components
+     * @return A new preprocessor instance
+     * @throws IllegalArgumentException if the preprocessor name is not supported
+     * @throws IllegalStateException if the configuration name is not recognized
+     */
+    public static Preprocessor<Element> createElementPreprocessor(ModuleConfiguration configuration, ContextStore contextStore) {
+        return switch (configuration.name().split(CONFIG_NAME_SEPARATOR)[0]) {
+            case "json" ->
+                    switch (configuration.name()) {
+                        case "json_array_splitter" -> new JsonArraySplitter(configuration, contextStore);
+                        case "json_converter_text" -> new JsonConverterText(configuration, contextStore);
+                        default -> throw new IllegalArgumentException("Unsupported preprocessor name: " + configuration.name());
+                    };
+            case "text" ->
+                    switch (configuration.name()) {
+                        case "text_splitter_list" -> new TextListSplitter(configuration, contextStore);
+                        default -> throw new IllegalArgumentException("Unsupported preprocessor name: " + configuration.name());
+                    };
+            case "template" ->
+                    switch (configuration.name()) {
+                        case "template_replace" -> new TemplateReplacer(configuration, contextStore);
+                        case "template_openai" -> new TemplateRequest(configuration, contextStore);
+                        default -> throw new IllegalArgumentException("Unsupported preprocessor name: " + configuration.name());
+                    };
+            case "sentence" -> switch (configuration.name()) {
+                case "sentence" -> new SentencePreprocessor(configuration, contextStore);
+                case "sentence_openai" -> new SentenceInformation(configuration, contextStore);
+                default ->
+                        throw new IllegalArgumentException("Unsupported preprocessor name: " + configuration.name());
+            };
+            case "code" ->
+                    switch (configuration.name()) {
+                        case "code_chunking" -> new CodeChunkingPreprocessor(configuration, contextStore);
+                        case "code_method" -> new CodeMethodPreprocessor(configuration, contextStore);
+                        default ->
+                                throw new IllegalArgumentException("Unsupported preprocessor name: " + configuration.name());
+                    };
+            case "model" ->
+                    switch (configuration.name()) {
+                        case "model_uml" -> new ModelUMLPreprocessor(configuration, contextStore);
+                        default ->
+                                throw new IllegalArgumentException("Unsupported preprocessor name: " + configuration.name());
+                    };
+            case "summarize" -> new SummarizePreprocessor(configuration, contextStore);
+            default -> throw new IllegalStateException("Unexpected value: " + configuration.name());
+        };
+    }
+    
 }

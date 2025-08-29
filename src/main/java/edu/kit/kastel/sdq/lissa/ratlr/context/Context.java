@@ -14,4 +14,11 @@ public interface Context {
      * @return the context's unique ID
      */
     String getId();
+
+    /**
+     * Returns this context as a serialized String.
+     * 
+     * @return this context as a serialized String.
+     */
+    String asString();
 }

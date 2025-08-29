@@ -41,7 +41,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
  *
  * <p>Context handling is managed by the {@link Preprocessor} superclass. Subclasses should not duplicate context parameter documentation.</p>
  */
-public class CodeChunkingPreprocessor extends Preprocessor {
+public class CodeChunkingPreprocessor extends SingleElementPreprocessor {
 
     /** The list of supported programming languages */
     private final List<RecursiveSplitter.Language> languages;
@@ -76,15 +76,15 @@ public class CodeChunkingPreprocessor extends Preprocessor {
      * @param artifacts The list of code artifacts to preprocess
      * @return A list of elements containing both the original code files and their chunks
      */
-    @Override
-    public List<Element> preprocess(List<Artifact> artifacts) {
-        List<Element> elements = new ArrayList<>();
-        for (Artifact artifact : artifacts) {
-            List<Element> preprocessed = preprocess(artifact);
-            elements.addAll(preprocessed);
-        }
-        return elements;
-    }
+//    @Override
+//    public List<Element> preprocess(List<Artifact> artifacts) {
+//        List<Element> elements = new ArrayList<>();
+//        for (Artifact artifact : artifacts) {
+//            List<Element> preprocessed = preprocess(artifact);
+//            elements.addAll(preprocessed);
+//        }
+//        return elements;
+//    }
 
     /**
      * Preprocesses a single code artifact by splitting it into chunks.
@@ -96,21 +96,17 @@ public class CodeChunkingPreprocessor extends Preprocessor {
      *     <li>Links chunk elements to the file element</li>
      * </ol>
      *
-     * @param artifact The code artifact to preprocess
+     * @param element The code artifact to preprocess
      * @return A list of elements containing both the original code file and its chunks
      */
-    protected List<Element> preprocess(Artifact artifact) {
-        List<String> segments = this.generateSegments(artifact);
+    @Override
+    protected List<Element> preprocess(Element element) {
+        List<String> segments = this.generateSegments(element);
         List<Element> elements = new ArrayList<>();
-
-        Element artifactAsElement =
-                new Element(artifact.getIdentifier(), artifact.getType(), artifact.getContent(), 0, null, false);
-        elements.add(artifactAsElement);
 
         for (int i = 0; i < segments.size(); i++) {
             String segment = segments.get(i);
-            Element segmentAsElement = new Element(
-                    artifact.getIdentifier() + SEPARATOR + i, artifact.getType(), segment, 1, artifactAsElement, true);
+            Element segmentAsElement = Element.fromParent(element, i, segment, true);
             elements.add(segmentAsElement);
         }
 
@@ -122,12 +118,12 @@ public class CodeChunkingPreprocessor extends Preprocessor {
      * The language is determined either from the configuration (if only one language
      * is specified) or from the file extension of the artifact.
      *
-     * @param artifact The code artifact to split into chunks
+     * @param element The code artifact to split into chunks
      * @return A list of code chunks
      */
-    private List<String> generateSegments(Artifact artifact) {
-        RecursiveSplitter.Language language = languages.size() == 1 ? languages.getFirst() : getLanguage(artifact);
-        return RecursiveSplitter.fromLanguage(language, chunkSize).splitText(artifact.getContent());
+    private List<String> generateSegments(Element element) {
+        RecursiveSplitter.Language language = languages.size() == 1 ? languages.getFirst() : getLanguage(element);
+        return RecursiveSplitter.fromLanguage(language, chunkSize).splitText(element.getContent());
     }
 
     /**
@@ -138,13 +134,12 @@ public class CodeChunkingPreprocessor extends Preprocessor {
      *     <li>.py files -> PYTHON</li>
      * </ul>
      *
-     * @param artifact The code artifact to determine the language for
+     * @param element The code artifact to determine the language for
      * @return The programming language of the artifact
      * @throws IllegalArgumentException if the file extension is not supported
      */
-    private RecursiveSplitter.Language getLanguage(Artifact artifact) {
-        String ending =
-                artifact.getIdentifier().substring(artifact.getIdentifier().lastIndexOf(".") + 1);
+    private RecursiveSplitter.Language getLanguage(Element element) {
+        String ending = element.getIdentifier().substring(element.getIdentifier().lastIndexOf(".") + 1);
         return switch (ending) {
             case "java" -> RecursiveSplitter.Language.JAVA;
             case "py" -> RecursiveSplitter.Language.PYTHON;

@@ -1,15 +1,20 @@
 /* Licensed under MIT 2025. */
 package edu.kit.kastel.sdq.lissa.ratlr.configuration;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Represents the configuration for a module in the trace link analysis system.
@@ -31,10 +36,10 @@ public final class ModuleConfiguration {
     private final String name;
 
     /**
-     * The arguments for the module, stored as key-value pairs.
+     * The arguments of any type for the module, stored as key-value pairs.
      */
     @JsonProperty("args")
-    private final Map<String, String> arguments;
+    private final Map<String, Object> arguments;
 
     /**
      * Stores the retrieved arguments for serialization.
@@ -42,7 +47,7 @@ public final class ModuleConfiguration {
      * in the serialized configuration.
      */
     @JsonIgnore
-    private final Map<String, String> retrievedArguments = new LinkedHashMap<>();
+    private final Map<String, Object> retrievedArguments = new LinkedHashMap<>();
 
     /**
      * Flag indicating whether this configuration has been finalized for serialization.
@@ -57,7 +62,7 @@ public final class ModuleConfiguration {
      * @param arguments The arguments for the module
      */
     @JsonCreator
-    public ModuleConfiguration(@JsonProperty("name") String name, @JsonProperty("args") Map<String, String> arguments) {
+    public ModuleConfiguration(@JsonProperty("name") String name, @JsonProperty("args") Map<String, Object> arguments) {
         this.name = name;
         this.arguments = arguments;
     }
@@ -89,19 +94,22 @@ public final class ModuleConfiguration {
      * @param key The key of the argument to retrieve
      * @return The argument value as a string
      * @throws IllegalStateException If the configuration has been finalized
-     * @throws IllegalArgumentException If the argument is not found
+     * @throws IllegalArgumentException If the argument is not found or not a string
      */
     public String argumentAsString(String key) {
         if (finalized) {
             throw new IllegalStateException(ALREADY_FINALIZED_FOR_SERIALIZATION);
         }
 
-        String argument = arguments.get(key);
+        Object argument = arguments.get(key);
         if (argument == null) {
             throw new IllegalArgumentException("Argument with key " + key + " not found in configuration " + this);
         }
-        retrievedArguments.put(key, argument);
-        return argument;
+        if (!(argument instanceof String typedArgument)) {
+            throw new IllegalArgumentException("Argument with key " + key + " in configuration " + this + " is not a string");
+        }
+        retrievedArguments.put(key, typedArgument);
+        return typedArgument;
     }
 
     /**
@@ -113,20 +121,23 @@ public final class ModuleConfiguration {
      * @param defaultValue The default value to use if the argument is not found
      * @return The argument value as a string, or the default value
      * @throws IllegalStateException If the configuration has been finalized
-     * @throws IllegalArgumentException If the default value conflicts with a previously retrieved value
+     * @throws IllegalArgumentException If the default value conflicts with a previously retrieved value, or the value is not a string
      */
     public String argumentAsString(String key, String defaultValue) {
         if (finalized) {
             throw new IllegalStateException(ALREADY_FINALIZED_FOR_SERIALIZATION);
         }
 
-        String argument = arguments.getOrDefault(key, defaultValue);
-        String retrievedArgument = retrievedArguments.put(key, argument);
+        Object argument = arguments.getOrDefault(key, defaultValue);
+        Object retrievedArgument = retrievedArguments.put(key, argument);
         if (retrievedArgument != null && !retrievedArgument.equals(argument)) {
             throw new IllegalArgumentException("Default argument for key " + key + " already set to "
                     + retrievedArgument + " and cannot be changed to " + defaultValue);
         }
-        return argument;
+        if (!(argument instanceof String typedArgument)) {
+            throw new IllegalArgumentException("Argument with key " + key + " in configuration " + this + " is not a string");
+        }
+        return typedArgument;
     }
 
     /**
@@ -197,6 +208,50 @@ public final class ModuleConfiguration {
     }
 
     /**
+     * Retrieves an argument as a typed list.
+     * 
+     * @param key The key of the argument to retrieve
+     * @param listParameterType The class of the element type expected to be contained in the list
+     * @return The argument value as a typed list
+     * @param <T> The type of the elements contained in the list
+     */
+    public <T> List<T> argumentAsList(String key, TypeReference<T> listParameterType) {
+        if (finalized) {
+            throw new IllegalStateException(ALREADY_FINALIZED_FOR_SERIALIZATION);
+        }
+
+        Object argument = this.arguments.get(key);
+        if (argument == null) {
+            throw new IllegalArgumentException("Argument with key " + key + " not found in configuration " + this);
+        }
+        if (!(argument instanceof List list)) {
+            throw new IllegalArgumentException("Argument with key " + key + " in configuration " + this + " is not a list");
+        }
+
+        List<T> typedList = new ArrayList<>(list.size());
+        for (Object object : list) {
+            typedList.add(new ObjectMapper().convertValue(object, listParameterType));
+        }
+        this.retrievedArguments.put(key, typedList);
+        return typedList;
+    }
+    
+    public <T> T argumentAsType(String key, TypeReference<T> type) {
+        if (finalized) {
+            throw new IllegalStateException(ALREADY_FINALIZED_FOR_SERIALIZATION);
+        }
+
+        Object argument = this.arguments.get(key);
+        if (argument == null) {
+            throw new IllegalArgumentException("Argument with key " + key + " not found in configuration " + this);
+        }
+        
+        T value = new ObjectMapper().convertValue(argument, type);
+        this.retrievedArguments.put(key, value);
+        return value;
+    }
+
+    /**
      * Retrieves an argument as a string by enum index.
      * The argument can be either a numeric index into the enum array or the
      * transformed string value itself.
@@ -216,7 +271,7 @@ public final class ModuleConfiguration {
             throw new IllegalStateException(ALREADY_FINALIZED_FOR_SERIALIZATION);
         }
 
-        String value = arguments.getOrDefault(key, String.valueOf(defaultIndex));
+        String value = argumentAsString(key, String.valueOf(defaultIndex));
         // If not a number, it can be the text itself
         try {
             int index = Integer.parseInt(value);
@@ -229,7 +284,7 @@ public final class ModuleConfiguration {
             // It's not a number, so it's the text itself
         }
 
-        String retrievedArgument = retrievedArguments.put(key, value);
+        Object retrievedArgument = retrievedArguments.put(key, value);
         if (retrievedArgument != null && !retrievedArgument.equals(value)) {
             throw new IllegalArgumentException("Default argument for key " + key + " already set to "
                     + retrievedArgument + " and cannot be changed to " + value);

@@ -13,6 +13,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.Classifier;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
+import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.Preprocessor;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.KeyGenerator;
 
 import io.soabase.recordbuilder.core.RecordBuilder;
@@ -26,74 +28,45 @@ import io.soabase.recordbuilder.core.RecordBuilder;
  * The configuration is used to instantiate pipeline components, each of which can access shared context
  * via a {@link edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore} passed to their factory methods.
  * </p>
+ * 
+ * @param cacheDir Directory for caching intermediate results.
+ * @param goldStandardConfiguration Configuration for gold standard evaluation.
+ * @param sourceArtifactProvider Configuration for the source artifact provider.
+ * @param targetArtifactProvider Configuration for the target artifact provider.
+ * @param sourcePreprocessor Configuration for a single source artifact preprocessor.
+ *                           Either this or {@link #sourcePreprocessors} must be set, but not both.
+ * @param sourcePreprocessors Configuration for a multi-stage source artifact preprocessor pipeline.
+ *                            Either this or {@link #sourcePreprocessor} must be set, but not both.
+ * @param targetPreprocessor Configuration for a single target artifact preprocessor.
+ *                           Either this or {@link #targetPreprocessors} must be set, but not both.
+ * @param targetPreprocessors Configuration for a multi-stage target artifact preprocessor pipeline.
+ *                            Either this or {@link #targetPreprocessor} must be set, but not both.
+ * @param embeddingCreator Configuration for the embedding creator.
+ * @param sourceStore Configuration for the source element store.
+ * @param targetStore Configuration for the target element store.
+ * @param classifier Configuration for a single classifier.
+ *                   Either this or {@link #classifiers} must be set, but not both.
+ * @param classifiers Configuration for a multi-stage classifier pipeline.
+ *                    Either this or {@link #classifier} must be set, but not both.
+ * @param resultAggregator Configuration for the result aggregator.
+ * @param traceLinkIdPostprocessor Configuration for the trace link ID postprocessor.
  */
 @RecordBuilder()
 public record Configuration(
-        /**
-         * Directory for caching intermediate results.
-         */
         @JsonProperty("cache_dir") String cacheDir,
-
-        /**
-         * Configuration for gold standard evaluation.
-         */
         @JsonProperty("gold_standard_configuration") GoldStandardConfiguration goldStandardConfiguration,
-
-        /**
-         * Configuration for the source artifact provider.
-         */
         @JsonProperty("source_artifact_provider") ModuleConfiguration sourceArtifactProvider,
-
-        /**
-         * Configuration for the target artifact provider.
-         */
         @JsonProperty("target_artifact_provider") ModuleConfiguration targetArtifactProvider,
-
-        /**
-         * Configuration for the source artifact preprocessor.
-         */
         @JsonProperty("source_preprocessor") ModuleConfiguration sourcePreprocessor,
-
-        /**
-         * Configuration for the target artifact preprocessor.
-         */
+        @JsonProperty("source_preprocessors") List<ModuleConfiguration> sourcePreprocessors,
         @JsonProperty("target_preprocessor") ModuleConfiguration targetPreprocessor,
-
-        /**
-         * Configuration for the embedding creator.
-         */
+        @JsonProperty("target_preprocessors") List<ModuleConfiguration> targetPreprocessors,
         @JsonProperty("embedding_creator") ModuleConfiguration embeddingCreator,
-
-        /**
-         * Configuration for the source element store.
-         */
         @JsonProperty("source_store") ModuleConfiguration sourceStore,
-
-        /**
-         * Configuration for the target element store.
-         */
         @JsonProperty("target_store") ModuleConfiguration targetStore,
-
-        /**
-         * Configuration for a single classifier.
-         * Either this or {@link #classifiers} must be set, but not both.
-         */
         @JsonProperty("classifier") ModuleConfiguration classifier,
-
-        /**
-         * Configuration for a multi-stage classifier pipeline.
-         * Either this or {@link #classifier} must be set, but not both.
-         */
         @JsonProperty("classifiers") List<List<ModuleConfiguration>> classifiers,
-
-        /**
-         * Configuration for the result aggregator.
-         */
         @JsonProperty("result_aggregator") ModuleConfiguration resultAggregator,
-
-        /**
-         * Configuration for the trace link ID postprocessor.
-         */
         @JsonProperty("tracelinkid_postprocessor") ModuleConfiguration traceLinkIdPostprocessor)
         implements ConfigurationBuilder.With {
 
@@ -108,8 +81,22 @@ public record Configuration(
     public String serializeAndDestroyConfiguration() throws UncheckedIOException {
         sourceArtifactProvider.finalizeForSerialization();
         targetArtifactProvider.finalizeForSerialization();
-        sourcePreprocessor.finalizeForSerialization();
-        targetPreprocessor.finalizeForSerialization();
+        if (sourcePreprocessor != null) {
+            sourcePreprocessor.finalizeForSerialization();
+        }
+        if (sourcePreprocessors != null) {
+            for (ModuleConfiguration configuration : sourcePreprocessors) {
+                configuration.finalizeForSerialization();
+            }
+        }
+        if (targetPreprocessor != null) {
+            targetPreprocessor.finalizeForSerialization();
+        }
+        if (targetPreprocessors != null) {
+            for (ModuleConfiguration configuration : targetPreprocessors) {
+                configuration.finalizeForSerialization();
+            }
+        }
         embeddingCreator.finalizeForSerialization();
         sourceStore.finalizeForSerialization();
         targetStore.finalizeForSerialization();
@@ -150,8 +137,10 @@ public record Configuration(
         return "Configuration{" + "sourceArtifactProvider="
                 + sourceArtifactProvider + ", targetArtifactProvider="
                 + targetArtifactProvider + ", sourcePreprocessor="
-                + sourcePreprocessor + ", targetPreprocessor="
-                + targetPreprocessor + ", embeddingCreator="
+                + sourcePreprocessor + ", sourcePreprocessors="
+                + sourcePreprocessors + ", targetPreprocessor="
+                + targetPreprocessor + ", targetPreprocessors="
+                + targetPreprocessors + ", embeddingCreator="
                 + embeddingCreator + ", sourceStore="
                 + sourceStore + ", targetStore="
                 + targetStore + ", classifier="
@@ -191,5 +180,39 @@ public record Configuration(
         return classifier != null
                 ? Classifier.createClassifier(classifier, contextStore)
                 : Classifier.createMultiStageClassifier(classifiers, contextStore);
+    }
+
+    /**
+     * Creates a preprocessor instance based on this configuration.
+     * Either a single classifier or a multi-stage classifier pipeline is created,
+     * depending on which configuration is set. The shared {@link ContextStore} is passed to all classifiers.
+     *
+     * @param contextStore The shared context store for pipeline components
+     * @return A classifier instance
+     * @throws IllegalStateException If neither or both classifier configurations are set
+     */
+    public Preprocessor<Artifact> createSourcePreprocessor(ContextStore contextStore) {
+        if ((sourcePreprocessor == null) == (sourcePreprocessors == null)) {
+            throw new IllegalStateException("Either 'sourcePreprocessor' or 'sourcePreprocessors' must be set, but not both.");
+        }
+
+        return Preprocessor.createPreprocessors(sourcePreprocessor != null ? List.of(sourcePreprocessor) : sourcePreprocessors, contextStore);
+    }
+
+    /**
+     * Creates a classifier instance based on this configuration.
+     * Either a single classifier or a multi-stage classifier pipeline is created,
+     * depending on which configuration is set. The shared {@link ContextStore} is passed to all classifiers.
+     *
+     * @param contextStore The shared context store for pipeline components
+     * @return A classifier instance
+     * @throws IllegalStateException If neither or both classifier configurations are set
+     */
+    public Preprocessor<Artifact> createTargetPreprocessor(ContextStore contextStore) {
+        if ((targetPreprocessor == null) == (targetPreprocessors == null)) {
+            throw new IllegalStateException("Either 'targetPreprocessor' or 'targetPreprocessors' must be set, but not both.");
+        }
+
+        return Preprocessor.createPreprocessors(targetPreprocessor != null ? List.of(targetPreprocessor) : targetPreprocessors, contextStore);
     }
 }

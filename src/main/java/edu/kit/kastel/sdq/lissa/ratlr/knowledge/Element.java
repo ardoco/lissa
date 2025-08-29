@@ -8,6 +8,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.Classifier;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.Preprocessor;
+
+// TODO consider moving separator to here
+import static edu.kit.kastel.sdq.lissa.ratlr.preprocessor.Preprocessor.SEPARATOR;
 
 /**
  * Represents an element in the LiSSA framework, which is a granular unit of knowledge
@@ -57,7 +61,7 @@ public final class Element extends Knowledge {
      *  {@link Classifier Classifiers} will only consider this element for candidate pairs for classification if this is true.
      */
     @JsonProperty
-    private final boolean compare;
+    private boolean compare;
 
     /**
      * Creates a new element from JSON data.
@@ -140,5 +144,49 @@ public final class Element extends Knowledge {
      */
     public boolean isCompare() {
         return compare;
+    }
+
+    /**
+     * Sets whether this element should be included in the classification.
+     * 
+     * @param compare true if the element should be classified, false otherwise
+     */
+    public void setCompare(boolean compare) {
+        this.compare = compare;
+    }
+
+    /**
+     * Convenience method to create a new element as a child of a parent element.
+     * The parent identifier is appended by a {@link Preprocessor#SEPARATOR separator} followed by the identifier index.
+     * The type is taken from the parent.
+     * The granularity is incremented by one.
+     * 
+     * @param parent the parent to set and retrieve information from
+     * @param identifierIndex the index of this child used in the identifier
+     * @param content the content of this child
+     * @param compare whether this child should be included in the classification
+     * @return a new child element based on the parent
+     */
+    public static Element fromParent(Element parent, int identifierIndex, String content, boolean compare) {
+        return new Element(parent.getIdentifier() + SEPARATOR + identifierIndex
+                , parent.getType()
+                , content
+                , parent.getGranularity() + 1
+                , parent
+                , compare);
+    }
+
+    /**
+     * Convenience method to create a single child based on a parent.
+     * The identifier index is set to 0.
+     * The child is flagged to be included for classification.
+     *
+     * @param parent the parent to set and retrieve information from
+     * @param content the content of this child
+     * @return a new child element based on the parent
+     * @see #fromParent(Element, int, String, boolean) 
+     */
+    public static Element fromParent(Element parent, String content) {
+        return fromParent(parent, 0, content, true);
     }
 }

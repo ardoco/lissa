@@ -19,7 +19,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
  *
  * <p>Context handling is managed by the {@link Preprocessor} superclass. Subclasses should not duplicate context parameter documentation.</p>
  */
-public class SingleArtifactPreprocessor extends Preprocessor {
+public class SingleArtifactPreprocessor extends Preprocessor<Artifact> {
 
     public SingleArtifactPreprocessor(ContextStore contextStore) {
         super(contextStore);
