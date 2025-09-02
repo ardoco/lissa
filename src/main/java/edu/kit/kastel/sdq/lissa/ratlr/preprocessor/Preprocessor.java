@@ -121,42 +121,41 @@ public abstract class Preprocessor<T extends Knowledge> {
      */
     public static Preprocessor<Element> createElementPreprocessor(ModuleConfiguration configuration, ContextStore contextStore) {
         return switch (configuration.name().split(CONFIG_NAME_SEPARATOR)[0]) {
-            case "json" ->
-                    switch (configuration.name()) {
-                        case "json_array_splitter" -> new JsonArraySplitter(configuration, contextStore);
-                        case "json_converter_text" -> new JsonConverterText(configuration, contextStore);
-                        default -> throw new IllegalArgumentException("Unsupported preprocessor name: " + configuration.name());
-                    };
-            case "text" ->
-                    switch (configuration.name()) {
-                        case "text_splitter_list" -> new TextListSplitter(configuration, contextStore);
-                        default -> throw new IllegalArgumentException("Unsupported preprocessor name: " + configuration.name());
-                    };
-            case "template" ->
-                    switch (configuration.name()) {
-                        case "template_replace" -> new TemplateReplacer(configuration, contextStore);
-                        case "template_openai" -> new TemplateRequest(configuration, contextStore);
-                        default -> throw new IllegalArgumentException("Unsupported preprocessor name: " + configuration.name());
-                    };
+            case "json" -> switch (configuration.name()) {
+                case "json_array_splitter" -> new JsonArraySplitter(configuration, contextStore);
+                case "json_converter_text" -> new JsonConverterText(configuration, contextStore);
+                default -> throw new IllegalArgumentException("Unsupported preprocessor name: " + configuration.name());
+            };
+            case "text" -> switch (configuration.name()) {
+                case "text_splitter_list" -> new TextListSplitter(configuration, contextStore);
+                default -> throw new IllegalArgumentException("Unsupported preprocessor name: " + configuration.name());
+            };
+            case "template" -> switch (configuration.name()) {
+                case "template_replace" -> new TemplateReplacer(configuration, contextStore);
+                case "template_openai" -> new TemplateRequest(configuration, contextStore);
+                default -> throw new IllegalArgumentException("Unsupported preprocessor name: " + configuration.name());
+            };
+            case "context" -> switch (configuration.name()) {
+                case "context_writer" -> new ContextWriter(configuration, contextStore);
+                default -> throw new IllegalArgumentException("Unsupported preprocessor name: " + configuration.name());
+            };
             case "sentence" -> switch (configuration.name()) {
                 case "sentence" -> new SentencePreprocessor(configuration, contextStore);
                 case "sentence_openai" -> new SentenceInformation(configuration, contextStore);
                 default ->
                         throw new IllegalArgumentException("Unsupported preprocessor name: " + configuration.name());
             };
-            case "code" ->
-                    switch (configuration.name()) {
-                        case "code_chunking" -> new CodeChunkingPreprocessor(configuration, contextStore);
-                        case "code_method" -> new CodeMethodPreprocessor(configuration, contextStore);
-                        default ->
-                                throw new IllegalArgumentException("Unsupported preprocessor name: " + configuration.name());
-                    };
-            case "model" ->
-                    switch (configuration.name()) {
-                        case "model_uml" -> new ModelUMLPreprocessor(configuration, contextStore);
-                        default ->
-                                throw new IllegalArgumentException("Unsupported preprocessor name: " + configuration.name());
-                    };
+            case "code" -> switch (configuration.name()) {
+                case "code_chunking" -> new CodeChunkingPreprocessor(configuration, contextStore);
+                case "code_method" -> new CodeMethodPreprocessor(configuration, contextStore);
+                default ->
+                        throw new IllegalArgumentException("Unsupported preprocessor name: " + configuration.name());
+            };
+            case "model" -> switch (configuration.name()) {
+                case "model_uml" -> new ModelUMLPreprocessor(configuration, contextStore);
+                default ->
+                        throw new IllegalArgumentException("Unsupported preprocessor name: " + configuration.name());
+            };
             case "summarize" -> new SummarizePreprocessor(configuration, contextStore);
             default -> throw new IllegalStateException("Unexpected value: " + configuration.name());
         };

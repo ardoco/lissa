@@ -9,6 +9,8 @@ import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.SingleArtifactPreprocessor;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -22,7 +24,7 @@ import java.util.Queue;
  *     <li>Each pipelined preprocessor receives only those elements from the previous stage whose {@link Element#isCompare()} flag is {@code true}.</li>
  *     <li>Before forwarding these elements to the next stage, their {@code compare} flag is cleared (except before the final stage).
  * This prevents elements of intermediate stages to be included for classification.</li>
- *     <li>The outputs of every stage are accumulated and returned as a single list (initial artifact-preprocessor elements plus all elements produced by each stage).</li>
+ *     <li>The outputs of every stage are uniquely accumulated and returned as a single list (initial artifact-preprocessor elements plus all elements produced by each stage).</li>
  * </ol>
  * Configuration:
  * <ul>
@@ -50,7 +52,7 @@ public class PipelinePreprocessor extends Preprocessor<Artifact> {
 
     @Override
     public final List<Element> preprocess(List<Artifact> artifacts) {
-        List<Element> elements = new ArrayList<>(this.artifactPreprocessor.preprocess(artifacts));
+        Collection<Element> elements = new LinkedHashSet<>(this.artifactPreprocessor.preprocess(artifacts));
         List<Element> toCompare = new ArrayList<>(elements);
         List<Preprocessor<Element>> pipelinedPreprocessors = this.preprocessors;
         for (int i = 0; i < pipelinedPreprocessors.size(); i++) {
@@ -66,7 +68,7 @@ public class PipelinePreprocessor extends Preprocessor<Artifact> {
             }
             elements.addAll(newElements);
         }
-        return elements;
+        return new ArrayList<>(elements);
     }
 
     private static Preprocessor<Artifact> retrieveArtifactPreprocessor(Queue<ModuleConfiguration> configurations, ContextStore contextStore) {
