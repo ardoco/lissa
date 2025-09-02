@@ -78,7 +78,7 @@ public final class ModuleConfiguration {
      * 
      * @return an unmodifiable view of the registered argument keys
      */
-    public Set<String> getArgumentKeys() {
+    public Set<String> argumentKeys() {
         return Collections.unmodifiableSet(this.arguments.keySet());
     }
 
@@ -87,7 +87,7 @@ public final class ModuleConfiguration {
      * 
      * @return an unmodifiable view of the retrieved argument keys
      */
-    public Set<String> getRetrievedArgumentKeys() {
+    public Set<String> retrievedArgumentKeys() {
         return Collections.unmodifiableSet(this.retrievedArguments.keySet());
     }
 

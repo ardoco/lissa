@@ -39,8 +39,8 @@ public class ContextWriter extends ElementFormatter {
      */
     protected ContextWriter(ModuleConfiguration configuration, ContextStore contextStore) {
         super(configuration, contextStore);
-        for (String argumentKey : configuration.getArgumentKeys()) {
-            if (!configuration.getRetrievedArgumentKeys().contains(argumentKey)) {
+        for (String argumentKey : configuration.argumentKeys()) {
+            if (!configuration.retrievedArgumentKeys().contains(argumentKey)) {
                 this.contextIdentifiersToStore.put(argumentKey, configuration.argumentAsString(argumentKey));
             }
         }

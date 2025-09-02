@@ -27,7 +27,7 @@ public class JsonArraySplitter extends JsonPreprocessor {
     public JsonArraySplitter(ModuleConfiguration configuration, ContextStore contextStore) {
         super(contextStore);
         this.remapper = new HashMap<>();
-        for (String key : configuration.getArgumentKeys()) {
+        for (String key : configuration.argumentKeys()) {
             this.remapper.put(key, configuration.argumentAsString(key));
         }
     }
