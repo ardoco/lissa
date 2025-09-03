@@ -57,13 +57,10 @@ public abstract class Classifier {
      * This method can process the classification either sequentially or in parallel
      * depending on the number of threads configured.
      *
-     * @param sourceStore The store containing source elements
-     * @param targetStore The store containing target elements
+     * @param tasks The list of element pairs to classify
      * @return A list of classification results
      */
-    public List<ClassificationResult> classify(ElementStore sourceStore, ElementStore targetStore) {
-        var tasks = createClassificationTasks(sourceStore, targetStore);
-
+    public List<ClassificationResult> classify(List<Pair<Element, Element>> tasks) {
         if (threads <= 1) {
             return sequentialClassify(tasks);
         }
@@ -170,7 +167,7 @@ public abstract class Classifier {
      * @param targetStore The store containing target elements
      * @return A list of element pairs to classify
      */
-    protected static List<Pair<Element, Element>> createClassificationTasks(
+    public static List<Pair<Element, Element>> createClassificationTasks(
             ElementStore sourceStore, ElementStore targetStore) {
         List<Pair<Element, Element>> tasks = new ArrayList<>();
 

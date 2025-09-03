@@ -1,10 +1,15 @@
 /* Licensed under MIT 2025. */
 package edu.kit.kastel.sdq.lissa.ratlr.cache;
 
+import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 /**
@@ -22,6 +27,7 @@ public final class CacheManager {
     private static CacheManager defaultInstanceManager;
     private final Path directoryOfCaches;
     private final Map<String, RedisCache> caches = new HashMap<>();
+    private final Map<KeyRegistration, CacheKey> keyRegistrations = new HashMap<>();
 
     /**
      * Sets the cache directory for the default cache manager instance.
@@ -128,5 +134,18 @@ public final class CacheManager {
         for (Cache cache : caches.values()) {
             cache.flush();
         }
+        this.keyRegistrations.clear();
+    }
+
+    public CacheKey getKey(Element source, Element target) {
+        return this.keyRegistrations.get(new KeyRegistration(source, target));
+    }
+
+    public void register(Element source, Element target, CacheKey cacheKey) {
+        this.keyRegistrations.put(new KeyRegistration(source, target), cacheKey);
+    }
+    
+    public record KeyRegistration(Element source, Element target) {
+        
     }
 }

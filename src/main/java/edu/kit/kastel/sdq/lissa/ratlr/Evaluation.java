@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Set;
 
+import edu.kit.kastel.mcse.ardoco.metrics.result.SingleClassificationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -186,16 +187,19 @@ public class Evaluation {
         targetStore.setup(targetElements, targetEmbeddings);
 
         logger.info("Classifying Tracelinks");
-        var llmResults = classifier.classify(sourceStore, targetStore);
+        var tasks = Classifier.createClassificationTasks(sourceStore, targetStore);
+        var llmResults = classifier.classify(tasks);
         var traceLinks = aggregator.aggregate(sourceElements, targetElements, llmResults);
 
         logger.info("Postprocessing Tracelinks");
         traceLinks = traceLinkIdPostProcessor.postprocess(traceLinks);
 
         logger.info("Evaluating Results");
-        Statistics.generateStatistics(
+        SingleClassificationResult statistics = Statistics.generateStatistics(
                 traceLinks, configFile.toFile(), configuration, sourceArtifacts.size(), targetArtifacts.size());
         Statistics.saveTraceLinks(traceLinks, configFile.toFile(), configuration);
+
+        Statistics.saveForAnalysis(sourceElements, targetElements, tasks, llmResults, statistics, traceLinkIdPostProcessor, configFile.toFile(), configuration);
 
         CacheManager.getDefaultInstance().flush();
 

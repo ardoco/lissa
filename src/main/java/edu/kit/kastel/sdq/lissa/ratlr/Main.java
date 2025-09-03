@@ -116,7 +116,8 @@ public class Main {
         targetStore.setup(targetElements, targetEmbeddings);
 
         logger.info("Classifying Tracelinks");
-        var llmResults = classifier.classify(sourceStore, targetStore);
+        var tasks = Classifier.createClassificationTasks(sourceStore, targetStore);
+        var llmResults = classifier.classify(tasks);
         var traceLinks = aggregator.aggregate(sourceElements, targetElements, llmResults);
 
         logger.info("Postprocessing Tracelinks");

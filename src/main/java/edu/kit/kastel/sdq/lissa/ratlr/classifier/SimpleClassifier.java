@@ -139,7 +139,7 @@ public class SimpleClassifier extends Classifier {
                 .replace("{target_content}", target.getContent());
 
         CacheKey cacheKey =
-                CacheKey.of(provider.modelName(), provider.seed(), provider.temperature(), CacheKey.Mode.CHAT, request);
+                CacheKey.of(provider.modelName(), provider.seed(), provider.temperature(), CacheKey.Mode.CHAT, request, source, target);
         String cachedResponse = cache.get(cacheKey, String.class);
         if (cachedResponse != null) {
             return cachedResponse;

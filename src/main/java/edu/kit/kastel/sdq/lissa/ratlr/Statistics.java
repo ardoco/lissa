@@ -10,6 +10,14 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import edu.kit.kastel.mcse.ardoco.metrics.result.SingleClassificationResult;
+import edu.kit.kastel.sdq.lissa.ratlr.classifier.ClassificationResult;
+import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
+import edu.kit.kastel.sdq.lissa.ratlr.postprocessor.TraceLinkIdPostprocessor;
+import edu.kit.kastel.sdq.lissa.ratlr.utils.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,14 +69,14 @@ public final class Statistics {
      * @param targetArtifacts Number of target artifacts
      * @throws UncheckedIOException If there are issues writing the statistics file
      */
-    public static void generateStatistics(
+    public static SingleClassificationResult<TraceLink> generateStatistics(
             Set<TraceLink> traceLinks,
             File configFile,
             Configuration configuration,
             int sourceArtifacts,
             int targetArtifacts)
             throws UncheckedIOException {
-        generateStatistics(
+        return generateStatistics(
                 configuration.getConfigurationIdentifierForFile(configFile.getName()),
                 configuration.serializeAndDestroyConfiguration(),
                 traceLinks,
@@ -96,7 +104,7 @@ public final class Statistics {
      * @param targetArtifacts Number of target artifacts
      * @throws UncheckedIOException If there are issues writing the statistics file
      */
-    public static void generateStatistics(
+    public static SingleClassificationResult<TraceLink> generateStatistics(
             String configurationIdentifier,
             String configurationSummary,
             Set<TraceLink> traceLinks,
@@ -108,13 +116,13 @@ public final class Statistics {
         if (goldStandardConfiguration == null || goldStandardConfiguration.path() == null) {
             logger.info(
                     "Skipping statistics generation since no path to ground truth has been provided as first command line argument");
-            return;
+            return null;
         }
 
         Set<TraceLink> validTraceLinks = getTraceLinksFromGoldStandard(goldStandardConfiguration);
 
         ClassificationMetricsCalculator cmc = ClassificationMetricsCalculator.getInstance();
-        var classification = cmc.calculateMetrics(traceLinks, validTraceLinks, null);
+        SingleClassificationResult<TraceLink> classification = cmc.calculateMetrics(traceLinks, validTraceLinks, null);
         classification.prettyPrint();
 
         // Store information to one file (config and results)
@@ -151,6 +159,7 @@ public final class Statistics {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+        return classification;
     }
 
     /**
@@ -230,6 +239,22 @@ public final class Statistics {
                 .collect(Collectors.joining("\n"));
         try {
             Files.writeString(new File(destination).toPath(), csvResult, StandardOpenOption.CREATE);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    public static void saveForAnalysis(List<Element> sourceElements, List<Element> targetElements, List<Pair<Element, Element>> tasks,
+                                       List<ClassificationResult> llmResults, SingleClassificationResult<TraceLink> statistics, 
+                                       TraceLinkIdPostprocessor postprocessor, File configFile, Configuration configuration) {
+        var fileName = "analysis-" + configuration.getConfigurationIdentifierForFile(configFile.getName()) + ".json";
+        logger.info("Storing analysis to {}", fileName);
+
+        Analysis analysis = new Analysis(sourceElements, targetElements, tasks, llmResults, statistics, postprocessor);
+        try {
+            Files.writeString(new File(fileName).toPath(), 
+                    new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT).writeValueAsString(analysis), 
+                    StandardOpenOption.CREATE);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

@@ -178,7 +178,7 @@ public class ReasoningClassifier extends Classifier {
 
         // TODO Don't rely on messages.toString() as it is not stable
         CacheKey cacheKey = CacheKey.of(
-                provider.modelName(), provider.seed(), provider.temperature(), CacheKey.Mode.CHAT, messages.toString());
+                provider.modelName(), provider.seed(), provider.temperature(), CacheKey.Mode.CHAT, messages.toString(), source, target);
 
         String cachedResponse = cache.get(cacheKey, String.class);
         if (cachedResponse != null) {

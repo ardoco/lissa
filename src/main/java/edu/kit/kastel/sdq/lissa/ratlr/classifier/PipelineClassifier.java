@@ -61,15 +61,12 @@ public class PipelineClassifier extends Classifier {
      * among its classifiers. The process continues until either all stages are processed
      * or no trace links remain.
      *
-     * @param sourceStore The store containing source elements
-     * @param targetStore The store containing target elements
+     * @param tasks The list of element pairs to classify
      * @return A list of classification results for the remaining trace links
      */
     @Override
-    public List<ClassificationResult> classify(ElementStore sourceStore, ElementStore targetStore) {
+    public List<ClassificationResult> classify(List<Pair<Element, Element>> tasks) {
         List<ClassificationResult> results = new ArrayList<>();
-        List<Pair<Element, Element>> tasks = createClassificationTasks(sourceStore, targetStore);
-
         int layerNum = 0;
         for (List<Classifier> layer : classifiers) {
             logger.info("Invoking layer {} with {} classifiers and {} tasks", layerNum, layer.size(), tasks.size());
