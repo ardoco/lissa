@@ -4,6 +4,7 @@ package edu.kit.kastel.sdq.lissa.ratlr;
 import java.io.File;
 import java.io.IOException;
 
+import edu.kit.kastel.mcse.ardoco.metrics.result.SingleClassificationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -124,9 +125,10 @@ public class Main {
         traceLinks = traceLinkIdPostProcessor.postprocess(traceLinks);
 
         logger.info("Evaluating Results");
-        Statistics.generateStatistics(
+        SingleClassificationResult statistics = Statistics.generateStatistics(
                 traceLinks, configFile, configuration, sourceArtifacts.size(), targetArtifacts.size());
         Statistics.saveTraceLinks(traceLinks, configFile, configuration);
+        Statistics.saveForAnalysis(sourceElements, targetElements, tasks, llmResults, statistics, traceLinkIdPostProcessor, configFile, configuration);
 
         CacheManager.getDefaultInstance().flush();
     }

@@ -38,7 +38,7 @@ OPENAI_API_KEY=sk-DUMMY
         File config = new File("src/test/resources/warc/config.json");
         Assertions.assertTrue(config.exists());
 
-        Evaluation evaluation = new Evaluation(config.toPath());
+        Evaluation evaluation = new Evaluation(config.toPath(), false);
         var traceLinks = evaluation.run();
 
         Set<TraceLink> validTraceLinks =

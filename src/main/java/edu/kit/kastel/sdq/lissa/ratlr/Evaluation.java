@@ -57,6 +57,7 @@ public class Evaluation {
 
     private static final Logger logger = LoggerFactory.getLogger(Evaluation.class);
     private final Path configFile;
+    private final boolean saveAnalysis;
 
     private Configuration configuration;
 
@@ -90,12 +91,14 @@ public class Evaluation {
      *     <li>Sets up all required components for the pipeline, sharing a {@link ContextStore}</li>
      * </ol>
      *
-     * @param configFile Path to the configuration file
-     * @throws IOException If there are issues reading the configuration file
+     * @param configFile   Path to the configuration file
+     * @param saveAnalysis Whether information to analyze the evaluation process should be saved
+     * @throws IOException          If there are issues reading the configuration file
      * @throws NullPointerException If configFile is null
      */
-    public Evaluation(Path configFile) throws IOException {
+    public Evaluation(Path configFile, boolean saveAnalysis) throws IOException {
         this.configFile = Objects.requireNonNull(configFile);
+        this.saveAnalysis = saveAnalysis;
         setup();
     }
 
@@ -199,7 +202,9 @@ public class Evaluation {
                 traceLinks, configFile.toFile(), configuration, sourceArtifacts.size(), targetArtifacts.size());
         Statistics.saveTraceLinks(traceLinks, configFile.toFile(), configuration);
 
-        Statistics.saveForAnalysis(sourceElements, targetElements, tasks, llmResults, statistics, traceLinkIdPostProcessor, configFile.toFile(), configuration);
+        if (saveAnalysis) {
+            Statistics.saveForAnalysis(sourceElements, targetElements, tasks, llmResults, statistics, traceLinkIdPostProcessor, configFile.toFile(), configuration);
+        }
 
         CacheManager.getDefaultInstance().flush();
 

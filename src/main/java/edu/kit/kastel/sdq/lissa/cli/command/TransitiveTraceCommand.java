@@ -166,7 +166,7 @@ public class TransitiveTraceCommand implements Runnable {
         try {
             for (Path traceConfig : transitiveTraceConfigs) {
                 logger.info("Invoking the pipeline with '{}'", traceConfig);
-                Evaluation evaluation = new Evaluation(traceConfig);
+                Evaluation evaluation = new Evaluation(traceConfig, false);
                 evaluations.add(evaluation);
                 var traceLinksForRun = evaluation.run();
                 logger.info("Found {} trace links", traceLinksForRun.size());

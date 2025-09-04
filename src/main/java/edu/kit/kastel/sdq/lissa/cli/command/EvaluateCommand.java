@@ -41,6 +41,19 @@ public class EvaluateCommand implements Runnable {
     private Path[] configs;
 
     /**
+     * Whether the intermediate results produced for each evaluation should be saved.
+     */
+    @CommandLine.Option(
+            names = {"-a", "--analyze"},
+            description = """
+                        Specifies whether intermediate results of each evaluation should be saved. This will contain:
+                                - The total element tree of both source and target elements.
+                                - A mapping of local cache keys to identify cached classification responses.
+                        """
+    )
+    private boolean saveAnalysis;
+
+    /**
      * Executes the evaluation command.
      * This method:
      * 1. Loads the specified configuration files (or uses default if none specified)
@@ -56,7 +69,7 @@ public class EvaluateCommand implements Runnable {
         for (Path config : configsToEvaluate) {
             logger.info("Invoking the pipeline with '{}'", config);
             try {
-                var evaluation = new Evaluation(config);
+                var evaluation = new Evaluation(config, saveAnalysis);
                 evaluation.run();
             } catch (Exception e) {
                 logger.warn("Configuration '{}' threw an exception: {}", config, e.toString());
