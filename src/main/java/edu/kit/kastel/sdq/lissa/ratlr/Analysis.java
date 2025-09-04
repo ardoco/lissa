@@ -8,6 +8,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.classifier.ClassificationResult;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
 import edu.kit.kastel.sdq.lissa.ratlr.postprocessor.TraceLinkIdPostprocessor;
+import edu.kit.kastel.sdq.lissa.ratlr.resultaggregator.ResultAggregator;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.Pair;
 
 import java.util.LinkedHashMap;
@@ -30,8 +31,9 @@ public class Analysis {
     @JsonProperty
     private final Map<String, Map<String, String>> trueNegatives = new LinkedHashMap<>();
 
-    public Analysis(List<Element> sourceElements, List<Element> targetElements, List<Pair<Element, Element>> retrieved, 
-                    List<ClassificationResult> llmResults, SingleClassificationResult<TraceLink> statistics, TraceLinkIdPostprocessor postprocessor) {
+    public Analysis(List<Element> sourceElements, List<Element> targetElements, List<Pair<Element, Element>> retrieved,
+                    List<ClassificationResult> llmResults, ResultAggregator aggregator, TraceLinkIdPostprocessor postprocessor, 
+                    SingleClassificationResult<TraceLink> statistics) {
         this.sourceElements = sourceElements.stream()
                 .filter(element -> element.getParent() == null)
                 .map(element -> {
@@ -50,7 +52,8 @@ public class Analysis {
                 .toList();
         for (Pair<Element, Element> retrievedPair : retrieved) {
             CacheKey key = CacheManager.getDefaultInstance().getKey(retrievedPair.first(), retrievedPair.second());
-            TraceLink retrievedProcessed = postprocessor.postprocess(Set.of(new TraceLink(retrievedPair.first().getIdentifier(), retrievedPair.second().getIdentifier())))
+            TraceLink retrievedProcessed = postprocessor.postprocess(aggregator.aggregate(sourceElements, targetElements, 
+                            List.of(new ClassificationResult(retrievedPair.first(), retrievedPair.second(), 1.0))))
                     .iterator().next();
             Map<String, Map<String, String>> confusionCollection = getConfusionCollection(statistics, retrievedProcessed);
             confusionCollection.putIfAbsent(retrievedPair.first().getIdentifier(), new LinkedHashMap<>());

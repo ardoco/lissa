@@ -17,6 +17,7 @@ import edu.kit.kastel.mcse.ardoco.metrics.result.SingleClassificationResult;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.ClassificationResult;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 import edu.kit.kastel.sdq.lissa.ratlr.postprocessor.TraceLinkIdPostprocessor;
+import edu.kit.kastel.sdq.lissa.ratlr.resultaggregator.ResultAggregator;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -245,12 +246,12 @@ public final class Statistics {
     }
 
     public static void saveForAnalysis(List<Element> sourceElements, List<Element> targetElements, List<Pair<Element, Element>> tasks,
-                                       List<ClassificationResult> llmResults, SingleClassificationResult<TraceLink> statistics, 
-                                       TraceLinkIdPostprocessor postprocessor, File configFile, Configuration configuration) {
+                                       List<ClassificationResult> llmResults, ResultAggregator aggregator, TraceLinkIdPostprocessor postprocessor,
+                                       SingleClassificationResult<TraceLink> statistics, File configFile, Configuration configuration) {
         var fileName = "analysis-" + configuration.getConfigurationIdentifierForFile(configFile.getName()) + ".json";
         logger.info("Storing analysis to {}", fileName);
 
-        Analysis analysis = new Analysis(sourceElements, targetElements, tasks, llmResults, statistics, postprocessor);
+        Analysis analysis = new Analysis(sourceElements, targetElements, tasks, llmResults, aggregator, postprocessor, statistics);
         try {
             Files.writeString(new File(fileName).toPath(), 
                     new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT).writeValueAsString(analysis), 

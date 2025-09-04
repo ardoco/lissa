@@ -128,7 +128,7 @@ public class Main {
         SingleClassificationResult statistics = Statistics.generateStatistics(
                 traceLinks, configFile, configuration, sourceArtifacts.size(), targetArtifacts.size());
         Statistics.saveTraceLinks(traceLinks, configFile, configuration);
-        Statistics.saveForAnalysis(sourceElements, targetElements, tasks, llmResults, statistics, traceLinkIdPostProcessor, configFile, configuration);
+        Statistics.saveForAnalysis(sourceElements, targetElements, tasks, llmResults, aggregator, traceLinkIdPostProcessor, statistics, configFile, configuration);
 
         CacheManager.getDefaultInstance().flush();
     }

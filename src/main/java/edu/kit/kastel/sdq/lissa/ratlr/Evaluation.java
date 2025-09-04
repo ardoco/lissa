@@ -203,7 +203,8 @@ public class Evaluation {
         Statistics.saveTraceLinks(traceLinks, configFile.toFile(), configuration);
 
         if (saveAnalysis) {
-            Statistics.saveForAnalysis(sourceElements, targetElements, tasks, llmResults, statistics, traceLinkIdPostProcessor, configFile.toFile(), configuration);
+            Statistics.saveForAnalysis(sourceElements, targetElements, tasks, llmResults, aggregator, traceLinkIdPostProcessor, 
+                    statistics, configFile.toFile(), configuration);
         }
 
         CacheManager.getDefaultInstance().flush();
