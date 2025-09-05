@@ -40,7 +40,7 @@ public class TextListSplitter extends Preprocessor<Element> {
         String original = element.getContent();
         List<StringBuilder> results = new LinkedList<>();
         results.add(new StringBuilder());
-        for (String normalTextOrList : original.splitWithDelimiters("((?<=\\n)%s.*\\n?)+".formatted(this.listElementIndicator), -1)) {
+        for (String normalTextOrList : original.splitWithDelimiters("(?m)((?<=^)%s.*\\n?)+".formatted(this.listElementIndicator), -1)) {
             if (normalTextOrList.startsWith(this.listElementIndicator)) {
                 // list cluster found
                 // create a copy of every existing result for each list entry and append the entry on each
