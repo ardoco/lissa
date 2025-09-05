@@ -7,6 +7,7 @@ import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.request.ResponseFormat;
 import dev.langchain4j.model.chat.request.ResponseFormatType;
+import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.request.json.JsonRawSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchema;
 import edu.kit.kastel.sdq.lissa.ratlr.cache.Cache;
@@ -149,27 +150,28 @@ public abstract class LanguageModelPreprocessor extends Preprocessor<Element> {
 
         @Override
         public String call() {
-            CacheKey cacheKey = CacheKey.of(
-                    provider.modelName(), provider.seed(), provider.temperature(), CacheKey.Mode.CHAT, request);
-
-            String cachedResponse = cache.get(cacheKey, String.class);
-            if (cachedResponse != null) {
-                return cachedResponse;
-            }
             
-            ChatModel chatModel = threads > 1 ? provider.createChatModel() : llmInstance;
             List<ChatMessage> messages = new ArrayList<>();
             if (!systemMessage.isEmpty()) {
                 messages.add(new SystemMessage(systemMessage));
             }
             messages.add(new UserMessage(request));
+            CacheKey cacheKey = CacheKey.of(
+                    provider.modelName(), provider.seed(), provider.temperature(), CacheKey.Mode.CHAT, messages.toString());
+
+            String cachedResponse = cache.get(cacheKey, String.class);
+            if (cachedResponse != null) {
+                return cachedResponse;
+            }
 
             ChatRequest.Builder requestBuilder = ChatRequest.builder().messages(messages);
             if (!jsonSchema.isEmpty()) {
+                JsonRawSchema rawSchema = JsonRawSchema.from(jsonSchema);
                 requestBuilder.responseFormat(ResponseFormat.builder().type(ResponseFormatType.JSON)
-                        .jsonSchema(JsonSchema.builder().rootElement(JsonRawSchema.from(jsonSchema)).build())
+                        .jsonSchema(JsonSchema.builder().rootElement(rawSchema).build())
                         .build());
             }
+            ChatModel chatModel = threads > 1 ? provider.createChatModel() : llmInstance;
             String response = chatModel.chat(requestBuilder.build()).aiMessage().text().replace("\r", "");
             cache.put(cacheKey, response);
             return response;
