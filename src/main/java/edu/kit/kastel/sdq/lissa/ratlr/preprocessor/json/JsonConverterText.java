@@ -27,7 +27,10 @@ public class JsonConverterText extends TemplateReplacer {
 
         JsonNode rootNode = Jsons.readTree(element.getContent());
         if (rootNode.has(placeholderKey)) {
-            return rootNode.get(placeholderKey).toString();
+            JsonNode jsonNode = rootNode.get(placeholderKey);
+            return jsonNode.isTextual()
+                    ? jsonNode.textValue()
+                    : jsonNode.toString();
         }
         
         return null;

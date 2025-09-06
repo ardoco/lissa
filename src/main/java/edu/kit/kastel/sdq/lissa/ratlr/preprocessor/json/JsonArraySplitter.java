@@ -85,7 +85,9 @@ public class JsonArraySplitter extends JsonPreprocessor {
                 for (JsonNode arrayElement : childEntry.getValue()) {
                     for (Map<String, String> resultWithoutArrayElement : results) {
                         Map<String, String> newResult = new LinkedHashMap<>(resultWithoutArrayElement);
-                        newResult.put(remapper.get(childEntry.getKey()), MAPPER.writeValueAsString(arrayElement));
+                        newResult.put(remapper.get(childEntry.getKey()), arrayElement.isTextual()
+                                ? arrayElement.textValue()
+                                : arrayElement.toString());
                         newResults.add(newResult);
                     }
                 }
@@ -93,7 +95,9 @@ public class JsonArraySplitter extends JsonPreprocessor {
             } else {
                 // append non-splittable entry on every existing result
                 for (Map<String, String> result : results) {
-                    result.put(childEntry.getKey(), MAPPER.writeValueAsString(childEntry.getValue()));
+                    result.put(childEntry.getKey(), childEntry.getValue().isTextual() 
+                            ? childEntry.getValue().textValue() 
+                            : childEntry.getValue().toString());
                 }
             }
         }
