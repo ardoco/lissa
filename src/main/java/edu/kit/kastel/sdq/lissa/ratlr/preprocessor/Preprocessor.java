@@ -6,11 +6,11 @@ import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Knowledge;
-import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.json.JsonArraySplitter;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.json.JsonSplitterArray;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.json.JsonConverterText;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.nl.SentenceInformation;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.nl.TemplateRequest;
-import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.nl.TextListSplitter;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.nl.TextSplitterListing;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.PipelinePreprocessor;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.text.TemplateReplacer;
 import org.slf4j.Logger;
@@ -122,12 +122,12 @@ public abstract class Preprocessor<T extends Knowledge> {
     public static Preprocessor<Element> createElementPreprocessor(ModuleConfiguration configuration, ContextStore contextStore) {
         return switch (configuration.name().split(CONFIG_NAME_SEPARATOR)[0]) {
             case "json" -> switch (configuration.name()) {
-                case "json_array_splitter" -> new JsonArraySplitter(configuration, contextStore);
+                case "json_splitter_array" -> new JsonSplitterArray(configuration, contextStore);
                 case "json_converter_text" -> new JsonConverterText(configuration, contextStore);
                 default -> throw new IllegalArgumentException("Unsupported preprocessor name: " + configuration.name());
             };
             case "text" -> switch (configuration.name()) {
-                case "text_splitter_list" -> new TextListSplitter(configuration, contextStore);
+                case "text_splitter_listing" -> new TextSplitterListing(configuration, contextStore);
                 default -> throw new IllegalArgumentException("Unsupported preprocessor name: " + configuration.name());
             };
             case "template" -> switch (configuration.name()) {

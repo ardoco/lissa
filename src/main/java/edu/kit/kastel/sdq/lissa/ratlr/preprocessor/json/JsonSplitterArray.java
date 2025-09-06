@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 // TODO check necessity to extend from JsonPreprocessor
-public class JsonArraySplitter extends JsonPreprocessor {
+public class JsonSplitterArray extends JsonPreprocessor {
 
     private final Map<String, String> remapper;
     
@@ -24,7 +24,7 @@ public class JsonArraySplitter extends JsonPreprocessor {
      *
      * @param contextStore The shared context store for pipeline components
      */
-    public JsonArraySplitter(ModuleConfiguration configuration, ContextStore contextStore) {
+    public JsonSplitterArray(ModuleConfiguration configuration, ContextStore contextStore) {
         super(contextStore);
         this.remapper = new HashMap<>();
         for (String key : configuration.argumentKeys()) {

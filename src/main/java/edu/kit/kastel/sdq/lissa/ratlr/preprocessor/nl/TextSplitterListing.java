@@ -11,7 +11,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-public class TextListSplitter extends Preprocessor<Element> {
+public class TextSplitterListing extends Preprocessor<Element> {
     
     private final String listElementIndicator;
     private final String elementPrefix;
@@ -21,9 +21,9 @@ public class TextListSplitter extends Preprocessor<Element> {
      *
      * @param contextStore The shared context store for pipeline components
      */
-    public TextListSplitter(ModuleConfiguration configuration, ContextStore contextStore) {
+    public TextSplitterListing(ModuleConfiguration configuration, ContextStore contextStore) {
         super(contextStore);
-        this.listElementIndicator = configuration.argumentAsString("list_element_indicator", "- ");
+        this.listElementIndicator = configuration.argumentAsString("listing_element_indicator", "- ");
         this.elementPrefix = configuration.argumentAsString("element_prefix", "");
     }
 
