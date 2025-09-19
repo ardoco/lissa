@@ -26,12 +26,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Knowledge;
  * <li>artifact_type: The type of artifact to create (e.g., REQUIREMENT, SOURCE_CODE)</li>
  * </ul>
  */
-public class TextArtifactProvider extends ArtifactProvider {
-
-    /**
-     * The file or directory path from which artifacts are loaded.
-     */
-    protected final File path;
+public class TextArtifactProvider extends PathedProvider {
 
     /**
      * The type of artifacts to be created.
@@ -51,11 +46,7 @@ public class TextArtifactProvider extends ArtifactProvider {
      * @throws IllegalArgumentException If the specified path does not exist
      */
     public TextArtifactProvider(ModuleConfiguration configuration, ContextStore contextStore) {
-        super(contextStore);
-        this.path = new File(configuration.argumentAsString("path"));
-        if (!path.exists()) {
-            throw new IllegalArgumentException("Path does not exist: " + path.getAbsolutePath());
-        }
+        super(configuration, contextStore);
         this.artifactType = Artifact.ArtifactType.from(configuration.argumentAsString("artifact_type"));
         this.artifacts = new ArrayList<>();
     }
