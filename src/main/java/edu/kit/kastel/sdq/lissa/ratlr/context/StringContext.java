@@ -2,10 +2,9 @@ package edu.kit.kastel.sdq.lissa.ratlr.context;
 
 /**
  * This class represents an implementation of a {@link Context} in which the context is a simple String.
- * It is assumed that the representation of this String is the String itself.
- * {@link #asString()} thereby returns the context.
+ * It is assumed that the representation of this String is the String itself; {@link #asString()} thereby returns the context.
  */
-public class StringContext implements Context {
+public class StringContext implements SerializedContext {
     
     private final String id;
     private final String context;

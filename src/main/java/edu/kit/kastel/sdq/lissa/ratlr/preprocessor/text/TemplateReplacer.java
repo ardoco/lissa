@@ -2,6 +2,7 @@ package edu.kit.kastel.sdq.lissa.ratlr.preprocessor.text;
 
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
+import edu.kit.kastel.sdq.lissa.ratlr.context.SerializedContext;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.Preprocessor;
 
@@ -23,6 +24,13 @@ import java.util.regex.Pattern;
  *     If the template does not contain any specified placeholder, then all children will contain the raw template as their content.
  * </p>
  *
+ * <p>
+ *      This class introduces placeholders that retrieve information from the {@link ContextStore}, in addition to placeholders defined by {@link ElementFormatter}.
+ *      Their identifier must be prefixed with {@code context_} to indicate the intention of such access.
+ *      Furthermore, the context to be retrieved must be an instance of {@link SerializedContext}.
+ *      Hence, the information that replaces these placeholders is the result of {@link SerializedContext#asString()}.
+ * </p>
+ * 
  * <p>
  *     Configuration options:
  *     <ul>
@@ -96,7 +104,7 @@ public class TemplateReplacer extends ElementFormatter {
             if (!this.contextStore.hasContext(contextKey)) {
                 throw new RuntimeException("%s: context store does not contain key '%s'".formatted(element.getIdentifier(), contextKey));
             }
-            return this.contextStore.getSerializedContext(contextKey);
+            return this.contextStore.getContext(contextKey, SerializedContext.class).asString();
         }
         return null;
     }

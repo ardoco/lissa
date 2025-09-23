@@ -55,14 +55,4 @@ public class ContextStore {
         }
         throw new IllegalArgumentException(String.format("Context %s is not of type %s", id, contextType.getName()));
     }
-
-    /**
-     * Retrieves a serialized context by ID and type.
-     * 
-     * @param id the context ID
-     * @return the context serialized as String if found, or {@code null} otherwise
-     */
-    public String getSerializedContext(String id) {
-        return !this.contexts.containsKey(id) ? null : this.contexts.get(id).asString();
-    }
 }
