@@ -1,15 +1,12 @@
-package edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline;
+package edu.kit.kastel.sdq.lissa.ratlr.preprocessor;
 
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
-import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.Preprocessor;
-import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.SingleArtifactPreprocessor;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;

@@ -11,7 +11,6 @@ import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.json.JsonConverterText;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.nl.SentenceInformation;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.nl.TemplateRequest;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.nl.TextSplitterListing;
-import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.PipelinePreprocessor;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.text.TemplateReplacer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,7 +99,7 @@ public abstract class Preprocessor<T extends Knowledge> {
      * @throws IllegalArgumentException if the preprocessor name is not supported
      * @throws IllegalStateException if the configuration name is not recognized
      */
-    public static Preprocessor<Artifact> createPreprocessor(ModuleConfiguration configuration, ContextStore contextStore) {
+    static Preprocessor<Artifact> createPreprocessor(ModuleConfiguration configuration, ContextStore contextStore) {
         return switch (configuration.name()) {
             case "code_tree" -> new CodeTreePreprocessor(configuration, contextStore);
             case "artifact" -> new SingleArtifactPreprocessor(contextStore);
@@ -119,7 +118,7 @@ public abstract class Preprocessor<T extends Knowledge> {
      * @throws IllegalArgumentException if the preprocessor name is not supported
      * @throws IllegalStateException if the configuration name is not recognized
      */
-    public static Preprocessor<Element> createElementPreprocessor(ModuleConfiguration configuration, ContextStore contextStore) {
+    static Preprocessor<Element> createElementPreprocessor(ModuleConfiguration configuration, ContextStore contextStore) {
         return switch (configuration.name().split(CONFIG_NAME_SEPARATOR)[0]) {
             case "json" -> switch (configuration.name()) {
                 case "json_splitter_array" -> new JsonSplitterArray(configuration, contextStore);

@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 
 import edu.kit.kastel.mcse.ardoco.metrics.result.SingleClassificationResult;
+import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,10 +81,10 @@ public class Main {
         ArtifactProvider targetArtifactProvider =
                 ArtifactProvider.createArtifactProvider(configuration.targetArtifactProvider(), contextStore);
 
-        Preprocessor sourcePreprocessor =
-                Preprocessor.createPreprocessor(configuration.sourcePreprocessor(), contextStore);
-        Preprocessor targetPreprocessor =
-                Preprocessor.createPreprocessor(configuration.targetPreprocessor(), contextStore);
+        Preprocessor<Artifact> sourcePreprocessor =
+                configuration.createSourcePreprocessor(contextStore);
+        Preprocessor<Artifact> targetPreprocessor =
+                configuration.createTargetPreprocessor(contextStore);
 
         EmbeddingCreator embeddingCreator =
                 EmbeddingCreator.createEmbeddingCreator(configuration.embeddingCreator(), contextStore);
