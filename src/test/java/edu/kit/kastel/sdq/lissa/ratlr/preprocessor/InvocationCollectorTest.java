@@ -1,6 +1,6 @@
 package edu.kit.kastel.sdq.lissa.ratlr.preprocessor;
 
-import edu.kit.kastel.sdq.lissa.ratlr.codegraph.types.Declaration;
+import edu.kit.kastel.sdq.lissa.ratlr.codegraph.types.TypeDeclaration;
 import edu.kit.kastel.sdq.lissa.ratlr.codegraph.types.InvokedTypesCollector;
 import edu.kit.kastel.sdq.lissa.ratlr.codegraph.types.OuterInvocation;
 import edu.kit.kastel.sdq.lissa.ratlr.codegraph.types.ProjectInvocation;
@@ -52,11 +52,11 @@ public class InvocationCollectorTest {
         System.out.println(invokedOuterTypes);
     }
     
-    private static List<String> getInvokedTypesTransitivelyBFS(Map<Declaration, TargetsContainer> invokedTypes, String simpleName) {
-        List<Declaration> list = invokedTypes.keySet().stream()
+    private static List<String> getInvokedTypesTransitivelyBFS(Map<TypeDeclaration, TargetsContainer> invokedTypes, String simpleName) {
+        List<TypeDeclaration> list = invokedTypes.keySet().stream()
                 .filter(targetsContainer -> targetsContainer.getDeclaringType().getSimpleName().equals(simpleName))
                 .toList();
-        for (Declaration declaration : list) {
+        for (TypeDeclaration declaration : list) {
             
         }
         return null;

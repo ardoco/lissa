@@ -19,6 +19,9 @@ public interface RetrievalStrategy {
     static RetrievalStrategy createStrategy(ModuleConfiguration configuration) {
         return switch (configuration.name()) {
             case "cosine_similarity" -> new CosineSimilarity(configuration);
+            case "token_similarity" -> new TokenSimilarity(configuration);
+            case "cosine_token_similarity" -> new CosineTokenSimilarity(configuration);
+            case "occurrence_similarity" -> new OccurrenceSimilarity(configuration);
             case "custom" -> {
                 logger.warn("For backwards compatibility: Using cosine similarity as default retrieval strategy.");
                 yield new CosineSimilarity(configuration);

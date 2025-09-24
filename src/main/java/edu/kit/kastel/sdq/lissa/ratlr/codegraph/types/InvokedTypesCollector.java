@@ -14,10 +14,10 @@ import java.util.Map;
 
 public class InvokedTypesCollector extends AbstractProcessor<CtInvocation<?>> {
     
-    private final Map<Declaration, TargetsContainer> invokedTypesByDeclaringType = new HashMap<>();
-    private final Map<Declaration, TargetsContainer> invokedTypesView = Collections.unmodifiableMap(invokedTypesByDeclaringType);
+    private final Map<TypeDeclaration, TargetsContainer> invokedTypesByDeclaringType = new HashMap<>();
+    private final Map<TypeDeclaration, TargetsContainer> invokedTypesView = Collections.unmodifiableMap(invokedTypesByDeclaringType);
 
-    public Map<Declaration, TargetsContainer> getInvokedTypes() {
+    public Map<TypeDeclaration, TargetsContainer> getInvokedTypes() {
         return invokedTypesView;
     }
 
@@ -27,7 +27,7 @@ public class InvokedTypesCollector extends AbstractProcessor<CtInvocation<?>> {
         if (declaringParent == null) {
             throw new RuntimeException("invocation has no CtType parent: " + element);
         }
-        Declaration declaration = new Declaration(declaringParent);
+        TypeDeclaration declaration = new TypeDeclaration(declaringParent);
         invokedTypesByDeclaringType.putIfAbsent(declaration, new TargetsContainer(new LinkedList<>(), new LinkedList<>()));
         if (element.getExecutable() != null) {
             CtExecutable<?> targetDeclaration = element.getExecutable().getExecutableDeclaration();
