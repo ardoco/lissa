@@ -10,6 +10,7 @@ import spoon.Launcher;
 import spoon.SpoonAPI;
 import spoon.reflect.CtModel;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -31,7 +32,11 @@ public class InvocationCollectorTest {
                         System.out.println("nulling");
                         return "null";
                     } else {
-                        return ctType.getSimpleName();
+                        File file = ctType.getPosition().getFile();
+                        if (file == null) {
+                            return ctType.getSimpleName() + " : " + ctType.getPosition();
+                        }
+                        return file.getPath();
                     }
                 })
                 .toList();

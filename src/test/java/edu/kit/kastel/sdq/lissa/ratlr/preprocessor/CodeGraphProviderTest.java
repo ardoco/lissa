@@ -1,5 +1,8 @@
 package edu.kit.kastel.sdq.lissa.ratlr.preprocessor;
 
+import edu.kit.kastel.sdq.lissa.ratlr.artifactprovider.CodeGraphProvider;
+import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
+import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import spoon.Launcher;
@@ -108,6 +111,7 @@ import spoon.reflect.visitor.CtVisitor;
 
 import java.lang.annotation.Annotation;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -117,17 +121,22 @@ public class CodeGraphProviderTest {
 
     @Test
     public void testMethodChain() {
-        SpoonAPI launcher = new Launcher();
-        launcher.addInputResource("datasets/doc2code/TeaStore/model_2022/code");
-        CtModel model = launcher.buildModel();
-        for (CtType<?> type : model.getAllTypes()) {
-            if (type.getSimpleName().equals("CartServlet")) {
-                for (CtExecutableReference<?> declaredExecutable : type.getDeclaredExecutables()) {
-                    System.out.println("---" + declaredExecutable);
-                    declaredExecutable.accept(new MethodChainProcessor(declaredExecutable));
-                }
-            }
-        }
+        CodeGraphProvider provider = new CodeGraphProvider(new ModuleConfiguration("whatever", new HashMap<>() {{
+            put("path", "./datasets/doc2code/TeaStore/model_2022/code/");
+        }}), new ContextStore());
+        provider.getArtifacts();
+
+//        SpoonAPI launcher = new Launcher();
+//        launcher.addInputResource("datasets/doc2code/TeaStore/model_2022/code");
+//        CtModel model = launcher.buildModel();
+//        for (CtType<?> type : model.getAllTypes()) {
+//            if (type.getSimpleName().equals("CartServlet")) {
+//                for (CtExecutableReference<?> declaredExecutable : type.getDeclaredExecutables()) {
+//                    System.out.println("---" + declaredExecutable);
+//                    declaredExecutable.accept(new MethodChainProcessor(declaredExecutable));
+//                }
+//            }
+//        }
     }
     
     private static final class MethodChained {

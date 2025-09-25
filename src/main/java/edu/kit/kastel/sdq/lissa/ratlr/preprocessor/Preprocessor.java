@@ -6,6 +6,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Knowledge;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.codegraph.ComponentPreprocessor;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.json.JsonSplitterArray;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.json.JsonConverterText;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.nl.SentenceInformation;
@@ -103,6 +104,7 @@ public abstract class Preprocessor<T extends Knowledge> {
         return switch (configuration.name()) {
             case "code_tree" -> new CodeTreePreprocessor(configuration, contextStore);
             case "artifact" -> new SingleArtifactPreprocessor(contextStore);
+            case "code_graph_component" -> new ComponentPreprocessor(contextStore);
             default -> throw new IllegalStateException("Unexpected value: " + configuration.name());
         };
     }

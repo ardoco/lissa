@@ -134,8 +134,8 @@ public class Evaluation {
         targetPreprocessor = configuration.createTargetPreprocessor(contextStore);
 
         embeddingCreator = EmbeddingCreator.createEmbeddingCreator(configuration.embeddingCreator(), contextStore);
-        sourceStore = new ElementStore(configuration.sourceStore(), false);
-        targetStore = new ElementStore(configuration.targetStore(), true);
+        sourceStore = new ElementStore(configuration.sourceStore(), false, contextStore);
+        targetStore = new ElementStore(configuration.targetStore(), true, contextStore);
 
         classifier = configuration.createClassifier(contextStore);
         aggregator = ResultAggregator.createResultAggregator(configuration.resultAggregator(), contextStore);

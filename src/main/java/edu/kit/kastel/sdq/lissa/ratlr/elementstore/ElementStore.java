@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
+import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.elementstore.strategy.RetrievalStrategy;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.Pair;
@@ -59,15 +60,16 @@ public class ElementStore {
     /**
      * Creates a new element store for the LiSSA framework.
      *
-     * @param configuration The configuration of the module
+     * @param configuration       The configuration of the module
      * @param similarityRetriever Whether this store should be a target store (true) or source store (false).
-     *                           Target stores support similarity search but limit results.
-     *                           Source stores allow retrieving all elements but don't support similarity search.
+     *                            Target stores support similarity search but limit results.
+     *                            Source stores allow retrieving all elements but don't support similarity search.
+     * @param contextStore
      * @throws IllegalArgumentException If max_results is less than 1 in target store mode
      */
-    public ElementStore(ModuleConfiguration configuration, boolean similarityRetriever) {
+    public ElementStore(ModuleConfiguration configuration, boolean similarityRetriever, ContextStore contextStore) {
         if (similarityRetriever) {
-            this.retrievalStrategy = RetrievalStrategy.createStrategy(configuration);
+            this.retrievalStrategy = RetrievalStrategy.createStrategy(configuration, contextStore);
         } else {
             if (!"custom".equals(configuration.name())) {
                 RetrievalStrategy.logger.error(

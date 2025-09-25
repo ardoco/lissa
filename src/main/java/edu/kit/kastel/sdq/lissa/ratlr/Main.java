@@ -88,8 +88,8 @@ public class Main {
 
         EmbeddingCreator embeddingCreator =
                 EmbeddingCreator.createEmbeddingCreator(configuration.embeddingCreator(), contextStore);
-        ElementStore sourceStore = new ElementStore(configuration.sourceStore(), false);
-        ElementStore targetStore = new ElementStore(configuration.targetStore(), true);
+        ElementStore sourceStore = new ElementStore(configuration.sourceStore(), false, contextStore);
+        ElementStore targetStore = new ElementStore(configuration.targetStore(), true, contextStore);
 
         Classifier classifier = configuration.createClassifier(contextStore);
         ResultAggregator aggregator =
