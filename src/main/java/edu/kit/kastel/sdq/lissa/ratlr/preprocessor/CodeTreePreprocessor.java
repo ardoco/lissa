@@ -43,7 +43,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
  *
  * <p>Context handling is managed by the {@link Preprocessor} superclass. Subclasses should not duplicate context parameter documentation.</p>
  */
-public class CodeTreePreprocessor extends Preprocessor<Artifact> {
+public class CodeTreePreprocessor extends Preprocessor {
 
     /** The programming language to use for parsing */
     private final Language language;

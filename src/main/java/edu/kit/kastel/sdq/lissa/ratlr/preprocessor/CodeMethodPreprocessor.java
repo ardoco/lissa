@@ -44,7 +44,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
  *
  * <p>Context handling is managed by the {@link Preprocessor} superclass. Subclasses should not duplicate context parameter documentation.</p>
  */
-public class CodeMethodPreprocessor extends SingleElementPreprocessor {
+public class CodeMethodPreprocessor extends Preprocessor {
 
     /** The programming language to use for parsing */
     private final Language language;
@@ -73,18 +73,18 @@ public class CodeMethodPreprocessor extends SingleElementPreprocessor {
      * @param artifacts The list of code artifacts to preprocess
      * @return A list of elements containing the original code files and their classes and methods
      */
-//    @Override
-//    public List<Element> preprocess(List<Artifact> artifacts) {
-//        List<Element> elements = new ArrayList<>();
-//        for (Artifact artifact : artifacts) {
-//            List<Element> preprocessed = preprocess(artifact);
-//            elements.addAll(preprocessed);
-//        }
-//        return elements;
-//    }
+    @Override
+    public List<Element> preprocess(List<Artifact> artifacts) {
+        List<Element> elements = new ArrayList<>();
+        for (Artifact artifact : artifacts) {
+            List<Element> preprocessed = preprocess(artifact);
+            elements.addAll(preprocessed);
+        }
+        return elements;
+    }
 
     /**
-     * Preprocesses a single code element by splitting it into class and method elements.
+     * Preprocesses a single code artifact by splitting it into class and method elements.
      * This method:
      * <ol>
      *     <li>Creates an element for the entire code file (granularity level 0)</li>
@@ -93,14 +93,22 @@ public class CodeMethodPreprocessor extends SingleElementPreprocessor {
      *     <li>Links elements in a hierarchical structure</li>
      * </ol>
      *
-     * @param element The code element to preprocess
+     * @param artifact The code artifact to preprocess
      * @return A list of elements containing the original code file and its classes and methods
      */
-    @Override
-    protected List<Element> preprocess(Element element) {
-        return switch (language) {
-            case JAVA -> splitJava(element);
-        };
+    protected List<Element> preprocess(Artifact artifact) {
+        List<Element> elements = new ArrayList<>();
+        Element artifactAsElement =
+                new Element(artifact.getIdentifier(), artifact.getType(), artifact.getContent(), 0, null, false);
+        elements.add(artifactAsElement);
+
+        var newElements =
+                switch (language) {
+                    case JAVA -> splitJava(artifactAsElement);
+                };
+
+        elements.addAll(newElements);
+        return elements;
     }
 
     /**
