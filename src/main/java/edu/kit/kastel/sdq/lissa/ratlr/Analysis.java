@@ -19,6 +19,8 @@ import java.util.Set;
 public class Analysis {
 
     @JsonProperty
+    private final Map<Integer, SentenceAnalysis> statisticsBySentenceId = new LinkedHashMap<>();
+    @JsonProperty
     private final List<Map<String, Object>> sourceElements;
     @JsonProperty
     private final List<Map<String, Object>> targetElements;
@@ -34,6 +36,20 @@ public class Analysis {
     public Analysis(List<Element> sourceElements, List<Element> targetElements, List<Pair<Element, Element>> retrieved,
                     List<ClassificationResult> llmResults, ResultAggregator aggregator, TraceLinkIdPostprocessor postprocessor, 
                     SingleClassificationResult<TraceLink> statistics) {
+        
+        Map<Integer, Integer> truePositivesBySentenceId = new LinkedHashMap<>();
+        int max = collectSentenceStatistics(statistics.getTruePositives(), truePositivesBySentenceId);
+        Map<Integer, Integer> falseNegativesBySentenceId = new LinkedHashMap<>();
+        max = Math.max(max, collectSentenceStatistics(statistics.getFalseNegatives(), falseNegativesBySentenceId));
+        Map<Integer, Integer> falsePositivesBySentenceId = new LinkedHashMap<>();
+        max = Math.max(max, collectSentenceStatistics(statistics.getFalsePositives(), falsePositivesBySentenceId));
+        for (int i = 1; i <= max; i++) {
+            statisticsBySentenceId.put(i, new SentenceAnalysis(
+                    truePositivesBySentenceId.getOrDefault(i, 0), 
+                    falsePositivesBySentenceId.getOrDefault(i, 0), 
+                    falseNegativesBySentenceId.getOrDefault(i, 0)));
+        }
+        
         this.sourceElements = sourceElements.stream()
                 .filter(element -> element.getParent() == null)
                 .map(element -> {
@@ -59,6 +75,17 @@ public class Analysis {
             confusionCollection.putIfAbsent(retrievedPair.first().getIdentifier(), new LinkedHashMap<>());
             confusionCollection.get(retrievedPair.first().getIdentifier()).put(retrievedPair.second().getIdentifier(), key == null ? null : key.localKey());
         }
+    }
+
+    private static int collectSentenceStatistics(Set<TraceLink> traceLinks, Map<Integer, Integer> collector) {
+        int max = 0;
+        for (TraceLink traceLink : traceLinks) {
+            int sourceId = Integer.parseInt(traceLink.sourceId());
+            max = Math.max(max, sourceId);
+            collector.putIfAbsent(sourceId, 0);
+            collector.computeIfPresent(sourceId, (key, value) -> ++value);
+        }
+        return max;
     }
 
     private Map<String, Map<String, String>> getConfusionCollection(SingleClassificationResult<TraceLink> statistics, TraceLink retrievedProcessed) {
@@ -103,5 +130,29 @@ public class Analysis {
             }
         }
         return map;
+    }
+    
+    private static final class SentenceAnalysis {
+        @JsonProperty
+        private final int truePositives;
+        @JsonProperty
+        private final int falsePositives;
+        @JsonProperty
+        private final int falseNegatives;
+        @JsonProperty
+        private final float precision;
+        @JsonProperty
+        private final float recall;
+        @JsonProperty
+        private final float f1;
+
+        private SentenceAnalysis(int truePositives, int falsePositives, int falseNegatives) {
+            this.truePositives = truePositives;
+            this.falsePositives = falsePositives;
+            this.falseNegatives = falseNegatives;
+            this.precision = ((float) truePositives) / (truePositives + falsePositives);
+            this.recall = ((float) truePositives) / (truePositives + falseNegatives);
+            this.f1 = (2 * precision * recall) / (precision + recall);
+        }
     }
 }
