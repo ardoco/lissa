@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Objects;
 
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.PipelinePreprocessor;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.codegraph.ComponentElementsLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,6 +101,7 @@ public abstract class Preprocessor {
                 case "code_chunking" -> new CodeChunkingPreprocessor(configuration, contextStore);
                 case "code_method" -> new CodeMethodPreprocessor(configuration, contextStore);
                 case "code_tree" -> new CodeTreePreprocessor(configuration, contextStore);
+                case "code_component" -> new ComponentElementsLoader(contextStore);
                 default ->
                         throw new IllegalArgumentException("Unsupported preprocessor name: " + configuration.name());
             };

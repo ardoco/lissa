@@ -1,4 +1,4 @@
-package edu.kit.kastel.sdq.lissa.ratlr.codegraph.types;
+package edu.kit.kastel.sdq.lissa.ratlr.context.codegraph.types;
 
 import spoon.reflect.declaration.CtPackage;
 import spoon.reflect.declaration.CtType;

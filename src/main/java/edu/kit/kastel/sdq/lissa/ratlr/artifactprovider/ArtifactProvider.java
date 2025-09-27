@@ -73,7 +73,7 @@ public abstract class ArtifactProvider {
         return switch (configuration.name()) {
             case "text" -> new TextArtifactProvider(configuration, contextStore);
             case "recursive_text" -> new RecursiveTextArtifactProvider(configuration, contextStore);
-            case "code" -> new CodeGraphProvider(configuration, contextStore);
+            case "code_graph" -> new CodeGraphProvider(configuration, contextStore);
             default -> throw new IllegalStateException("Unexpected value: " + configuration.name());
         };
     }

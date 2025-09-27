@@ -24,4 +24,12 @@ public abstract class PathedProvider extends ArtifactProvider {
             throw new IllegalArgumentException("Path does not exist: " + path.getAbsolutePath());
         }
     }
+    
+    protected PathedProvider(String path, ContextStore contextStore) {
+        super(contextStore);
+        this.path = new File(path);
+        if (!this.path.exists()) {
+            throw new IllegalArgumentException("Path does not exist: " + this.path.getAbsolutePath());
+        }
+    }
 }

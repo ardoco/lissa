@@ -30,6 +30,14 @@ public abstract class MaxResultsStrategy implements RetrievalStrategy {
         }
     }
 
+    /**
+     * Creates a new instance limiting the returned results.
+     * @param maxResults the number of the highest results to be returned
+     */
+    protected MaxResultsStrategy(int maxResults) {
+        this.maxResults = maxResults;
+    }
+
     @Override
     public final List<Pair<Element, Float>> findSimilarElements(Pair<Element, float[]> query, List<Pair<Element, float[]>> allElementsInStore) {
         List<Pair<Element, Float>> results = findSimilarElementsInternal(query, allElementsInStore);

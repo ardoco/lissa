@@ -1,4 +1,4 @@
-package edu.kit.kastel.sdq.lissa.ratlr.codegraph.component;
+package edu.kit.kastel.sdq.lissa.ratlr.context.codegraph.component;
 
 import spoon.reflect.CtModel;
 import spoon.reflect.code.CtInvocation;
@@ -26,24 +26,25 @@ public final class Components {
     // TODO SubInheritanceHierarchyFunction, SubtypeFilter
     // TODO SuperInheritanceHierarchyFunction.DistinctTypeListener
 
-    public static Collection<Component> getComponents(CtModel model) {
+    public static Collection<ComponentAdapter> getComponents(CtModel model) {
         // component root packages with contained types
         Map<CtPackage, Collection<CtType<?>>> components = getComponentRootPackages(model);
 
         // component providing             these interfaces     to these components, which             invoke (require) them
         //     v                                   v                        v                                   v
         Map<CtPackage, Map<CtType<?>, Map<CtExecutableReference<?>, Map<CtPackage, Map<CtType<?>, Map<CtExecutableReference<?>, Collection<CtInvocation<?>>>>>>>>
-                providedInterfaces = getProvidedInterfaces(components, model);
+//                providedInterfaces = getProvidedInterfaces(components, model);
+                providedInterfaces = new HashMap<>();
 
         return getComponents(components, providedInterfaces);
     }
 
-    private static Collection<Component> getComponents(Map<CtPackage, Collection<CtType<?>>> retriever,
-                                                       Map<CtPackage, Map<CtType<?>, Map<CtExecutableReference<?>, Map<CtPackage, Map<CtType<?>, Map<CtExecutableReference<?>, Collection<CtInvocation<?>>>>>>>> providedInterfaces) {
-        Collection<Component> components = new HashSet<>();
+    private static Collection<ComponentAdapter> getComponents(Map<CtPackage, Collection<CtType<?>>> retriever,
+                                                              Map<CtPackage, Map<CtType<?>, Map<CtExecutableReference<?>, Map<CtPackage, Map<CtType<?>, Map<CtExecutableReference<?>, Collection<CtInvocation<?>>>>>>>> providedInterfaces) {
+        Collection<ComponentAdapter> components = new HashSet<>();
         for (Map.Entry<CtPackage, Collection<CtType<?>>> componentEntry : retriever.entrySet()) {
             CtPackage rootPackage = componentEntry.getKey();
-            components.add(new Component(rootPackage, componentEntry.getValue(), providedInterfaces.get(rootPackage)));
+            components.add(new ComponentAdapter(rootPackage, componentEntry.getValue(), providedInterfaces.get(rootPackage)));
         }
         return components;
     }
@@ -87,7 +88,6 @@ public final class Components {
                         }
                     }
                 }
-                break;
             }
         }
         return providedInterfaces;

@@ -1,4 +1,4 @@
-package edu.kit.kastel.sdq.lissa.ratlr.codegraph.types;
+package edu.kit.kastel.sdq.lissa.ratlr.context.codegraph.types;
 
 import java.util.List;
 

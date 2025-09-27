@@ -23,7 +23,7 @@ public interface RetrievalStrategy {
             case "token_similarity" -> new TokenSimilarity(configuration);
             case "cosine_token_similarity" -> new CosineTokenSimilarity(configuration);
             case "occurrence_similarity" -> new OccurrenceSimilarity(configuration);
-            case "code_graph_strategy" -> new CodeGraphStrategy(contextStore);
+            case "code_graph_strategy" -> new CodeGraphStrategyLoader(contextStore);
             case "custom" -> {
                 logger.warn("For backwards compatibility: Using cosine similarity as default retrieval strategy.");
                 yield new CosineSimilarity(configuration);

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Scanner;
 import java.util.stream.Stream;
 
@@ -44,6 +45,11 @@ public class RecursiveTextArtifactProvider extends TextArtifactProvider {
         super(configuration, contextStore);
         this.extensions =
                 configuration.argumentAsString("extensions").toLowerCase().split(",");
+    }
+
+    public RecursiveTextArtifactProvider(Artifact.ArtifactType artifactType, String path, String[] extensions, ContextStore contextStore) {
+        super(artifactType, path, contextStore);
+        this.extensions = Arrays.copyOf(extensions, extensions.length);
     }
 
     /**

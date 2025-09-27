@@ -1,10 +1,10 @@
 package edu.kit.kastel.sdq.lissa.ratlr.preprocessor;
 
-import edu.kit.kastel.sdq.lissa.ratlr.codegraph.types.TypeDeclaration;
-import edu.kit.kastel.sdq.lissa.ratlr.codegraph.types.InvokedTypesCollector;
-import edu.kit.kastel.sdq.lissa.ratlr.codegraph.types.OuterInvocation;
-import edu.kit.kastel.sdq.lissa.ratlr.codegraph.types.ProjectInvocation;
-import edu.kit.kastel.sdq.lissa.ratlr.codegraph.types.TargetsContainer;
+import edu.kit.kastel.sdq.lissa.ratlr.context.codegraph.types.TypeDeclaration;
+import edu.kit.kastel.sdq.lissa.ratlr.context.codegraph.types.InvokedTypesCollector;
+import edu.kit.kastel.sdq.lissa.ratlr.context.codegraph.types.OuterInvocation;
+import edu.kit.kastel.sdq.lissa.ratlr.context.codegraph.types.ProjectInvocation;
+import edu.kit.kastel.sdq.lissa.ratlr.context.codegraph.types.TargetsContainer;
 import org.junit.jupiter.api.Test;
 import spoon.Launcher;
 import spoon.SpoonAPI;

@@ -50,6 +50,12 @@ public class TextArtifactProvider extends PathedProvider {
         this.artifactType = Artifact.ArtifactType.from(configuration.argumentAsString("artifact_type"));
         this.artifacts = new ArrayList<>();
     }
+    
+    protected TextArtifactProvider(Artifact.ArtifactType artifactType, String path, ContextStore contextStore) {
+        super(path, contextStore);
+        this.artifactType = artifactType;
+        this.artifacts = new ArrayList<>();
+    }
 
     /**
      * Loads text files from the configured path and creates artifacts.

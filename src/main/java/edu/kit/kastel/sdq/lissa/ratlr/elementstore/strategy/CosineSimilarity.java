@@ -20,6 +20,14 @@ public class CosineSimilarity extends MaxResultsStrategy {
         super(configuration);
     }
 
+    /**
+     * Creates a new instance limiting the returned results.
+     * @param maxResults the number of the highest results to be returned
+     */
+    CosineSimilarity(int maxResults) {
+        super(maxResults);
+    }
+
     @Override
     public List<Pair<Element, Float>> findSimilarElementsInternal(
             Pair<Element, float[]> query, List<Pair<Element, float[]>> allElementsInStore) {

@@ -13,7 +13,7 @@ public abstract class CodeGraphPreprocessor extends Preprocessor {
      */
     protected CodeGraphPreprocessor(ContextStore contextStore) {
         super(contextStore);
-        if (!contextStore.hasContext(CodeGraphProvider.CONTEXT_CODE_PATH)) {
+        if (!contextStore.hasContext(CodeGraphProvider.CONTEXT_CODE_PATH_IDENTIFIER)) {
             throw new IllegalStateException("illegal artifact provider, must be 'code'");
         }
     }
