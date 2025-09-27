@@ -1,11 +1,11 @@
-package edu.kit.kastel.sdq.lissa.ratlr.preprocessor.codegraph;
+package edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.codegraph;
 
 import edu.kit.kastel.sdq.lissa.ratlr.artifactprovider.CodeGraphProvider;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.Preprocessor;
 
-public abstract class CodeGraphPreprocessor extends Preprocessor<Artifact> {
+public abstract class CodeGraphPreprocessor extends Preprocessor {
     /**
      * Creates a new preprocessor with the specified context store.
      *

@@ -1,10 +1,9 @@
-package edu.kit.kastel.sdq.lissa.ratlr.preprocessor.nl;
+package edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.nl;
 
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
-import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.LanguageModelPreprocessor;
-import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.text.TemplateReplacer;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.text.TemplateReplacer;
 
 import java.util.List;
 
@@ -26,7 +25,7 @@ public class TemplateRequest extends LanguageModelPreprocessor {
 
     @Override
     protected String createRequest(Element element) {
-        return this.replacer.preprocess(List.of(element)).getFirst().getContent();
+        return this.replacer.process(List.of(element)).getFirst().getContent();
     }
 
     @Override

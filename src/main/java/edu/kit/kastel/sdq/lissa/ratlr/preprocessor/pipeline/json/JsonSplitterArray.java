@@ -1,4 +1,4 @@
-package edu.kit.kastel.sdq.lissa.ratlr.preprocessor.json;
+package edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.json;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.SingleElementProcessingStage;
+import edu.kit.kastel.sdq.lissa.ratlr.utils.json.Jsons;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -14,8 +16,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-// TODO check necessity to extend from JsonPreprocessor
-public class JsonSplitterArray extends JsonPreprocessor {
+public class JsonSplitterArray extends SingleElementProcessingStage {
 
     private final Map<String, String> remapper;
     
@@ -32,12 +33,14 @@ public class JsonSplitterArray extends JsonPreprocessor {
         }
     }
 
-    protected void preprocess(Element element, List<Element> elements) throws JsonProcessingException {
-        List<Map<String, String>> results = splitOnEachArrayEntry(element.getContent());
-        for (int i = 0; i < results.size(); i++) {
-            Map<String, String> result = results.get(i);
-            elements.add(Element.fromParent(element, i, MAPPER.writeValueAsString(result), true));
+    protected List<Element> process(Element element) {
+        List<Map<String, String>> splitResults = splitOnEachArrayEntry(element.getContent());
+        List<Element> results = new LinkedList<>();
+        for (int i = 0; i < splitResults.size(); i++) {
+            Map<String, String> result = splitResults.get(i);
+            results.add(Element.fromParent(element, i, Jsons.writeValueAsString(result), true));
         }
+        return results;
     }
 
     /**
@@ -69,8 +72,8 @@ public class JsonSplitterArray extends JsonPreprocessor {
      * @throws JsonProcessingException if the input is not a valid JSON
      */
     @NotNull
-    private List<Map<String, String>> splitOnEachArrayEntry(String json) throws JsonProcessingException {
-        Map<String, JsonNode> children = MAPPER.readValue(json, new TypeReference<>() {});
+    private List<Map<String, String>> splitOnEachArrayEntry(String json) {
+        Map<String, JsonNode> children = Jsons.readValue(json, new TypeReference<>() {});
 
         List<Map<String, String>> results = new LinkedList<>();
         results.add(new LinkedHashMap<>());

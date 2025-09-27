@@ -1,4 +1,4 @@
-package edu.kit.kastel.sdq.lissa.ratlr.preprocessor;
+package edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.nl;
 
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.SystemMessage;
@@ -7,7 +7,6 @@ import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.request.ResponseFormat;
 import dev.langchain4j.model.chat.request.ResponseFormatType;
-import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.request.json.JsonRawSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchema;
 import edu.kit.kastel.sdq.lissa.ratlr.cache.Cache;
@@ -17,6 +16,8 @@ import edu.kit.kastel.sdq.lissa.ratlr.classifier.ChatLanguageModelProvider;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.Preprocessor;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.PipelineStage;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.Futures;
 
 import java.util.ArrayList;
@@ -43,7 +44,7 @@ import java.util.concurrent.Executors;
  * </ul>
  *
  */
-public abstract class LanguageModelPreprocessor extends Preprocessor<Element> {
+public abstract class LanguageModelPreprocessor extends PipelineStage {
     
     /** The provider for chat language models */
     private final ChatLanguageModelProvider provider;
@@ -99,7 +100,7 @@ public abstract class LanguageModelPreprocessor extends Preprocessor<Element> {
      * @throws IllegalStateException if preprocessing fails
      */
     @Override
-    public final List<Element> preprocess(List<Element> elements) {
+    public final List<Element> process(List<Element> elements) {
         List<Element> result = new ArrayList<>();
 
         List<String> requests = new ArrayList<>();

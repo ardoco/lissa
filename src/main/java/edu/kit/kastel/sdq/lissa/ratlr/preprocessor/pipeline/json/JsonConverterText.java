@@ -1,10 +1,10 @@
-package edu.kit.kastel.sdq.lissa.ratlr.preprocessor.json;
+package edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.json;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
-import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.text.TemplateReplacer;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.text.TemplateReplacer;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.json.Jsons;
 
 public class JsonConverterText extends TemplateReplacer {

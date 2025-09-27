@@ -1,14 +1,15 @@
-package edu.kit.kastel.sdq.lissa.ratlr.preprocessor;
+package edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline;
 
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.Preprocessor;
 
 import java.util.LinkedList;
 import java.util.List;
 
-public class IndependentParallel extends Preprocessor<Element> {
+public class IndependentParallel extends PipelineStage {
 
-    private final List<Preprocessor<Element>> preprocessors;
+    private final List<PipelineStage> preprocessors;
     
     /**
      * Creates a new preprocessor with the specified context store.
@@ -21,11 +22,11 @@ public class IndependentParallel extends Preprocessor<Element> {
     }
 
     @Override
-    public List<Element> preprocess(List<Element> artifacts) {
-        List<Element> elements = new LinkedList<>();
-        for (Preprocessor<Element> preprocessor : preprocessors) {
-            elements.addAll(preprocessor.preprocess(artifacts));
+    public List<Element> process(List<Element> elements) {
+        List<Element> results = new LinkedList<>();
+        for (PipelineStage parallelStage : preprocessors) {
+            results.addAll(parallelStage.process(elements));
         }
-        return elements;
+        return results;
     }
 }

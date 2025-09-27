@@ -81,10 +81,10 @@ public class Main {
         ArtifactProvider targetArtifactProvider =
                 ArtifactProvider.createArtifactProvider(configuration.targetArtifactProvider(), contextStore);
 
-        Preprocessor<Artifact> sourcePreprocessor =
-                configuration.createSourcePreprocessor(contextStore);
-        Preprocessor<Artifact> targetPreprocessor =
-                configuration.createTargetPreprocessor(contextStore);
+        Preprocessor sourcePreprocessor =
+                Preprocessor.createPreprocessor(configuration.sourcePreprocessor(), contextStore);
+        Preprocessor targetPreprocessor =
+                Preprocessor.createPreprocessor(configuration.targetPreprocessor(), contextStore);
 
         EmbeddingCreator embeddingCreator =
                 EmbeddingCreator.createEmbeddingCreator(configuration.embeddingCreator(), contextStore);

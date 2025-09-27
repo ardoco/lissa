@@ -184,35 +184,39 @@ public record Configuration(
 
     /**
      * Creates a preprocessor instance based on this configuration.
-     * Either a single classifier or a multi-stage classifier pipeline is created,
-     * depending on which configuration is set. The shared {@link ContextStore} is passed to all classifiers.
+     * Either a single preprocessor or a multi-stage preprocessor pipeline is created,
+     * depending on which configuration is set. The shared {@link ContextStore} is passed to all preprocessors.
      *
      * @param contextStore The shared context store for pipeline components
-     * @return A classifier instance
-     * @throws IllegalStateException If neither or both classifier configurations are set
+     * @return A preprocessor instance
+     * @throws IllegalStateException If neither nor both preprocessor configurations are set
      */
-    public Preprocessor<Artifact> createSourcePreprocessor(ContextStore contextStore) {
+    public Preprocessor createSourcePreprocessor(ContextStore contextStore) {
         if ((sourcePreprocessor == null) == (sourcePreprocessors == null)) {
             throw new IllegalStateException("Either 'sourcePreprocessor' or 'sourcePreprocessors' must be set, but not both.");
         }
 
-        return Preprocessor.createPreprocessors(sourcePreprocessor != null ? List.of(sourcePreprocessor) : sourcePreprocessors, contextStore);
+        return sourcePreprocessor != null 
+                ? Preprocessor.createPreprocessor(sourcePreprocessor, contextStore) 
+                : Preprocessor.createPreprocessor(sourcePreprocessors, contextStore);
     }
 
     /**
-     * Creates a classifier instance based on this configuration.
-     * Either a single classifier or a multi-stage classifier pipeline is created,
-     * depending on which configuration is set. The shared {@link ContextStore} is passed to all classifiers.
+     * Creates a preprocessor instance based on this configuration.
+     * Either a single preprocessor or a multi-stage preprocessor pipeline is created,
+     * depending on which configuration is set. The shared {@link ContextStore} is passed to all preprocessors.
      *
      * @param contextStore The shared context store for pipeline components
-     * @return A classifier instance
-     * @throws IllegalStateException If neither or both classifier configurations are set
+     * @return A preprocessor instance
+     * @throws IllegalStateException If neither nor both preprocessor configurations are set
      */
-    public Preprocessor<Artifact> createTargetPreprocessor(ContextStore contextStore) {
+    public Preprocessor createTargetPreprocessor(ContextStore contextStore) {
         if ((targetPreprocessor == null) == (targetPreprocessors == null)) {
             throw new IllegalStateException("Either 'targetPreprocessor' or 'targetPreprocessors' must be set, but not both.");
         }
 
-        return Preprocessor.createPreprocessors(targetPreprocessor != null ? List.of(targetPreprocessor) : targetPreprocessors, contextStore);
+        return targetPreprocessor != null
+                ? Preprocessor.createPreprocessor(targetPreprocessor, contextStore)
+                : Preprocessor.createPreprocessor(targetPreprocessors, contextStore);
     }
 }

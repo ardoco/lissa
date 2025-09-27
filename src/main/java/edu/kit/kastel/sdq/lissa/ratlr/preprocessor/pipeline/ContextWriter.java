@@ -1,10 +1,10 @@
-package edu.kit.kastel.sdq.lissa.ratlr.preprocessor;
+package edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline;
 
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.context.StringContext;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
-import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.text.ElementFormatter;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.text.ElementFormatter;
 
 import java.util.HashMap;
 import java.util.List;
@@ -47,7 +47,7 @@ public class ContextWriter extends ElementFormatter {
     }
 
     @Override
-    protected List<Element> preprocess(Element element) {
+    protected List<Element> process(Element element) {
         for (Map.Entry<String, String> toStoreEntry : this.contextIdentifiersToStore.entrySet()) {
             contextStore.createContext(new StringContext(toStoreEntry.getKey(), replace(toStoreEntry.getValue(), element)));
         }

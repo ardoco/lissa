@@ -1,4 +1,4 @@
-package edu.kit.kastel.sdq.lissa.ratlr.preprocessor.codegraph;
+package edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.codegraph;
 
 import edu.kit.kastel.sdq.lissa.ratlr.artifactprovider.CodeGraphProvider;
 import edu.kit.kastel.sdq.lissa.ratlr.codegraph.ModelContext;

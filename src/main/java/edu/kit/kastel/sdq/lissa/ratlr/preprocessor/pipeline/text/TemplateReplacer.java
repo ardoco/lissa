@@ -1,4 +1,4 @@
-package edu.kit.kastel.sdq.lissa.ratlr.preprocessor.text;
+package edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.text;
 
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
@@ -81,7 +81,7 @@ public class TemplateReplacer extends ElementFormatter {
      * @return a singleton element containing the replaced template as its content
      */
     @Override
-    public List<Element> preprocess(Element element) {
+    public List<Element> process(Element element) {
         return List.of(Element.fromParent(element, replace(this.template, element)));
     }
 

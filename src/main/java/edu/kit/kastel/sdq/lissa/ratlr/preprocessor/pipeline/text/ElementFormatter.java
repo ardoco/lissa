@@ -1,10 +1,10 @@
-package edu.kit.kastel.sdq.lissa.ratlr.preprocessor.text;
+package edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.text;
 
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.Preprocessor;
-import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.SingleElementPreprocessor;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.SingleElementProcessingStage;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,7 +40,7 @@ import java.util.regex.Pattern;
  *
  * <p>Context handling is managed by the {@link Preprocessor} superclass. Subclasses should not duplicate context parameter documentation.</p>
  */
-public abstract class ElementFormatter extends SingleElementPreprocessor {
+public abstract class ElementFormatter extends SingleElementProcessingStage {
 
     /**
      * The keying of element information.

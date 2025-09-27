@@ -1,9 +1,10 @@
-package edu.kit.kastel.sdq.lissa.ratlr.preprocessor.nl;
+package edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.nl;
 
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.Preprocessor;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.SingleElementProcessingStage;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -11,7 +12,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-public class TextSplitterListing extends Preprocessor<Element> {
+public class TextSplitterListing extends SingleElementProcessingStage {
     
     private final String listElementIndicator;
     private final String elementPrefix;
@@ -28,15 +29,7 @@ public class TextSplitterListing extends Preprocessor<Element> {
     }
 
     @Override
-    public List<Element> preprocess(List<Element> elements) {
-        List<Element> result = new LinkedList<>();
-        for (Element element : elements) {
-            result.addAll(preprocess(element));
-        }
-        return result;
-    }
-
-    private Collection<Element> preprocess(Element element) {
+    public List<Element> process(Element element) {
         String original = element.getContent();
         List<StringBuilder> results = new LinkedList<>();
         results.add(new StringBuilder());

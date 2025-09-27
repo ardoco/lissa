@@ -6,6 +6,7 @@ import static edu.kit.kastel.sdq.lissa.ratlr.classifier.Classifier.CONFIG_NAME_S
 import java.util.List;
 import java.util.Objects;
 
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.PipelinePreprocessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,24 +90,31 @@ public abstract class Preprocessor {
      */
     public static Preprocessor createPreprocessor(ModuleConfiguration configuration, ContextStore contextStore) {
         return switch (configuration.name().split(CONFIG_NAME_SEPARATOR)[0]) {
-            case "sentence" -> new SentencePreprocessor(configuration, contextStore);
-            case "code" ->
-                    switch (configuration.name()) {
-                        case "code_chunking" -> new CodeChunkingPreprocessor(configuration, contextStore);
-                        case "code_method" -> new CodeMethodPreprocessor(configuration, contextStore);
-                        case "code_tree" -> new CodeTreePreprocessor(configuration, contextStore);
-                        default ->
-                                throw new IllegalArgumentException("Unsupported preprocessor name: " + configuration.name());
-                    };
-            case "model" ->
-                    switch (configuration.name()) {
-                        case "model_uml" -> new ModelUMLPreprocessor(configuration, contextStore);
-                        default ->
-                                throw new IllegalArgumentException("Unsupported preprocessor name: " + configuration.name());
-                    };
+            case "sentence" -> switch (configuration.name()) {
+                case "sentence" -> new SentencePreprocessor(configuration, contextStore);
+                case "sentence_openai" -> new SentenceInformationPreprocessor(configuration, contextStore);
+                default ->
+                        throw new IllegalArgumentException("Unsupported preprocessor name: " + configuration.name());
+            };
+            case "code" -> switch (configuration.name()) {
+                case "code_chunking" -> new CodeChunkingPreprocessor(configuration, contextStore);
+                case "code_method" -> new CodeMethodPreprocessor(configuration, contextStore);
+                case "code_tree" -> new CodeTreePreprocessor(configuration, contextStore);
+                default ->
+                        throw new IllegalArgumentException("Unsupported preprocessor name: " + configuration.name());
+            };
+            case "model" -> switch (configuration.name()) {
+                case "model_uml" -> new ModelUMLPreprocessor(configuration, contextStore);
+                default ->
+                        throw new IllegalArgumentException("Unsupported preprocessor name: " + configuration.name());
+            };
             case "summarize" -> new SummarizePreprocessor(configuration, contextStore);
             case "artifact" -> new SingleArtifactPreprocessor(contextStore);
             default -> throw new IllegalStateException("Unexpected value: " + configuration.name());
         };
+    }
+
+    public static Preprocessor createPreprocessor(List<ModuleConfiguration> configurations, ContextStore contextStore) {
+        return new PipelinePreprocessor(configurations, contextStore);
     }
 }
