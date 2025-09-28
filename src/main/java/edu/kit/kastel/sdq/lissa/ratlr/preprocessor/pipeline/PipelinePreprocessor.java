@@ -11,6 +11,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.json.JsonConverterTe
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.json.JsonSplitterArray;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.nl.TemplateRequest;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.nl.TextSplitterListing;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.text.RegexReplacer;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.text.TemplateElement;
 
 import java.util.ArrayList;
@@ -112,23 +113,31 @@ public class PipelinePreprocessor extends Preprocessor {
      */
     private static Pipelineable createStage(ModuleConfiguration configuration, ContextStore contextStore) {
         return switch (configuration.name().split(CONFIG_NAME_SEPARATOR)[0]) {
+            case "regex" -> switch (configuration.name()) {
+                case "regex_replacer" -> new RegexReplacer(configuration, contextStore);
+                default -> throw new IllegalArgumentException("Unsupported pipeline stage name: " + configuration.name());
+            };
+            case "element" -> switch (configuration.name()) {
+                case "element_joiner" -> new ElementJoiner(configuration, contextStore);
+                default -> throw new IllegalArgumentException("Unsupported pipeline stage name: " + configuration.name());
+            };
             case "json" -> switch (configuration.name()) {
                 case "json_splitter_array" -> new JsonSplitterArray(configuration, contextStore);
                 case "json_converter_text" -> new JsonConverterText(configuration, contextStore);
-                default -> throw new IllegalArgumentException("Unsupported preprocessor name: " + configuration.name());
+                default -> throw new IllegalArgumentException("Unsupported pipeline stage name: " + configuration.name());
             };
             case "text" -> switch (configuration.name()) {
                 case "text_splitter_listing" -> new TextSplitterListing(configuration, contextStore);
-                default -> throw new IllegalArgumentException("Unsupported preprocessor name: " + configuration.name());
+                default -> throw new IllegalArgumentException("Unsupported pipeline stage name: " + configuration.name());
             };
             case "template" -> switch (configuration.name()) {
                 case "template_replace" -> new TemplateElement(configuration, contextStore);
                 case "template_openai" -> new TemplateRequest(configuration, contextStore);
-                default -> throw new IllegalArgumentException("Unsupported preprocessor name: " + configuration.name());
+                default -> throw new IllegalArgumentException("Unsupported pipeline stage name: " + configuration.name());
             };
             case "context" -> switch (configuration.name()) {
                 case "context_writer" -> new ContextWriter(configuration, contextStore);
-                default -> throw new IllegalArgumentException("Unsupported preprocessor name: " + configuration.name());
+                default -> throw new IllegalArgumentException("Unsupported pipeline stage name: " + configuration.name());
             };
             case "sentence" -> new SentencePreprocessor(configuration, contextStore);
             default -> throw new IllegalStateException("Unexpected value: " + configuration.name());
