@@ -1,5 +1,7 @@
 package edu.kit.kastel.sdq.lissa.ratlr.context.codegraph.component;
 
+import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
+
 import java.util.SortedSet;
 
 public interface Component extends Comparable<Component> {
@@ -7,6 +9,8 @@ public interface Component extends Comparable<Component> {
     String getSimpleName();
 
     String getQualifiedName();
+
+    SortedSet<Artifact> getContainedArtifacts();
 
     SortedSet<String> getPaths();
     

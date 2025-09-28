@@ -2,45 +2,42 @@ package edu.kit.kastel.sdq.lissa.ratlr.context;
 
 import edu.kit.kastel.sdq.lissa.ratlr.context.codegraph.ArtifactMapper;
 import edu.kit.kastel.sdq.lissa.ratlr.context.codegraph.component.Component;
-import edu.kit.kastel.sdq.lissa.ratlr.context.codegraph.component.ComponentAdapter;
+import edu.kit.kastel.sdq.lissa.ratlr.context.codegraph.component.ComponentSpoonAdapter;
+import edu.kit.kastel.sdq.lissa.ratlr.context.codegraph.component.ComponentStrategy;
 import edu.kit.kastel.sdq.lissa.ratlr.context.codegraph.component.Components;
-import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
 import spoon.reflect.CtModel;
 
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 public class CodeGraph implements Context {
 
     private final String identifier;
     private final CtModel model;
     private final ArtifactMapper artifactMapper;
-    private Collection<ComponentAdapter> components;
+    private final List<Path> projectConfigurations;
+    private Collection<Component> components;
+    private final Path codeRoot;
 
-    public CodeGraph(String identifier, CtModel model, ArtifactMapper artifactMapper) {
+    public CodeGraph(String identifier, CtModel model, ArtifactMapper artifactMapper, List<Path> projectConfigurations, Path codeRoot) {
         this.identifier = identifier;
         this.model = model;
         this.artifactMapper = artifactMapper;
-    }
-    
-    public Collection<Component> getComponents() {
-        if (components == null) {
-            components = Components.getComponents(model, artifactMapper);
-        }
-        return Collections.unmodifiableCollection(components);
-    }
-    
-    public Collection<Artifact> getContainedArtifacts(Component component) {
-        return artifactMapper.getArtifacts(getComponentAdapter(component).getContainedTypes());
+        this.projectConfigurations = projectConfigurations;
+        this.codeRoot = codeRoot;
     }
 
-    private ComponentAdapter getComponentAdapter(Component component) {
-        for (ComponentAdapter adapter : components) {
-            if (adapter == component) {
-                return adapter;
-            }
+    public List<Path> getProjectConfigurations() {
+        return Collections.unmodifiableList(projectConfigurations);
+    }
+
+    public Collection<Component> getComponents(ComponentStrategy[] strategies) {
+        if (components == null) {
+            components = Components.getComponents(strategies, model, artifactMapper, projectConfigurations, codeRoot);
         }
-        throw new IllegalArgumentException("given component is not created by this context");
+        return Collections.unmodifiableCollection(components);
     }
 
     @Override

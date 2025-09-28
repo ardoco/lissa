@@ -6,6 +6,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.context.CodeGraph;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ElementRetrieval;
 import edu.kit.kastel.sdq.lissa.ratlr.context.codegraph.component.Component;
+import edu.kit.kastel.sdq.lissa.ratlr.context.codegraph.component.ComponentStrategy;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.Preprocessor;
@@ -26,6 +27,7 @@ public class ComponentElementsLoader extends CodeGraphPreprocessor {
     private final ElementRetrieval retrieval = new ElementRetrieval();
     private final AtomicReference<Component> componentReference = new AtomicReference<>();
     private final TemplateFormatter formatter;
+    private final ComponentStrategy[] strategies;
     
     /**
      * Creates a new preprocessor with the specified context store.
@@ -36,7 +38,12 @@ public class ComponentElementsLoader extends CodeGraphPreprocessor {
         super(contextStore);
         this.basePreprocessor = new SingleArtifactPreprocessor(contextStore);
         contextStore.createContext(retrieval);
-        formatter = new TemplateFormatter(configuration, new ComponentReplacementRetriever(null, componentReference));
+        this.formatter = new TemplateFormatter(configuration, new ComponentReplacementRetriever(null, componentReference));
+        String[] strategySplit = configuration.argumentAsString("strategies").split(",");
+        this.strategies = new ComponentStrategy[strategySplit.length];
+        for (int i = 0; i < strategySplit.length; i++) {
+            this.strategies[i] = ComponentStrategy.valueOf(strategySplit[i]);
+        }
     }
 
     @Override
@@ -44,7 +51,7 @@ public class ComponentElementsLoader extends CodeGraphPreprocessor {
         Map<Artifact, Element> artifactElements = getArtifactElements(artifacts);
         
         CodeGraph codeGraph = contextStore.getContext(CodeGraphProvider.CONTEXT_IDENTIFIER, CodeGraph.class);
-        Collection<Component> components = codeGraph.getComponents();
+        Collection<Component> components = codeGraph.getComponents(strategies);
 
         List<Element> elements = new ArrayList<>(components.size());
         for (Component component : components) {
@@ -53,7 +60,7 @@ public class ComponentElementsLoader extends CodeGraphPreprocessor {
             Element componentElement = new Element(component.getQualifiedName(), "source code component", formatter.format(), 0, null, true);
             elements.add(componentElement);
 
-            List<Element> artifactElementsOfComponent = codeGraph.getContainedArtifacts(component).stream()
+            List<Element> artifactElementsOfComponent = component.getContainedArtifacts().stream()
                     .map(artifactElements::get)
                     .toList();
             retrieval.setRetrieval(componentElement, artifactElementsOfComponent);

@@ -2,6 +2,7 @@ package edu.kit.kastel.sdq.lissa.ratlr.context.codegraph.component;
 
 import edu.kit.kastel.sdq.lissa.ratlr.context.codegraph.ArtifactMapper;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
+import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Knowledge;
 import spoon.reflect.CtModel;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.declaration.CtPackage;
@@ -10,14 +11,20 @@ import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.visitor.CtAbstractVisitor;
 import spoon.reflect.visitor.filter.InvocationFilter;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.stream.Stream;
 
 public final class Components {
     
@@ -30,7 +37,40 @@ public final class Components {
     // TODO SubInheritanceHierarchyFunction, SubtypeFilter
     // TODO SuperInheritanceHierarchyFunction.DistinctTypeListener
 
-    public static Collection<ComponentAdapter> getComponents(CtModel model, ArtifactMapper mapper) {
+    public static Collection<Component> getComponents(ComponentStrategy[] strategies, CtModel model, ArtifactMapper mapper, List<Path> projectConfigurations, Path codeRoot) {
+        Collection<Component> components = new TreeSet<>();
+        for (ComponentStrategy strategy : strategies) {
+            components.addAll(switch (strategy) {
+                case PACKAGES -> getComponents(model, mapper);
+                case BUILD_CONFIGURATIONS -> getComponents(projectConfigurations, codeRoot, mapper);
+            });
+        }
+        return components;
+    }
+
+    private static Collection<Component> getComponents(List<Path> projectConfigurations, Path codeRoot, ArtifactMapper mapper) {
+        Map<Path, SortedSet<Artifact>> componentMapping = new HashMap<>();
+        for (Path configPath : projectConfigurations) {
+            Path rootPath = configPath.getParent();
+            try (Stream<Path> paths = Files.walk(rootPath)) {
+                componentMapping.put(rootPath, new TreeSet<>(mapper.getArtifactsByAbsolutePaths(paths)));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        Collection<Component> components = new TreeSet<>();
+        for (Map.Entry<Path, SortedSet<Artifact>> componentEntry : componentMapping.entrySet()) {
+            Path rootPath = codeRoot.relativize(componentEntry.getKey());
+            SortedSet<String> paths = new TreeSet<>();
+            String normalizedPath = rootPath.toString().replace("\\", "/");
+            paths.add(normalizedPath);
+            components.add(new SimpleComponent(normalizedPath, normalizedPath, componentEntry.getValue(), paths));
+        }
+        return components;
+    }
+
+    public static Collection<ComponentSpoonAdapter> getComponents(CtModel model, ArtifactMapper mapper) {
         // component root packages with contained types
         Map<CtPackage, Collection<CtType<?>>> components = getComponentRootPackages(model);
 
@@ -50,16 +90,19 @@ public final class Components {
 //                providedInterfaces = getProvidedInterfaces(components, model);
                 providedInterfaces = new HashMap<>();
 
-        return getComponents(components, packagePaths, providedInterfaces);
+        return getComponents(components, packagePaths, providedInterfaces, mapper);
     }
 
-    private static Collection<ComponentAdapter> getComponents(Map<CtPackage, Collection<CtType<?>>> retriever,
-                                                              Map<CtPackage, SortedSet<String>> packagePaths, 
-                                                              Map<CtPackage, Map<CtType<?>, Map<CtExecutableReference<?>, Map<CtPackage, Map<CtType<?>, Map<CtExecutableReference<?>, Collection<CtInvocation<?>>>>>>>> providedInterfaces) {
-        Collection<ComponentAdapter> components = new HashSet<>();
+    private static Collection<ComponentSpoonAdapter> getComponents(Map<CtPackage, Collection<CtType<?>>> retriever,
+                                                                   Map<CtPackage, SortedSet<String>> packagePaths,
+                                                                   Map<CtPackage, Map<CtType<?>, Map<CtExecutableReference<?>, Map<CtPackage, Map<CtType<?>, Map<CtExecutableReference<?>, Collection<CtInvocation<?>>>>>>>> providedInterfaces,
+                                                                   ArtifactMapper mapper) {
+        Collection<ComponentSpoonAdapter> components = new HashSet<>();
         for (Map.Entry<CtPackage, Collection<CtType<?>>> componentEntry : retriever.entrySet()) {
             CtPackage rootPackage = componentEntry.getKey();
-            components.add(new ComponentAdapter(rootPackage, componentEntry.getValue(), packagePaths.get(rootPackage), providedInterfaces.get(rootPackage)));
+            SortedSet<Artifact> containedArtifacts = new TreeSet<>(Comparator.comparing(Knowledge::getIdentifier));
+            containedArtifacts.addAll(mapper.getArtifacts(componentEntry.getValue()));
+            components.add(new ComponentSpoonAdapter(rootPackage, componentEntry.getValue(), containedArtifacts, packagePaths.get(rootPackage), providedInterfaces.get(rootPackage)));
         }
         return components;
     }
