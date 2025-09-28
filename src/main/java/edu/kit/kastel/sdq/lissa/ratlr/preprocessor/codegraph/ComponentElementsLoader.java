@@ -11,22 +11,19 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.Preprocessor;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.SingleArtifactPreprocessor;
-import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.formatter.ComponentReplacementRetriever;
-import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.formatter.TemplateFormatter;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.formatter.ComponentFormatter;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class ComponentElementsLoader extends CodeGraphPreprocessor {
 
     private final Preprocessor basePreprocessor;
     private final ElementRetrieval retrieval = new ElementRetrieval();
-    private final AtomicReference<Component> componentReference = new AtomicReference<>();
-    private final TemplateFormatter formatter;
+    private final ComponentFormatter formatter;
     private final ComponentStrategy[] strategies;
     
     /**
@@ -38,7 +35,7 @@ public class ComponentElementsLoader extends CodeGraphPreprocessor {
         super(contextStore);
         this.basePreprocessor = new SingleArtifactPreprocessor(contextStore);
         contextStore.createContext(retrieval);
-        this.formatter = new TemplateFormatter(configuration, new ComponentReplacementRetriever(null, componentReference));
+        this.formatter = new ComponentFormatter(configuration, contextStore);
         String[] strategySplit = configuration.argumentAsString("strategies").split(",");
         this.strategies = new ComponentStrategy[strategySplit.length];
         for (int i = 0; i < strategySplit.length; i++) {
@@ -55,7 +52,7 @@ public class ComponentElementsLoader extends CodeGraphPreprocessor {
 
         List<Element> elements = new ArrayList<>(components.size());
         for (Component component : components) {
-            componentReference.set(component);
+            formatter.setComponent(component);
             
             Element componentElement = new Element(component.getQualifiedName(), "source code component", formatter.format(), 0, null, true);
             elements.add(componentElement);
