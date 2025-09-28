@@ -5,8 +5,10 @@ import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +74,10 @@ public class EvaluateCommand implements Runnable {
                 var evaluation = new Evaluation(config, saveAnalysis);
                 evaluation.run();
             } catch (Exception e) {
-                logger.warn("Configuration '{}' threw an exception: {}", config, e.toString());
+                logger.warn("Configuration '{}' threw an exception: {}\n{}", config, e, 
+                        Arrays.stream(e.getStackTrace())
+                                .map(stackTraceElement -> "    at " + stackTraceElement.toString())
+                                .collect(Collectors.joining("\n")));
             }
         }
     }

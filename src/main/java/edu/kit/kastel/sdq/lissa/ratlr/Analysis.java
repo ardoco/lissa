@@ -62,7 +62,7 @@ public class Analysis {
                 .filter(element -> element.getParent() == null)
                 .map(element -> {
                     Map<String, Object> map = new LinkedHashMap<>();
-                    map.put(element.getIdentifier(), getElementMap(element, targetElements, true));
+                    map.put(element.getIdentifier(), getElementMap(element, targetElements, false));
                     return map;
                 })
                 .toList();
