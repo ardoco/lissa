@@ -3,9 +3,9 @@ package edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
-import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.formatter.ContextReplacementRetriever;
-import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.formatter.ElementFormatter;
-import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.formatter.TemplateFormatter;
+import edu.kit.kastel.sdq.lissa.ratlr.utils.formatter.ContextReplacementRetriever;
+import edu.kit.kastel.sdq.lissa.ratlr.utils.formatter.ElementFormatter;
+import edu.kit.kastel.sdq.lissa.ratlr.utils.formatter.TemplateFormatter;
 
 import java.util.List;
 import java.util.StringJoiner;
