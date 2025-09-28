@@ -1,4 +1,4 @@
-package edu.kit.kastel.sdq.lissa.ratlr.preprocessor.formatter;
+package edu.kit.kastel.sdq.lissa.ratlr.utils.formatter;
 
 public class RetrieverDecorator implements ReplacementRetriever {
     

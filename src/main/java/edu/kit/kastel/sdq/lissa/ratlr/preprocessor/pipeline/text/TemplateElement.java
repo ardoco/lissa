@@ -5,14 +5,14 @@ import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.context.SerializedContext;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.Preprocessor;
-import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.formatter.ContextReplacementRetriever;
-import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.formatter.ElementReplacementRetriever;
-import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.formatter.ReplacementRetriever;
-import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.formatter.TemplateFormatter;
+import edu.kit.kastel.sdq.lissa.ratlr.utils.formatter.ElementFormatter;
+import edu.kit.kastel.sdq.lissa.ratlr.utils.formatter.ElementReplacementRetriever;
+import edu.kit.kastel.sdq.lissa.ratlr.utils.formatter.ReplacementRetriever;
+import edu.kit.kastel.sdq.lissa.ratlr.utils.formatter.RetrievingFormatter;
+import edu.kit.kastel.sdq.lissa.ratlr.utils.formatter.ValueFormatter;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.SingleElementProcessingStage;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 /**
@@ -58,23 +58,10 @@ import java.util.function.Function;
  * <p>Context handling is managed by the {@link Preprocessor} superclass. Subclasses should not duplicate context parameter documentation.</p>
  * @see ElementReplacementRetriever
  */
-public class TemplateElement extends SingleElementProcessingStage {
+public class TemplateElement extends SingleElementProcessingStage implements RetrievingFormatter {
+
+    private final ValueFormatter<Element> elementFormatter;
     
-    private final AtomicReference<Element> elementReference = new AtomicReference<>();
-    private final TemplateFormatter formatter;
-
-    /**
-     * Creates a new preprocessor with the specified context store.
-     *
-     * @param configuration The module configuration containing the placeholder format and template
-     * @param contextStore The shared context store for pipeline components
-     */
-    public TemplateElement(ModuleConfiguration configuration, Function<ReplacementRetriever, ReplacementRetriever> retrieverProvider, ContextStore contextStore) {
-        super(contextStore);
-        ReplacementRetriever retriever = new ContextReplacementRetriever(new ElementReplacementRetriever(null, elementReference), contextStore);
-        this.formatter = new TemplateFormatter(configuration, retrieverProvider.apply(retriever));
-    }
-
     /**
      * Creates a new preprocessor with the specified context store.
      *
@@ -82,11 +69,8 @@ public class TemplateElement extends SingleElementProcessingStage {
      * @param contextStore The shared context store for pipeline components
      */
     public TemplateElement(ModuleConfiguration configuration, ContextStore contextStore) {
-        this(configuration, Function.identity(), contextStore);
-    }
-
-    public TemplateFormatter getFormatter() {
-        return formatter;
+        super(contextStore);
+        this.elementFormatter = new ElementFormatter(configuration, contextStore);
     }
 
     /**
@@ -97,7 +81,12 @@ public class TemplateElement extends SingleElementProcessingStage {
      */
     @Override
     public List<Element> process(Element element) {
-        elementReference.set(element);
-        return List.of(Element.fromParent(element, formatter.format()));
+        elementFormatter.setValue(element);
+        return List.of(Element.fromParent(element, elementFormatter.format()));
+    }
+
+    @Override
+    public void addRetriever(Function<ReplacementRetriever, ReplacementRetriever> retrieverProvider) {
+        elementFormatter.addRetriever(retrieverProvider);
     }
 }

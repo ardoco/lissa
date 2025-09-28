@@ -1,15 +1,16 @@
-package edu.kit.kastel.sdq.lissa.ratlr.preprocessor.formatter;
+package edu.kit.kastel.sdq.lissa.ratlr.utils.formatter;
 
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringJoiner;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class TextReplacer {
+public class TextFormatter implements ValueFormatter<String> {
 
     /**
      * The string format for the placeholders.
@@ -20,6 +21,7 @@ public class TextReplacer {
      * E.g.: {@code .*\Q<<<\E(.*)\Q>>>\E.*}
      */
     private final Pattern placeholderPattern;
+    private final AtomicReference<String> textReference = new AtomicReference<>();
     private ReplacementRetriever retriever;
 
     /**
@@ -27,24 +29,31 @@ public class TextReplacer {
      * @param configuration
      * @param retriever the retriever to be used to resolve placeholders
      */
-    protected TextReplacer(ModuleConfiguration configuration, ReplacementRetriever retriever) {
+    protected TextFormatter(ModuleConfiguration configuration, ReplacementRetriever retriever) {
         this.placeholderFormat = configuration.argumentAsString("placeholder", "<<<%s>>>");
         this.retriever = retriever;
         this.placeholderPattern = Pattern.compile("(.|\n)*" + createCapturingGroupFromReplaceFormat(this.placeholderFormat) + "(.|\n)*");
     }
-    
+
+    @Override
     public void addRetriever(Function<ReplacementRetriever, ReplacementRetriever> retrieverProvider) {
         retriever = retrieverProvider.apply(retriever);
+    }
+
+    @Override
+    public void setValue(String value) {
+        textReference.set(value);
     }
 
     /**
      * Replaces all placeholders in a text.
      *
-     * @param text the text containing placeholders
      * @return the provided text with all placeholders being replaced
      */
-    protected final String replace(String text) {
+    @Override
+    public String format() {
         Map<String, String> contentByPlaceholder = new HashMap<>();
+        String text = textReference.get();
         String placeholderText = text;
         Matcher placeholderMatcher = this.placeholderPattern.matcher(placeholderText);
         while (placeholderMatcher.matches()) {

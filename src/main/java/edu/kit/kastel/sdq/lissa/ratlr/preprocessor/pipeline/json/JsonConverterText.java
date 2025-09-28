@@ -3,10 +3,10 @@ package edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.json;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
-import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.formatter.ContextReplacementRetriever;
-import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.formatter.ElementReplacementRetriever;
-import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.formatter.JsonReplacementRetriever;
-import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.formatter.ReplacementRetriever;
+import edu.kit.kastel.sdq.lissa.ratlr.utils.formatter.ContextReplacementRetriever;
+import edu.kit.kastel.sdq.lissa.ratlr.utils.formatter.ElementReplacementRetriever;
+import edu.kit.kastel.sdq.lissa.ratlr.utils.formatter.JsonReplacementRetriever;
+import edu.kit.kastel.sdq.lissa.ratlr.utils.formatter.ReplacementRetriever;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.text.TemplateElement;
 
 import java.util.List;
@@ -26,7 +26,7 @@ public class JsonConverterText extends TemplateElement {
      */
     public JsonConverterText(ModuleConfiguration configuration, ContextStore contextStore) {
         super(configuration, contextStore);
-        getFormatter().getReplacer().addRetriever(templateElementRetriever -> new JsonReplacementRetriever(templateElementRetriever, jsonReference));
+        addRetriever(templateElementRetriever -> new JsonReplacementRetriever(templateElementRetriever, jsonReference));
         jsonRetriever = new ContextReplacementRetriever(new ElementReplacementRetriever(null, jsonRetrieverElementReference), contextStore);
         jsonRetrieverKey = configuration.argumentAsString("json_source", "element_content");
     }

@@ -11,7 +11,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.Preprocessor;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.SingleArtifactPreprocessor;
-import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.formatter.ComponentFormatter;
+import edu.kit.kastel.sdq.lissa.ratlr.utils.formatter.ComponentFormatter;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -52,7 +52,7 @@ public class ComponentElementsLoader extends CodeGraphPreprocessor {
 
         List<Element> elements = new ArrayList<>(components.size());
         for (Component component : components) {
-            formatter.setComponent(component);
+            formatter.setValue(component);
             
             Element componentElement = new Element(component.getQualifiedName(), "source code component", formatter.format(), 0, null, true);
             elements.add(componentElement);
