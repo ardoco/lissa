@@ -6,7 +6,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.PipelinePreprocessor;
-import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.codegraph.ComponentElementsLoader;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.codegraph.ComponentElementsLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
