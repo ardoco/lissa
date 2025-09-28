@@ -5,12 +5,13 @@ import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.text.TemplateElement;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class TemplateRequest extends LanguageModelPreprocessor {
+public class TemplateRequest extends LanguageModelRequester {
     
     // TODO consider decorator pattern instead
-    private final TemplateElement replacer;
+    protected final TemplateElement replacer;
     
     /**
      * Creates a new preprocessor with the specified context store.
@@ -24,12 +25,19 @@ public class TemplateRequest extends LanguageModelPreprocessor {
     }
 
     @Override
-    protected String createRequest(Element element) {
-        return this.replacer.process(List.of(element)).getFirst().getContent();
+    protected List<String> createRequests(List<Element> elements) {
+        return this.replacer.process(elements).stream()
+                .map(Element::getContent)
+                .toList();
     }
 
     @Override
-    protected List<Element> createElements(Element element, String response) {
-        return List.of(Element.fromParent(element, response));
+    protected List<Element> createElements(List<Element> elements, List<String> responses) {
+        List<Element> result = new ArrayList<>(elements.size());
+        for (int i = 0; i < elements.size(); i++) {
+            Element element = elements.get(i);
+            result.add(Element.fromParent(element, responses.get(i)));
+        }
+        return result;
     }
 }

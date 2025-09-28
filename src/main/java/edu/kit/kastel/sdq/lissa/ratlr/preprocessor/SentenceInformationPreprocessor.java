@@ -7,7 +7,8 @@ import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
-import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.nl.LanguageModelPreprocessor;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.nl.LanguageModelRequester;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -34,7 +35,7 @@ import java.util.List;
  *     <li>{information} - Additional information regarding the sentence</li>
  * </ul>
  *
- * @see LanguageModelPreprocessor
+ * @see LanguageModelRequester
  */
 public class SentenceInformationPreprocessor extends Preprocessor {
 
@@ -60,7 +61,7 @@ public class SentenceInformationPreprocessor extends Preprocessor {
         return elements;
     }
 
-    private static final class SentenceInformation extends LanguageModelPreprocessor {
+    private static final class SentenceInformation extends LanguageModelRequester {
 
         private final String contentTemplate;
 
@@ -78,12 +79,21 @@ public class SentenceInformationPreprocessor extends Preprocessor {
         }
 
         @Override
-        protected String createRequest(Element element) {
-            return element.getContent();
+        protected List<String> createRequests(List<Element> elements) {
+            return elements.stream().map(Element::getContent).toList();
         }
 
         @Override
-        protected List<Element> createElements(Element element, String response) {
+        protected List<Element> createElements(List<Element> elements, List<String> responses) {
+            List<Element> result = new LinkedList<>();
+            for (int i = 0; i < elements.size(); i++) {
+                result.addAll(createElements(elements.get(i), responses.get(i)));
+            }
+            return result;
+        }
+
+        @NotNull
+        private List<Element> createElements(Element element, String response) {
             String[] sentenceElements = response.split("\n");
             List<Element> elements = new ArrayList<>(sentenceElements.length + 1);
 

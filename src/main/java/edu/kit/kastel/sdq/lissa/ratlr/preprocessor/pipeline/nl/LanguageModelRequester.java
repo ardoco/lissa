@@ -16,7 +16,6 @@ import edu.kit.kastel.sdq.lissa.ratlr.classifier.ChatLanguageModelProvider;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
-import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.Preprocessor;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.PipelineStage;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.Futures;
 
@@ -25,6 +24,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * Abstract preprocessor that enables content generation using a language model.
@@ -44,7 +44,7 @@ import java.util.concurrent.Executors;
  * </ul>
  *
  */
-public abstract class LanguageModelPreprocessor extends PipelineStage {
+public abstract class LanguageModelRequester extends PipelineStage {
     
     /** The provider for chat language models */
     private final ChatLanguageModelProvider provider;
@@ -62,7 +62,7 @@ public abstract class LanguageModelPreprocessor extends PipelineStage {
      * @param moduleConfiguration The module configuration containing template and model settings
      * @param contextStore The shared context store for pipeline components
      */
-    protected LanguageModelPreprocessor(ModuleConfiguration moduleConfiguration, ContextStore contextStore) {
+    protected LanguageModelRequester(ModuleConfiguration moduleConfiguration, ContextStore contextStore) {
         super(contextStore);
         this.provider = new ChatLanguageModelProvider(moduleConfiguration);
         this.threads = ChatLanguageModelProvider.threads(moduleConfiguration);
@@ -75,9 +75,9 @@ public abstract class LanguageModelPreprocessor extends PipelineStage {
     /**
      * Preprocesses a list of elements by generating content with the configured language model.
      * 
-     * The request sent to the model is created by {@link #createRequest(Element)} for each given artifact. 
+     * The requests sent to the model are created by {@link #createRequests(List)} for each given artifact. 
      * 
-     * At the end {@link #createElements(Element, String)} is invoked with the respective artifact and the models response.
+     * At the end {@link #createElements(List, List)} is invoked with the respective artifact and the models response.
      * 
      * This method:
      * <ol>
@@ -103,16 +103,7 @@ public abstract class LanguageModelPreprocessor extends PipelineStage {
     public final List<Element> process(List<Element> elements) {
         List<Element> result = new ArrayList<>();
 
-        List<String> requests = new ArrayList<>();
-
-        for (Element element : elements) {
-            String request = createRequest(element);
-            if (request == null || request.isEmpty()) {
-                logger.error("Request for element {} must not be null or empty", element.getIdentifier());
-                // TODO react properly
-            }
-            requests.add(request);
-        }
+        List<String> requests = createRequests(elements);
 
         ExecutorService executorService =
                 threads > 1 ? Executors.newFixedThreadPool(threads) : Executors.newSingleThreadExecutor();
@@ -124,12 +115,12 @@ public abstract class LanguageModelPreprocessor extends PipelineStage {
 
         try {
             logger.info("Preprocessing {} elements with {} threads", elements.size(), threads);
-            var responses = executorService.invokeAll(tasks);
-            for (int i = 0; i < elements.size(); i++) {
-                Element element = elements.get(i);
-                String response = Futures.getLogged(responses.get(i), logger);
-                result.addAll(createElements(element, response));
+            var futureResponses = executorService.invokeAll(tasks);
+            List<String> responses = new ArrayList<>(futureResponses.size());
+            for (Future<String> futureResponse : futureResponses) {
+                responses.add(Futures.getLogged(futureResponse, logger));
             }
+            result.addAll(createElements(elements, responses));
         } catch (InterruptedException e) {
             logger.error("Preprocessing interrupted", e);
             Thread.currentThread().interrupt();
@@ -179,8 +170,8 @@ public abstract class LanguageModelPreprocessor extends PipelineStage {
         }
     }
 
-    protected abstract String createRequest(Element element);
+    protected abstract List<String> createRequests(List<Element> elements);
 
-    protected abstract List<Element> createElements(Element element, String response);
+    protected abstract List<Element> createElements(List<Element> elements, List<String> responses);
     
 }
