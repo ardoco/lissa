@@ -25,7 +25,7 @@ public class CodeGraph implements Context {
     
     public Collection<Component> getComponents() {
         if (components == null) {
-            components = Components.getComponents(model);
+            components = Components.getComponents(model, artifactMapper);
         }
         return Collections.unmodifiableCollection(components);
     }

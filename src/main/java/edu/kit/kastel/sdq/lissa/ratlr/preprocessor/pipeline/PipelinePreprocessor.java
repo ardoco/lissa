@@ -11,7 +11,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.json.JsonConverterTe
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.json.JsonSplitterArray;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.nl.TemplateRequest;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.nl.TextSplitterListing;
-import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.text.TemplateReplacer;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.text.TemplateElement;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -122,7 +122,7 @@ public class PipelinePreprocessor extends Preprocessor {
                 default -> throw new IllegalArgumentException("Unsupported preprocessor name: " + configuration.name());
             };
             case "template" -> switch (configuration.name()) {
-                case "template_replace" -> new TemplateReplacer(configuration, contextStore);
+                case "template_replace" -> new TemplateElement(configuration, contextStore);
                 case "template_openai" -> new TemplateRequest(configuration, contextStore);
                 default -> throw new IllegalArgumentException("Unsupported preprocessor name: " + configuration.name());
             };

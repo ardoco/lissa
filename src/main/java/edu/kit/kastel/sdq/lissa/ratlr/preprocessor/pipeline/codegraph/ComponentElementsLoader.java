@@ -1,35 +1,42 @@
 package edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.codegraph;
 
 import edu.kit.kastel.sdq.lissa.ratlr.artifactprovider.CodeGraphProvider;
-import edu.kit.kastel.sdq.lissa.ratlr.context.codegraph.component.Component;
+import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.CodeGraph;
-import edu.kit.kastel.sdq.lissa.ratlr.context.ElementRetrieval;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
+import edu.kit.kastel.sdq.lissa.ratlr.context.ElementRetrieval;
+import edu.kit.kastel.sdq.lissa.ratlr.context.codegraph.component.Component;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.Preprocessor;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.SingleArtifactPreprocessor;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.formatter.ComponentReplacementRetriever;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.formatter.TemplateFormatter;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ComponentElementsLoader extends CodeGraphPreprocessor {
 
     private final Preprocessor basePreprocessor;
     private final ElementRetrieval retrieval = new ElementRetrieval();
+    private final AtomicReference<Component> componentReference = new AtomicReference<>();
+    private final TemplateFormatter formatter;
     
     /**
      * Creates a new preprocessor with the specified context store.
      *
      * @param contextStore The shared context store for pipeline components
      */
-    public ComponentElementsLoader(ContextStore contextStore) {
+    public ComponentElementsLoader(ModuleConfiguration configuration, ContextStore contextStore) {
         super(contextStore);
         this.basePreprocessor = new SingleArtifactPreprocessor(contextStore);
         contextStore.createContext(retrieval);
+        formatter = new TemplateFormatter(configuration, new ComponentReplacementRetriever(null, componentReference));
     }
 
     @Override
@@ -41,7 +48,9 @@ public class ComponentElementsLoader extends CodeGraphPreprocessor {
 
         List<Element> elements = new ArrayList<>(components.size());
         for (Component component : components) {
-            Element componentElement = new Element(component.getSimpleName(), "source code component", component.getQualifiedName(), 0, null, true);
+            componentReference.set(component);
+            
+            Element componentElement = new Element(component.getQualifiedName(), "source code component", formatter.format(), 0, null, true);
             elements.add(componentElement);
 
             List<Element> artifactElementsOfComponent = codeGraph.getContainedArtifacts(component).stream()

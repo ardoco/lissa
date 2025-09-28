@@ -7,17 +7,20 @@ import spoon.reflect.reference.CtExecutableReference;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.SortedSet;
 
 public class ComponentAdapter implements Component, TypeContainer {
     
     private final CtPackage rootPackage;
     private final Collection<CtType<?>> containedTypes;
+    private final SortedSet<String> packagePaths;
     private final Collection<CtType<?>> providedInterfaces;
     private final Collection<CtExecutableReference<?>> providedInterfaceMethods;
 
-    public ComponentAdapter(CtPackage rootPackage, Collection<CtType<?>> containedTypes, Map<CtType<?>, Map<CtExecutableReference<?>, Map<CtPackage, Map<CtType<?>, Map<CtExecutableReference<?>, Collection<CtInvocation<?>>>>>>> ctPackages) {
+    public ComponentAdapter(CtPackage rootPackage, Collection<CtType<?>> containedTypes, SortedSet<String> packagePaths, Map<CtType<?>, Map<CtExecutableReference<?>, Map<CtPackage, Map<CtType<?>, Map<CtExecutableReference<?>, Collection<CtInvocation<?>>>>>>> ctPackages) {
         this.rootPackage = rootPackage;
         this.containedTypes = containedTypes;
+        this.packagePaths = packagePaths;
         this.providedInterfaceMethods = null;
         this.providedInterfaces = null;
     }
@@ -39,6 +42,11 @@ public class ComponentAdapter implements Component, TypeContainer {
     @Override
     public String getQualifiedName() {
         return rootPackage.getQualifiedName();
+    }
+
+    @Override
+    public SortedSet<String> getPaths() {
+        return packagePaths;
     }
 
     @Override

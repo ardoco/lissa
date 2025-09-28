@@ -1,20 +1,19 @@
 /* Licensed under MIT 2025. */
 package edu.kit.kastel.sdq.lissa.ratlr.preprocessor;
 
-import static edu.kit.kastel.sdq.lissa.ratlr.classifier.Classifier.CONFIG_NAME_SEPARATOR;
-
-import java.util.List;
-import java.util.Objects;
-
+import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
+import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
+import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
+import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.PipelinePreprocessor;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.codegraph.ComponentElementsLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
-import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
-import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
-import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
+import java.util.List;
+import java.util.Objects;
+
+import static edu.kit.kastel.sdq.lissa.ratlr.classifier.Classifier.CONFIG_NAME_SEPARATOR;
 
 /**
  * Abstract base class for preprocessors that extract elements from artifacts.
@@ -101,7 +100,7 @@ public abstract class Preprocessor {
                 case "code_chunking" -> new CodeChunkingPreprocessor(configuration, contextStore);
                 case "code_method" -> new CodeMethodPreprocessor(configuration, contextStore);
                 case "code_tree" -> new CodeTreePreprocessor(configuration, contextStore);
-                case "code_component" -> new ComponentElementsLoader(contextStore);
+                case "code_component" -> new ComponentElementsLoader(configuration, contextStore);
                 default ->
                         throw new IllegalArgumentException("Unsupported preprocessor name: " + configuration.name());
             };

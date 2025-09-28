@@ -3,14 +3,14 @@ package edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.nl;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
-import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.text.TemplateReplacer;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.text.TemplateElement;
 
 import java.util.List;
 
 public class TemplateRequest extends LanguageModelPreprocessor {
     
     // TODO consider decorator pattern instead
-    private final TemplateReplacer replacer;
+    private final TemplateElement replacer;
     
     /**
      * Creates a new preprocessor with the specified context store.
@@ -20,7 +20,7 @@ public class TemplateRequest extends LanguageModelPreprocessor {
      */
     public TemplateRequest(ModuleConfiguration moduleConfiguration, ContextStore contextStore) {
         super(moduleConfiguration, contextStore);
-        this.replacer = new TemplateReplacer(moduleConfiguration, contextStore);
+        this.replacer = new TemplateElement(moduleConfiguration, contextStore);
     }
 
     @Override

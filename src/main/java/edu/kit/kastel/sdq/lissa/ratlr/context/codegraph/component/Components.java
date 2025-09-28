@@ -1,5 +1,7 @@
 package edu.kit.kastel.sdq.lissa.ratlr.context.codegraph.component;
 
+import edu.kit.kastel.sdq.lissa.ratlr.context.codegraph.ArtifactMapper;
+import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
 import spoon.reflect.CtModel;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.declaration.CtPackage;
@@ -14,6 +16,8 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public final class Components {
     
@@ -26,9 +30,19 @@ public final class Components {
     // TODO SubInheritanceHierarchyFunction, SubtypeFilter
     // TODO SuperInheritanceHierarchyFunction.DistinctTypeListener
 
-    public static Collection<ComponentAdapter> getComponents(CtModel model) {
+    public static Collection<ComponentAdapter> getComponents(CtModel model, ArtifactMapper mapper) {
         // component root packages with contained types
         Map<CtPackage, Collection<CtType<?>>> components = getComponentRootPackages(model);
+
+        Map<CtPackage, SortedSet<String>> packagePaths = new HashMap<>();
+        for (Map.Entry<CtPackage, Collection<CtType<?>>> componentEntry : components.entrySet()) {
+            TreeSet<String> collector = new TreeSet<>();
+            packagePaths.put(componentEntry.getKey(), collector);
+            for (Artifact artifact : mapper.getArtifacts(componentEntry.getValue())) {
+                String path = artifact.getIdentifier().replaceAll("(?<=%s).*$".formatted(componentEntry.getKey().getQualifiedName().replace(".", "/")), "");
+                collector.add(path);
+            }
+        }
 
         // component providing             these interfaces     to these components, which             invoke (require) them
         //     v                                   v                        v                                   v
@@ -36,15 +50,16 @@ public final class Components {
 //                providedInterfaces = getProvidedInterfaces(components, model);
                 providedInterfaces = new HashMap<>();
 
-        return getComponents(components, providedInterfaces);
+        return getComponents(components, packagePaths, providedInterfaces);
     }
 
     private static Collection<ComponentAdapter> getComponents(Map<CtPackage, Collection<CtType<?>>> retriever,
+                                                              Map<CtPackage, SortedSet<String>> packagePaths, 
                                                               Map<CtPackage, Map<CtType<?>, Map<CtExecutableReference<?>, Map<CtPackage, Map<CtType<?>, Map<CtExecutableReference<?>, Collection<CtInvocation<?>>>>>>>> providedInterfaces) {
         Collection<ComponentAdapter> components = new HashSet<>();
         for (Map.Entry<CtPackage, Collection<CtType<?>>> componentEntry : retriever.entrySet()) {
             CtPackage rootPackage = componentEntry.getKey();
-            components.add(new ComponentAdapter(rootPackage, componentEntry.getValue(), providedInterfaces.get(rootPackage)));
+            components.add(new ComponentAdapter(rootPackage, componentEntry.getValue(), packagePaths.get(rootPackage), providedInterfaces.get(rootPackage)));
         }
         return components;
     }

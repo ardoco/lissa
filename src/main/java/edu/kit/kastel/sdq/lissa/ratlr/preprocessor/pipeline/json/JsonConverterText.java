@@ -1,13 +1,10 @@
 package edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.json;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
-import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
-import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.text.TemplateReplacer;
-import edu.kit.kastel.sdq.lissa.ratlr.utils.json.Jsons;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.text.TemplateElement;
 
-public class JsonConverterText extends TemplateReplacer {
+public class JsonConverterText extends TemplateElement {
 
     /**
      * Creates a new preprocessor with the specified context store.
@@ -16,23 +13,5 @@ public class JsonConverterText extends TemplateReplacer {
      */
     public JsonConverterText(ModuleConfiguration configuration, ContextStore contextStore) {
         super(configuration, contextStore);
-    }
-
-    @Override
-    protected String retrieveReplacement(Element element, String placeholderKey) {
-        String replacement = super.retrieveReplacement(element, placeholderKey);
-        if (replacement != null) {
-            return replacement;
-        }
-
-        JsonNode rootNode = Jsons.readTree(element.getContent());
-        if (rootNode.has(placeholderKey)) {
-            JsonNode jsonNode = rootNode.get(placeholderKey);
-            return jsonNode.isTextual()
-                    ? jsonNode.textValue()
-                    : jsonNode.toString();
-        }
-        
-        return null;
     }
 }

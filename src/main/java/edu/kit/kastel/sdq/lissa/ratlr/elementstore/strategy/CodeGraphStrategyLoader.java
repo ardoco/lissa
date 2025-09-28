@@ -4,12 +4,15 @@ import edu.kit.kastel.sdq.lissa.ratlr.context.ElementRetrieval;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class CodeGraphStrategyLoader implements RetrievalStrategy {
 
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final ContextStore contextStore;
     private final RetrievalStrategy cosineSimilarity;
 
@@ -18,7 +21,7 @@ public class CodeGraphStrategyLoader implements RetrievalStrategy {
         if (!contextStore.hasContext(ElementRetrieval.IDENTIFIER)) {
             throw new IllegalStateException("illegal artifact provider, must be 'code'");
         }
-        this.cosineSimilarity = new CosineSimilarity(1);
+        this.cosineSimilarity = new CosineSimilarity(Integer.MAX_VALUE);
     }
     
     @Override
@@ -34,11 +37,14 @@ public class CodeGraphStrategyLoader implements RetrievalStrategy {
      * @return all artifact elements contained in the found component
      */
     public List<Pair<Element, Float>> findSingleComponent(Pair<Element, float[]> query, List<Pair<Element, float[]>> components) {
-        Pair<Element, Float> similarityResult = cosineSimilarity.findSimilarElements(query, components).getFirst();
-        List<Element> elementsToBeRetrieved = contextStore.getContext(ElementRetrieval.IDENTIFIER, ElementRetrieval.class).retrieve(similarityResult.first());
+        List<Pair<Element, Float>> similarityResult = cosineSimilarity.findSimilarElements(query, components);
+        for (Pair<Element, Float> pair : similarityResult) {
+            logger.info("similarity for {} and {}: {}", query.first().getIdentifier(), pair.first().getIdentifier(), pair.second());
+        }
+        List<Element> elementsToBeRetrieved = contextStore.getContext(ElementRetrieval.IDENTIFIER, ElementRetrieval.class).retrieve(similarityResult.getFirst().first());
         List<Pair<Element, Float>> retrievedElements = new ArrayList<>(elementsToBeRetrieved.size());
         for (Element element : elementsToBeRetrieved) {
-            retrievedElements.add(new Pair<>(element, similarityResult.second()));
+            retrievedElements.add(new Pair<>(element, similarityResult.getFirst().second()));
         }
         return retrievedElements;
     }
