@@ -5,6 +5,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringJoiner;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,7 +20,7 @@ public class TextReplacer {
      * E.g.: {@code .*\Q<<<\E(.*)\Q>>>\E.*}
      */
     private final Pattern placeholderPattern;
-    private final ReplacementRetriever retriever;
+    private ReplacementRetriever retriever;
 
     /**
      * 
@@ -30,6 +31,10 @@ public class TextReplacer {
         this.placeholderFormat = configuration.argumentAsString("placeholder", "<<<%s>>>");
         this.retriever = retriever;
         this.placeholderPattern = Pattern.compile("(.|\n)*" + createCapturingGroupFromReplaceFormat(this.placeholderFormat) + "(.|\n)*");
+    }
+    
+    public void addRetriever(Function<ReplacementRetriever, ReplacementRetriever> retrieverProvider) {
+        retriever = retrieverProvider.apply(retriever);
     }
 
     /**

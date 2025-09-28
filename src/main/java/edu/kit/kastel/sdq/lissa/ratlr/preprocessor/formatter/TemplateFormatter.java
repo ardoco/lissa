@@ -14,7 +14,11 @@ public class TemplateFormatter {
         this.template = configuration.argumentAsString("template");
         this.replacer = new TextReplacer(configuration, retriever);
     }
-    
+
+    public TextReplacer getReplacer() {
+        return replacer;
+    }
+
     public String format() {
         return replacer.replace(template);
     }

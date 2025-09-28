@@ -13,6 +13,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.SingleElementProcess
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 /**
  * A preprocessor that uses a template string with variable placeholders to generate diverse content.
@@ -68,10 +69,10 @@ public class TemplateElement extends SingleElementProcessingStage {
      * @param configuration The module configuration containing the placeholder format and template
      * @param contextStore The shared context store for pipeline components
      */
-    public TemplateElement(ModuleConfiguration configuration, ReplacementRetriever retriever, ContextStore contextStore) {
+    public TemplateElement(ModuleConfiguration configuration, Function<ReplacementRetriever, ReplacementRetriever> retrieverProvider, ContextStore contextStore) {
         super(contextStore);
-        ReplacementRetriever format = new ContextReplacementRetriever(new ElementReplacementRetriever(retriever, elementReference), contextStore);
-        this.formatter = new TemplateFormatter(configuration, format);
+        ReplacementRetriever retriever = new ContextReplacementRetriever(new ElementReplacementRetriever(null, elementReference), contextStore);
+        this.formatter = new TemplateFormatter(configuration, retrieverProvider.apply(retriever));
     }
 
     /**
@@ -81,7 +82,11 @@ public class TemplateElement extends SingleElementProcessingStage {
      * @param contextStore The shared context store for pipeline components
      */
     public TemplateElement(ModuleConfiguration configuration, ContextStore contextStore) {
-        this(configuration, null, contextStore);
+        this(configuration, Function.identity(), contextStore);
+    }
+
+    public TemplateFormatter getFormatter() {
+        return formatter;
     }
 
     /**
