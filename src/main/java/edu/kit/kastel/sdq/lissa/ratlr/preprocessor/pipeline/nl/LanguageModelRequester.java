@@ -54,8 +54,9 @@ public abstract class LanguageModelRequester extends PipelineStage {
     private final Cache cache;
     private final String systemMessage;
     private final String jsonSchema;
+    private final String jsonSchemaName;
     private final ChatModel llmInstance;
-    
+
     /**
      * Creates a new preprocessor with the specified context store.
      *
@@ -69,7 +70,12 @@ public abstract class LanguageModelRequester extends PipelineStage {
         this.cache = CacheManager.getDefaultInstance().getCache(this, provider.getCacheParameters());
         this.systemMessage = moduleConfiguration.argumentAsString("system_message", "");
         this.jsonSchema = moduleConfiguration.argumentAsString("json_schema", "");
+        this.jsonSchemaName = moduleConfiguration.argumentAsString("json_schema_name", "");
         this.llmInstance = provider.createChatModel();
+        
+        if (!jsonSchema.isEmpty() && jsonSchemaName.isEmpty()) {
+            throw new IllegalArgumentException("when using 'json_schema' then argument 'json_schema_name' must be set and not empty");
+        }
     }
 
     /**
@@ -160,7 +166,7 @@ public abstract class LanguageModelRequester extends PipelineStage {
             if (!jsonSchema.isEmpty()) {
                 JsonRawSchema rawSchema = JsonRawSchema.from(jsonSchema);
                 requestBuilder.responseFormat(ResponseFormat.builder().type(ResponseFormatType.JSON)
-                        .jsonSchema(JsonSchema.builder().rootElement(rawSchema).build())
+                        .jsonSchema(JsonSchema.builder().name(jsonSchemaName).rootElement(rawSchema).build())
                         .build());
             }
             ChatModel chatModel = threads > 1 ? provider.createChatModel() : llmInstance;
