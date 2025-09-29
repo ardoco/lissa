@@ -4,14 +4,12 @@ import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.context.StringContext;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
-import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.text.TemplateElement;
-import edu.kit.kastel.sdq.lissa.ratlr.utils.formatter.ElementReplacementRetriever;
-import edu.kit.kastel.sdq.lissa.ratlr.utils.formatter.TemplateFormatter;
+import edu.kit.kastel.sdq.lissa.ratlr.utils.formatter.ElementFormatter;
+import edu.kit.kastel.sdq.lissa.ratlr.utils.formatter.ValueFormatter;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * A preprocessor that writes context into the context store.
@@ -31,11 +29,9 @@ import java.util.concurrent.atomic.AtomicReference;
  *     </li>
  * </ul>
  */
-public class ContextWriter extends TemplateElement {
+public class ContextWriter extends SingleElementProcessingStage {
     
-    private final Map<String, String> contextIdentifiersToStore = new HashMap<>();
-    private final AtomicReference<Element> elementReference = new AtomicReference<>();
-    private final TemplateFormatter formatter;
+    private final Map<String, ValueFormatter<Element>> formatterByContextKey = new HashMap<>();
     
     /**
      * Creates a new preprocessor with the specified context store.
@@ -43,20 +39,19 @@ public class ContextWriter extends TemplateElement {
      * @param contextStore The shared context store for pipeline components
      */
     protected ContextWriter(ModuleConfiguration configuration, ContextStore contextStore) {
-        super(configuration, contextStore);
-        this.formatter = new TemplateFormatter(configuration, new ElementReplacementRetriever(null, elementReference));
+        super(contextStore);
         for (String argumentKey : configuration.argumentKeys()) {
             if (!configuration.retrievedArgumentKeys().contains(argumentKey)) {
-                this.contextIdentifiersToStore.put(argumentKey, configuration.argumentAsString(argumentKey));
+                this.formatterByContextKey.put(argumentKey, new ElementFormatter(configuration, contextStore, argumentKey));
             }
         }
     }
 
     @Override
     public List<Element> process(Element element) {
-        elementReference.set(element);
-        for (Map.Entry<String, String> toStoreEntry : this.contextIdentifiersToStore.entrySet()) {
-            contextStore.createContext(new StringContext(toStoreEntry.getKey(), formatter.format()));
+        for (Map.Entry<String, ValueFormatter<Element>> toStoreEntry : this.formatterByContextKey.entrySet()) {
+            toStoreEntry.getValue().setValue(element);
+            contextStore.createContext(new StringContext(toStoreEntry.getKey(), toStoreEntry.getValue().format()));
         }
         
         element.setCompare(true);
