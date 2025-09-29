@@ -45,7 +45,7 @@ import static edu.kit.kastel.sdq.lissa.ratlr.classifier.Classifier.CONFIG_NAME_S
 public class PipelinePreprocessor extends Preprocessor {
     
     private final Preprocessor artifactPreprocessor;
-    private final List<Pipelineable> preprocessors;
+    private final List<Pipelineable> stages;
     
     public PipelinePreprocessor(List<ModuleConfiguration> configurations, ContextStore contextStore) {
         super(contextStore);
@@ -55,14 +55,18 @@ public class PipelinePreprocessor extends Preprocessor {
         }
         Queue<ModuleConfiguration> queuedConfigurations = new LinkedList<>(configurations);
         this.artifactPreprocessor = retrieveArtifactPreprocessor(queuedConfigurations, contextStore);
-        this.preprocessors = retrievePreprocessors(queuedConfigurations, contextStore);
+        this.stages = retrievePreprocessors(queuedConfigurations, contextStore);
     }
 
     @Override
     public final List<Element> preprocess(List<Artifact> artifacts) {
         Collection<Element> elements = new LinkedHashSet<>(this.artifactPreprocessor.preprocess(artifacts));
+        for (Element element : elements) {
+            element.setCompare(false);
+        }
+        
         List<Element> toCompare = new ArrayList<>(elements);
-        List<Pipelineable> pipelinedPreprocessors = this.preprocessors;
+        List<Pipelineable> pipelinedPreprocessors = this.stages;
         for (int i = 0; i < pipelinedPreprocessors.size(); i++) {
             Pipelineable preprocessor = pipelinedPreprocessors.get(i);
             List<Element> newElements = preprocessor.process(toCompare);
