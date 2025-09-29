@@ -7,6 +7,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.Preprocessor;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.SentencePreprocessor;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.SingleArtifactPreprocessor;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.codegraph.ComponentCreator;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.json.JsonConverterText;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.json.JsonSplitterArray;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.nl.TemplateRequest;
@@ -68,6 +69,10 @@ public class PipelinePreprocessor extends Preprocessor {
         List<Element> toCompare = new ArrayList<>(elements);
         List<Pipelineable> pipelinedPreprocessors = this.stages;
         for (int i = 0; i < pipelinedPreprocessors.size(); i++) {
+            if (toCompare.isEmpty()) {
+                logger.warn("stage {} returned no elements to compare, aborting pipeline", i);
+                break;
+            }
             Pipelineable preprocessor = pipelinedPreprocessors.get(i);
             List<Element> newElements = preprocessor.process(toCompare);
             
@@ -117,6 +122,10 @@ public class PipelinePreprocessor extends Preprocessor {
      */
     private static Pipelineable createStage(ModuleConfiguration configuration, ContextStore contextStore) {
         return switch (configuration.name().split(CONFIG_NAME_SEPARATOR)[0]) {
+            case "code" -> switch (configuration.name()) {
+                case "code_component_creator" -> new ComponentCreator(contextStore);
+                default -> throw new IllegalArgumentException("Unsupported pipeline stage name: " + configuration.name());
+            };
             case "regex" -> switch (configuration.name()) {
                 case "regex_replacer" -> new RegexReplacer(configuration, contextStore);
                 default -> throw new IllegalArgumentException("Unsupported pipeline stage name: " + configuration.name());
