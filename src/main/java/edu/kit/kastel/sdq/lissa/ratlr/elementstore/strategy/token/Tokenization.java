@@ -13,6 +13,12 @@ import java.util.List;
 public enum Tokenization {
 
     UNDER_CAMEL(Tokenization::tokenizeUnderCamel),
+
+    /**
+     * The character CHAR tokenization.
+     */
+    CHAR(Tokenization::tokenizeChar),
+    
     /**
      * The word WORD tokenization.
      */
@@ -36,6 +42,14 @@ public enum Tokenization {
      */
     public String[] tokenize(String input) {
         return this.tokenizer.tokenize(input);
+    }
+
+    private static String[] tokenizeChar(String input) {
+        String[] tokens = new String[input.length()];
+        for (int i = 0; i < input.length(); i++) {
+            tokens[i] = String.valueOf(input.charAt(i));
+        }
+        return tokens;
     }
 
     private static String[] tokenizeWord(String input) {
