@@ -18,6 +18,8 @@ import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.PipelineStage;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.Futures;
+import edu.kit.kastel.sdq.lissa.ratlr.utils.formatter.ContextReplacementRetriever;
+import edu.kit.kastel.sdq.lissa.ratlr.utils.formatter.TemplateFormatter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +54,7 @@ public abstract class LanguageModelRequester extends PipelineStage {
     private final int threads;
     /** Cache for storing and retrieving summaries */
     private final Cache cache;
-    private final String systemMessage;
+    private final TemplateFormatter systemMessageFormatter;
     private final String jsonSchema;
     private final String jsonSchemaName;
     private final ChatModel llmInstance;
@@ -68,7 +70,11 @@ public abstract class LanguageModelRequester extends PipelineStage {
         this.provider = new ChatLanguageModelProvider(moduleConfiguration);
         this.threads = ChatLanguageModelProvider.threads(moduleConfiguration);
         this.cache = CacheManager.getDefaultInstance().getCache(this, provider.getCacheParameters());
-        this.systemMessage = moduleConfiguration.argumentAsString("system_message", "");
+        if (!moduleConfiguration.argumentAsString("system_message", "").isEmpty()) {
+            this.systemMessageFormatter = new TemplateFormatter(moduleConfiguration, new ContextReplacementRetriever(null, contextStore), "system_message");
+        } else {
+            this.systemMessageFormatter = null;
+        }
         this.jsonSchema = moduleConfiguration.argumentAsString("json_schema", "");
         this.jsonSchemaName = moduleConfiguration.argumentAsString("json_schema_name", "");
         this.llmInstance = provider.createChatModel();
@@ -150,8 +156,8 @@ public abstract class LanguageModelRequester extends PipelineStage {
         public String call() {
             
             List<ChatMessage> messages = new ArrayList<>();
-            if (!systemMessage.isEmpty()) {
-                messages.add(new SystemMessage(systemMessage));
+            if (systemMessageFormatter != null) {
+                messages.add(new SystemMessage(systemMessageFormatter.format()));
             }
             messages.add(new UserMessage(request));
             CacheKey cacheKey = CacheKey.of(
