@@ -4,19 +4,28 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
 
 import java.util.SortedSet;
 
-public interface Component extends Comparable<Component> {
+public abstract class Component implements Comparable<Component> {
     
-    String getSimpleName();
+    public abstract String getSimpleName();
 
-    String getQualifiedName();
+    public abstract String getQualifiedName();
 
-    SortedSet<Artifact> getContainedArtifacts();
+    public abstract SortedSet<Artifact> getContainedArtifacts();
 
-    SortedSet<String> getPaths();
+    public abstract SortedSet<String> getPaths();
     
     @Override
-    default int compareTo(Component o) {
+    public int compareTo(Component o) {
         return getQualifiedName().compareTo(o.getQualifiedName());
     }
-    
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj != null && obj.getClass() == getClass() && compareTo((Component) obj) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return getQualifiedName().hashCode();
+    }
 }

@@ -4,7 +4,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
 
 import java.util.SortedSet;
 
-public class SimpleComponent implements Component {
+public class SimpleComponent extends Component {
     
     private final String simpleName;
     private final String qualifiedName;

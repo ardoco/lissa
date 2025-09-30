@@ -3,6 +3,8 @@ package edu.kit.kastel.sdq.lissa.ratlr.context.codegraph.component;
 import edu.kit.kastel.sdq.lissa.ratlr.context.codegraph.ArtifactMapper;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Knowledge;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import spoon.reflect.CtModel;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.declaration.CtPackage;
@@ -27,6 +29,8 @@ import java.util.TreeSet;
 import java.util.stream.Stream;
 
 public final class Components {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(Components.class);
     
     private Components() {
         // utility class
@@ -62,6 +66,9 @@ public final class Components {
         Collection<Component> components = new TreeSet<>();
         for (Map.Entry<Path, SortedSet<Artifact>> componentEntry : componentMapping.entrySet()) {
             Path rootPath = codeRoot.relativize(componentEntry.getKey());
+            if (rootPath.toString().isEmpty() || componentEntry.getValue().isEmpty()) {
+                continue;
+            }
             SortedSet<String> paths = new TreeSet<>();
             String normalizedPath = rootPath.toString().replace("\\", "/");
             paths.add(normalizedPath);
@@ -78,8 +85,16 @@ public final class Components {
         for (Map.Entry<CtPackage, Collection<CtType<?>>> componentEntry : components.entrySet()) {
             TreeSet<String> collector = new TreeSet<>();
             packagePaths.put(componentEntry.getKey(), collector);
-            for (Artifact artifact : mapper.getArtifacts(componentEntry.getValue())) {
+            Collection<Artifact> artifacts = mapper.getArtifacts(componentEntry.getValue());
+            if (artifacts.isEmpty()) {
+                LOGGER.warn("no mapped artifacts found for component '{}' with types: {}", componentEntry.getKey().getQualifiedName(), 
+                        componentEntry.getValue().stream().map(CtType::getQualifiedName).toList());
+            }
+            for (Artifact artifact : artifacts) {
                 String path = artifact.getIdentifier().replaceAll("(?<=%s).*$".formatted(componentEntry.getKey().getQualifiedName().replace(".", "/")), "");
+                if (path.isBlank()) {
+                    LOGGER.warn("blank relative path for '{}' and '{}'", artifact.getIdentifier(), componentEntry.getKey().getQualifiedName());
+                }
                 collector.add(path);
             }
         }
@@ -164,27 +179,34 @@ public final class Components {
         @Override
         public void visitCtPackage(CtPackage ctPackage) {
             if (!ctPackage.getTypes().isEmpty()) {
-                collect(ctPackage);
+                packagePaths.put(ctPackage, collect(ctPackage));
             } else if (ctPackage.getPackages().size() != 1) {
+                Map<CtPackage, Collection<CtType<?>>> subPackageCollector = new HashMap<>();
                 for (CtPackage subPackage : ctPackage.getPackages()) {
-                    collect(subPackage);
+                    subPackageCollector.put(subPackage, collect(subPackage));
                 }
-            } else {
-                for (CtPackage subPackage : ctPackage.getPackages()) {
-                    subPackage.accept(this);
+                if (subPackageCollector.values().stream()
+                        .filter(types -> !types.isEmpty())
+                        .count() > 1) {
+                    packagePaths.putAll(subPackageCollector);
+                    return;
                 }
+            }
+            
+            for (CtPackage subPackage : ctPackage.getPackages()) {
+                subPackage.accept(this);
             }
         }
 
-        private void collect(CtPackage ctPackage) {
-            packagePaths.putIfAbsent(ctPackage, new HashSet<>());
-            packagePaths.get(ctPackage).addAll(ctPackage.getTypes());
+        private Collection<CtType<?>> collect(CtPackage ctPackage) {
+            List<CtType<?>> collector = new LinkedList<>(ctPackage.getTypes());
             Queue<CtPackage> toVisit = new LinkedList<>(ctPackage.getPackages());
             while (!toVisit.isEmpty()) {
                 CtPackage subPackage = toVisit.poll();
-                packagePaths.get(ctPackage).addAll(subPackage.getTypes());
+                collector.addAll(subPackage.getTypes());
                 toVisit.addAll(subPackage.getPackages());
             }
+            return collector;
         }
     }
     

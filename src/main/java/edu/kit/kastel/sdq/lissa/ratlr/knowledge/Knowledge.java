@@ -64,6 +64,9 @@ public abstract sealed class Knowledge permits Artifact, Element {
     protected Knowledge(String identifier, String type, String content) {
         this.identifier = identifier;
         this.type = type;
+        if (content == null || content.isEmpty()) {
+            throw new IllegalArgumentException("content must not be null or empty");
+        }
         this.content = content;
         this.normalizedContent = content.replace("\r\n", "\n");
     }

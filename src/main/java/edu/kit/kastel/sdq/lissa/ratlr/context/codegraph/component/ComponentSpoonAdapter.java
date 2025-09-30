@@ -11,7 +11,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.SortedSet;
 
-public class ComponentSpoonAdapter implements Component, TypeContainer {
+public class ComponentSpoonAdapter extends Component implements TypeContainer {
     
     private final CtPackage rootPackage;
     private final Collection<CtType<?>> containedTypes;
@@ -59,15 +59,7 @@ public class ComponentSpoonAdapter implements Component, TypeContainer {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-
-        ComponentSpoonAdapter component = (ComponentSpoonAdapter) o;
-        return rootPackage.equals(component.rootPackage);
-    }
-
-    @Override
-    public int hashCode() {
-        return rootPackage.hashCode();
+    public String toString() {
+        return getQualifiedName();
     }
 }
