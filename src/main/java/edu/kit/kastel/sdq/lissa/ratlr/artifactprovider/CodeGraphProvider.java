@@ -78,6 +78,7 @@ public class CodeGraphProvider extends PathedProvider {
         SpoonAPI launcher = new Launcher();
         launcher.addInputResource(resourcePath.toString());
         launcher.getEnvironment().setIgnoreSyntaxErrors(true); // needed for wrongly handled package-info
+        launcher.getEnvironment().setIgnoreDuplicateDeclarations(true);
         try {
             CtModel model = launcher.buildModel();
             if (!model.getAllTypes().isEmpty()) {
