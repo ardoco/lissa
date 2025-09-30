@@ -1,5 +1,6 @@
 package edu.kit.kastel.sdq.lissa.ratlr.elementstore.strategy;
 
+import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ElementRetrieval;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
@@ -8,7 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CodeGraphStrategyLoader implements RetrievalStrategy {
 
@@ -16,12 +19,18 @@ public class CodeGraphStrategyLoader implements RetrievalStrategy {
     private final ContextStore contextStore;
     private final RetrievalStrategy cosineSimilarity;
 
-    public CodeGraphStrategyLoader(ContextStore contextStore) {
+    public CodeGraphStrategyLoader(ModuleConfiguration configuration, ContextStore contextStore) {
         this.contextStore = contextStore;
         if (!contextStore.hasContext(ElementRetrieval.IDENTIFIER)) {
             throw new IllegalStateException("illegal artifact provider, must be 'code'");
         }
-        this.cosineSimilarity = new CosineSimilarity(Integer.MAX_VALUE);
+        Map<String, String> baseSimilarityArguments = new HashMap<>();
+        for (String argumentKey : configuration.argumentKeys()) {
+            if (!argumentKey.equals("name")) {
+                baseSimilarityArguments.put(argumentKey, configuration.argumentAsString(argumentKey));
+            }
+        }
+        this.cosineSimilarity = RetrievalStrategy.createStrategy(new ModuleConfiguration(configuration.argumentAsString("name"), baseSimilarityArguments), contextStore);
     }
     
     @Override
@@ -42,6 +51,10 @@ public class CodeGraphStrategyLoader implements RetrievalStrategy {
             logger.info("similarity for {} and {}: {}", query.first().getIdentifier(), pair.first().getIdentifier(), pair.second());
         }
         List<Element> elementsToBeRetrieved = contextStore.getContext(ElementRetrieval.IDENTIFIER, ElementRetrieval.class).retrieve(similarityResult.getFirst().first());
+        if (elementsToBeRetrieved == null) {
+            return List.of();
+        }
+        
         List<Pair<Element, Float>> retrievedElements = new ArrayList<>(elementsToBeRetrieved.size());
         for (Element element : elementsToBeRetrieved) {
             retrievedElements.add(new Pair<>(element, similarityResult.getFirst().second()));
