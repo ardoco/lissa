@@ -191,6 +191,7 @@ abstract class CachedEmbeddingCreator extends EmbeddingCreator {
             } catch (Exception e) {
                 STATIC_LOGGER.error(
                         "Error while calculating embedding for .. try to fix ..: {}", element.getIdentifier());
+                STATIC_LOGGER.error(e.toString());
                 // Probably the length was too long .. check that
                 return tryToFixWithLength(embeddingModel, cache, rawNameOfModel, cacheKey, element.getContent());
             }
