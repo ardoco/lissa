@@ -65,7 +65,7 @@ To get started with LiSSA, follow these steps:
 ### Configuration
 
 1. Create a configuration you want to use for evaluation / execution. E.g., you can find configurations [here](https://github.com/ArDoCo/ReplicationPackage-ICSE25_LiSSA-Toward-Generic-Traceability-Link-Recovery-through-RAG/tree/main/LiSSA-RATLR-V2/lissa/configs/req2code-significance). You can also provide a directory containing multiple configurations.
-2. Configure your OpenAI API key and organization in a `.env` file. You can use the provided template file as a template [env-template](env-template).
+2. Configure your API keys for the language model platforms you plan to use as environment variables. See the [configuration documentation](docs/configuration.md#supported-platforms-and-environment-variables) for details on supported platforms (OpenAI, Open WebUI, Ollama, Blablador, DeepSeek) and their required environment variables.
 3. LiSSA caches requests in order to be reproducible. The cache is located in the cache folder that can be specified in the configuration.
 4. Run `java -jar target/ratlr-*-jar-with-dependencies.jar eval -c configs/....` to run the evaluation. You can provide a JSON or a directory containing JSON configurations.
 5. The results will be printed to the console and saved to a file in the current directory. The name is also printed to the console.

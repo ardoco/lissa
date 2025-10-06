@@ -28,7 +28,7 @@ import dev.langchain4j.model.openai.OpenAiChatModel;
  *   </li>
  *   <li>Ollama:
  *     <ul>
- *       <li>{@code OLLAMA_HOST}: The host URL for the Ollama server (optional)</li>
+ *       <li>{@code OLLAMA_HOST}: The host URL for the Ollama server</li>
  *       <li>{@code OLLAMA_USER}: Username for Ollama authentication (optional)</li>
  *       <li>{@code OLLAMA_PASSWORD}: Password for Ollama authentication (optional)</li>
  *     </ul>
@@ -36,6 +36,17 @@ import dev.langchain4j.model.openai.OpenAiChatModel;
  *   <li>Blablador:
  *     <ul>
  *       <li>{@code BLABLADOR_API_KEY}: Your Blablador API key</li>
+ *     </ul>
+ *   </li>
+ *   <li>DeepSeek:
+ *   <ul>
+ *       <li>{@code DEEPSEEK_API_KEY}: Your DeepSeek API key</li>
+ *     </ul>
+ *   </li>
+ *   <li>Open WebUI:
+ *   <ul>
+ *       <li>{@code OPENWEBUI_URL}: The URL for the Open WebUI server</li>
+ *       <li>{@code OPENWEBUI_API_KEY}: Your Open WebUI API key</li>
  *     </ul>
  *   </li>
  * </ul>
@@ -96,6 +107,7 @@ public class ChatLanguageModelProvider {
             case OLLAMA -> createOllamaChatModel(modelName, seed, temperature);
             case BLABLADOR -> createBlabladorChatModel(modelName, seed, temperature);
             case DEEPSEEK -> createDeepSeekChatModel(modelName, seed, temperature);
+            case OPENWEBUI -> createOpenWebUIChatModel(modelName, seed, temperature);
         };
     }
 
@@ -164,6 +176,10 @@ public class ChatLanguageModelProvider {
         String host = Environment.getenv("OLLAMA_HOST");
         String user = Environment.getenv("OLLAMA_USER");
         String password = Environment.getenv("OLLAMA_PASSWORD");
+
+        if (host == null) {
+            throw new IllegalStateException("OLLAMA_HOST environment variable not set");
+        }
 
         var ollama = OllamaChatModel.builder()
                 .baseUrl(host)
@@ -249,6 +265,32 @@ public class ChatLanguageModelProvider {
                 .baseUrl("https://api.deepseek.com/v1")
                 .modelName(model)
                 .apiKey(deepseekApiKey)
+                .temperature(temperature)
+                .seed(seed)
+                .build();
+    }
+
+    /**
+     * Creates an Open WebUI chat model instance.
+     * Requires Open WebUI API key and url to be set in environment variables.
+     *
+     * @param model The name of the model to use
+     * @param seed The seed value for randomization
+     * @param temperature The temperature setting for the model
+     * @return A configured Open WebUI chat model instance
+     * @throws IllegalStateException If required environment variables are not set
+     */
+    private ChatModel createOpenWebUIChatModel(String model, int seed, double temperature) {
+        String openwebuiUrl = Environment.getenv("OPENWEBUI_URL");
+        String openwebuiApiKey = Environment.getenv("OPENWEBUI_API_KEY");
+        if (openwebuiUrl == null || openwebuiApiKey == null) {
+            throw new IllegalStateException("OPENWEBUI_URL or OPENWEBUI_API_KEY environment variable not set");
+        }
+
+        return new OpenAiChatModel.OpenAiChatModelBuilder()
+                .baseUrl(openwebuiUrl)
+                .modelName(model)
+                .apiKey(openwebuiApiKey)
                 .temperature(temperature)
                 .seed(seed)
                 .build();

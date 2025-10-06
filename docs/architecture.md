@@ -28,6 +28,7 @@ The project follows a modular architecture with the following main components:
    - Implementations:
      - [`OpenAiEmbeddingCreator`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/embeddingcreator/OpenAiEmbeddingCreator.java): Uses OpenAI's embedding models to create vector representations of text, supporting various models like text-embedding-3-large.
      - [`OllamaEmbeddingCreator`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/embeddingcreator/OllamaEmbeddingCreator.java): Integrates with Ollama's local embedding models, providing an alternative to cloud-based solutions.
+     - [`OpenWebUiEmbeddingCreator`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/embeddingcreator/OpenWebUiEmbeddingCreator.java): Integrates with Open WebUI servers for embedding generation, supporting local deployment with OpenAI-compatible APIs.
      - [`OnnxEmbeddingCreator`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/embeddingcreator/OnnxEmbeddingCreator.java): Uses ONNX models for local embedding generation, offering high performance and offline capabilities.
      - [`MockEmbeddingCreator`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/embeddingcreator/MockEmbeddingCreator.java): Provides zero vectors for testing purposes, useful for development and testing scenarios.
      - All extend [`CachedEmbeddingCreator`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/embeddingcreator/CachedEmbeddingCreator.java) for caching support, improving performance by storing and reusing embeddings.

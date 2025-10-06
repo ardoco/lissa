@@ -14,6 +14,7 @@ Configuration options in LiSSA are defined in the code through several mechanism
    - [`TextArtifactProvider`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/artifactprovider/TextArtifactProvider.java) defines options for text-based artifact loading
    - [`CodeTreePreprocessor`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/preprocessor/CodeTreePreprocessor.java) defines options for code tree processing
    - [`OpenAiEmbeddingCreator`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/embeddingcreator/OpenAiEmbeddingCreator.java) defines options for OpenAI embedding generation
+   - [`OpenWebUiEmbeddingCreator`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/embeddingcreator/OpenWebUiEmbeddingCreator.java) defines options for Open WebUI embedding generation
 2. **Configuration Classes**: The [`Configuration`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/configuration/Configuration.java) class serves as the central configuration container, defining the structure of the configuration file.
 3. **Example Configurations**: You can find example configurations in the `example-configs` directory, which demonstrate different configuration setups for various use cases.
 4. **Configuration Template**: The `config-template.json` file provides a template with all available configuration options and their default values.
@@ -76,13 +77,13 @@ Use the `classifier` field to configure a single classifier.
 ```json
 {
   "embedding_creator": {
-    "name": "openai",
+    "name": "openai",  // or "ollama", "openwebui", "onnx", "mock"
     "args": {
       "model": "text-embedding-3-large"
     }
   },
   "classifier": {
-    "name": "reasoning_openai",  // or "simple_openai", "mock"
+    "name": "reasoning_openai",  // or "simple_openai", "reasoning_ollama", "simple_ollama", "reasoning_openwebui", "simple_openwebui", "reasoning_blablador", "simple_blablador", "reasoning_deepseek", "simple_deepseek", "mock"
     "args": {
       "model": "gpt-4o-mini-2024-07-18",
       ...  // Other classifier-specific arguments
@@ -100,7 +101,7 @@ Each inner list represents a stage in the pipeline. Classifiers within the same 
 ```json
 {
   "embedding_creator": {
-    "name": "openai",
+    "name": "openai",  // or "ollama", "openwebui", "onnx", "mock"
     "args": {
       "model": "text-embedding-3-large"
     }
@@ -132,6 +133,65 @@ Each inner list represents a stage in the pipeline. Classifiers within the same 
       }
     ]
   ]
+}
+```
+
+## Supported Platforms and Environment Variables
+
+LiSSA supports multiple platforms for embedding creation and language model classification. Each platform requires specific environment variables to be configured:
+
+### Embedding Creators
+
+- **openai**: OpenAI's embedding models
+  - `OPENAI_ORGANIZATION_ID`: Your OpenAI organization ID
+  - `OPENAI_API_KEY`: Your OpenAI API key
+- **ollama**: Local Ollama embedding models
+  - `OLLAMA_EMBEDDING_HOST`: The host URL for the Ollama server (required)
+  - `OLLAMA_EMBEDDING_USER`: Username for authentication (optional)
+  - `OLLAMA_EMBEDDING_PASSWORD`: Password for authentication (optional)
+- **openwebui**: Open WebUI embedding models
+  - `OPENWEBUI_URL`: The URL of the Open WebUI server
+  - `OPENWEBUI_API_KEY`: Your Open WebUI API key
+- **onnx**: Local ONNX models (no environment variables required)
+- **mock**: Mock embedding creator for testing (no environment variables required)
+
+### Chat Language Models
+
+Chat language models are configured by prefixing the classifier name with the platform. For example, `simple_openai`, `reasoning_ollama`, `simple_openwebui`, etc.
+
+- **OpenAI** (`*_openai`): Uses OpenAI's chat models
+  - `OPENAI_ORGANIZATION_ID`: Your OpenAI organization ID
+  - `OPENAI_API_KEY`: Your OpenAI API key
+- **Ollama** (`*_ollama`): Uses local Ollama chat models
+  - `OLLAMA_HOST`: The host URL for the Ollama server (required)
+  - `OLLAMA_USER`: Username for authentication (optional)
+  - `OLLAMA_PASSWORD`: Password for authentication (optional)
+- **Open WebUI** (`*_openwebui`): Uses Open WebUI chat models
+  - `OPENWEBUI_URL`: The URL of the Open WebUI server
+  - `OPENWEBUI_API_KEY`: Your Open WebUI API key
+- **Blablador** (`*_blablador`): Uses Blablador's chat models
+  - `BLABLADOR_API_KEY`: Your Blablador API key
+- **DeepSeek** (`*_deepseek`): Uses DeepSeek's chat models
+  - `DEEPSEEK_API_KEY`: Your DeepSeek API key
+
+### Example Configuration with Open WebUI
+
+```json
+{
+  "embedding_creator": {
+    "name": "openwebui",
+    "args": {
+      "model": "nomic-embed-text:v1.5"
+    }
+  },
+  "classifier": {
+    "name": "simple_openwebui",
+    "args": {
+      "model": "llama3:8b",
+      "seed": 133742243,
+      "temperature": 0.0
+    }
+  }
 }
 ```
 
