@@ -16,7 +16,7 @@ import dev.langchain4j.model.openai.OpenAiEmbeddingModel;
  * Required environment variables:
  * <ul>
  *     <li>{@code OPENWEBUI_URL}: The URL of the Open WebUI server</li>
- *     <li>{@code OPENWEBUI_API_KEY}: (Optional) Username for authentication</li>
+ *     <li>{@code OPENWEBUI_API_KEY}: API key for authentication</li>
  * </ul>
  *
  * The default model used is "nomic-embed-text:v1.5", but this can be overridden
