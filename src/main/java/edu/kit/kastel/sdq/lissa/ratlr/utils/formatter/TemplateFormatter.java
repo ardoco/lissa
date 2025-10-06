@@ -8,13 +8,13 @@ public class TemplateFormatter implements Formatter {
 
     private final ValueFormatter<String> textFormatter;
     
-    public TemplateFormatter(ModuleConfiguration configuration, ReplacementRetriever retriever, String templateKey) {
+    public TemplateFormatter(ModuleConfiguration configuration, ReplacementRetriever retriever, String template) {
         this.textFormatter = new TextFormatter(configuration, retriever);
-        this.textFormatter.setValue(configuration.argumentAsString(templateKey));
+        this.textFormatter.setValue(template);
     }
 
     public TemplateFormatter(ModuleConfiguration configuration, ReplacementRetriever retriever) {
-        this(configuration, retriever, "template");
+        this(configuration, retriever, configuration.argumentAsString("template"));
     }
 
     @Override

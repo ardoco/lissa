@@ -71,7 +71,7 @@ public abstract class LanguageModelRequester extends PipelineStage {
         this.threads = ChatLanguageModelProvider.threads(moduleConfiguration);
         this.cache = CacheManager.getDefaultInstance().getCache(this, provider.getCacheParameters());
         if (!moduleConfiguration.argumentAsString("system_message", "").isEmpty()) {
-            this.systemMessageFormatter = new TemplateFormatter(moduleConfiguration, new ContextReplacementRetriever(null, contextStore), "system_message");
+            this.systemMessageFormatter = new TemplateFormatter(moduleConfiguration, new ContextReplacementRetriever(null, contextStore), moduleConfiguration.argumentAsString("system_message"));
         } else {
             this.systemMessageFormatter = null;
         }

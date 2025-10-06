@@ -21,10 +21,10 @@ public class ElementJoiner extends PipelineStage {
     
     protected ElementJoiner(ModuleConfiguration configuration, ContextStore contextStore) {
         super(contextStore);
-        this.templatePrefix = new TemplateFormatter(configuration, new ContextReplacementRetriever(null, contextStore), "prefix");
+        this.templatePrefix = new TemplateFormatter(configuration, new ContextReplacementRetriever(null, contextStore), configuration.argumentAsString("prefix"));
         this.templateElement = new ElementFormatter(configuration, contextStore);
-        this.templateDelimiter = new TemplateFormatter(configuration, new ContextReplacementRetriever(null, contextStore), "delimiter");
-        this.templateSuffix = new TemplateFormatter(configuration, new ContextReplacementRetriever(null, contextStore), "suffix");
+        this.templateDelimiter = new TemplateFormatter(configuration, new ContextReplacementRetriever(null, contextStore), configuration.argumentAsString("delimiter"));
+        this.templateSuffix = new TemplateFormatter(configuration, new ContextReplacementRetriever(null, contextStore), configuration.argumentAsString("suffix"));
         this.elementType = configuration.argumentAsString("type");
     }
 

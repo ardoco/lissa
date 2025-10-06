@@ -29,9 +29,14 @@ public class ContextReplacementRetriever extends RetrieverDecorator {
         Matcher contextKeyMatcher = CONTEXT_KEY_PATTERN.matcher(placeholderKey);
         if (contextKeyMatcher.matches()) {
             String contextKey = contextKeyMatcher.group(1);
+            String original = contextKey;
             if (!this.contextStore.hasContext(contextKey)) {
-                throw new RuntimeException("context store does not contain key '%s'".formatted(contextKey));
+                contextKey = retrieveReplacement(contextKey);
             }
+            if (contextKey == null || !this.contextStore.hasContext(contextKey)) {
+                throw new RuntimeException("context store does not contain key '%s'".formatted(original));
+            }
+            
             return this.contextStore.getContext(contextKey, SerializedContext.class).asString();
         }
         return null;

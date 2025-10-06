@@ -22,9 +22,9 @@ public class ElementFormatter implements ValueFormatter<Element> {
         ReplacementRetriever retriever = new ContextReplacementRetriever(new ElementReplacementRetriever(null, elementReference), contextStore);
         this.formatter = new TemplateFormatter(configuration, retriever);
     }
-    public ElementFormatter(ModuleConfiguration configuration, ContextStore contextStore, String templateKey) {
+    public ElementFormatter(ModuleConfiguration configuration, ContextStore contextStore, String template) {
         ReplacementRetriever retriever = new ContextReplacementRetriever(new ElementReplacementRetriever(null, elementReference), contextStore);
-        this.formatter = new TemplateFormatter(configuration, retriever, templateKey);
+        this.formatter = new TemplateFormatter(configuration, retriever, template);
     }
     
     @Override

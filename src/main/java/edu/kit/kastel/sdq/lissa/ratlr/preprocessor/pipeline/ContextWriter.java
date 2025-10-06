@@ -31,7 +31,7 @@ import java.util.Map;
  */
 public class ContextWriter extends SingleElementProcessingStage {
     
-    private final Map<String, ValueFormatter<Element>> formatterByContextKey = new HashMap<>();
+    private final Map<ValueFormatter<Element>, ValueFormatter<Element>> formatterByContextKey = new HashMap<>();
     
     /**
      * Creates a new preprocessor with the specified context store.
@@ -42,16 +42,18 @@ public class ContextWriter extends SingleElementProcessingStage {
         super(contextStore);
         for (String argumentKey : configuration.argumentKeys()) {
             if (!configuration.retrievedArgumentKeys().contains(argumentKey)) {
-                this.formatterByContextKey.put(argumentKey, new ElementFormatter(configuration, contextStore, argumentKey));
+                this.formatterByContextKey.put(new ElementFormatter(configuration, contextStore, argumentKey)
+                        , new ElementFormatter(configuration, contextStore, configuration.argumentAsString(argumentKey)));
             }
         }
     }
 
     @Override
     public List<Element> process(Element element) {
-        for (Map.Entry<String, ValueFormatter<Element>> toStoreEntry : this.formatterByContextKey.entrySet()) {
+        for (Map.Entry<ValueFormatter<Element>, ValueFormatter<Element>> toStoreEntry : this.formatterByContextKey.entrySet()) {
+            toStoreEntry.getKey().setValue(element);
             toStoreEntry.getValue().setValue(element);
-            contextStore.createContext(new StringContext(toStoreEntry.getKey(), toStoreEntry.getValue().format()));
+            contextStore.createContext(new StringContext(toStoreEntry.getKey().format(), toStoreEntry.getValue().format()));
         }
         
         element.setCompare(true);
