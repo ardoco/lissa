@@ -126,8 +126,6 @@ public final class Statistics {
         SingleClassificationResult<TraceLink> classification = cmc.calculateMetrics(traceLinks, validTraceLinks, null);
         classification.prettyPrint();
 
-        // Store information to one file (config and results)
-        var resultFile = new File("results-" + configurationIdentifier + ".md");
         StringBuilder result = new StringBuilder();
         result.append("## Configuration (")
                 .append(new SimpleDateFormat("yyyy-MM-dd_HH-mmZZZ").format(new Date()))
@@ -154,6 +152,12 @@ public final class Statistics {
         result.append("* Recall: ").append(classification.getRecall()).append("\n");
         result.append("* F1: ").append(classification.getF1()).append("\n");
 
+        // Store information to one file (config and results)
+        var resultFile = new File("results-" 
+                + configurationIdentifier.replaceFirst("\\.json_", ".json_" + Math.round(classification.getF1() * 100) 
+                        + "-" + Math.round(classification.getRecall() * 100) 
+                        + "-" + Math.round(classification.getPrecision() * 100) + "_") 
+                + ".md");
         logger.info("Storing results to {}", resultFile.getName());
         try {
             Files.writeString(resultFile.toPath(), result.toString(), StandardOpenOption.CREATE);
