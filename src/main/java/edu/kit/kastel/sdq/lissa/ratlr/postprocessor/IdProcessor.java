@@ -9,7 +9,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
  * Enum representing different strategies for processing trace link identifiers.
  * Each enum value defines how source and target identifiers should be transformed
  * based on the type of trace link being processed.
- *
+ * <p>
  * The enum supports the following processing strategies:
  * <ul>
  *     <li>REQ2CODE: Processes requirement-to-code trace links by removing file extensions</li>

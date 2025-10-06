@@ -17,7 +17,7 @@ import dev.langchain4j.model.openai.OpenAiChatModel;
  * Provides chat language model instances for different platforms.
  * This class supports multiple language model platforms (OpenAI, Ollama, Blablador)
  * and handles their configuration, including authentication and model settings.
- *
+ * <p>
  * Required environment variables for each platform:
  * <ul>
  *   <li>OpenAI:

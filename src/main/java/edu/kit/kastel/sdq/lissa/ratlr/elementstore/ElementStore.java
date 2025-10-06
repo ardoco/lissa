@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.elementstore.strategy.RetrievalStrategy;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
@@ -54,7 +56,7 @@ public class ElementStore {
      * Strategy to find similar elements.
      * {@code null} indicates source store mode (no similarity search).
      */
-    private final RetrievalStrategy retrievalStrategy;
+    private final @Nullable RetrievalStrategy retrievalStrategy;
 
     /**
      * Creates a new element store for the LiSSA framework.
@@ -141,7 +143,7 @@ public class ElementStore {
      * @param id The identifier of the element to retrieve
      * @return A pair containing the element and its embedding, or null if not found
      */
-    public Pair<Element, float[]> getById(String id) {
+    public @Nullable Pair<Element, float[]> getById(String id) {
         var element = idToElementWithEmbedding.get(id);
         if (element == null) {
             return null;

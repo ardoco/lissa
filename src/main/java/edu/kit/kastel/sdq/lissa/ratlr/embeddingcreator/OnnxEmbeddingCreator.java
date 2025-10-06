@@ -14,11 +14,11 @@ import dev.langchain4j.model.embedding.onnx.PoolingMode;
  * An embedding creator that uses ONNX models for generating embeddings.
  * This class provides integration with ONNX-based embedding models, allowing
  * for local embedding generation without requiring external services.
- *
+ * <p>
  * The creator requires both a model file and a tokenizer file to be present
  * on the local filesystem. These files are specified either through the
  * constructor parameters or through the module configuration.
- *
+ * <p>
  * The embedding model uses mean pooling by default for generating the final
  * embeddings from the token-level representations.
  */

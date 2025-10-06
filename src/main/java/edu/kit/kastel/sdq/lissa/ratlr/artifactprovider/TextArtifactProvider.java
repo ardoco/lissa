@@ -19,7 +19,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Knowledge;
  * This provider reads text files and creates artifacts using the filename as the identifier.
  * Artifacts represent the original documents that will be processed into elements by preprocessors.
  * It supports both single files and directories containing multiple text files.
- *
+ * <p>
  * Configuration parameters:
  * <ul>
  * <li>path: The path to the file or directory containing text files</li>

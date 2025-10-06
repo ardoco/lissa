@@ -23,7 +23,7 @@ import dev.langchain4j.data.document.splitter.DocumentBySentenceSplitter;
  * into sentences, creating a new element for each sentence. The original artifact
  * is also preserved as an element with granularity level 0, and all sentence elements
  * are linked to it as children.
- *
+ * <p>
  * Each sentence element:
  * <ul>
  *     <li>Has a unique identifier combining the artifact ID and sentence index</li>

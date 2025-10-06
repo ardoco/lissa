@@ -5,6 +5,8 @@ import java.io.UncheckedIOException;
 import java.util.List;
 import java.util.Objects;
 
+import org.jspecify.annotations.Nullable;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -78,13 +80,13 @@ public record Configuration(
          * Configuration for a single classifier.
          * Either this or {@link #classifiers} must be set, but not both.
          */
-        @JsonProperty("classifier") ModuleConfiguration classifier,
+        @JsonProperty("classifier") @Nullable ModuleConfiguration classifier,
 
         /**
          * Configuration for a multi-stage classifier pipeline.
          * Either this or {@link #classifier} must be set, but not both.
          */
-        @JsonProperty("classifiers") List<List<ModuleConfiguration>> classifiers,
+        @JsonProperty("classifiers") @Nullable List<List<ModuleConfiguration>> classifiers,
 
         /**
          * Configuration for the result aggregator.
@@ -94,7 +96,7 @@ public record Configuration(
         /**
          * Configuration for the trace link ID postprocessor.
          */
-        @JsonProperty("tracelinkid_postprocessor") ModuleConfiguration traceLinkIdPostprocessor)
+        @JsonProperty("tracelinkid_postprocessor") @Nullable ModuleConfiguration traceLinkIdPostprocessor)
         implements ConfigurationBuilder.With {
 
     /**
@@ -131,7 +133,7 @@ public record Configuration(
         try {
             return new ObjectMapper()
                     .enable(SerializationFeature.INDENT_OUTPUT)
-                    .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                    .setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL)
                     .writeValueAsString(this);
         } catch (JsonProcessingException e) {
             throw new UncheckedIOException(e);

@@ -21,7 +21,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
  * The preprocessor supports multiple programming languages and can automatically
  * detect the language based on the file extension. Each code chunk is created
  * using language-specific splitting rules to maintain code structure and readability.
- *
+ * <p>
  * Configuration options:
  * <ul>
  *     <li>language: The programming language(s) to use. Can be multiple languages

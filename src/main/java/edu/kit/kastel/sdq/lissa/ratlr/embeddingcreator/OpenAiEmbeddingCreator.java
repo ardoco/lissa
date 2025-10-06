@@ -12,7 +12,7 @@ import dev.langchain4j.model.openai.OpenAiEmbeddingModel;
  * An embedding creator that uses OpenAI's embedding models for generating embeddings.
  * This class provides integration with OpenAI's embedding API, supporting high-throughput
  * embedding generation through parallel processing.
- *
+ * <p>
  * Required environment variables:
  * <ul>
  *     <li>{@code OPENAI_ORGANIZATION_ID}: Your OpenAI organization ID</li>

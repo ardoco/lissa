@@ -12,7 +12,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
  * A preprocessor that creates a hierarchical tree structure from code artifacts,
  * organizing them by package and class. This preprocessor considers both the
  * code files and their package declarations to create a meaningful hierarchy.
- *
+ * <p>
  * The preprocessor creates a tree structure where:
  * <ul>
  *     <li>Root elements represent packages (granularity level 0)</li>

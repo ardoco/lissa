@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,7 +86,7 @@ class RecursiveSplitter {
         return finalChunks;
     }
 
-    private List<String> splitWithRegex(String text, String separator) {
+    private List<String> splitWithRegex(String text, @Nullable String separator) {
         if (separator == null || separator.isEmpty()) {
             return text.chars().mapToObj(it -> String.valueOf((char) it)).toList();
         }
@@ -149,7 +150,7 @@ class RecursiveSplitter {
         return docs;
     }
 
-    private String joinDocs(List<String> docs, String separator) {
+    private @Nullable String joinDocs(List<String> docs, String separator) {
         String text = String.join(separator, docs);
         text = text.strip();
         if (text.isBlank()) {
@@ -161,23 +162,24 @@ class RecursiveSplitter {
     public static List<String> getSeparatorsForLanguage(Language language) {
         // Taken from LangChain (Python)
         return switch (language) {
-            case JAVA -> List.of(
-                    "\nclass ",
-                    "\npublic ",
-                    "\nprotected ",
-                    "\nprivate ",
-                    "\nstatic ",
-                    "\nif ",
-                    "\nfor ",
-                    "\nwhile ",
-                    "\nswitch ",
-                    "\ncase ",
-                    "\n\n",
-                    "\n",
-                    " ",
-                    "");
+            case JAVA ->
+                List.of(
+                        "\nclass ",
+                        "\npublic ",
+                        "\nprotected ",
+                        "\nprivate ",
+                        "\nstatic ",
+                        "\nif ",
+                        "\nfor ",
+                        "\nwhile ",
+                        "\nswitch ",
+                        "\ncase ",
+                        "\n\n",
+                        "\n",
+                        " ",
+                        "");
             case PYTHON -> List.of("\nclass ", "\ndef ", "\n\tdef ", "\n\n", "\n", " ", "");
-                // Add other languages as needed...
+            // Add other languages as needed...
             default -> throw new IllegalArgumentException("Unsupported language: " + language);
         };
     }

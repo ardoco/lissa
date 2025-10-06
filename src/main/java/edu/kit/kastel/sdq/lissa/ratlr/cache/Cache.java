@@ -1,6 +1,8 @@
 /* Licensed under MIT 2025. */
 package edu.kit.kastel.sdq.lissa.ratlr.cache;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * Interface for cache implementations in the LiSSA framework.
  * This interface defines the contract for caching mechanisms that store and retrieve
@@ -15,7 +17,7 @@ public interface Cache {
      * @param clazz The class of the type to deserialize to
      * @return The deserialized value, or null if not found
      */
-    <T> T get(CacheKey key, Class<T> clazz);
+    <T> @Nullable T get(CacheKey key, Class<T> clazz);
 
     /**
      * Stores a string value in the cache.

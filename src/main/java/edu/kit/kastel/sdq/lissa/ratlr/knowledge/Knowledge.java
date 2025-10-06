@@ -10,13 +10,13 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
  * Abstract base class representing a unit of knowledge in the LiSSA framework.
  * This class serves as the foundation for different types of knowledge units,
  * specifically artifacts and elements, which are used in trace link analysis.
- *
+ * <p>
  * The class is designed as a sealed class, meaning it can only be extended by
  * the explicitly permitted classes: {@link Artifact} and {@link Element}. This
  * design ensures that all knowledge units in the system are either artifacts
  * (high-level containers) or elements (granular units), providing a clear and
  * controlled hierarchy of knowledge representation.
- *
+ * <p>
  * Each knowledge unit contains:
  * <ul>
  *     <li>An identifier that uniquely identifies the knowledge unit</li>

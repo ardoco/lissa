@@ -4,6 +4,8 @@ package edu.kit.kastel.sdq.lissa.ratlr.context;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * Stores and manages {@link Context} objects for the LiSSA pipeline.
  * The {@code ContextStore} acts as a registry for context objects that can be shared
@@ -45,7 +47,7 @@ public class ContextStore {
      * @throws IllegalArgumentException if the context exists but is not of the requested type
      */
     @SuppressWarnings("unchecked")
-    public <C> C getContext(String id, Class<C> contextType) {
+    public <C> @Nullable C getContext(String id, Class<C> contextType) {
         if (!contexts.containsKey(id)) {
             return null;
         }

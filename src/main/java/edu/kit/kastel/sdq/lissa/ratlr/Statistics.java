@@ -10,7 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,7 +100,7 @@ public final class Statistics {
             String configurationIdentifier,
             String configurationSummary,
             Set<TraceLink> traceLinks,
-            GoldStandardConfiguration goldStandardConfiguration,
+            @Nullable GoldStandardConfiguration goldStandardConfiguration,
             int sourceArtifacts,
             int targetArtifacts)
             throws UncheckedIOException {
@@ -167,7 +167,6 @@ public final class Statistics {
      * @return Set of valid trace links from the gold standard
      * @throws UncheckedIOException If there are issues reading the gold standard file
      */
-    @NotNull
     public static Set<TraceLink> getTraceLinksFromGoldStandard(GoldStandardConfiguration goldStandardConfiguration) {
         File groundTruth = new File(goldStandardConfiguration.path());
         boolean header = goldStandardConfiguration.hasHeader();

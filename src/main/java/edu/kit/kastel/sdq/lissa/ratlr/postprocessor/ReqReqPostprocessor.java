@@ -11,7 +11,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
  * A postprocessor that transforms trace links between requirements.
  * This class specifically handles the transformation of requirement-to-requirement
  * trace links by removing file extensions from both source and target identifiers.
- *
+ * <p>
  * The transformation follows this pattern:
  * <ul>
  *     <li>Input: TraceLink[sourceId=UC10E1.txt, targetId=UC10E2.txt]</li>

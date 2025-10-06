@@ -4,6 +4,7 @@ package edu.kit.kastel.sdq.lissa.ratlr.utils;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +34,7 @@ import io.github.cdimascio.dotenv.Dotenv;
 public final class Environment {
     private static final Logger logger = LoggerFactory.getLogger(Environment.class);
     /** The loaded .env configuration, or null if no .env file exists */
-    private static final Dotenv DOTENV = load();
+    private static final @Nullable Dotenv DOTENV = load();
 
     private Environment() {
         throw new IllegalAccessError("Utility class");
@@ -51,7 +52,7 @@ public final class Environment {
      * @param key The name of the environment variable to retrieve
      * @return The value of the environment variable, or null if not found
      */
-    public static String getenv(String key) {
+    public static @Nullable String getenv(String key) {
         String dotenvValue = DOTENV == null ? null : DOTENV.get(key);
         if (dotenvValue != null) return dotenvValue;
         return System.getenv(key);
@@ -62,8 +63,7 @@ public final class Environment {
      * This method:
      * <ol>
      *     <li>Attempts to retrieve the variable using {@link #getenv(String)}</li>
-     *     <li>Logs an error if the variable is not found</li>
-     *     <li>Returns the value (which may be null, despite the method name)</li>
+     *     <li>Throws an IllegalStateException if environment variable would be null</li>
      * </ol>
      *
      * @param key The name of the environment variable to retrieve
@@ -73,7 +73,8 @@ public final class Environment {
     public static String getenvNonNull(String key) {
         String env = getenv(key);
         if (env == null) {
-            logger.error("environment variable {} is missing, use '.env' or your system to set it up", key);
+            throw new IllegalStateException(
+                    "environment variable %s is missing, use '.env' or your system to set it up".formatted(key));
         }
         return env;
     }
@@ -91,7 +92,7 @@ public final class Environment {
      *
      * @return The loaded Dotenv configuration, or null if no .env file exists
      */
-    private static synchronized Dotenv load() {
+    private static synchronized @Nullable Dotenv load() {
         if (DOTENV != null) {
             return DOTENV;
         }

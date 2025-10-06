@@ -17,7 +17,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
  * This provider reads text files from a directory and its subdirectories, using the relative path
  * as the artifact identifier. Artifacts represent the original documents that will be processed
  * into elements by preprocessors. It supports filtering files by their extensions.
- *
+ * <p>
  * Configuration parameters:
  * <ul>
  * <li>path: The path to the root directory containing the artifacts</li>

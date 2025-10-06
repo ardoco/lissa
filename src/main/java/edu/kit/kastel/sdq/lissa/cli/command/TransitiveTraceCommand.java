@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +52,7 @@ public class TransitiveTraceCommand implements Runnable {
             names = {"-c", "--configs"},
             arity = "2..*",
             description = "Specifies two or more config paths to be invoked sequentially.")
-    private Path[] transitiveTraceConfigs;
+    private @Nullable Path[] transitiveTraceConfigs;
 
     /**
      * Path to the evaluation configuration file used for gold standard comparison.
@@ -61,7 +62,7 @@ public class TransitiveTraceCommand implements Runnable {
     @CommandLine.Option(
             names = {"-e", "--evaluation-config"},
             description = "Specifies the evaluation config path to be invoked after the transitive trace link.")
-    private Path evaluationConfig;
+    private @Nullable Path evaluationConfig;
 
     /**
      * Executes the transitive trace link analysis pipeline.

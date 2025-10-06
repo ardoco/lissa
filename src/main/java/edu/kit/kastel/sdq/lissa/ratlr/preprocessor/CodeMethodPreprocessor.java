@@ -27,7 +27,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
  *
  * The preprocessor uses Tree-sitter to parse the source code and extract class and
  * method definitions. Currently, it supports Java code through the TreeSitterJava parser.
- *
+ * <p>
  * Configuration options:
  * <ul>
  *     <li>language: The programming language to use (currently only JAVA is supported)</li>

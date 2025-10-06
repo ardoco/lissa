@@ -7,6 +7,8 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * Manages caching operations in the LiSSA framework.
  * This class provides a centralized way to create and access caches for different purposes,
@@ -19,7 +21,7 @@ public final class CacheManager {
      */
     public static final String DEFAULT_CACHE_DIRECTORY = "cache";
 
-    private static CacheManager defaultInstanceManager;
+    private static @Nullable CacheManager defaultInstanceManager;
     private final Path directoryOfCaches;
     private final Map<String, RedisCache> caches = new HashMap<>();
 
@@ -30,7 +32,7 @@ public final class CacheManager {
      * @param directory The path to the cache directory, or null to use the default directory
      * @throws IOException If the cache directory cannot be created
      */
-    public static synchronized void setCacheDir(String directory) throws IOException {
+    public static synchronized void setCacheDir(@Nullable String directory) throws IOException {
         defaultInstanceManager = new CacheManager(Path.of(directory == null ? DEFAULT_CACHE_DIRECTORY : directory));
     }
 

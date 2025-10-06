@@ -5,6 +5,8 @@ import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
+
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
@@ -34,7 +36,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
  */
 public class TraceLinkIdPostprocessor {
     /** The ID processor used to transform trace link identifiers */
-    private final IdProcessor idProcessor;
+    private final @Nullable IdProcessor idProcessor;
 
     /**
      * The shared context store for pipeline components.
@@ -73,7 +75,12 @@ public class TraceLinkIdPostprocessor {
      * @throws IllegalStateException if the module name is not recognized
      */
     public static TraceLinkIdPostprocessor createTraceLinkIdPostprocessor(
-            ModuleConfiguration moduleConfiguration, ContextStore contextStore) {
+            @Nullable ModuleConfiguration moduleConfiguration, ContextStore contextStore) {
+
+        if (moduleConfiguration == null) {
+            return new IdentityPostprocessor(contextStore);
+        }
+
         return switch (moduleConfiguration.name()) {
             case "req2code" -> new TraceLinkIdPostprocessor(IdProcessor.REQ2CODE, contextStore);
             case "sad2code" -> new TraceLinkIdPostprocessor(IdProcessor.SAD2CODE, contextStore);
@@ -82,7 +89,6 @@ public class TraceLinkIdPostprocessor {
             case "sam2code" -> new TraceLinkIdPostprocessor(IdProcessor.SAM2CODE, contextStore);
             case "req2req" -> new ReqReqPostprocessor(contextStore);
             case "identity" -> new IdentityPostprocessor(contextStore);
-            case null -> new IdentityPostprocessor(contextStore);
             default -> throw new IllegalStateException("Unexpected value: " + moduleConfiguration.name());
         };
     }

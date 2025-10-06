@@ -17,7 +17,7 @@ import dev.langchain4j.model.ollama.OllamaEmbeddingModel;
  * An embedding creator that uses Ollama for generating embeddings.
  * This class provides integration with Ollama's embedding models, supporting
  * both authenticated and unauthenticated access to the Ollama server.
- *
+ * <p>
  * Required environment variables:
  * <ul>
  *     <li>{@code OLLAMA_EMBEDDING_HOST}: The host URL of the Ollama server</li>

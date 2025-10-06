@@ -3,6 +3,8 @@ package edu.kit.kastel.sdq.lissa.ratlr.knowledge;
 
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -13,7 +15,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.classifier.Classifier;
  * Represents an element in the LiSSA framework, which is a granular unit of knowledge
  * that can be traced and compared. Elements form a hierarchical structure through
  * parent references, where each element knows its parent but not its children.
- *
+ * <p>
  * Elements are organized in a hierarchical structure where:
  * <ul>
  *     <li>Each element can have a parent element, creating a tree-like structure</li>
@@ -46,10 +48,12 @@ public final class Element extends Knowledge {
 
     /** The parent element of this element, if any */
     @JsonIgnore
+    @Nullable
     private Element parent;
 
     /** The identifier of the parent element, used for JSON serialization */
     @JsonProperty
+    @Nullable
     private final String parentId;
 
     /**
@@ -94,7 +98,13 @@ public final class Element extends Knowledge {
      * @param parent The parent element, if any
      * @param compare Whether the element should be included in comparisons
      */
-    public Element(String identifier, String type, String content, int granularity, Element parent, boolean compare) {
+    public Element(
+            String identifier,
+            String type,
+            String content,
+            int granularity,
+            @Nullable Element parent,
+            boolean compare) {
         super(identifier, type, content);
         this.granularity = granularity;
         this.parentId = parent == null ? null : parent.getIdentifier();
@@ -129,7 +139,7 @@ public final class Element extends Knowledge {
      *
      * @return The parent element, or null if this element has no parent
      */
-    public Element getParent() {
+    public @Nullable Element getParent() {
         return parent;
     }
 

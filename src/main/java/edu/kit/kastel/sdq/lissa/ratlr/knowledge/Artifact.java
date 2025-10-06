@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
  * Represents an artifact in the LiSSA framework, which is a high-level unit of knowledge
  * that can contain multiple elements. Artifacts are typically used to represent
  * different types of software artifacts like source code, documentation, or models.
- *
+ * <p>
  * Artifacts serve as containers for elements, where:
  * <ul>
  *     <li>Each artifact represents a complete software artifact (e.g., a source file,
