@@ -280,7 +280,7 @@ public class ChatLanguageModelProvider {
      * @return A configured Open WebUI chat model instance
      * @throws IllegalStateException If required environment variables are not set
      */
-    private ChatModel createOpenWebUIChatModel(String model, int seed, double temperature) {
+    private static ChatModel createOpenWebUIChatModel(String model, int seed, double temperature) {
         String openwebuiUrl = Environment.getenv("OPENWEBUI_URL");
         String openwebuiApiKey = Environment.getenv("OPENWEBUI_API_KEY");
         if (openwebuiUrl == null || openwebuiApiKey == null) {
