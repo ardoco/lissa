@@ -4,8 +4,10 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.Preprocessor;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -49,6 +51,16 @@ public class ElementReplacementRetriever extends SupplyingRetriever<Element> {
         put("element_parentId", element -> element.getParent().getIdentifier());
         put("element_compare", element -> String.valueOf(element.isCompare()));
     }};
+    
+    private static final Map<String, BiFunction<String, Element, String>> ELEMENT_VALUE_PROVIDER_BY_MATCHING_KEY = new LinkedHashMap<>() {{
+        put("element_parentId_\\d+", (key, element) -> {
+            Element current = element;
+            for (int i = 0; i < Integer.parseInt(key.split("_")[2]); i++) {
+                current = current.getParent();
+            }
+            return current.getIdentifier();
+        });
+    }};
 
     /**
      * Creates a new instance.
@@ -67,8 +79,14 @@ public class ElementReplacementRetriever extends SupplyingRetriever<Element> {
      */
     @Override
     public String retrieveReplacement(Element element, String placeholderKey) {
-        return ELEMENT_VALUE_PROVIDER_BY_REPLACE_KEY.containsKey(placeholderKey) 
-                ? ELEMENT_VALUE_PROVIDER_BY_REPLACE_KEY.get(placeholderKey).apply(element) 
-                : null;
+        if (ELEMENT_VALUE_PROVIDER_BY_REPLACE_KEY.containsKey(placeholderKey)) {
+            return ELEMENT_VALUE_PROVIDER_BY_REPLACE_KEY.get(placeholderKey).apply(element);
+        }
+        for (Map.Entry<String, BiFunction<String, Element, String>> entry : ELEMENT_VALUE_PROVIDER_BY_MATCHING_KEY.entrySet()) {
+            if (placeholderKey.matches(entry.getKey())) {
+                return entry.getValue().apply(placeholderKey, element);
+            }
+        }
+        return null;
     }
 }
