@@ -141,6 +141,7 @@ public abstract class LanguageModelRequester extends PipelineStage {
             executorService.shutdown();
         }
 
+        cache.flush();
         return result;
     }
     
@@ -161,7 +162,8 @@ public abstract class LanguageModelRequester extends PipelineStage {
             }
             messages.add(new UserMessage(request));
             CacheKey cacheKey = CacheKey.of(
-                    provider.modelName(), provider.seed(), provider.temperature(), CacheKey.Mode.CHAT, messages.toString());
+                    provider.modelName(), provider.seed(), provider.temperature(), CacheKey.Mode.CHAT
+                    , messages + (jsonSchema.isEmpty() ? "" : jsonSchema));
 
             String cachedResponse = cache.get(cacheKey, String.class);
             if (cachedResponse != null) {
