@@ -74,6 +74,11 @@ public class ChatLanguageModelProvider {
     private double temperature;
 
     /**
+     * The request timeout in seconds. {@code null} if isn't set.
+     */
+    private Integer timeoutSeconds;
+
+    /**
      * Creates a new chat language model provider with the specified configuration.
      * The configuration name should be in the format "mode_platform" (e.g., "simple_openai").
      *
@@ -92,10 +97,10 @@ public class ChatLanguageModelProvider {
      */
     public ChatModel createChatModel() {
         return switch (platform) {
-            case OPENAI -> createOpenAiChatModel(modelName, seed, temperature);
-            case OLLAMA -> createOllamaChatModel(modelName, seed, temperature);
-            case BLABLADOR -> createBlabladorChatModel(modelName, seed, temperature);
-            case DEEPSEEK -> createDeepSeekChatModel(modelName, seed, temperature);
+            case OPENAI -> createOpenAiChatModel(modelName, seed, temperature, timeoutSeconds);
+            case OLLAMA -> createOllamaChatModel(modelName, seed, temperature, timeoutSeconds);
+            case BLABLADOR -> createBlabladorChatModel(modelName, seed, temperature, timeoutSeconds);
+            case DEEPSEEK -> createDeepSeekChatModel(modelName, seed, temperature, timeoutSeconds);
         };
     }
 
@@ -111,6 +116,13 @@ public class ChatLanguageModelProvider {
         this.modelName = configuration.argumentAsString(modelKey, platform.getDefaultModel());
         this.seed = configuration.argumentAsInt("seed", DEFAULT_SEED);
         this.temperature = configuration.argumentAsDouble("temperature", DEFAULT_TEMPERATURE);
+        if (configuration.hasArgument("timeout")) {
+            try {
+                this.timeoutSeconds = Integer.parseInt(configuration.argumentAsString("timeout"));
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("timeout must be an integer");
+            }
+        }
     }
 
     /**
@@ -158,9 +170,10 @@ public class ChatLanguageModelProvider {
      * @param model The name of the model to use
      * @param seed The seed value for randomization
      * @param temperature The temperature setting for the model
+     * @param timeoutSeconds The request timeout in seconds. {@code null} if isn't set.
      * @return A configured Ollama chat model instance
      */
-    private static OllamaChatModel createOllamaChatModel(String model, int seed, double temperature) {
+    private static OllamaChatModel createOllamaChatModel(String model, int seed, double temperature, Integer timeoutSeconds) {
         String host = Environment.getenv("OLLAMA_HOST");
         String user = Environment.getenv("OLLAMA_USER");
         String password = Environment.getenv("OLLAMA_PASSWORD");
@@ -171,6 +184,9 @@ public class ChatLanguageModelProvider {
                 .timeout(Duration.ofMinutes(15))
                 .temperature(temperature)
                 .seed(seed);
+        if (timeoutSeconds != null) {
+            ollama = ollama.timeout(Duration.ofSeconds(timeoutSeconds));
+        }
         if (user != null && password != null && !user.isEmpty() && !password.isEmpty()) {
             ollama.customHeaders(Map.of(
                     "Authorization",
@@ -188,24 +204,28 @@ public class ChatLanguageModelProvider {
      * @param model The name of the model to use
      * @param seed The seed value for randomization
      * @param temperature The temperature setting for the model
+     * @param timeoutSeconds The request timeout in seconds. {@code null} if isn't set.
      * @return A configured OpenAI chat model instance
      * @throws IllegalStateException If required environment variables are not set
      */
-    private static OpenAiChatModel createOpenAiChatModel(String model, int seed, double temperature) {
+    private static OpenAiChatModel createOpenAiChatModel(String model, int seed, double temperature, Integer timeoutSeconds) {
         String openAiOrganizationId = Environment.getenv("OPENAI_ORGANIZATION_ID");
         String openAiApiKey = Environment.getenv("OPENAI_API_KEY");
         if (openAiOrganizationId == null || openAiApiKey == null) {
             throw new IllegalStateException("OPENAI_ORGANIZATION_ID or OPENAI_API_KEY environment variable not set");
         }
-        return new OpenAiChatModel.OpenAiChatModelBuilder()
+        var openAi = new OpenAiChatModel.OpenAiChatModelBuilder()
                 .modelName(model)
                 .organizationId(openAiOrganizationId)
                 .apiKey(openAiApiKey)
                 .temperature(temperature)
-                .seed(seed)
-                .build();
+                .seed(seed);
+        if (timeoutSeconds != null) {
+            openAi = openAi.timeout(Duration.ofSeconds(timeoutSeconds));
+        }
+        return openAi.build();
     }
-
+    
     /**
      * Creates a Blablador chat model instance.
      * Requires Blablador API key to be set in environment variables.
@@ -213,20 +233,25 @@ public class ChatLanguageModelProvider {
      * @param model The name of the model to use
      * @param seed The seed value for randomization
      * @param temperature The temperature setting for the model
+     * @param timeoutSeconds The request timeout in seconds. {@code null} if isn't set.
      * @return A configured Blablador chat model instance
      * @throws IllegalStateException If required environment variables are not set
      */
-    private static OpenAiChatModel createBlabladorChatModel(String model, int seed, double temperature) {
+    private static OpenAiChatModel createBlabladorChatModel(String model, int seed, double temperature, Integer timeoutSeconds) {
         String blabladorApiKey = Environment.getenv("BLABLADOR_API_KEY");
         if (blabladorApiKey == null) {
             throw new IllegalStateException("BLABLADOR_API_KEY environment variable not set");
         }
-        return new OpenAiChatModel.OpenAiChatModelBuilder()
+        var blablador = new OpenAiChatModel.OpenAiChatModelBuilder()
                 .baseUrl("https://api.helmholtz-blablador.fz-juelich.de/v1")
                 .modelName(model)
                 .apiKey(blabladorApiKey)
                 .temperature(temperature)
-                .seed(seed)
+                .seed(seed);
+        if (timeoutSeconds != null) {
+            blablador = blablador.timeout(Duration.ofSeconds(timeoutSeconds));
+        }
+        return blablador
                 .build();
     }
 
@@ -237,20 +262,25 @@ public class ChatLanguageModelProvider {
      * @param model The name of the model to use
      * @param seed The seed value for randomization
      * @param temperature The temperature setting for the model
+     * @param timeoutSeconds The request timeout in seconds. {@code null} if isn't set.
      * @return A configured DeepSeek chat model instance
      * @throws IllegalStateException If required environment variables are not set
      */
-    private static OpenAiChatModel createDeepSeekChatModel(String model, int seed, double temperature) {
+    private static OpenAiChatModel createDeepSeekChatModel(String model, int seed, double temperature, Integer timeoutSeconds) {
         String deepseekApiKey = Environment.getenv("DEEPSEEK_API_KEY");
         if (deepseekApiKey == null) {
             throw new IllegalStateException("DEEPSEEK_API_KEY environment variable not set");
         }
-        return new OpenAiChatModel.OpenAiChatModelBuilder()
+        var deepSeek = new OpenAiChatModel.OpenAiChatModelBuilder()
                 .baseUrl("https://api.deepseek.com/v1")
                 .modelName(model)
                 .apiKey(deepseekApiKey)
                 .temperature(temperature)
-                .seed(seed)
+                .seed(seed);
+        if (timeoutSeconds != null) {
+            deepSeek = deepSeek.timeout(Duration.ofSeconds(timeoutSeconds));
+        }
+        return deepSeek
                 .build();
     }
 
