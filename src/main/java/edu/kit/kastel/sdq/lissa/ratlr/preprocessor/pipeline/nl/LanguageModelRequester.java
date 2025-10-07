@@ -1,5 +1,6 @@
 package edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.nl;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
@@ -20,6 +21,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.PipelineStage;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.Futures;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.formatter.ContextReplacementRetriever;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.formatter.TemplateFormatter;
+import edu.kit.kastel.sdq.lissa.ratlr.utils.json.Jsons;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,8 +57,7 @@ public abstract class LanguageModelRequester extends PipelineStage {
     /** Cache for storing and retrieving summaries */
     private final Cache cache;
     private final TemplateFormatter systemMessageFormatter;
-    private final String jsonSchema;
-    private final String jsonSchemaName;
+    private final TemplateFormatter jsonSchemaFormatter;
     private final ChatModel llmInstance;
 
     /**
@@ -70,18 +71,24 @@ public abstract class LanguageModelRequester extends PipelineStage {
         this.provider = new ChatLanguageModelProvider(moduleConfiguration);
         this.threads = ChatLanguageModelProvider.threads(moduleConfiguration);
         this.cache = CacheManager.getDefaultInstance().getCache(this, provider.getCacheParameters());
-        if (!moduleConfiguration.argumentAsString("system_message", "").isEmpty()) {
-            this.systemMessageFormatter = new TemplateFormatter(moduleConfiguration, new ContextReplacementRetriever(null, contextStore), moduleConfiguration.argumentAsString("system_message"));
+        
+        String systemMessageTemplate = moduleConfiguration.argumentAsString("system_message", "");
+        if (!systemMessageTemplate.isEmpty()) {
+            this.systemMessageFormatter = new TemplateFormatter(moduleConfiguration, new ContextReplacementRetriever(null, contextStore)
+                    , systemMessageTemplate);
         } else {
             this.systemMessageFormatter = null;
         }
-        this.jsonSchema = moduleConfiguration.argumentAsString("json_schema", "");
-        this.jsonSchemaName = moduleConfiguration.argumentAsString("json_schema_name", "");
-        this.llmInstance = provider.createChatModel();
         
-        if (!jsonSchema.isEmpty() && jsonSchemaName.isEmpty()) {
-            throw new IllegalArgumentException("when using 'json_schema' then argument 'json_schema_name' must be set and not empty");
+        String jsonSchemaTemplate = moduleConfiguration.argumentAsString("json_schema", "");
+        if (jsonSchemaTemplate.isEmpty()) {
+            this.jsonSchemaFormatter = null;
+        } else {
+            this.jsonSchemaFormatter = new TemplateFormatter(moduleConfiguration, new ContextReplacementRetriever(null, contextStore)
+                    , jsonSchemaTemplate);
         }
+        
+        this.llmInstance = provider.createChatModel();
     }
 
     /**
@@ -155,6 +162,18 @@ public abstract class LanguageModelRequester extends PipelineStage {
 
         @Override
         public String call() {
+
+            JsonSchema jsonSchema;
+            if (jsonSchemaFormatter == null) {
+                jsonSchema = null;
+            } else {
+                String schema = jsonSchemaFormatter.format();
+                JsonNode title = Jsons.readTree(schema).get("title");
+                if (title == null || title.textValue().isEmpty()) {
+                    throw new IllegalArgumentException("when using 'json_schema' then 'title' of the schema must be set and not empty");
+                }
+                jsonSchema = JsonSchema.builder().name(title.textValue()).rootElement(JsonRawSchema.from(schema)).build();
+            }
             
             List<ChatMessage> messages = new ArrayList<>();
             if (systemMessageFormatter != null) {
@@ -163,7 +182,7 @@ public abstract class LanguageModelRequester extends PipelineStage {
             messages.add(new UserMessage(request));
             CacheKey cacheKey = CacheKey.of(
                     provider.modelName(), provider.seed(), provider.temperature(), CacheKey.Mode.CHAT
-                    , messages + (jsonSchema.isEmpty() ? "" : jsonSchema));
+                    , messages + (jsonSchema == null ? "" : jsonSchema.toString()));
 
             String cachedResponse = cache.get(cacheKey, String.class);
             if (cachedResponse != null) {
@@ -171,10 +190,9 @@ public abstract class LanguageModelRequester extends PipelineStage {
             }
 
             ChatRequest.Builder requestBuilder = ChatRequest.builder().messages(messages);
-            if (!jsonSchema.isEmpty()) {
-                JsonRawSchema rawSchema = JsonRawSchema.from(jsonSchema);
+            if (jsonSchema != null) {
                 requestBuilder.responseFormat(ResponseFormat.builder().type(ResponseFormatType.JSON)
-                        .jsonSchema(JsonSchema.builder().name(jsonSchemaName).rootElement(rawSchema).build())
+                        .jsonSchema(jsonSchema)
                         .build());
             }
             ChatModel chatModel = threads > 1 ? provider.createChatModel() : llmInstance;
