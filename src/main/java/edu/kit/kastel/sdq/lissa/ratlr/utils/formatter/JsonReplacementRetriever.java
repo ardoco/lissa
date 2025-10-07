@@ -13,11 +13,6 @@ public class JsonReplacementRetriever extends SupplyingRetriever<String> {
 
     @Override
     public String retrieveReplacement(String value, String placeholderKey) {
-        String replacement = super.retrieveReplacement(placeholderKey);
-        if (replacement != null) {
-            return replacement;
-        }
-
         JsonNode rootNode = Jsons.readTree(value);
         if (rootNode.has(placeholderKey)) {
             JsonNode jsonNode = rootNode.get(placeholderKey);

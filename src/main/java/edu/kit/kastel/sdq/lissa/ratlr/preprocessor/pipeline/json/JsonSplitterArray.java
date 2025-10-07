@@ -1,8 +1,7 @@
 package edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.json;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
@@ -11,6 +10,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.utils.json.Jsons;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,6 +18,7 @@ import java.util.Map;
 
 public class JsonSplitterArray extends SingleElementProcessingStage {
 
+    private final String emptyDefault;
     private final Map<String, String> remapper;
     
     /**
@@ -27,18 +28,20 @@ public class JsonSplitterArray extends SingleElementProcessingStage {
      */
     public JsonSplitterArray(ModuleConfiguration configuration, ContextStore contextStore) {
         super(contextStore);
+        this.emptyDefault = configuration.argumentAsString("empty_default", "");
         this.remapper = new HashMap<>();
         for (String key : configuration.argumentKeys()) {
-            this.remapper.put(key, configuration.argumentAsString(key));
+            if (!key.equals("empty_default")) {
+                this.remapper.put(key, configuration.argumentAsString(key));
+            }
         }
     }
 
     protected List<Element> process(Element element) {
-        List<Map<String, String>> splitResults = splitOnEachArrayEntry(element.getContent());
+        List<String> splitResults = splitOnEachArrayEntry(element.getContent());
         List<Element> results = new LinkedList<>();
         for (int i = 0; i < splitResults.size(); i++) {
-            Map<String, String> result = splitResults.get(i);
-            results.add(Element.fromParent(element, i, Jsons.writeValueAsString(result), true));
+            results.add(Element.fromParent(element, i, splitResults.get(i), true));
         }
         return results;
     }
@@ -69,41 +72,49 @@ public class JsonSplitterArray extends SingleElementProcessingStage {
      * ]}</pre></p>
      * @param json the input to process
      * @return a list containing combinations of split and remapped array entries along with the other content
-     * @throws JsonProcessingException if the input is not a valid JSON
      */
     @NotNull
-    private List<Map<String, String>> splitOnEachArrayEntry(String json) {
-        Map<String, JsonNode> children = Jsons.readValue(json, new TypeReference<>() {});
+    private List<String> splitOnEachArrayEntry(String json) {
+//        Map<String, JsonNode> children = Jsons.readValue(json, new TypeReference<>() {});
+//        while (children.size() == 1 && !remapper.containsKey(children.keySet().iterator().next()) && children.values().iterator().next().isObject()) {
+//            children = Jsons.readValue(children.values().iterator().next().toString(), new TypeReference<>() {});
+//        }
 
-        List<Map<String, String>> results = new LinkedList<>();
+        JsonNode root = Jsons.readTree(json);
+        while (root.size() == 1 && remapper.keySet().stream().noneMatch(root::has)) {
+            root = root.iterator().next();
+        }
+
+        Map<String, JsonNode> children = new LinkedHashMap<>();
+        Iterator<String> it = root.fieldNames();
+        while (it.hasNext()) {
+            String fieldName = it.next();
+            children.put(fieldName, root.get(fieldName));
+        }
+        
+        List<Map<String, JsonNode>> results = new LinkedList<>();
         results.add(new LinkedHashMap<>());
         for (Map.Entry<String, JsonNode> childEntry : children.entrySet()) {
             if (remapper.containsKey(childEntry.getKey()) && childEntry.getValue().isArray()) {
-                if (childEntry.getValue().isEmpty()) {
-                    continue;
-                }
-
                 // create a copy of every existing result for each array entry and append the entry on each
-                List<Map<String, String>> newResults = new LinkedList<>();
-                for (JsonNode arrayElement : childEntry.getValue()) {
-                    for (Map<String, String> resultWithoutArrayElement : results) {
-                        Map<String, String> newResult = new LinkedHashMap<>(resultWithoutArrayElement);
-                        newResult.put(remapper.get(childEntry.getKey()), arrayElement.isTextual()
-                                ? arrayElement.textValue()
-                                : arrayElement.toString());
+                List<Map<String, JsonNode>> newResults = new LinkedList<>();
+                // TODO strip component suffix
+                for (JsonNode arrayElement : (childEntry.getValue().isEmpty() ? new TextNode(emptyDefault) : childEntry.getValue())) {
+                    for (Map<String, JsonNode> resultWithoutArrayElement : results) {
+                        Map<String, JsonNode> newResult = new LinkedHashMap<>(resultWithoutArrayElement);
+                        newResult.put(remapper.get(childEntry.getKey()), arrayElement);
                         newResults.add(newResult);
                     }
                 }
                 results = newResults;
             } else {
                 // append non-splittable entry on every existing result
-                for (Map<String, String> result : results) {
-                    result.put(childEntry.getKey(), childEntry.getValue().isTextual() 
-                            ? childEntry.getValue().textValue() 
-                            : childEntry.getValue().toString());
+                for (Map<String, JsonNode> result : results) {
+                    result.put(childEntry.getKey(), childEntry.getValue());
                 }
             }
         }
-        return results;
+        
+        return results.stream().map(Jsons::writeValueAsString).toList();
     }
 }
