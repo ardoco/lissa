@@ -13,6 +13,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.json.JsonSplitterArr
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.nl.TemplateRequest;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.nl.TextSplitterListing;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.text.RegexReplacer;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.text.SentenceId;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.text.TemplateElement;
 
 import java.util.ArrayList;
@@ -141,6 +142,7 @@ public class PipelinePreprocessor extends Preprocessor {
             };
             case "text" -> switch (configuration.name()) {
                 case "text_splitter_listing" -> new TextSplitterListing(configuration, contextStore);
+                case "text_line_id" -> new SentenceId(contextStore);
                 default -> throw new IllegalArgumentException("Unsupported pipeline stage name: " + configuration.name());
             };
             case "template" -> switch (configuration.name()) {
