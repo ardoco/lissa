@@ -2,18 +2,25 @@ package edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline;
 
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
+import edu.kit.kastel.sdq.lissa.ratlr.context.StringContext;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.Preprocessor;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.SentencePreprocessor;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.SingleArtifactPreprocessor;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.codegraph.ComponentCreator;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.documentation.CodeObjectsWriter;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.documentation.ComponentNamesWriter;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.documentation.ProjectNameWriter;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.documentation.SectionsSplitter;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.json.JsonConverterText;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.json.JsonMergerArray;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.json.JsonSplitterArray;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.json.JsonSplitterMap;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.nl.TemplateRequest;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.nl.TextSplitterListing;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.text.LineIdentifier;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.text.RegexReplacer;
-import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.text.SentenceId;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.text.TemplateElement;
 
 import java.util.ArrayList;
@@ -22,6 +29,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.StringJoiner;
 
 import static edu.kit.kastel.sdq.lissa.ratlr.classifier.Classifier.CONFIG_NAME_SEPARATOR;
 
@@ -63,6 +71,10 @@ public class PipelinePreprocessor extends Preprocessor {
     @Override
     public final List<Element> preprocess(List<Artifact> artifacts) {
         Collection<Element> elements = new LinkedHashSet<>(this.artifactPreprocessor.preprocess(artifacts));
+        if (stages.isEmpty()) {
+            return new ArrayList<>(elements);
+        }
+        
         for (Element element : elements) {
             element.setCompare(false);
         }
@@ -123,6 +135,10 @@ public class PipelinePreprocessor extends Preprocessor {
      */
     private static Pipelineable createStage(ModuleConfiguration configuration, ContextStore contextStore) {
         return switch (configuration.name().split(CONFIG_NAME_SEPARATOR)[0]) {
+            case "documentationProjectName" -> new ProjectNameWriter(configuration, contextStore);
+            case "documentationComponentNames" -> new ComponentNamesWriter(configuration, contextStore);
+            case "documentationCodeObjects" -> new CodeObjectsWriter(configuration, contextStore);
+            case "documentationSectionSplitter" -> new SectionsSplitter(configuration, contextStore);
             case "code" -> switch (configuration.name()) {
                 case "code_component_creator" -> new ComponentCreator(contextStore);
                 default -> throw new IllegalArgumentException("Unsupported pipeline stage name: " + configuration.name());
@@ -138,11 +154,13 @@ public class PipelinePreprocessor extends Preprocessor {
             case "json" -> switch (configuration.name()) {
                 case "json_splitter_array" -> new JsonSplitterArray(configuration, contextStore);
                 case "json_converter_text" -> new JsonConverterText(configuration, contextStore);
+                case "json_merger_array" -> new JsonMergerArray(configuration, contextStore);
+                case "json_splitter_map" -> new JsonSplitterMap(contextStore);
                 default -> throw new IllegalArgumentException("Unsupported pipeline stage name: " + configuration.name());
             };
             case "text" -> switch (configuration.name()) {
                 case "text_splitter_listing" -> new TextSplitterListing(configuration, contextStore);
-                case "text_line_id" -> new SentenceId(contextStore);
+                case "text_line_id" -> new LineIdentifier(contextStore);
                 default -> throw new IllegalArgumentException("Unsupported pipeline stage name: " + configuration.name());
             };
             case "template" -> switch (configuration.name()) {
@@ -157,5 +175,14 @@ public class PipelinePreprocessor extends Preprocessor {
             case "sentence" -> new SentencePreprocessor(configuration, contextStore);
             default -> throw new IllegalStateException("Unexpected value: " + configuration.name());
         };
+    }
+    
+    public static String getLineIdPrefixedDocumentation(ContextStore contextStore) {
+        String[] lines = contextStore.getContext("documentation", StringContext.class).asString().split("\n");
+        StringJoiner joiner = new StringJoiner("\n");
+        for (int i = 0; i < lines.length; i++) {
+            joiner.add((i + 1) + ": " + lines[i]);
+        }
+        return joiner.toString();
     }
 }

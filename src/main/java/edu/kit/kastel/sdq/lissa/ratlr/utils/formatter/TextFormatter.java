@@ -2,13 +2,8 @@ package edu.kit.kastel.sdq.lissa.ratlr.utils.formatter;
 
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.StringJoiner;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class TextFormatter implements ValueFormatter<String> {
 
@@ -16,13 +11,9 @@ public class TextFormatter implements ValueFormatter<String> {
      * The string format for the placeholders.
      */
     private final String placeholderFormat;
-    /**
-     * The regex pattern defining an unnamed capturing group for a single placeholder across the whole template.
-     * E.g.: {@code .*\Q<<<\E(.*)\Q>>>\E.*}
-     */
-    private final Pattern placeholderPattern;
     private final AtomicReference<String> textReference = new AtomicReference<>();
     private ReplacementRetriever retriever;
+    private final String[] placeholderBounding;
 
     /**
      * 
@@ -31,8 +22,8 @@ public class TextFormatter implements ValueFormatter<String> {
      */
     protected TextFormatter(ModuleConfiguration configuration, ReplacementRetriever retriever) {
         this.placeholderFormat = configuration.argumentAsString("placeholder", "<<<%s>>>");
+        this.placeholderBounding = this.placeholderFormat.split("%s");
         this.retriever = retriever;
-        this.placeholderPattern = Pattern.compile("(.|\n)*" + createCapturingGroupFromReplaceFormat(this.placeholderFormat) + "(.|\n)*");
     }
 
     @Override
@@ -52,46 +43,29 @@ public class TextFormatter implements ValueFormatter<String> {
      */
     @Override
     public String format() {
-        Map<String, String> contentByPlaceholder = new HashMap<>();
         String text = textReference.get();
-        String placeholderText = text;
-        Matcher placeholderMatcher = this.placeholderPattern.matcher(placeholderText);
-        while (placeholderMatcher.matches()) {
-            String placeholderKey = placeholderMatcher.group(2);
-            String replacement = this.retriever.retrieveReplacement(placeholderKey);
-            if (replacement == null) {
-                throw new RuntimeException("no replacement found for placeholder '%s'".formatted(placeholderKey));
+
+        int offset = 0;
+        int rightBounding;
+        int leftBounding;
+        do {
+            rightBounding = text.indexOf(placeholderBounding[1], offset);
+            if (rightBounding == -1) {
+                return text;
             }
+            leftBounding = text.indexOf(placeholderBounding[0], offset, rightBounding);
+            offset = rightBounding + placeholderBounding[1].length();
+            if (leftBounding != -1) {
+                String placeholderKey = text.substring(leftBounding + placeholderBounding[0].length(), rightBounding);
+                String replacement = this.retriever.retrieveReplacement(placeholderKey);
+                if (replacement == null) {
+                    throw new RuntimeException("no replacement found for placeholder '%s'".formatted(placeholderKey));
+                }
 
-            contentByPlaceholder.put(this.placeholderFormat.formatted(placeholderKey), replacement);
-            placeholderText = placeholderText.replace(this.placeholderFormat.formatted(placeholderKey), "");
-
-            placeholderMatcher = this.placeholderPattern.matcher(placeholderText);
-        }
-
-        for (Map.Entry<String, String> replaceEntry : contentByPlaceholder.entrySet()) {
-            text = text.replace(replaceEntry.getKey(), replaceEntry.getValue());
-        }
-
+                text = text.replaceFirst("\\Q" + this.placeholderFormat.formatted(placeholderKey) + "\\E", replacement);
+            }
+        } while (leftBounding != -1);
+        
         return text;
-    }
-
-    /**
-     * Generates a regex unnamed capturing group for the given placeholder format.
-     * Escapes all symbols surrounding the key placeholder in the format.
-     *
-     * @param placeholderFormat the string format of a placeholder
-     * @return a regex with capturing group
-     */
-    private static String createCapturingGroupFromReplaceFormat(String placeholderFormat) {
-        String delimiter = "%s";
-        StringJoiner joiner = new StringJoiner("(" + delimiter + ")");
-        for (String split : placeholderFormat.splitWithDelimiters(delimiter, -1)) {
-            if (split.equals(delimiter)) {
-                continue;
-            }
-            joiner.add("\\Q" + split + "\\E");
-        }
-        return joiner.toString().formatted(".*");
     }
 }

@@ -5,8 +5,8 @@ import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
-import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.PipelinePreprocessor;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.codegraph.ComponentElementsLoader;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.PipelinePreprocessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,10 +100,10 @@ public abstract class Preprocessor {
                 case "code_chunking" -> new CodeChunkingPreprocessor(configuration, contextStore);
                 case "code_method" -> new CodeMethodPreprocessor(configuration, contextStore);
                 case "code_tree" -> new CodeTreePreprocessor(configuration, contextStore);
-                case "code_component" -> new ComponentElementsLoader(configuration, contextStore);
                 default ->
                         throw new IllegalArgumentException("Unsupported preprocessor name: " + configuration.name());
             };
+            case "codecomponent" -> new ComponentElementsLoader(configuration, contextStore);
             case "model" -> switch (configuration.name()) {
                 case "model_uml" -> new ModelUMLPreprocessor(configuration, contextStore);
                 default ->

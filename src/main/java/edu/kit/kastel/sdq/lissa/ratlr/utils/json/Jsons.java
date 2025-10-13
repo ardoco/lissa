@@ -18,6 +18,11 @@ public final class Jsons {
         return visitor.visit(root, arg);
     }
 
+
+    public static JsonNode readTree(String content) {
+        return readTree(content, MAPPER);
+    }
+
     /**
      * Convenience method to deserialize JSON content.
      * 
@@ -25,13 +30,18 @@ public final class Jsons {
      * @return the deserialized JSON content
      * @see ObjectMapper#readTree(String)
      */
-    public static JsonNode readTree(String content) {
+    public static JsonNode readTree(String content, ObjectMapper mapper) {
         try {
-            return MAPPER.readTree(content);
+            return mapper.readTree(content);
         } catch (JsonProcessingException e) {
             // TODO log error
             throw new RuntimeException(e);
         }
+    }
+
+
+    public static <T> String writeValueAsString(T value) {
+        return writeValueAsString(value, MAPPER);
     }
 
     /**
@@ -41,9 +51,9 @@ public final class Jsons {
      * @return the serialized JSON
      * @see ObjectMapper#writeValueAsString(Object)
      */
-    public static <T> String writeValueAsString(T value) {
+    public static <T> String writeValueAsString(T value, ObjectMapper mapper) {
         try {
-            return MAPPER.writeValueAsString(value);
+            return mapper.writeValueAsString(value);
         } catch (JsonProcessingException e) {
             // TODO log error
             throw new RuntimeException(e);
@@ -51,8 +61,12 @@ public final class Jsons {
     }
     
     public static <T> T readValue(String json, TypeReference<T> typeReference) {
+        return readValue(json, typeReference, MAPPER);
+    }
+    
+    public static <T> T readValue(String json, TypeReference<T> typeReference, ObjectMapper mapper) {
         try {
-            return MAPPER.readValue(json, typeReference);
+            return mapper.readValue(json, typeReference);
         } catch (JsonProcessingException e) {
             // TODO log error
             throw new RuntimeException(e);

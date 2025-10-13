@@ -67,12 +67,23 @@ public abstract class LanguageModelRequester extends PipelineStage {
      * @param contextStore The shared context store for pipeline components
      */
     protected LanguageModelRequester(ModuleConfiguration moduleConfiguration, ContextStore contextStore) {
+        this(moduleConfiguration, contextStore, "", "");
+    }
+
+    /**
+     * Creates a new preprocessor with the specified context store.
+     *
+     * @param moduleConfiguration The module configuration containing template and model settings
+     * @param contextStore The shared context store for pipeline components
+     */
+    protected LanguageModelRequester(ModuleConfiguration moduleConfiguration, ContextStore contextStore, 
+                                     String systemMessageTemplateDefault, String jsonSchemaTemplateDefault) {
         super(contextStore);
         this.provider = new ChatLanguageModelProvider(moduleConfiguration);
         this.threads = ChatLanguageModelProvider.threads(moduleConfiguration);
         this.cache = CacheManager.getDefaultInstance().getCache(this, provider.getCacheParameters());
         
-        String systemMessageTemplate = moduleConfiguration.argumentAsString("system_message", "");
+        String systemMessageTemplate = moduleConfiguration.argumentAsString("system_message", systemMessageTemplateDefault);
         if (!systemMessageTemplate.isEmpty()) {
             this.systemMessageFormatter = new TemplateFormatter(moduleConfiguration, new ContextReplacementRetriever(null, contextStore)
                     , systemMessageTemplate);
@@ -80,14 +91,14 @@ public abstract class LanguageModelRequester extends PipelineStage {
             this.systemMessageFormatter = null;
         }
         
-        String jsonSchemaTemplate = moduleConfiguration.argumentAsString("json_schema", "");
-        if (jsonSchemaTemplate.isEmpty()) {
-            this.jsonSchemaFormatter = null;
-        } else {
+        String jsonSchemaTemplate = moduleConfiguration.argumentAsString("json_schema", jsonSchemaTemplateDefault);
+        if (!jsonSchemaTemplate.isEmpty()) {
             this.jsonSchemaFormatter = new TemplateFormatter(moduleConfiguration, new ContextReplacementRetriever(null, contextStore)
                     , jsonSchemaTemplate);
+        } else {
+            this.jsonSchemaFormatter = null;
         }
-        
+
         this.llmInstance = provider.createChatModel();
     }
 

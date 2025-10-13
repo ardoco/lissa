@@ -7,13 +7,13 @@ import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.SingleElementProcess
 import java.util.List;
 import java.util.StringJoiner;
 
-public class SentenceId extends SingleElementProcessingStage {
+public class LineIdentifier extends SingleElementProcessingStage {
     /**
      * Creates a new preprocessor with the specified context store.
      *
      * @param contextStore The shared context store for pipeline components
      */
-    public SentenceId(ContextStore contextStore) {
+    public LineIdentifier(ContextStore contextStore) {
         super(contextStore);
     }
 

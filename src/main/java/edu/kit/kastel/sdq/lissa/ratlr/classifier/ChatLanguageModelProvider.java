@@ -226,6 +226,24 @@ public class ChatLanguageModelProvider {
         return openAi.build();
     }
     
+    public OpenAiChatModel.OpenAiChatModelBuilder getBuilder() {
+        String openAiOrganizationId = Environment.getenv("OPENAI_ORGANIZATION_ID");
+        String openAiApiKey = Environment.getenv("OPENAI_API_KEY");
+        if (openAiOrganizationId == null || openAiApiKey == null) {
+            throw new IllegalStateException("OPENAI_ORGANIZATION_ID or OPENAI_API_KEY environment variable not set");
+        }
+        var openAi = new OpenAiChatModel.OpenAiChatModelBuilder()
+                .modelName(modelName)
+                .organizationId(openAiOrganizationId)
+                .apiKey(openAiApiKey)
+                .temperature(temperature)
+                .seed(seed);
+        if (timeoutSeconds != null) {
+            openAi = openAi.timeout(Duration.ofSeconds(timeoutSeconds));
+        }
+        return openAi;
+    }
+    
     /**
      * Creates a Blablador chat model instance.
      * Requires Blablador API key to be set in environment variables.

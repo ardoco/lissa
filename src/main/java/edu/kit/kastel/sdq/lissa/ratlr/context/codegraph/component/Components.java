@@ -41,42 +41,6 @@ public final class Components {
     // TODO SubInheritanceHierarchyFunction, SubtypeFilter
     // TODO SuperInheritanceHierarchyFunction.DistinctTypeListener
 
-    public static Collection<Component> getComponents(ComponentStrategy[] strategies, CtModel model, ArtifactMapper mapper, List<Path> projectConfigurations, Path codeRoot) {
-        Collection<Component> components = new TreeSet<>();
-        for (ComponentStrategy strategy : strategies) {
-            components.addAll(switch (strategy) {
-                case PACKAGES -> getComponents(model, mapper);
-                case BUILD_CONFIGURATIONS -> getComponents(projectConfigurations, codeRoot, mapper);
-            });
-        }
-        return components;
-    }
-
-    private static Collection<Component> getComponents(List<Path> projectConfigurations, Path codeRoot, ArtifactMapper mapper) {
-        Map<Path, SortedSet<Artifact>> componentMapping = new HashMap<>();
-        for (Path configPath : projectConfigurations) {
-            Path rootPath = configPath.getParent();
-            try (Stream<Path> paths = Files.walk(rootPath)) {
-                componentMapping.put(rootPath, new TreeSet<>(mapper.getArtifactsByAbsolutePaths(paths)));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        Collection<Component> components = new TreeSet<>();
-        for (Map.Entry<Path, SortedSet<Artifact>> componentEntry : componentMapping.entrySet()) {
-            Path rootPath = codeRoot.relativize(componentEntry.getKey());
-            if (rootPath.toString().isEmpty() || componentEntry.getValue().isEmpty()) {
-                continue;
-            }
-            SortedSet<String> paths = new TreeSet<>();
-            String normalizedPath = rootPath.toString().replace("\\", "/");
-            paths.add(normalizedPath);
-            components.add(new SimpleComponent(normalizedPath, normalizedPath, componentEntry.getValue(), paths));
-        }
-        return components;
-    }
-
     public static Collection<ComponentSpoonAdapter> getComponents(CtModel model, ArtifactMapper mapper) {
         // component root packages with contained types
         Map<CtPackage, Collection<CtType<?>>> components = getComponentRootPackages(model);
