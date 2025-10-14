@@ -55,9 +55,10 @@ public class Analysis {
                     truePositivesBySentenceId.getOrDefault(i, 0), 
                     falsePositivesBySentenceId.getOrDefault(i, 0), 
                     falseNegativesBySentenceId.getOrDefault(i, 0)));
-            sentencePrecision.put(i, getHistogramValue(statisticsBySentenceId.get(i).precision, max, i));
-            sentenceRecall.put(i, getHistogramValue(statisticsBySentenceId.get(i).recall, max, i));
-            sentenceF1.put(i, getHistogramValue(statisticsBySentenceId.get(i).f1, max, i));
+            SentenceAnalysis sentenceAnalysis = statisticsBySentenceId.get(i);
+            sentencePrecision.put(i, getHistogramValue(sentenceAnalysis.precision, max, i) + "| " + sentenceAnalysis.predictedPos);
+            sentenceRecall.put(i, getHistogramValue(sentenceAnalysis.recall, max, i) + "| " + sentenceAnalysis.expectedPos);
+            sentenceF1.put(i, getHistogramValue(sentenceAnalysis.f1, max, i));
         }
         
         this.sourceElements = sourceElements.stream()
@@ -88,9 +89,9 @@ public class Analysis {
     }
 
     @NotNull
-    private static String getHistogramValue(float value, int max, int i) {
+    private static String getHistogramValue(float value, int maxId, int id) {
         int shifted = (int) (value * 100);
-        return " ".repeat(String.valueOf(max).length() - String.valueOf(i).length()) + "|".repeat(shifted) + " ".repeat(100 - shifted);
+        return " ".repeat(String.valueOf(maxId).length() - String.valueOf(id).length()) + "|".repeat(shifted) + " ".repeat(100 - shifted);
     }
 
     private static int collectSentenceStatistics(Set<TraceLink> traceLinks, Map<Integer, Integer> collector, boolean print) {
@@ -161,15 +162,19 @@ public class Analysis {
         private final float recall;
         @JsonProperty
         private final float f1;
+        @JsonProperty
+        private final int predictedPos;
+        @JsonProperty
+        private final int expectedPos;
 
         private SentenceAnalysis(int truePositives, int falsePositives, int falseNegatives) {
             this.truePositives = truePositives;
             this.falsePositives = falsePositives;
             this.falseNegatives = falseNegatives;
-            int pos = truePositives + falsePositives;
-            this.precision = pos == 0 ? 1.0f : ((float) truePositives) / pos;
-            int totalPos = truePositives + falseNegatives;
-            this.recall = totalPos == 0 ? 1.0f : ((float) truePositives) / totalPos;
+            this.predictedPos = truePositives + falsePositives;
+            this.precision = predictedPos == 0 ? 1.0f : ((float) truePositives) / predictedPos;
+            this.expectedPos = truePositives + falseNegatives;
+            this.recall = expectedPos == 0 ? 1.0f : ((float) truePositives) / expectedPos;
             this.f1 = (precision + recall) == 0.0f ? 0.0f : (2 * precision * recall) / (precision + recall);
         }
     }
