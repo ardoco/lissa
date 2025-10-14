@@ -40,7 +40,9 @@ public class ComponentNamesWriter extends LanguageModelRequester {
 
     @Override
     protected List<Element> createElements(List<Element> elements, List<String> responses) {
-        contextStore.createContext(Jsons.readValue(responses.getFirst(), new TypeReference<ComponentNames>() {}));
+        ComponentNames componentNames = Jsons.readValue(responses.getFirst(), new TypeReference<>() {});
+        contextStore.createContext(componentNames);
+        contextStore.createContext(new StringContext("documentation_component_names_json", componentNames.asJsonArrayWithoutBrackets()));
         
         elements.forEach(element -> element.setCompare(true));
         return elements;

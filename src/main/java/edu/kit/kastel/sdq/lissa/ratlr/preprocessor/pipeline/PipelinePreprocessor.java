@@ -15,6 +15,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.documentation.Compon
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.documentation.ProjectNameWriter;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.documentation.SectionsSplitter;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.documentation.SentenceComponents;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.documentation.SentenceComponentsResolver;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.json.JsonConverterText;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.json.JsonMergerArray;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.json.JsonSplitterArray;
@@ -143,6 +144,7 @@ public class PipelinePreprocessor extends Preprocessor {
             case "documentationSectionSplitter" -> new SectionsSplitter(configuration, contextStore);
             case "documentationSentenceComponent" -> new SentenceComponents(configuration, contextStore);
             case "documentationAmbiguousComponents" -> new AmbiguousComponents(configuration, contextStore);
+            case "documentationSentenceComponentResolver" -> new SentenceComponentsResolver(configuration, contextStore);
             case "code" -> switch (configuration.name()) {
                 case "code_component_creator" -> new ComponentCreator(contextStore);
                 default -> throw new IllegalArgumentException("Unsupported pipeline stage name: " + configuration.name());

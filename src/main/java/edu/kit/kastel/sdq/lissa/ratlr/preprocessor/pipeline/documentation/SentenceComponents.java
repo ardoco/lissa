@@ -55,6 +55,19 @@ public class SentenceComponents extends LanguageModelRequester {
         Element responseElement = Element.fromParent(elements.getFirst(), 0, responses.getFirst(), false);
         results.add(responseElement);
 
+        Map<String, String> componentNameMapping = getComponentNameMapping(extraction);
+        Element nameMappingElement = Element.fromParent(responseElement, 0, Jsons.writeValueAsString(componentNameMapping), false);
+        results.add(nameMappingElement);
+
+        for (Sentence sentence : extraction.documentation) {
+            sentence.components = sentence.components.stream().map(componentNameMapping::get).toList();
+            results.add(Element.fromParent(nameMappingElement, sentence.id - 1, Jsons.writeValueAsString(sentence), true));
+        }
+        
+        return results;
+    }
+
+    private Map<String, String> getComponentNameMapping(ComponentExtraction extraction) {
         SortedSet<String> componentNames = new TreeSet<>();
         for (Sentence sentence : extraction.documentation) {
             componentNames.addAll(sentence.components);
@@ -69,40 +82,11 @@ public class SentenceComponents extends LanguageModelRequester {
                 .map(element -> new Pair<>(element, embeddingCreator.calculateEmbedding(element)))
                 .toList();
 
-        Map<String, String> componentNameMapping = sentenceComponentNames.stream()
+        return sentenceComponentNames.stream()
                 .collect(Collectors.toMap(pair -> pair.first().getContent(),
                         pair -> retrievalStrategy.findSimilarElements(pair, simpleComponentNames).getFirst().first().getContent()));
-
-        Element nameMappingElement = Element.fromParent(responseElement, 0, Jsons.writeValueAsString(componentNameMapping), false);
-        results.add(nameMappingElement);
-        
-        
-
-        for (Sentence sentence : extraction.documentation) {
-            sentence.components = sentence.components.stream().map(componentNameMapping::get).toList();
-            
-            Element sentenceElement = Element.fromParent(nameMappingElement, sentence.id - 1, Jsons.writeValueAsString(sentence), false);
-            results.add(sentenceElement);
-            if (sentence.components.isEmpty()) {
-                results.add(Element.fromParent(sentenceElement, "-"));
-                continue;
-            }
-            List<String> components = sentence.components;
-            for (int i = 0; i < components.size(); i++) {
-                String component = components.get(i);
-                results.add(Element.fromParent(sentenceElement,i , component, true));
-            }
-        }
-        
-//        String componentNamesListing = componentNames.stream().collect(Collectors.joining("\n- ", "- ", ""));
-//        contextStore.createContext(new StringContext("component_names_listing", componentNamesListing));
-//        contextStore.createContext(new StringContext("component_names_json_list",
-//                componentNames.stream().collect(Collectors.joining("\", \"", "\"", "\""))));
-//        contextStore.createContext(new StringContext("component_names_count", String.valueOf(componentNames.size())));
-        
-        return results;
     }
-    
+
     private static final class ComponentExtraction {
         @JsonProperty
         private List<Sentence> documentation;

@@ -173,7 +173,10 @@ public abstract class LanguageModelRequester extends PipelineStage {
 
         @Override
         public String call() {
-
+            if (request == null) {
+                return null;
+            }
+            
             JsonSchema jsonSchema;
             if (jsonSchemaFormatter == null) {
                 jsonSchema = null;
