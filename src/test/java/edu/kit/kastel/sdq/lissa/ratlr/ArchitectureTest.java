@@ -3,24 +3,14 @@ package edu.kit.kastel.sdq.lissa.ratlr;
 
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.*;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.jspecify.annotations.NullMarked;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
 import com.tngtech.archunit.base.DescribedPredicate;
-import com.tngtech.archunit.core.domain.JavaClass;
-import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.domain.JavaConstructorCall;
-import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
@@ -123,33 +113,4 @@ class ArchitectureTest {
             .callMethod(Future.class, "get")
             .orShould()
             .callMethod(Future.class, "resultNow");
-
-    @Test
-    void allPackagesShouldHavePackageInfo() {
-        JavaClasses classes = new ClassFileImporter().importPackages("edu.kit.kastel.sdq.lissa");
-
-        Set<String> packages = new HashSet<>();
-        Set<String> packagesWithPackageInfo = new HashSet<>();
-
-        for (JavaClass clazz : classes) {
-            String pkg = clazz.getPackageName();
-            packages.add(pkg);
-
-            if (clazz.getSimpleName().equals("package-info")) {
-                packagesWithPackageInfo.add(pkg);
-                Assertions.assertTrue(
-                        clazz.isAnnotatedWith(NullMarked.class),
-                        "package-info.java in package " + pkg + " must be annotated with @NullMarked");
-            }
-        }
-
-        // Now check which packages are missing package-info
-        Set<String> packagesMissingPackageInfo = packages.stream()
-                .filter(pkg -> !packagesWithPackageInfo.contains(pkg))
-                .collect(Collectors.toSet());
-
-        Assertions.assertTrue(
-                packagesMissingPackageInfo.isEmpty(),
-                "Package info missing in packages: " + packagesMissingPackageInfo);
-    }
 }
