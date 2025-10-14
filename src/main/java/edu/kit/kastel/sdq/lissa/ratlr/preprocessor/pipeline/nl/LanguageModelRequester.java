@@ -24,7 +24,9 @@ import edu.kit.kastel.sdq.lissa.ratlr.utils.formatter.TemplateFormatter;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.json.Jsons;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -54,11 +56,14 @@ public abstract class LanguageModelRequester extends PipelineStage {
     private final ChatLanguageModelProvider provider;
     /** Number of threads to use for parallel processing */
     private final int threads;
+    private final ModuleConfiguration moduleConfiguration;
     /** Cache for storing and retrieving summaries */
     private final Cache cache;
-    private final TemplateFormatter systemMessageFormatter;
-    private final TemplateFormatter jsonSchemaFormatter;
+    private final TemplateFormatter defaultSystemMessageFormatter;
+    private final TemplateFormatter defaultJsonSchemaFormatter;
     private final ChatModel llmInstance;
+    private final Map<Integer, TemplateFormatter> systemMessageFormatterByRequest = new HashMap<>();
+    private final Map<Integer, TemplateFormatter> jsonSchemaFormatterByRequest = new HashMap<>();
 
     /**
      * Creates a new preprocessor with the specified context store.
@@ -81,25 +86,36 @@ public abstract class LanguageModelRequester extends PipelineStage {
         super(contextStore);
         this.provider = new ChatLanguageModelProvider(moduleConfiguration);
         this.threads = ChatLanguageModelProvider.threads(moduleConfiguration);
+        this.moduleConfiguration = moduleConfiguration;
         this.cache = CacheManager.getDefaultInstance().getCache(this, provider.getCacheParameters());
         
         String systemMessageTemplate = moduleConfiguration.argumentAsString("system_message", systemMessageTemplateDefault);
         if (!systemMessageTemplate.isEmpty()) {
-            this.systemMessageFormatter = new TemplateFormatter(moduleConfiguration, new ContextReplacementRetriever(null, contextStore)
-                    , systemMessageTemplate);
+            this.defaultSystemMessageFormatter = getTemplateFormatter(moduleConfiguration, systemMessageTemplate);
         } else {
-            this.systemMessageFormatter = null;
+            this.defaultSystemMessageFormatter = null;
         }
         
         String jsonSchemaTemplate = moduleConfiguration.argumentAsString("json_schema", jsonSchemaTemplateDefault);
         if (!jsonSchemaTemplate.isEmpty()) {
-            this.jsonSchemaFormatter = new TemplateFormatter(moduleConfiguration, new ContextReplacementRetriever(null, contextStore)
-                    , jsonSchemaTemplate);
+            this.defaultJsonSchemaFormatter = getTemplateFormatter(moduleConfiguration, jsonSchemaTemplate);
         } else {
-            this.jsonSchemaFormatter = null;
+            this.defaultJsonSchemaFormatter = null;
         }
 
         this.llmInstance = provider.createChatModel();
+    }
+
+    private TemplateFormatter getTemplateFormatter(ModuleConfiguration moduleConfiguration, String template) {
+        return new TemplateFormatter(moduleConfiguration, new ContextReplacementRetriever(null, contextStore), template);
+    }
+
+    protected final void registerRequestSystemMessage(int requestId, String systemMessageTemplate) {
+        systemMessageFormatterByRequest.put(requestId, getTemplateFormatter(moduleConfiguration, systemMessageTemplate));
+    }
+
+    protected final void registerRequestJsonSchema(int requestId, String jsonSchemaTemplate) {
+        jsonSchemaFormatterByRequest.put(requestId, getTemplateFormatter(moduleConfiguration, jsonSchemaTemplate));
     }
 
     /**
@@ -139,8 +155,10 @@ public abstract class LanguageModelRequester extends PipelineStage {
                 threads > 1 ? Executors.newFixedThreadPool(threads) : Executors.newSingleThreadExecutor();
 
         List<Callable<String>> tasks = new ArrayList<>();
-        for (String request : requests) {
-            tasks.add(new Task(request));
+        for (int i = 0; i < requests.size(); i++) {
+            String request = requests.get(i);
+            tasks.add(new Task(request, systemMessageFormatterByRequest.getOrDefault(i, defaultSystemMessageFormatter)
+                    , jsonSchemaFormatterByRequest.getOrDefault(i, defaultJsonSchemaFormatter)));
         }
 
         try {
@@ -166,9 +184,13 @@ public abstract class LanguageModelRequester extends PipelineStage {
     private final class Task implements Callable<String> {
         
         private final String request;
+        private final TemplateFormatter systemMessageFormatter;
+        private final TemplateFormatter jsonSchemaFormatter;
 
-        private Task(String request) {
+        private Task(String request, TemplateFormatter systemMessageFormatter, TemplateFormatter jsonSchemaFormatter) {
             this.request = request;
+            this.systemMessageFormatter = systemMessageFormatter;
+            this.jsonSchemaFormatter = jsonSchemaFormatter;
         }
 
         @Override
@@ -177,10 +199,8 @@ public abstract class LanguageModelRequester extends PipelineStage {
                 return null;
             }
             
-            JsonSchema jsonSchema;
-            if (jsonSchemaFormatter == null) {
-                jsonSchema = null;
-            } else {
+            JsonSchema jsonSchema = null;
+            if (jsonSchemaFormatter != null) {
                 String schema = jsonSchemaFormatter.format();
                 JsonNode title = Jsons.readTree(schema).get("title");
                 if (title == null || title.textValue().isEmpty()) {
