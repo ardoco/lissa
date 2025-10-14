@@ -11,9 +11,11 @@ import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.nl.LanguageModelRequ
 import edu.kit.kastel.sdq.lissa.ratlr.utils.json.Jsons;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class SentenceComponentsResolver extends LanguageModelRequester {
@@ -38,6 +40,8 @@ public class SentenceComponentsResolver extends LanguageModelRequester {
             
             The extracted component: `%s`
             
+            Other extracted components for this sentence: %s
+            
             Additional information about ambiguities regarding this and other components:
             ```
             %s
@@ -45,7 +49,7 @@ public class SentenceComponentsResolver extends LanguageModelRequester {
             """;
     private static final String JSON_SCHEMA_TEMPLATE_DEFAULT =
             "{\"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\"title\": \"ExtractionEvaluation\",\"description\": \"Evaluation whether the extracted component is actually being describes by the sentence.\",\"type\": \"object\",\"properties\": {\"explanation\": {\"description\": \"The explanation whether the extracted component is actually being describes by the sentence.\",\"type\": \"string\"},\"finalDecision\": {\"description\": \"The final decision whether the extracted component is actually being describes by the sentence.\",\"enum\": [<<<context_documentation_component_names_json>>>, \"-\"]}},\"required\": [\"explanation\", \"finalDecision\"]}";
-
+    private final Map<Element, List<String>> componentsByElement = new LinkedHashMap<>();
 
     public SentenceComponentsResolver(ModuleConfiguration configuration, ContextStore contextStore) {
         super(configuration, contextStore, SYSTEM_MESSAGE_TEMPLATE_DEFAULT, JSON_SCHEMA_TEMPLATE_DEFAULT);
@@ -58,17 +62,24 @@ public class SentenceComponentsResolver extends LanguageModelRequester {
         for (int i = 0; i < elements.size(); i++) {
             Element element = elements.get(i);
             Sentence sentence = Jsons.readValue(element.getContent(), new TypeReference<>() {});
-            if (ambiguityMapper.isAmbiguous(sentence.component)) {
-                Map<SortedSet<String>, String> sharedAmbiguities = ambiguityMapper.getSharedAmbiguities(sentence.component);
-                String ambiguityInformation = sharedAmbiguities.entrySet().stream()
-                        .map(entry -> "Ambiguities of `%s` with %s: %s"
-                                .formatted(sentence.component, "`" + String.join("`, `", entry.getKey()) + "`", entry.getValue()))
-                        .collect(Collectors.joining("\n"));
+            componentsByElement.put(element, new ArrayList<>(sentence.components.size()));
+            for (String component : sentence.components) {
+                if (ambiguityMapper.isAmbiguous(component)) {
+                    Map<SortedSet<String>, String> sharedAmbiguities = ambiguityMapper.getSharedAmbiguities(component);
+                    String ambiguityInformation = sharedAmbiguities.entrySet().stream()
+                            .map(entry -> "Ambiguities of `%s` with %s: %s"
+                                    .formatted(component, "`" + String.join("`, `", entry.getKey()) + "`", entry.getValue()))
+                            .collect(Collectors.joining("\n"));
 
-                requests.add(USER_MESSAGE_FORMAT.formatted(contextStore.getContext("documentation", StringContext.class).asString()
-                        , sentence.id + ": " + sentence.content, sentence.component, ambiguityInformation));
-            } else {
-                requests.add(null);
+                    requests.add(USER_MESSAGE_FORMAT.formatted(contextStore.getContext("documentation", StringContext.class).asString()
+                            , sentence.id + ": " + sentence.content
+                            , component
+                            , sentence.components.stream().filter(Predicate.not(component::equals)).collect(Collectors.joining("`, `", "`", "`"))
+                            , ambiguityInformation));
+                    componentsByElement.get(element).add(null);
+                } else {
+                    componentsByElement.get(element).add(component);
+                }
             }
         }
         return requests;
@@ -77,19 +88,22 @@ public class SentenceComponentsResolver extends LanguageModelRequester {
     @Override
     protected List<Element> createElements(List<Element> elements, List<String> responses) {
         List<Element> results = new ArrayList<>(elements.size());
-        for (int i = 0; i < elements.size(); i++) {
-            if (responses.get(i) == null) {
-                results.add(Element.fromParent(elements.get(i), elements.get(i).getContent()));
-                continue;
-            }
-            
-            ExtractionEvaluation evaluation = Jsons.readValue(responses.get(i), new TypeReference<>() {});
-            if (evaluation.finalDecision.equals(elements.get(i).getContent())) {
-                results.add(Element.fromParent(elements.get(i), elements.get(i).getContent()));
-            } else if (evaluation.finalDecision.equals("-")) {
-                results.add(Element.fromParent(elements.get(i), i, evaluation.explanation, false));
-            } else {
-                results.add(Element.fromParent(elements.get(i), evaluation.finalDecision));
+        int requestId = 0;
+        for (Map.Entry<Element, List<String>> entry : componentsByElement.entrySet()) {
+            Element element = entry.getKey();
+            int componentId = 0;
+            for (String component : entry.getValue()) {
+                if (component != null) {
+                    results.add(Element.fromParent(element, componentId, component, true));
+                    continue;
+                }
+
+                Element responseElement = Element.fromParent(element, componentId, responses.get(requestId++), false);
+                results.add(responseElement);
+                ExtractionEvaluation evaluation = Jsons.readValue(responseElement.getContent(), new TypeReference<>() {});
+                if (!evaluation.finalDecision.equals("-")) {
+                    results.add(Element.fromParent(responseElement, evaluation.finalDecision));
+                }
             }
         }
         return results;
@@ -101,7 +115,7 @@ public class SentenceComponentsResolver extends LanguageModelRequester {
         @JsonProperty
         private String content;
         @JsonProperty
-        private String component;
+        private List<String> components;
     }
     
     private static final class ExtractionEvaluation {
