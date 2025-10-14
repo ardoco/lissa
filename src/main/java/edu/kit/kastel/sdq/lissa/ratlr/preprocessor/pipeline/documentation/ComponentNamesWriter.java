@@ -1,10 +1,13 @@
 package edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.documentation;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.context.StringContext;
+import edu.kit.kastel.sdq.lissa.ratlr.context.documentation.ComponentNames;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.nl.LanguageModelRequester;
+import edu.kit.kastel.sdq.lissa.ratlr.utils.json.Jsons;
 
 import java.util.List;
 
@@ -16,9 +19,6 @@ public class ComponentNamesWriter extends LanguageModelRequester {
             - They are simple names excluding the name of the project (`<<<context_project_name>>>`)
             - They exclude prefixes and suffixes that are not essential
             - They represent main components of the project
-            
-            ## Output Format
-            Return a bulleted list of the names and nothing else.
             """;
     private static final String USER_MESSAGE_FORMAT = """
             Here is the full documentation containing all sentences:
@@ -26,9 +26,11 @@ public class ComponentNamesWriter extends LanguageModelRequester {
             %s
             ```
             """;
+    private static final String JSON_SCHEMA_TEMPLATE_DEFAULT = 
+            "{\"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\"title\": \"ComponentNamesIdentification\",\"description\": \"Identification of explicitly mentioned main components in the documentation.\",\"type\": \"object\",\"properties\": {\"names\": {\"description\": \"Explicitly mentioned main components in the documentation.\",\"type\": \"array\",\"items\": {\"type\": \"string\"}}},\"required\": [\"names\"]}";
 
     public ComponentNamesWriter(ModuleConfiguration configuration, ContextStore contextStore) {
-        super(configuration, contextStore, SYSTEM_MESSAGE_TEMPLATE_DEFAULT, "");
+        super(configuration, contextStore, SYSTEM_MESSAGE_TEMPLATE_DEFAULT, JSON_SCHEMA_TEMPLATE_DEFAULT);
     }
 
     @Override
@@ -38,12 +40,7 @@ public class ComponentNamesWriter extends LanguageModelRequester {
 
     @Override
     protected List<Element> createElements(List<Element> elements, List<String> responses) {
-        String componentNamesListing = responses.getFirst();
-        contextStore.createContext(new StringContext("component_names_listing", componentNamesListing));
-        String[] namesSplit = componentNamesListing.split("\n?- ");
-        contextStore.createContext(new StringContext("component_names_json_list", 
-                "\"" + String.join("\", \"", namesSplit) + "\""));
-        contextStore.createContext(new StringContext("component_names_count", String.valueOf(namesSplit.length)));
+        contextStore.createContext(Jsons.readValue(responses.getFirst(), new TypeReference<ComponentNames>() {}));
         
         elements.forEach(element -> element.setCompare(true));
         return elements;

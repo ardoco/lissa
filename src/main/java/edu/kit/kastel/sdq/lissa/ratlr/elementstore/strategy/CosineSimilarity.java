@@ -24,7 +24,7 @@ public class CosineSimilarity extends MaxResultsStrategy {
      * Creates a new instance limiting the returned results.
      * @param maxResults the number of the highest results to be returned
      */
-    CosineSimilarity(int maxResults) {
+    public CosineSimilarity(int maxResults) {
         super(maxResults);
     }
 

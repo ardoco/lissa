@@ -9,10 +9,12 @@ import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.Preprocessor;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.SentencePreprocessor;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.SingleArtifactPreprocessor;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.codegraph.ComponentCreator;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.documentation.AmbiguousComponents;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.documentation.CodeObjectsWriter;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.documentation.ComponentNamesWriter;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.documentation.ProjectNameWriter;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.documentation.SectionsSplitter;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.documentation.SentenceComponents;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.json.JsonConverterText;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.json.JsonMergerArray;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.json.JsonSplitterArray;
@@ -139,6 +141,8 @@ public class PipelinePreprocessor extends Preprocessor {
             case "documentationComponentNames" -> new ComponentNamesWriter(configuration, contextStore);
             case "documentationCodeObjects" -> new CodeObjectsWriter(configuration, contextStore);
             case "documentationSectionSplitter" -> new SectionsSplitter(configuration, contextStore);
+            case "documentationSentenceComponent" -> new SentenceComponents(configuration, contextStore);
+            case "documentationAmbiguousComponents" -> new AmbiguousComponents(configuration, contextStore);
             case "code" -> switch (configuration.name()) {
                 case "code_component_creator" -> new ComponentCreator(contextStore);
                 default -> throw new IllegalArgumentException("Unsupported pipeline stage name: " + configuration.name());
