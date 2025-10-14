@@ -1,17 +1,16 @@
 /* Licensed under MIT 2025. */
 package edu.kit.kastel.sdq.lissa.ratlr.artifactprovider;
 
+import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
+import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
+import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Scanner;
 import java.util.stream.Stream;
-
-import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
-import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
-import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
 
 /**
  * Provides text-based artifacts from a directory structure recursively.
@@ -43,13 +42,7 @@ public class RecursiveTextArtifactProvider extends TextArtifactProvider {
      */
     public RecursiveTextArtifactProvider(ModuleConfiguration configuration, ContextStore contextStore) {
         super(configuration, contextStore);
-        this.extensions =
-                configuration.argumentAsString("extensions").toLowerCase().split(",");
-    }
-
-    public RecursiveTextArtifactProvider(Artifact.ArtifactType artifactType, String path, String[] extensions, ContextStore contextStore) {
-        super(artifactType, path, contextStore);
-        this.extensions = Arrays.copyOf(extensions, extensions.length);
+        this.extensions = configuration.argumentAsString("extensions").toLowerCase().split(",");
     }
 
     /**

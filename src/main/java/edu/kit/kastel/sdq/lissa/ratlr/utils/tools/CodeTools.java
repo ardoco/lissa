@@ -2,7 +2,6 @@ package edu.kit.kastel.sdq.lissa.ratlr.utils.tools;
 
 import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
-import edu.kit.kastel.sdq.lissa.ratlr.artifactprovider.CodeGraphProvider;
 import edu.kit.kastel.sdq.lissa.ratlr.context.CodeGraph;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import org.slf4j.Logger;
@@ -53,6 +52,6 @@ public class CodeTools {
     }
     
     private Path getRoot() {
-        return contextStore.getContext(CodeGraphProvider.CONTEXT_IDENTIFIER, CodeGraph.class).getCodeRoot();
+        return contextStore.getContext(CodeGraph.CONTEXT_IDENTIFIER, CodeGraph.class).getCodeRoot();
     }
 }

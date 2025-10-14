@@ -1,18 +1,26 @@
 /* Licensed under MIT 2025. */
 package edu.kit.kastel.sdq.lissa.ratlr.artifactprovider;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.*;
-
-import org.apache.commons.io.IOUtils;
-
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Knowledge;
+import org.apache.commons.io.IOUtils;
+
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Provides text-based artifacts from a configured file or directory.
@@ -27,6 +35,11 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Knowledge;
  * </ul>
  */
 public class TextArtifactProvider extends PathedProvider {
+
+    /**
+     * The configuration argument key for the type of artifacts to be created.
+     */
+    protected static final String ARTIFACT_TYPE_KEY = "artifact_type";
 
     /**
      * The type of artifacts to be created.
@@ -47,13 +60,7 @@ public class TextArtifactProvider extends PathedProvider {
      */
     public TextArtifactProvider(ModuleConfiguration configuration, ContextStore contextStore) {
         super(configuration, contextStore);
-        this.artifactType = Artifact.ArtifactType.from(configuration.argumentAsString("artifact_type"));
-        this.artifacts = new ArrayList<>();
-    }
-    
-    protected TextArtifactProvider(Artifact.ArtifactType artifactType, String path, ContextStore contextStore) {
-        super(path, contextStore);
-        this.artifactType = artifactType;
+        this.artifactType = Artifact.ArtifactType.from(configuration.argumentAsString(ARTIFACT_TYPE_KEY));
         this.artifacts = new ArrayList<>();
     }
 

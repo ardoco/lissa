@@ -9,6 +9,8 @@ import java.util.Collection;
 
 public interface CodeGraph extends Context {
 
+    String CONTEXT_IDENTIFIER = "codegraph";
+
     void initializeComponentExtraction(ModuleConfiguration configuration, ContextStore contextStore);
 
     Collection<Component> getComponents();

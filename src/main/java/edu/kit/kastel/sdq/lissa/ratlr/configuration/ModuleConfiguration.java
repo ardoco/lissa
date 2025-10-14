@@ -258,6 +258,29 @@ public final class ModuleConfiguration {
     }
 
     /**
+     * Injects an argument into the configuration arguments.
+     * May be used to configure default values programmatically.
+     * The behavior of setting the argument in the configuration is simulated.
+     * This means:
+     * <ul>
+     *     <li>Injection fails if the configuration is already finalized.</li>
+     *     <li>The value of the argument, specified by the key if it already exists, will <u><b><i>not</i></b></u> be overridden.</li>
+     *     <li>The injected argument is present when serializing.</li>
+     *     <li>The injected argument must be retrieved before {@link #finalizeForSerialization() finalizing} this configuration.</li>
+     * </ul>
+     * 
+     * @param argumentKey The key of the argument to inject
+     * @param value The value of the argument to inject
+     * @return Whether the argument has been injected, {@code false} otherwise
+     */
+    public boolean injectArgument(String argumentKey, String value) {
+        if (finalized) {
+            throw new IllegalStateException(ALREADY_FINALIZED_FOR_SERIALIZATION);
+        }
+        return arguments.putIfAbsent(argumentKey, value) == null;
+    }
+
+    /**
      * Finalizes this configuration for serialization.
      * This method ensures that all arguments have been retrieved and prepares
      * the configuration for serialization.

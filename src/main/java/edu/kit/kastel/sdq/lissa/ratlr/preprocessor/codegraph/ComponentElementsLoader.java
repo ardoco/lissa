@@ -1,6 +1,5 @@
 package edu.kit.kastel.sdq.lissa.ratlr.preprocessor.codegraph;
 
-import edu.kit.kastel.sdq.lissa.ratlr.artifactprovider.CodeGraphProvider;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.CodeGraph;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
@@ -35,7 +34,7 @@ public class ComponentElementsLoader extends CodeGraphPreprocessor {
         this.basePreprocessor = new SingleArtifactPreprocessor(contextStore);
         contextStore.createContext(retrieval);
         this.formatter = new ComponentFormatter(configuration, contextStore);
-        this.codeGraph = contextStore.getContext(CodeGraphProvider.CONTEXT_IDENTIFIER, CodeGraph.class);
+        this.codeGraph = contextStore.getContext(CodeGraph.CONTEXT_IDENTIFIER, CodeGraph.class);
         this.codeGraph.initializeComponentExtraction(configuration, contextStore);
     }
 

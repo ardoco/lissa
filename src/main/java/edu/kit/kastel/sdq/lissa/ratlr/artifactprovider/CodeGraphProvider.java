@@ -7,11 +7,8 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
 
 import java.util.List;
 
-public class CodeGraphProvider extends PathedProvider {
+public class CodeGraphProvider extends RecursiveTextArtifactProvider {
 
-    private static final String CONTEXT_PREFIX = "codegraph:";
-    public static final String CONTEXT_IDENTIFIER = CONTEXT_PREFIX + "codegraph";
-    private final ArtifactProvider basicArtifactProvider;
     private final MultiModelCodeGraph codeGraph;
 
     /**
@@ -20,22 +17,28 @@ public class CodeGraphProvider extends PathedProvider {
      * @param contextStore The shared context store for pipeline components
      */
     public CodeGraphProvider(ModuleConfiguration configuration, ContextStore contextStore) {
-        super(configuration, contextStore);
-        this.basicArtifactProvider = new RecursiveTextArtifactProvider(Artifact.ArtifactType.SOURCE_CODE, this.path.getPath(), new String[]{".java"}, contextStore);
+        super(ensureCorrectArtifactType(configuration), contextStore);
         // used as a flag for other pipeline components to verify whether this provider is used at configuration validation time
-        this.codeGraph = new MultiModelCodeGraph(CONTEXT_IDENTIFIER, this.path.toPath());
+        this.codeGraph = new MultiModelCodeGraph(this.path.toPath());
         contextStore.createContext(codeGraph);
     }
 
     @Override
     public List<Artifact> getArtifacts() {
-        List<Artifact> artifacts = basicArtifactProvider.getArtifacts();
+        List<Artifact> artifacts = super.getArtifacts();
         codeGraph.setArtifacts(artifacts);
         return artifacts;
     }
-
-    @Override
-    public Artifact getArtifact(String identifier) {
-        return basicArtifactProvider.getArtifact(identifier);
+    
+    private static ModuleConfiguration ensureCorrectArtifactType(ModuleConfiguration configuration) {
+        if (configuration.hasArgument(ARTIFACT_TYPE_KEY)) {
+            if (!Artifact.ArtifactType.SOURCE_CODE.equals(Artifact.ArtifactType.from(configuration.argumentAsString(ARTIFACT_TYPE_KEY)))) {
+                throw new IllegalArgumentException("The argument key '%s' is expected to be '%s' as this provider works with source code"
+                        .formatted(ARTIFACT_TYPE_KEY, Artifact.ArtifactType.SOURCE_CODE));
+            }
+        }
+        // set the default value to be serialized, must happen before TextArtifactProvider accesses it, hence this method
+        configuration.injectArgument(ARTIFACT_TYPE_KEY, Artifact.ArtifactType.SOURCE_CODE.name());
+        return configuration;
     }
 }

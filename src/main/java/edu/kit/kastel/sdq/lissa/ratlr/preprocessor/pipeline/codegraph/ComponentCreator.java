@@ -2,7 +2,6 @@ package edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.codegraph;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
-import edu.kit.kastel.sdq.lissa.ratlr.artifactprovider.CodeGraphProvider;
 import edu.kit.kastel.sdq.lissa.ratlr.context.CodeGraph;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ElementRetrieval;
@@ -70,7 +69,7 @@ public class ComponentCreator extends SingleElementProcessingStage {
         
         SortedSet<String> paths = new TreeSet<>(Arrays.asList(componentInformation.directories));
         PathBasedComponent component = new PathBasedComponent(componentInformation.name, componentInformation.name, paths);
-        component.determineContainedArtifacts(contextStore.getContext(CodeGraphProvider.CONTEXT_IDENTIFIER, CodeGraph.class).getArtifacts());
+        component.determineContainedArtifacts(contextStore.getContext(CodeGraph.CONTEXT_IDENTIFIER, CodeGraph.class).getArtifacts());
         
         Element result = new Element(componentInformation.name, "source code component", componentInformation.name, 0, null, true);
         

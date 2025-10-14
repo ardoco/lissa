@@ -39,15 +39,13 @@ import java.util.stream.Collectors;
 public class MultiModelCodeGraph implements CodeGraph {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MultiModelCodeGraph.class);
-    protected final String identifier;
-    protected final Path codeRoot;
+    private final Path codeRoot;
     private final Set<ComponentExtractor> componentExtractors = new LinkedHashSet<>();
-    private final Collection<CtModel> models = new ArrayList<>();
+    private Collection<CtModel> models;
     private List<Artifact> artifacts;
-    protected Collection<Component> components;
+    private Collection<Component> components;
 
-    public MultiModelCodeGraph(String identifier, Path codeRoot) {
-        this.identifier = identifier;
+    public MultiModelCodeGraph(Path codeRoot) {
         this.codeRoot = codeRoot;
     }
     
@@ -126,12 +124,15 @@ public class MultiModelCodeGraph implements CodeGraph {
 
     @Override
     public final String getId() {
-        return identifier;
+        return CodeGraph.CONTEXT_IDENTIFIER;
     }
 
     private Collection<CtModel> getModels() {
-        if (models.isEmpty()) {
-            models.addAll(getModels(codeRoot));
+        if (models == null) {
+            models = getModels(codeRoot);
+            if (models.isEmpty()) {
+                LOGGER.info("unable to build any Spoon model");
+            }
         }
         return Collections.unmodifiableCollection(models);
     }
