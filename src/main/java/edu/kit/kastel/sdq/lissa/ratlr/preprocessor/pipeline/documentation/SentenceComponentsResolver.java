@@ -28,9 +28,7 @@ public class SentenceComponentsResolver extends LanguageModelRequester {
             Use information about ambiguities, that is provided as well, to justify your reasoning.
             
             1. Explain whether the sentence actually describes the provided component of the project.
-            2. Then give your final decision. If you decide that the sentence actually describes the provided component of the project, then choose the provided component.
-            Otherwise, if your explanation suggest another component that rather should have been extracted, then choose this component.
-            Otherwise, choose `-`.
+            2. Then give your final decision.
             """;
     private static final String USER_MESSAGE_FORMAT = """
             The full documentation containing all sentences:
@@ -50,7 +48,7 @@ public class SentenceComponentsResolver extends LanguageModelRequester {
             ```
             """;
     private static final String JSON_SCHEMA_TEMPLATE_DEFAULT =
-            "{\"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\"title\": \"ExtractionEvaluation\",\"description\": \"Evaluation whether the extracted component is actually being describes by the sentence.\",\"type\": \"object\",\"properties\": {\"explanation\": {\"description\": \"The explanation whether the extracted component is actually being describes by the sentence.\",\"type\": \"string\"},\"finalDecision\": {\"description\": \"The final decision whether the extracted component is actually being describes by the sentence.\",\"enum\": [%s, \"-\"]}},\"required\": [\"explanation\", \"finalDecision\"]}";
+            "{\"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\"title\": \"ExtractionEvaluation\",\"description\": \"Evaluation whether the extracted component is actually being described by the sentence.\",\"type\": \"object\",\"properties\": {\"explanation\": {\"description\": \"The explanation whether the extracted component is actually being described by the sentence.\",\"type\": \"string\"},\"finalDecision\": {\"description\": \"The final decision whether the extracted component is actually being described by the sentence.\",\"type\": \"boolean\"}},\"required\": [\"explanation\", \"finalDecision\"]}";
     private final Map<Element, List<String>> componentsByElement = new LinkedHashMap<>();
 
     public SentenceComponentsResolver(ModuleConfiguration configuration, ContextStore contextStore) {
@@ -78,7 +76,7 @@ public class SentenceComponentsResolver extends LanguageModelRequester {
                     ambiguitySharedComponents.removeIf(sentence.components::contains);
                     ambiguitySharedComponents.add(component);
                     registerRequestJsonSchema(requests.size(),
-                            JSON_SCHEMA_TEMPLATE_DEFAULT.formatted("\"" + String.join("\", \"", ambiguitySharedComponents) + "\""));
+                            JSON_SCHEMA_TEMPLATE_DEFAULT);
 
                     requests.add(USER_MESSAGE_FORMAT.formatted(contextStore.getContext("documentation", StringContext.class).asString()
                             , sentence.id + ": " + sentence.content
@@ -111,8 +109,8 @@ public class SentenceComponentsResolver extends LanguageModelRequester {
                 Element responseElement = Element.fromParent(element, i, responses.get(requestId++), false);
                 results.add(responseElement);
                 ExtractionEvaluation evaluation = Jsons.readValue(responseElement.getContent(), new TypeReference<>() {});
-                if (!evaluation.finalDecision.equals("-")) {
-                    results.add(Element.fromParent(responseElement, evaluation.finalDecision));
+                if (evaluation.finalDecision) {
+                    results.add(Element.fromParent(responseElement, Jsons.readValue(element.getContent(), new TypeReference<Sentence>() {}).components.get(i)));
                 }
             }
         }
@@ -132,6 +130,6 @@ public class SentenceComponentsResolver extends LanguageModelRequester {
         @JsonProperty
         private String explanation;
         @JsonProperty
-        private String finalDecision;
+        private boolean finalDecision;
     }
 }
