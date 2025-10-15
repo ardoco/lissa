@@ -15,6 +15,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.StringJoiner;
+import java.util.TreeSet;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -48,7 +50,7 @@ public class SentenceComponentsResolver extends LanguageModelRequester {
             ```
             """;
     private static final String JSON_SCHEMA_TEMPLATE_DEFAULT =
-            "{\"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\"title\": \"ExtractionEvaluation\",\"description\": \"Evaluation whether the extracted component is actually being describes by the sentence.\",\"type\": \"object\",\"properties\": {\"explanation\": {\"description\": \"The explanation whether the extracted component is actually being describes by the sentence.\",\"type\": \"string\"},\"finalDecision\": {\"description\": \"The final decision whether the extracted component is actually being describes by the sentence.\",\"enum\": [<<<context_documentation_component_names_json>>>, \"-\"]}},\"required\": [\"explanation\", \"finalDecision\"]}";
+            "{\"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\"title\": \"ExtractionEvaluation\",\"description\": \"Evaluation whether the extracted component is actually being describes by the sentence.\",\"type\": \"object\",\"properties\": {\"explanation\": {\"description\": \"The explanation whether the extracted component is actually being describes by the sentence.\",\"type\": \"string\"},\"finalDecision\": {\"description\": \"The final decision whether the extracted component is actually being describes by the sentence.\",\"enum\": [%s, \"-\"]}},\"required\": [\"explanation\", \"finalDecision\"]}";
     private final Map<Element, List<String>> componentsByElement = new LinkedHashMap<>();
 
     public SentenceComponentsResolver(ModuleConfiguration configuration, ContextStore contextStore) {
@@ -59,17 +61,24 @@ public class SentenceComponentsResolver extends LanguageModelRequester {
     protected List<String> createRequests(List<Element> elements) {
         AmbiguityMapper ambiguityMapper = contextStore.getContext("component_ambiguity_mapper", AmbiguityMapper.class);
         List<String> requests = new ArrayList<>(elements.size());
-        for (int i = 0; i < elements.size(); i++) {
-            Element element = elements.get(i);
+        for (Element element : elements) {
             Sentence sentence = Jsons.readValue(element.getContent(), new TypeReference<>() {});
             componentsByElement.put(element, new ArrayList<>(sentence.components.size()));
             for (String component : sentence.components) {
                 if (ambiguityMapper.isAmbiguous(component)) {
                     Map<SortedSet<String>, String> sharedAmbiguities = ambiguityMapper.getSharedAmbiguities(component);
-                    String ambiguityInformation = sharedAmbiguities.entrySet().stream()
-                            .map(entry -> "Ambiguities of `%s` with %s: %s"
-                                    .formatted(component, "`" + String.join("`, `", entry.getKey()) + "`", entry.getValue()))
-                            .collect(Collectors.joining("\n"));
+                    SortedSet<String> ambiguitySharedComponents = new TreeSet<>();
+                    StringJoiner ambiguityInformation = new StringJoiner("\n");
+                    for (Map.Entry<SortedSet<String>, String> entry : sharedAmbiguities.entrySet()) {
+                        String formatted = "Ambiguities of `%s` with %s: %s"
+                                .formatted(component, "`" + String.join("`, `", entry.getKey()) + "`", entry.getValue());
+                        ambiguityInformation.add(formatted);
+                        ambiguitySharedComponents.addAll(entry.getKey());
+                    }
+                    ambiguitySharedComponents.removeIf(sentence.components::contains);
+                    ambiguitySharedComponents.add(component);
+                    registerRequestJsonSchema(requests.size(),
+                            JSON_SCHEMA_TEMPLATE_DEFAULT.formatted("\"" + String.join("\", \"", ambiguitySharedComponents) + "\""));
 
                     requests.add(USER_MESSAGE_FORMAT.formatted(contextStore.getContext("documentation", StringContext.class).asString()
                             , sentence.id + ": " + sentence.content
@@ -91,14 +100,15 @@ public class SentenceComponentsResolver extends LanguageModelRequester {
         int requestId = 0;
         for (Map.Entry<Element, List<String>> entry : componentsByElement.entrySet()) {
             Element element = entry.getKey();
-            int componentId = 0;
-            for (String component : entry.getValue()) {
+            List<String> value = entry.getValue();
+            for (int i = 0; i < value.size(); i++) {
+                String component = value.get(i);
                 if (component != null) {
-                    results.add(Element.fromParent(element, componentId, component, true));
+                    results.add(Element.fromParent(element, i, component, true));
                     continue;
                 }
 
-                Element responseElement = Element.fromParent(element, componentId, responses.get(requestId++), false);
+                Element responseElement = Element.fromParent(element, i, responses.get(requestId++), false);
                 results.add(responseElement);
                 ExtractionEvaluation evaluation = Jsons.readValue(responseElement.getContent(), new TypeReference<>() {});
                 if (!evaluation.finalDecision.equals("-")) {

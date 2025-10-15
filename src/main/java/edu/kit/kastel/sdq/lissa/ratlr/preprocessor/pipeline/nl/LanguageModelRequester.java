@@ -56,14 +56,13 @@ public abstract class LanguageModelRequester extends PipelineStage {
     private final ChatLanguageModelProvider provider;
     /** Number of threads to use for parallel processing */
     private final int threads;
-    private final ModuleConfiguration moduleConfiguration;
     /** Cache for storing and retrieving summaries */
     private final Cache cache;
     private final TemplateFormatter defaultSystemMessageFormatter;
     private final TemplateFormatter defaultJsonSchemaFormatter;
     private final ChatModel llmInstance;
-    private final Map<Integer, TemplateFormatter> systemMessageFormatterByRequest = new HashMap<>();
-    private final Map<Integer, TemplateFormatter> jsonSchemaFormatterByRequest = new HashMap<>();
+    private final Map<Integer, String> systemMessageFormatterByRequest = new HashMap<>();
+    private final Map<Integer, String> jsonSchemaFormatterByRequest = new HashMap<>();
 
     /**
      * Creates a new preprocessor with the specified context store.
@@ -86,7 +85,6 @@ public abstract class LanguageModelRequester extends PipelineStage {
         super(contextStore);
         this.provider = new ChatLanguageModelProvider(moduleConfiguration);
         this.threads = ChatLanguageModelProvider.threads(moduleConfiguration);
-        this.moduleConfiguration = moduleConfiguration;
         this.cache = CacheManager.getDefaultInstance().getCache(this, provider.getCacheParameters());
         
         String systemMessageTemplate = moduleConfiguration.argumentAsString("system_message", systemMessageTemplateDefault);
@@ -111,11 +109,11 @@ public abstract class LanguageModelRequester extends PipelineStage {
     }
 
     protected final void registerRequestSystemMessage(int requestId, String systemMessageTemplate) {
-        systemMessageFormatterByRequest.put(requestId, getTemplateFormatter(moduleConfiguration, systemMessageTemplate));
+        systemMessageFormatterByRequest.put(requestId, systemMessageTemplate);
     }
 
     protected final void registerRequestJsonSchema(int requestId, String jsonSchemaTemplate) {
-        jsonSchemaFormatterByRequest.put(requestId, getTemplateFormatter(moduleConfiguration, jsonSchemaTemplate));
+        jsonSchemaFormatterByRequest.put(requestId, jsonSchemaTemplate);
     }
 
     /**
@@ -157,8 +155,8 @@ public abstract class LanguageModelRequester extends PipelineStage {
         List<Callable<String>> tasks = new ArrayList<>();
         for (int i = 0; i < requests.size(); i++) {
             String request = requests.get(i);
-            tasks.add(new Task(request, systemMessageFormatterByRequest.getOrDefault(i, defaultSystemMessageFormatter)
-                    , jsonSchemaFormatterByRequest.getOrDefault(i, defaultJsonSchemaFormatter)));
+            tasks.add(new Task(request, formatForRequest(systemMessageFormatterByRequest.get(i), defaultSystemMessageFormatter)
+                    , formatForRequest(jsonSchemaFormatterByRequest.get(i), defaultJsonSchemaFormatter)));
         }
 
         try {
@@ -181,16 +179,20 @@ public abstract class LanguageModelRequester extends PipelineStage {
         return result;
     }
     
+    private static String formatForRequest(String requestSpecific, TemplateFormatter formatter) {
+        return requestSpecific != null ? requestSpecific : formatter != null ? formatter.format() : null;
+    }
+    
     private final class Task implements Callable<String> {
         
         private final String request;
-        private final TemplateFormatter systemMessageFormatter;
-        private final TemplateFormatter jsonSchemaFormatter;
+        private final String systemMessage;
+        private final String schema;
 
-        private Task(String request, TemplateFormatter systemMessageFormatter, TemplateFormatter jsonSchemaFormatter) {
+        private Task(String request, String systemMessage, String jsonSchema) {
             this.request = request;
-            this.systemMessageFormatter = systemMessageFormatter;
-            this.jsonSchemaFormatter = jsonSchemaFormatter;
+            this.systemMessage = systemMessage;
+            this.schema = jsonSchema;
         }
 
         @Override
@@ -200,8 +202,7 @@ public abstract class LanguageModelRequester extends PipelineStage {
             }
             
             JsonSchema jsonSchema = null;
-            if (jsonSchemaFormatter != null) {
-                String schema = jsonSchemaFormatter.format();
+            if (this.schema != null) {
                 JsonNode title = Jsons.readTree(schema).get("title");
                 if (title == null || title.textValue().isEmpty()) {
                     throw new IllegalArgumentException("when using 'json_schema' then 'title' of the schema must be set and not empty");
@@ -210,8 +211,8 @@ public abstract class LanguageModelRequester extends PipelineStage {
             }
             
             List<ChatMessage> messages = new ArrayList<>();
-            if (systemMessageFormatter != null) {
-                messages.add(new SystemMessage(systemMessageFormatter.format()));
+            if (systemMessage != null) {
+                messages.add(new SystemMessage(systemMessage));
             }
             messages.add(new UserMessage(request));
             CacheKey cacheKey = CacheKey.of(
