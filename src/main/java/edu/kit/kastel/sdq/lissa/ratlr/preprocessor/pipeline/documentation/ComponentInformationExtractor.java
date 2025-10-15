@@ -6,6 +6,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.context.documentation.ComponentInformation;
 import edu.kit.kastel.sdq.lissa.ratlr.context.documentation.ComponentNames;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
+import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.Preprocessor;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.PipelinePreprocessor;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.nl.LanguageModelRequester;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.json.Jsons;
@@ -50,7 +51,7 @@ public class ComponentInformationExtractor extends LanguageModelRequester {
         Collection<ComponentInformation.Information> collectedInformation = new ArrayList<>(responses.size());
         for (int i = 0; i < responses.size(); i++) {
             String response = responses.get(i);
-            results.add(new Element("component information", "meta information", response, 0, elements.getFirst(), false));
+            results.add(new Element("component information" + Preprocessor.SEPARATOR + i, "meta information", response, 0, elements.getFirst(), false));
 
             collectedInformation.add(Jsons.readValue(response, new TypeReference<>() {}));
         }
