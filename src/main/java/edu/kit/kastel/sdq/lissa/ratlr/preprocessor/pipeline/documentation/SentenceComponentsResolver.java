@@ -1,5 +1,6 @@
 package edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.documentation;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
@@ -12,6 +13,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.utils.json.Jsons;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
@@ -50,6 +52,8 @@ public class SentenceComponentsResolver extends LanguageModelRequester {
     private static final String JSON_SCHEMA_TEMPLATE_DEFAULT =
             "{\"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\"title\": \"ExtractionEvaluation\",\"description\": \"Evaluation whether the extracted component is expected to contain what is described by the sentence.\",\"type\": \"object\",\"properties\": {\"explanation\": {\"description\": \"The explanation whether the extracted component is expected to contain what is described by the sentence.\",\"type\": \"string\"},\"finalDecision\": {\"description\": \"The final decision whether the extracted component is expected to contain what is described by the sentence.\",\"type\": \"boolean\"}},\"required\": [\"explanation\", \"finalDecision\"]}";
     private final Map<Element, List<String>> componentsByElement = new LinkedHashMap<>();
+    private final Map<Element, List<String>> populatedComponentsByElement = new LinkedHashMap<>();
+    private final List<Element> results = new LinkedList<>();
 
     public SentenceComponentsResolver(ModuleConfiguration configuration, ContextStore contextStore) {
         super(configuration, contextStore, SYSTEM_MESSAGE_TEMPLATE_DEFAULT, JSON_SCHEMA_TEMPLATE_DEFAULT);
@@ -59,24 +63,28 @@ public class SentenceComponentsResolver extends LanguageModelRequester {
     protected List<String> createRequests(List<Element> elements) {
         AmbiguityMapper ambiguityMapper = contextStore.getContext("component_ambiguity_mapper", AmbiguityMapper.class);
         List<String> requests = new ArrayList<>(elements.size());
-        for (Element element : elements) {
+        for (int i = 0; i < elements.size(); i++) {
+            Element element = elements.get(i);
             Sentence sentence = Jsons.readValue(element.getContent(), new TypeReference<>() {});
-            componentsByElement.put(element, new ArrayList<>(sentence.components.size()));
-            for (String component : sentence.components) {
+            SortedSet<String> populatedAmbiguityComponents = sentence.components.stream()
+                    .flatMap(component -> ambiguityMapper.getSharedAmbiguities(component).keySet().stream().flatMap(SortedSet::stream))
+                    .collect(Collectors.toCollection(TreeSet::new));
+            populatedAmbiguityComponents.addAll(sentence.components);
+            results.add(Element.fromParent(element, i,
+                    Jsons.writeValueAsString(new Sentence(sentence.id, sentence.content, populatedAmbiguityComponents.stream().toList())), 
+                    false));
+            componentsByElement.put(element, new ArrayList<>(populatedAmbiguityComponents.size()));
+            populatedComponentsByElement.put(element, populatedAmbiguityComponents.stream().toList());
+            for (String component : populatedAmbiguityComponents) {
                 if (ambiguityMapper.isAmbiguous(component)) {
                     Map<SortedSet<String>, String> sharedAmbiguities = ambiguityMapper.getSharedAmbiguities(component);
-                    SortedSet<String> ambiguitySharedComponents = new TreeSet<>();
                     StringJoiner ambiguityInformation = new StringJoiner("\n");
                     for (Map.Entry<SortedSet<String>, String> entry : sharedAmbiguities.entrySet()) {
                         String formatted = "Ambiguities of `%s` with %s: %s"
                                 .formatted(component, "`" + String.join("`, `", entry.getKey()) + "`", entry.getValue());
                         ambiguityInformation.add(formatted);
-                        ambiguitySharedComponents.addAll(entry.getKey());
                     }
-                    ambiguitySharedComponents.removeIf(sentence.components::contains);
-                    ambiguitySharedComponents.add(component);
-                    registerRequestJsonSchema(requests.size(),
-                            JSON_SCHEMA_TEMPLATE_DEFAULT);
+                    registerRequestJsonSchema(requests.size(), JSON_SCHEMA_TEMPLATE_DEFAULT);
 
                     requests.add(USER_MESSAGE_FORMAT.formatted(contextStore.getContext("documentation", StringContext.class).asString()
                             , sentence.id + ": " + sentence.content
@@ -94,7 +102,6 @@ public class SentenceComponentsResolver extends LanguageModelRequester {
 
     @Override
     protected List<Element> createElements(List<Element> elements, List<String> responses) {
-        List<Element> results = new ArrayList<>(elements.size());
         int requestId = 0;
         for (Map.Entry<Element, List<String>> entry : componentsByElement.entrySet()) {
             Element element = entry.getKey();
@@ -110,7 +117,7 @@ public class SentenceComponentsResolver extends LanguageModelRequester {
                 results.add(responseElement);
                 ExtractionEvaluation evaluation = Jsons.readValue(responseElement.getContent(), new TypeReference<>() {});
                 if (evaluation.finalDecision) {
-                    results.add(Element.fromParent(responseElement, Jsons.readValue(element.getContent(), new TypeReference<Sentence>() {}).components.get(i)));
+                    results.add(Element.fromParent(responseElement, populatedComponentsByElement.get(element).get(i)));
                 }
             }
         }
@@ -124,6 +131,13 @@ public class SentenceComponentsResolver extends LanguageModelRequester {
         private String content;
         @JsonProperty
         private List<String> components;
+
+        @JsonCreator
+        public Sentence(@JsonProperty("id") int id, @JsonProperty("content") String content, @JsonProperty("components") List<String> components) {
+            this.id = id;
+            this.content = content;
+            this.components = components;
+        }
     }
     
     private static final class ExtractionEvaluation {

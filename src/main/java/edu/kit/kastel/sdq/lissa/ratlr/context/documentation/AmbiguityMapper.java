@@ -13,6 +13,7 @@ public class AmbiguityMapper implements Context {
 
     private final String identifier;
     private final Map<SortedSet<String>, String> ambiguityInformation;
+    private final Map<String, Map<SortedSet<String>, String>> ambiguitiesByValue = new HashMap<>();
 
     public AmbiguityMapper(String identifier, Map<SortedSet<String>, String> ambiguityInformation) {
         this.identifier = identifier;
@@ -29,6 +30,9 @@ public class AmbiguityMapper implements Context {
     }
     
     public Map<SortedSet<String>, String> getSharedAmbiguities(String value) {
+        if (ambiguitiesByValue.containsKey(value)) {
+            return ambiguitiesByValue.get(value);
+        }
         Map<SortedSet<String>, String> sharedAmbiguities = new HashMap<>();
         for (Map.Entry<SortedSet<String>, String> sharingAmbiguity : ambiguityInformation.entrySet()) {
             if (sharingAmbiguity.getKey().contains(value)) {
@@ -38,6 +42,7 @@ public class AmbiguityMapper implements Context {
                     , sharingAmbiguity.getValue());
             }
         }
+        ambiguitiesByValue.put(value, sharedAmbiguities);
         return sharedAmbiguities;
     }
 
