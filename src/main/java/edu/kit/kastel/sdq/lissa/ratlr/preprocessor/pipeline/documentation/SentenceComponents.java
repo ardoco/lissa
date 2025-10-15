@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 public class SentenceComponents extends LanguageModelRequester {
 
     private static final String SYSTEM_MESSAGE_TEMPLATE_DEFAULT =
-            "Your task is to analyse software architecture documentation. Each sentence of the documentation is prefixed with its identifier. Extract for each sentence which component of the project it describes.";
+            "Your task is to analyse software architecture documentation. Each sentence of the documentation is prefixed with its identifier. Extract for each sentence in which components of the project one needs to look to find the code that it describes.";
     private static final String USER_MESSAGE_FORMAT = "%s";
     private static final String JSON_SCHEMA_TEMPLATE_DEFAULT =
             "{\"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\"title\": \"ComponentExtraction\",\"description\": \"A sentence from the document with additional instructions on how to evaluate this sentence\",\"type\": \"object\",\"properties\": {\"documentation\": {\"description\": \"The software architecture documentation of the project.\",\"type\": \"array\",\"items\": {\"$ref\": \"#/$defs/sentence\"}}},\"$defs\": {\"sentence\": {\"type\": \"object\",\"properties\": {\"id\": {\"description\": \"The identifier of the sentence.\",\"type\": \"integer\"},\"content\": {\"description\": \"The verbatim content of the sentence.\",\"type\": \"string\"},\"components\": {\"description\": \"The names of the components that this sentence describes. They exclude prefixes and suffixes that are not essential.\",\"type\": \"array\",\"items\": {\"type\": \"string\"},\"minItems\": 0}},\"required\": [\"id\", \"content\", \"components\"]}},\"required\": [\"documentation\"]}";
