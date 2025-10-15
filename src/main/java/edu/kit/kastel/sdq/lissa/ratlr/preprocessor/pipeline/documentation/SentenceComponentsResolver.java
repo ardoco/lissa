@@ -24,10 +24,10 @@ public class SentenceComponentsResolver extends LanguageModelRequester {
 
     private static final String SYSTEM_MESSAGE_TEMPLATE_DEFAULT = """
             You'll be given a sentence from a documentation that describes the components of a software project.
-            Your task is to make sure whether the sentence **truly** describes the additionally provided component that has been extracted before.
+            Your task is to make sure whether the extracted component **truly** is expected to contain the code that is described by the sentence.
             Use information about ambiguities, that is provided as well, to justify your reasoning.
             
-            1. Explain whether the sentence actually describes the provided component of the project.
+            1. Explain whether the extracted component actually is expected to contain what is described by the sentence.
             2. Then give your final decision.
             """;
     private static final String USER_MESSAGE_FORMAT = """
@@ -48,7 +48,7 @@ public class SentenceComponentsResolver extends LanguageModelRequester {
             ```
             """;
     private static final String JSON_SCHEMA_TEMPLATE_DEFAULT =
-            "{\"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\"title\": \"ExtractionEvaluation\",\"description\": \"Evaluation whether the extracted component is actually being described by the sentence.\",\"type\": \"object\",\"properties\": {\"explanation\": {\"description\": \"The explanation whether the extracted component is actually being described by the sentence.\",\"type\": \"string\"},\"finalDecision\": {\"description\": \"The final decision whether the extracted component is actually being described by the sentence.\",\"type\": \"boolean\"}},\"required\": [\"explanation\", \"finalDecision\"]}";
+            "{\"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\"title\": \"ExtractionEvaluation\",\"description\": \"Evaluation whether the extracted component is expected to contain what is described by the sentence.\",\"type\": \"object\",\"properties\": {\"explanation\": {\"description\": \"The explanation whether the extracted component is expected to contain what is described by the sentence.\",\"type\": \"string\"},\"finalDecision\": {\"description\": \"The final decision whether the extracted component is expected to contain what is described by the sentence.\",\"type\": \"boolean\"}},\"required\": [\"explanation\", \"finalDecision\"]}";
     private final Map<Element, List<String>> componentsByElement = new LinkedHashMap<>();
 
     public SentenceComponentsResolver(ModuleConfiguration configuration, ContextStore contextStore) {
