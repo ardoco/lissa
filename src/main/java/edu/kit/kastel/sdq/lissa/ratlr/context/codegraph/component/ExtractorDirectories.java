@@ -11,20 +11,20 @@ import edu.kit.kastel.sdq.lissa.ratlr.cache.CachedChatModel;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.ChatLanguageModelProvider;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
-import edu.kit.kastel.sdq.lissa.ratlr.context.StringContext;
 import edu.kit.kastel.sdq.lissa.ratlr.context.codegraph.ProjectHierarchyTool;
-import edu.kit.kastel.sdq.lissa.ratlr.context.documentation.CodeObjectsTool;
+import edu.kit.kastel.sdq.lissa.ratlr.context.documentation.ComponentInformation;
 import edu.kit.kastel.sdq.lissa.ratlr.context.documentation.ComponentNames;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.tools.Tools;
 
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 public class ExtractorDirectories extends ComponentExtractor {
     
-    private ChatModel llmInstance;
+    private final ChatModel llmInstance;
 
     /**
      * Creates a new preprocessor with the specified context store.
@@ -41,7 +41,7 @@ public class ExtractorDirectories extends ComponentExtractor {
     @Override
     public SortedSet<SimpleComponent> extract() {
         ProjectHierarchyTool projectTool = new ProjectHierarchyTool(codeRoot);
-        CodeObjectsTool codeObjectsTool = contextStore.getContext("code_object_information_map", CodeObjectsTool.class);
+        ComponentInformation componentInformation = contextStore.getContext(ComponentInformation.IDENTIFIER, ComponentInformation.class);
         SortedSet<SimpleComponent> components = new TreeSet<>();
         for (String componentName : contextStore.getContext("documentation_component_names", ComponentNames.class).getNames()) {
             if (componentName.isEmpty()) {
@@ -51,10 +51,12 @@ public class ExtractorDirectories extends ComponentExtractor {
             ComponentLoader loader = AiServices.builder(ComponentLoader.class)
                     .chatModel(llmInstance)
                     .tools(Tools.getTools(projectTool))
-                    .tools(Tools.getTools(codeObjectsTool))
+                    .tools(Tools.getTools(componentInformation))
                     .build();
-            Result<ComponentDirectoriesExtraction> productionResult = loader.loadProduction(createUserMessage(componentName));
-            Result<ComponentDirectoriesExtraction> testResult = loader.loadTest(createUserMessage(componentName));
+            Result<ComponentDirectoriesExtraction> productionResult = loader.loadProduction(createUserMessage(componentName, 
+                    componentInformation.getComponents().keySet()));
+            Result<ComponentDirectoriesExtraction> testResult = loader.loadTest(createUserMessage(componentName, 
+                    componentInformation.getComponents().keySet()));
             components.add(constructComponent(componentName, productionResult.content(), testResult.content(), projectTool));
         }
         return components;
@@ -77,15 +79,13 @@ public class ExtractorDirectories extends ComponentExtractor {
         }
     }
 
-    private String createUserMessage(String componentName) {
-        String codeObjectNames = contextStore.getContext("code_object_names", StringContext.class).asString();
+    private String createUserMessage(String componentName, Collection<String> componentNames) {
         return """
-                Information is retrievable for these keys:{codeObjectNames}
-                
+                Information is retrievable for the keys: {componentNames}
                 
                 Resolve the directories for the component: `{componentName}`
                 """
-                .replace("{codeObjectNames}", codeObjectNames.startsWith("\n") ? codeObjectNames : "\n" + codeObjectNames)
+                .replace("{componentNames}", "`" + String.join("`, `", componentNames) + "`")
                 .replace("{componentName}", componentName);
     }
 

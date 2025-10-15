@@ -18,11 +18,20 @@ import java.util.TreeMap;
 
 public class CodeObjectsWriter extends LanguageModelRequester {
 
-    private static final String SYSTEM_MESSAGE_TEMPLATE_DEFAULT =
-            "Your task is to analyse software architecture documentation. Each sentence of the documentation is prefixed with its identifier. Extract for each sentence the objects in the codebase it describes and collect information about them.";
+    private static final String SYSTEM_MESSAGE_TEMPLATE_DEFAULT = """
+            Your task is to analyse software architecture documentation.
+            Each sentence of the documentation is prefixed with its identifier.
+            Extract for each sentence the objects in the codebase it describes and collect information about them.
+            Interesting information could be:
+            - their role or purpose in the project
+            - their relationship to other objects
+            - how they are identifiable in the project
+            - whether they are part of or contain other objects
+            - the software engineering type they represent (classes, interface, package, component)
+            """;
     private static final String USER_MESSAGE_FORMAT = "%s";
     private static final String JSON_SCHEMA_TEMPLATE_DEFAULT =
-            "{\"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\"title\": \"Extraction\",\"description\": \"Extraction of mentioned code objects to be retrieved in the project with information about them.\",\"type\": \"object\",\"properties\": {\"documentation\": {\"description\": \"The software architecture documentation of the project.\",\"type\": \"array\",\"items\": {\"$ref\": \"#/$defs/sentence\"}}},\"$defs\": {\"sentence\": {\"type\": \"object\",\"properties\": {\"id\": {\"description\": \"The identifier of the sentence.\",\"type\": \"integer\"},\"content\": {\"description\": \"The verbatim content of the sentence.\",\"type\": \"string\"},\"mentionedCodebaseObjects\": {\"description\": \"Objects in the codebase that are mentioned in the sentence.\",\"type\": \"array\",\"items\": {\"type\": \"object\",\"description\": \"A mentioned code object with its name and information about it.\",\"name\": {\"type\": \"string\",\"description\": \"The name of the mentioned code object.\"},\"information\": {\"type\": \"string\",\"description\": \"Information about the code object.\"},\"required\": [\"name\", \"information\"]}}},\"required\": [\"id\", \"content\", \"mentionedCodebaseObjects\"]}},\"required\": [\"documentation\"]}";
+            "{\"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\"title\": \"Extraction\",\"description\": \"Extraction of mentioned code objects in the project with instructions about how they can get retrieved.\",\"type\": \"object\",\"properties\": {\"documentation\": {\"description\": \"The software architecture documentation of the project.\",\"type\": \"array\",\"items\": {\"$ref\": \"#/$defs/sentence\"}}},\"$defs\": {\"sentence\": {\"type\": \"object\",\"properties\": {\"id\": {\"description\": \"The identifier of the sentence.\",\"type\": \"integer\"},\"content\": {\"description\": \"The verbatim content of the sentence.\",\"type\": \"string\"},\"mentionedCodebaseObjects\": {\"description\": \"Objects in the codebase that are mentioned in the sentence.\",\"type\": \"array\",\"items\": {\"type\": \"object\",\"description\": \"A mentioned code object with its name and information about it.\",\"name\": {\"type\": \"string\",\"description\": \"The name of the mentioned code object.\"},\"information\": {\"type\": \"string\",\"description\": \"Information about the code object.\"},\"required\": [\"name\", \"information\"]}}},\"required\": [\"id\", \"content\", \"mentionedCodebaseObjects\"]}},\"required\": [\"documentation\"]}";
 
     public CodeObjectsWriter(ModuleConfiguration configuration, ContextStore contextStore) {
         super(configuration, contextStore, SYSTEM_MESSAGE_TEMPLATE_DEFAULT, JSON_SCHEMA_TEMPLATE_DEFAULT);
@@ -47,7 +56,7 @@ public class CodeObjectsWriter extends LanguageModelRequester {
         contextStore.createContext(new StringContext("code_object_names", Jsons.writeValueAsString(codeObjectInformation.keySet())));
         elements.forEach(element -> element.setCompare(true));
         List<Element> results = new ArrayList<>(elements);
-        results.add(new Element("code objects", "meta information", responses.getFirst(), 0, elements.getFirst(), false));
+        results.add(new Element("code objects", "meta information", Jsons.writeValueAsString(codeObjectInformation), 0, elements.getFirst(), false));
         return results;
     }
     
