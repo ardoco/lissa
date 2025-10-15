@@ -9,6 +9,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.nl.LanguageModelRequester;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.json.Jsons;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ComponentNamesWriter extends LanguageModelRequester {
@@ -43,8 +44,10 @@ public class ComponentNamesWriter extends LanguageModelRequester {
         ComponentNames componentNames = Jsons.readValue(responses.getFirst(), new TypeReference<>() {});
         contextStore.createContext(componentNames);
         contextStore.createContext(new StringContext("documentation_component_names_json", componentNames.asJsonArrayWithoutBrackets()));
-        
+
         elements.forEach(element -> element.setCompare(true));
-        return elements;
+        List<Element> results = new ArrayList<>(elements);
+        results.add(new Element("component names", "meta information", responses.getFirst(), 0, elements.getFirst(), false));
+        return results;
     }
 }

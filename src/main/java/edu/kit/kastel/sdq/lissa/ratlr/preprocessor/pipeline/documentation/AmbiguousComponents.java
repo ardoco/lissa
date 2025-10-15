@@ -11,6 +11,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.nl.LanguageModelRequester;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.json.Jsons;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.stream.Collectors;
@@ -20,7 +21,11 @@ public class AmbiguousComponents extends LanguageModelRequester {
     private static final String SYSTEM_MESSAGE_TEMPLATE_DEFAULT = """
             You'll be given a list of components in a software project that are described in the documentation.
             Your task is to identify pairs of components that share ambiguities.
-            These might arise through similar names, inconsistent use in the documentation or being part of a named structure that does not distinguish between them.
+            These might arise through:
+            - similar names
+            - inconsistent use in the documentation
+            - being part of a named structure that does not distinguish between them
+            - being responsible for similar things or containing similar software artifacts
             Other reasons for ambiguities are also possible.
             
             ## Output
@@ -55,7 +60,9 @@ public class AmbiguousComponents extends LanguageModelRequester {
                         .collect(Collectors.toMap(AmbiguityCase::getAmbiguousComponents, AmbiguityCase::getAdditionalInformation))));
         
         elements.forEach(element -> element.setCompare(true));
-        return elements;
+        List<Element> results = new ArrayList<>(elements);
+        results.add(new Element("ambiguous components", "meta information", responses.getFirst(), 0, elements.getFirst(), false));
+        return results;
     }
     
     private static final class AmbiguityExtraction {

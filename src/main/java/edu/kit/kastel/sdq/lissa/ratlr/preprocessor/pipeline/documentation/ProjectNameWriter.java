@@ -6,6 +6,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.context.StringContext;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.pipeline.nl.LanguageModelRequester;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProjectNameWriter extends LanguageModelRequester {
@@ -32,6 +33,8 @@ public class ProjectNameWriter extends LanguageModelRequester {
     protected List<Element> createElements(List<Element> elements, List<String> responses) {
         contextStore.createContext(new StringContext("project_name", responses.getFirst()));
         elements.forEach(element -> element.setCompare(true));
-        return elements;
+        List<Element> results = new ArrayList<>(elements);
+        results.add(new Element("project name", "meta information", responses.getFirst(), 0, elements.getFirst(), false));
+        return results;
     }
 }

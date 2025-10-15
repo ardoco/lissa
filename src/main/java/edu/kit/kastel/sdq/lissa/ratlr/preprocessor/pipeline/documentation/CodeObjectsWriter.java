@@ -46,7 +46,9 @@ public class CodeObjectsWriter extends LanguageModelRequester {
         contextStore.createContext(new CodeObjectsTool("code_object_information_map", codeObjectInformation));
         contextStore.createContext(new StringContext("code_object_names", Jsons.writeValueAsString(codeObjectInformation.keySet())));
         elements.forEach(element -> element.setCompare(true));
-        return elements;
+        List<Element> results = new ArrayList<>(elements);
+        results.add(new Element("code objects", "meta information", responses.getFirst(), 0, elements.getFirst(), false));
+        return results;
     }
     
     private static final class Extraction {
