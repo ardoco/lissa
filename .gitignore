@@ -49,3 +49,4 @@ build/
 /trace*.csv
 /transitive-trace*.csv
 /config.json
+package-info.java
