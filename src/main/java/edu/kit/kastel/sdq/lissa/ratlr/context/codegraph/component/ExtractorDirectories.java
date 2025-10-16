@@ -23,8 +23,14 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 public class ExtractorDirectories extends ComponentExtractor {
-    
+
+    private static final String USER_MESSAGE_TEMPLATE = """
+            Information is retrievable for the keys: {componentNames}
+            
+            Resolve the directories for the component: `{componentName}`
+            """;
     private final ChatModel llmInstance;
+    private final String userMessageTemplate;
 
     /**
      * Creates a new preprocessor with the specified context store.
@@ -36,11 +42,14 @@ public class ExtractorDirectories extends ComponentExtractor {
         ChatLanguageModelProvider provider = new ChatLanguageModelProvider(configuration);
         this.llmInstance = new CachedChatModel(provider, this, provider.getBuilder().strictJsonSchema(true)
                 .supportedCapabilities(Capability.RESPONSE_FORMAT_JSON_SCHEMA).build());
+        this.userMessageTemplate = configuration.argumentAsString("user_message_template", USER_MESSAGE_TEMPLATE);
+        configuration.argumentAsString("load_production_system_message", ComponentLoader.LOAD_PRODUCTION_SYSTEM_MESSAGE);
+        configuration.argumentAsString("load_test_system_message", ComponentLoader.LOAD_TEST_SYSTEM_MESSAGE);
     }
 
     @Override
     public SortedSet<SimpleComponent> extract() {
-        ProjectHierarchyTool projectTool = new ProjectHierarchyTool(codeRoot);
+        ProjectHierarchyTool projectTool = new ProjectHierarchyTool(codeRoot, 4);
         ComponentInformation componentInformation = contextStore.getContext(ComponentInformation.IDENTIFIER, ComponentInformation.class);
         SortedSet<SimpleComponent> components = new TreeSet<>();
         for (String componentName : contextStore.getContext("documentation_component_names", ComponentNames.class).getNames()) {
@@ -80,11 +89,7 @@ public class ExtractorDirectories extends ComponentExtractor {
     }
 
     private String createUserMessage(String componentName, Collection<String> componentNames) {
-        return """
-                Information is retrievable for the keys: {componentNames}
-                
-                Resolve the directories for the component: `{componentName}`
-                """
+        return userMessageTemplate
                 .replace("{componentNames}", "`" + String.join("`, `", componentNames) + "`")
                 .replace("{componentName}", componentName);
     }
@@ -94,33 +99,36 @@ public class ExtractorDirectories extends ComponentExtractor {
     }
 
     private interface ComponentLoader {
-        
-        @SystemMessage("""
+
+        String LOAD_PRODUCTION_SYSTEM_MESSAGE = """
                 Your task is to identify directories in a software project that likely correspond to a software component for which you'll be given its name.
                 Follow the instructions to identify the production directories, i.e., those directories that contain the main purpose of the component.
                 
                 Instructions to identify directories of a component:
                 1. Retrieve more information about the component you need to resolve using function `retrieveInformationForCodeObject`. Ensure to use the keys being provided.
-                2. Get an overview about the projects structure using function `showSubDirectoriesOfRoot`.
+                2. Try to find directories with the name of the component using `findDirectories`.
                 3. Make a first prediction about the directories of the component using the retrieved information about them and the project overview.
                 4. If there is information about its contained packages, then check the sub-directories of its predicted directories using the function `showSubDirectoryOfDirectory`. If there is information about the components contained file types, then check the contained types of the predicted directories using the function `fileExtensionsSummary`.
                 5. Adjust your directory predictions as necessary. If the predicted directory does not contain the specified packages or file types, then it is not a valid prediction for that component. A prediction is valid on the other hand, if all statements about its contained packages/sub-directories and file types hold true. The name of a directory of a component (i.e., the directory without its parents) are usually inspired by and similar to the components simple name.
                 6. After that, if there are no valid predictions for a component anymore, then use the function `fileExtensionDirectories` from the root (i.e., directory ".") with the expected file type extension for that component. Start over with the 3rd step using the new information instead.
-                """)
-        Result<ComponentDirectoriesExtraction> loadProduction(String message);
-
-        @SystemMessage("""
+                """;
+        String LOAD_TEST_SYSTEM_MESSAGE = """
                 Your task is to identify directories in a software project that likely correspond to a software component for which you'll be given its name.
                 Follow the instructions to identify the test directories. Test directories only contain elements that are related to testing the component itself.
                 
                 Instructions to identify directories of a component:
                 1. Retrieve more information about the component you need to resolve using function `retrieveInformationForCodeObject`. Ensure to use the keys being provided.
-                2. Get an overview about the projects structure using function `showSubDirectoriesOfRoot`.
+                2. Try to find directories with the name of the component using `findDirectories`.
                 3. Make a first prediction about the directories of the component using the retrieved information about them and the project overview.
                 4. If there is information about its contained packages, then check the sub-directories of its predicted directories using the function `showSubDirectoryOfDirectory`. If there is information about the components contained file types, then check the contained types of the predicted directories using the function `fileExtensionsSummary`.
                 5. Adjust your directory predictions as necessary. If the predicted directory does not contain the specified packages or file types, then it is not a valid prediction for that component. A prediction is valid on the other hand, if all statements about its contained packages/sub-directories and file types hold true. The name of a directory of a component (i.e., the directory without its parents) are usually inspired by and similar to the components simple name.
                 6. After that, if there are no valid predictions for a component anymore, then use the function `fileExtensionDirectories` from the root (i.e., directory ".") with the expected file type extension for that component. Start over with the 3rd step using the new information instead.
-                """)
+                """;
+
+        @SystemMessage(LOAD_PRODUCTION_SYSTEM_MESSAGE)
+        Result<ComponentDirectoriesExtraction> loadProduction(String message);
+
+        @SystemMessage(LOAD_TEST_SYSTEM_MESSAGE)
         Result<ComponentDirectoriesExtraction> loadTest(String message);
     }
 
