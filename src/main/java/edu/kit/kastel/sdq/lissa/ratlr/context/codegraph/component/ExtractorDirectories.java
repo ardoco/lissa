@@ -14,11 +14,14 @@ import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.context.codegraph.ProjectHierarchyTool;
 import edu.kit.kastel.sdq.lissa.ratlr.context.documentation.ComponentInformation;
 import edu.kit.kastel.sdq.lissa.ratlr.context.documentation.ComponentNames;
+import edu.kit.kastel.sdq.lissa.ratlr.embeddingcreator.EmbeddingCreator;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.tools.Tools;
 
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -31,6 +34,8 @@ public class ExtractorDirectories extends ComponentExtractor {
             """;
     private final ChatModel llmInstance;
     private final String userMessageTemplate;
+    private final EmbeddingCreator embeddingCreator;
+    private int noMatchK;
 
     /**
      * Creates a new preprocessor with the specified context store.
@@ -45,11 +50,16 @@ public class ExtractorDirectories extends ComponentExtractor {
         this.userMessageTemplate = configuration.argumentAsString("user_message_template", USER_MESSAGE_TEMPLATE);
         configuration.argumentAsString("load_production_system_message", ComponentLoader.LOAD_PRODUCTION_SYSTEM_MESSAGE);
         configuration.argumentAsString("load_test_system_message", ComponentLoader.LOAD_TEST_SYSTEM_MESSAGE);
+        Map<String, String> embeddingArguments = new HashMap<>();
+        embeddingArguments.put("model", configuration.argumentAsString("embedding_model", "text-embedding-3-large"));
+        this.embeddingCreator = EmbeddingCreator.createEmbeddingCreator(
+                new ModuleConfiguration(configuration.argumentAsString("embedding_platform"), embeddingArguments), contextStore);
+        this.noMatchK = configuration.argumentAsInt("no_match_k", 5);
     }
 
     @Override
     public SortedSet<SimpleComponent> extract() {
-        ProjectHierarchyTool projectTool = new ProjectHierarchyTool(codeRoot, 4);
+        ProjectHierarchyTool projectTool = new ProjectHierarchyTool(codeRoot, 4, embeddingCreator, noMatchK);
         ComponentInformation componentInformation = contextStore.getContext(ComponentInformation.IDENTIFIER, ComponentInformation.class);
         SortedSet<SimpleComponent> components = new TreeSet<>();
         for (String componentName : contextStore.getContext("documentation_component_names", ComponentNames.class).getNames()) {

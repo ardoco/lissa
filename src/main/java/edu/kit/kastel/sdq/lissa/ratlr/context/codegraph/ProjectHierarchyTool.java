@@ -2,6 +2,11 @@ package edu.kit.kastel.sdq.lissa.ratlr.context.codegraph;
 
 import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
+import edu.kit.kastel.sdq.lissa.ratlr.elementstore.strategy.CosineSimilarity;
+import edu.kit.kastel.sdq.lissa.ratlr.elementstore.strategy.RetrievalStrategy;
+import edu.kit.kastel.sdq.lissa.ratlr.embeddingcreator.EmbeddingCreator;
+import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
+import edu.kit.kastel.sdq.lissa.ratlr.utils.Pair;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.json.Jsons;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.tools.ProgrammaticToolProvider;
 
@@ -12,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,6 +26,7 @@ import java.util.Queue;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -27,10 +34,16 @@ public class ProjectHierarchyTool implements ProgrammaticToolProvider {
 
     private final Path root;
     private final int subDirectoryRetrievalDepth;
+    private final EmbeddingCreator embeddingCreator;
+    private final RetrievalStrategy retrievalStrategy;
+    private final Map<String, float[]> directoryNameEmbeddings = new HashMap<>();
+    private final List<Pair<Element, float[]>> nameEmbeddingPairs = new ArrayList<>();
 
-    public ProjectHierarchyTool(Path root, int subDirectoryRetrievalDepth) {
+    public ProjectHierarchyTool(Path root, int subDirectoryRetrievalDepth, EmbeddingCreator embeddingCreator, int retrievalK) {
         this.root = root;
         this.subDirectoryRetrievalDepth = subDirectoryRetrievalDepth;
+        this.embeddingCreator = embeddingCreator;
+        this.retrievalStrategy = new CosineSimilarity(retrievalK);
     }
 
     @Override
@@ -46,14 +59,32 @@ public class ProjectHierarchyTool implements ProgrammaticToolProvider {
     @Tool("Finds all directories in the project with the given name. Example: simpleName=`foo` might yield `directoryInRoot/bar/foo\ndirectoryInRoot/foo\nfoo`")
     public String findDirectories(@P("The name of the directories to look for.") String simpleName) throws IOException {
         System.out.println("findDirectories(" + simpleName + ")");
+        String collected;
         try (Stream<Path> walk = Files.walk(root)) {
-            String collected = walk.filter(path -> Files.isDirectory(path) && path.getFileName().toString().equalsIgnoreCase(simpleName))
+            collected = walk.filter(path -> Files.isDirectory(path) && path.getFileName().toString().equalsIgnoreCase(simpleName))
                     .map(root::relativize)
                     .map(Path::toString)
                     .sorted()
                     .collect(Collectors.joining("\n"));
-            return collected.isEmpty() ? "No results." : collected.replace("\\", "/");
         }
+        if (!collected.isEmpty()) {
+            return collected.replace("\\", "/");
+        }
+        
+        if (directoryNameEmbeddings.isEmpty()) {
+            try (Stream<Path> walk = Files.walk(root)) {
+                List<Element> nameElements = walk.filter(Files::isDirectory).map(Path::getFileName).map(Path::toString).distinct()
+                        .map(name -> new Element(name, "directory_embedding", name, 0, null, false)).toList();
+                directoryNameEmbeddings.putAll(nameElements.stream().collect(Collectors.toMap(Element::getContent, embeddingCreator::calculateEmbedding)));
+                nameEmbeddingPairs.addAll(nameElements.stream().map(element -> new Pair<>(element, directoryNameEmbeddings.get(element.getContent()))).toList());
+            }
+        }
+
+        Element queryElement = new Element(simpleName, "directory_request", simpleName, 0, null, false);
+        List<Pair<Element, Float>> similarElements = retrievalStrategy
+                .findSimilarElements(new Pair<>(queryElement, embeddingCreator.calculateEmbedding(queryElement)), nameEmbeddingPairs);
+        String alternativesList = similarElements.stream().map(Pair::first).map(Element::getContent).collect(Collectors.joining("`\n`", "`", "`"));
+        return "There is no directory named `%s` in the whole project. These are the closest options:\n%s".formatted(simpleName, alternativesList);
     }
 
     @Tool("Returns sub-directories of the root folder of the project up to two levels deep.")
