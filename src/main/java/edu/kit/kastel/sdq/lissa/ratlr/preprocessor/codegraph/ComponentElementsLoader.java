@@ -1,5 +1,7 @@
 package edu.kit.kastel.sdq.lissa.ratlr.preprocessor.codegraph;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.CodeGraph;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
@@ -10,12 +12,13 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.Preprocessor;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.SingleArtifactPreprocessor;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.formatter.ComponentFormatter;
+import edu.kit.kastel.sdq.lissa.ratlr.utils.json.Jsons;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
 
 public class ComponentElementsLoader extends CodeGraphPreprocessor {
 
@@ -41,14 +44,18 @@ public class ComponentElementsLoader extends CodeGraphPreprocessor {
     @Override
     public List<Element> preprocess(List<Artifact> artifacts) {
         Map<Artifact, Element> artifactElements = getArtifactElements(artifacts);
-        
-        Collection<Component> components = codeGraph.getComponents();
+
+        List<Component> components = new ArrayList<>(codeGraph.getComponents());
 
         List<Element> elements = new ArrayList<>(components.size());
-        for (Component component : components) {
+        for (int i = 0; i < components.size(); i++) {
+            Component component = components.get(i);
+            Element componentInformation = new Element("component extraction" + Preprocessor.SEPARATOR + i,
+                    "source code component", Jsons.writeValueAsString(new ComponentSerialization(component)), 0, null, false);
+            elements.add(componentInformation);
+
             formatter.setValue(component);
-            
-            Element componentElement = new Element(component.getQualifiedName(), "source code component", formatter.format(), 0, null, true);
+            Element componentElement = new Element(component.getQualifiedName(), "source code component", formatter.format(), 0, componentInformation, true);
             elements.add(componentElement);
 
             List<Element> artifactElementsOfComponent = component.getContainedArtifacts().stream()
@@ -72,5 +79,22 @@ public class ComponentElementsLoader extends CodeGraphPreprocessor {
             map.put(artifacts.get(i), elements.get(i));
         }
         return map;
+    }
+    
+    private static final class ComponentSerialization {
+        @JsonProperty
+        private final String simpleName;
+        @JsonProperty
+        private final String qualifiedName;
+        @JsonIgnore
+        private final SortedSet<Artifact> correspondingArtifacts;
+        @JsonProperty
+        private final SortedSet<String> directories;
+        public ComponentSerialization(Component component) {
+            this.simpleName = component.getSimpleName();
+            this.qualifiedName = component.getQualifiedName();
+            this.correspondingArtifacts = component.getContainedArtifacts();
+            this.directories = component.getPaths();
+        }
     }
 }
