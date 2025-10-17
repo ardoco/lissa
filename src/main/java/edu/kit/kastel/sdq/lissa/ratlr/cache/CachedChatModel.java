@@ -61,7 +61,7 @@ public class CachedChatModel implements ChatModel {
     public ChatResponse chat(ChatRequest chatRequest) {
         CacheKey cacheKey = getCacheKey(chatRequest);
         return getCachedResponse(cacheKey).map(CachedChatModel::convert)
-                .orElse(chatAndCache(() -> model.chat(chatRequest), cacheKey, CachedChatModel::convert));
+                .orElseGet(() -> chatAndCache(() -> model.chat(chatRequest), cacheKey, CachedChatModel::convert));
     }
 
     @Override
@@ -83,21 +83,21 @@ public class CachedChatModel implements ChatModel {
     public String chat(String userMessage) {
         CacheKey cacheKey = getCacheKey(userMessage);
         return getCachedResponse(cacheKey)
-                .orElse(chatAndCache(() -> model.chat(userMessage), cacheKey, Function.identity()));
+                .orElseGet(() -> chatAndCache(() -> model.chat(userMessage), cacheKey, Function.identity()));
     }
 
     @Override
     public ChatResponse chat(ChatMessage... messages) {
         CacheKey cacheKey = getCacheKey(messages);
         return getCachedResponse(cacheKey).map(CachedChatModel::convert)
-                .orElse(chatAndCache(() -> model.chat(messages), cacheKey, CachedChatModel::convert));
+                .orElseGet(() -> chatAndCache(() -> model.chat(messages), cacheKey, CachedChatModel::convert));
     }
 
     @Override
     public ChatResponse chat(List<ChatMessage> messages) {
         CacheKey cacheKey = getCacheKey(messages);
         return getCachedResponse(cacheKey).map(CachedChatModel::convert)
-                .orElse(chatAndCache(() -> model.chat(messages), cacheKey, CachedChatModel::convert));
+                .orElseGet(() -> chatAndCache(() -> model.chat(messages), cacheKey, CachedChatModel::convert));
     }
 
     private <T> T chatAndCache(Supplier<T> actualChat, CacheKey cacheKey, Function<T, String> responseConverter) {
