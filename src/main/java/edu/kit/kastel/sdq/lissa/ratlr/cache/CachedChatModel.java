@@ -26,7 +26,10 @@ import edu.kit.kastel.sdq.lissa.ratlr.utils.json.Jsons;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class CachedChatModel implements ChatModel {
 
@@ -36,38 +39,29 @@ public class CachedChatModel implements ChatModel {
             .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
     private final ChatModel model;
     private final Cache cache;
-    private final ChatLanguageModelProvider modelProvider;
+    private final ChatLanguageModelProvider provider;
 
-    public CachedChatModel(ChatLanguageModelProvider modelProvider, Object origin) {
-        this(modelProvider, CacheManager.getDefaultInstance().getCache(origin, modelProvider.getCacheParameters()));
+    public CachedChatModel(ChatLanguageModelProvider provider, Object origin) {
+        this(provider, CacheManager.getDefaultInstance().getCache(origin, provider.getCacheParameters()));
     }
 
-    public CachedChatModel(ChatLanguageModelProvider modelProvider, Cache cache) {
-        this.modelProvider = modelProvider;
-        this.model = modelProvider.createChatModel();
+    public CachedChatModel(ChatLanguageModelProvider provider, Cache cache) {
+        this.provider = provider;
+        this.model = provider.createChatModel();
         this.cache = cache;
     }
 
     public CachedChatModel(ChatLanguageModelProvider provider, Object origin, ChatModel model) {
-        this.modelProvider = provider;
+        this.provider = provider;
         this.model = model;
-        this.cache = CacheManager.getDefaultInstance().getCache(origin, modelProvider.getCacheParameters());
+        this.cache = CacheManager.getDefaultInstance().getCache(origin, this.provider.getCacheParameters());
     }
 
     @Override
     public ChatResponse chat(ChatRequest chatRequest) {
-        CacheKey cacheKey = CacheKey.of(
-                modelProvider.modelName(), modelProvider.seed(), modelProvider.temperature(), CacheKey.Mode.CHAT, Jsons.writeValueAsString(chatRequest, CUSTOM_MAPPER));
-        String cachedResponse = cache.get(cacheKey, String.class);
-        if (cachedResponse != null) {
-            return Jsons.readValue(cachedResponse, new TypeReference<ChatResponseWrapper>() {}, CUSTOM_MAPPER);
-        }
-        ChatResponse chatResponse = model.chat(chatRequest);
-        cache.put(cacheKey, Jsons.writeValueAsString(chatResponse.toBuilder()
-                .metadata(new ChatResponseMetadataWrapper(chatResponse.metadata().toBuilder()))
-                .build(), CUSTOM_MAPPER));
-        cache.flush();
-        return chatResponse;
+        CacheKey cacheKey = getCacheKey(chatRequest);
+        return getCachedResponse(cacheKey).map(CachedChatModel::convert)
+                .orElse(chatAndCache(() -> model.chat(chatRequest), cacheKey, CachedChatModel::convert));
     }
 
     @Override
@@ -87,17 +81,53 @@ public class CachedChatModel implements ChatModel {
 
     @Override
     public String chat(String userMessage) {
-        return model.chat(userMessage);
+        CacheKey cacheKey = getCacheKey(userMessage);
+        return getCachedResponse(cacheKey)
+                .orElse(chatAndCache(() -> model.chat(userMessage), cacheKey, Function.identity()));
     }
 
     @Override
     public ChatResponse chat(ChatMessage... messages) {
-        return model.chat(messages);
+        CacheKey cacheKey = getCacheKey(messages);
+        return getCachedResponse(cacheKey).map(CachedChatModel::convert)
+                .orElse(chatAndCache(() -> model.chat(messages), cacheKey, CachedChatModel::convert));
     }
 
     @Override
     public ChatResponse chat(List<ChatMessage> messages) {
-        return model.chat(messages);
+        CacheKey cacheKey = getCacheKey(messages);
+        return getCachedResponse(cacheKey).map(CachedChatModel::convert)
+                .orElse(chatAndCache(() -> model.chat(messages), cacheKey, CachedChatModel::convert));
+    }
+
+    private <T> T chatAndCache(Supplier<T> actualChat, CacheKey cacheKey, Function<T, String> responseConverter) {
+        T chatResponse = actualChat.get();
+        cache.put(cacheKey, responseConverter.apply(chatResponse));
+        cache.flush();
+        return chatResponse;
+    }
+    
+    private static String convert(ChatResponse chatResponse) {
+        return Jsons.writeValueAsString(chatResponse.toBuilder()
+                .metadata(new ChatResponseMetadataWrapper(chatResponse.metadata().toBuilder()))
+                .build(), CUSTOM_MAPPER);
+    }
+    
+    private static ChatResponse convert(String cachedResponse) {
+        return Jsons.readValue(cachedResponse, new TypeReference<ChatResponseWrapper>() {}, CUSTOM_MAPPER);
+    }
+    
+    private Optional<String> getCachedResponse(CacheKey cacheKey) {
+        String cachedResponse = cache.get(cacheKey, String.class);
+        return cachedResponse == null ? Optional.empty() : Optional.of(cachedResponse);
+    }
+    
+    private CacheKey getCacheKey(String message) {
+        return CacheKey.of(provider.modelName(), provider.seed(), provider.temperature(), CacheKey.Mode.CHAT, message);
+    }
+    
+    private <T> CacheKey getCacheKey(T request) {
+        return CacheKey.of(provider.modelName(), provider.seed(), provider.temperature(), CacheKey.Mode.CHAT, Jsons.writeValueAsString(request, CUSTOM_MAPPER));
     }
 
     @Override
