@@ -1,0 +1,1 @@
+Using GUI user should be able to change the length of a task via date picker control.

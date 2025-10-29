@@ -1,0 +1,1 @@
+An object of the recalculating task schedule algorithm class is used to change the start or end date based on dependency changes. The algorithm class provides functions to fulfill the constraints and to modify the start or end date of the tasks.

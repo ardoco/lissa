@@ -1,0 +1,1 @@
+SRS 44 - It shall be possible to specify non-default operations of "arc2warc" using a named configuration file, which will describe the desired ARC-record to WARC-record conversion.

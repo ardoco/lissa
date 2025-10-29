@@ -1,0 +1,1 @@
+The system will abort when the user tries to login if tabs are not assigned to the user in their NEW PERSON file or if the RESTRICT PATIENT SELECTION prompt does not contain a Yes or No.

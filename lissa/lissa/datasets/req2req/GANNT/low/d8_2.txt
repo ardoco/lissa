@@ -1,0 +1,1 @@
+A GUI provides interface and functions to edit the properties of objects of the human resource class.

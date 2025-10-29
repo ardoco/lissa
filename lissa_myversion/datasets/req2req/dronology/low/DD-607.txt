@@ -1,0 +1,3 @@
+Simulate travel to target
+
+While responding to a goto command  the _NVECSimulator_ shall continue moving in steps towards the target coordinates until the target has been reached.

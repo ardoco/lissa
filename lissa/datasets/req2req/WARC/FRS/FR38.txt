@@ -1,0 +1,1 @@
+FR 38 - The C library shall be implemented to be compatible with the Simplified Wrapper and Interface Generator (SWIG, http://www.swig.org) - a wrapper for libwarc C code to allow it to be called natively in a wide variety of languages.

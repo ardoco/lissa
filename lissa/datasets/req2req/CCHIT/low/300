@@ -1,0 +1,1 @@
+The system shall provide the ability to save a note in progress prior to finalizing the note, and shall retain the author, date, time of the saving of a note whether still in progress or finalized. The author, date and time of each save shall be documented in an audit trail.

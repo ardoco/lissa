@@ -1,0 +1,3 @@
+Hover In Place state change
+
+"When the UAV is commanded to hover in place  its state is changed to ""hover in place"" and a command is sent to the GCS."

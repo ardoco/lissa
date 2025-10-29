@@ -1,0 +1,1 @@
+SRS 60 - A Python interface to libwarc shall be implemented using the SWIG wrapper

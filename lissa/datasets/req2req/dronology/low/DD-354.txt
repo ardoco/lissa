@@ -1,0 +1,3 @@
+Multiple groundstations can register with Dronology
+
+The _GCSMiddleware_ shall handle multiple _GCS_ at the same time.

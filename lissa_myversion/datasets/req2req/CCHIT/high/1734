@@ -1,0 +1,1 @@
+The system shall automatically considered any member of a given User Class to be a member of all superclasses of that class.

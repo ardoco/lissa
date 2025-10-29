@@ -1,0 +1,3 @@
+Display UAV flight plan details
+
+When requested by the user  the _RouteAssignmentUI_ shall display details about the selected UAV and its flight plans.

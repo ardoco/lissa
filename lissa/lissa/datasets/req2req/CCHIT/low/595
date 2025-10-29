@@ -1,0 +1,1 @@
+When the system uses HITSP TP13 (IHE XDS) as a Document Consumer, the system shall be able to use the TP13 Document Integrity option. This may be a configurable parameter or may be enabled at all times

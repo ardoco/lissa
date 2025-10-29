@@ -1,0 +1,1 @@
+A PGE is a script which executes one or more MODIS software processes within the ECS environment.  The SDST shall integrate all software processes available to the SDST software integration team into a set of PGEs that execute all processes in the MODIS TLCF.

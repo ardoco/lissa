@@ -1,0 +1,1 @@
+When passwords are used, the system shall use either standards-based encryption, e.g., 3DES, AES, or standards-based hashing, e.g., SHA1 to store or transport passwords.

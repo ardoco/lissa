@@ -1,0 +1,1 @@
+FR 32 - WARC extensions shall be released as a patch to each of the commands "curl", "wget", and "httrack" projects

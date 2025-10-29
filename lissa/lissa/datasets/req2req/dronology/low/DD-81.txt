@@ -1,0 +1,3 @@
+Hover at completion of flight
+
+If the flight plan queue is empty when the UAV reaches the final waypoint of its current flight plan  then its state is set to {{IN_AIR}}.

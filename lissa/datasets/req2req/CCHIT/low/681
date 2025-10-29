@@ -1,0 +1,1 @@
+The HIE shall respond to data matching queries. The response should indicate the source of the data.  (source OID). (See HITSP specifications IS 01, 02, and 03 for PIX and PDQ)

@@ -1,0 +1,1 @@
+Shall write Read_packet_log_msgs to Log_messages when errors occur in the Read_MODIS_packet process.  

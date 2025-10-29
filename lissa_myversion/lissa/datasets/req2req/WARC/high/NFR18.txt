@@ -1,0 +1,1 @@
+NFR 18 - The C library will be developed in such a way as to allow it to be used with the Simplified Wrapper and Interface Generator, or SWIG, (www.swig.org) in order to wrap the C code and allow it to be called natively in a wide variety of languages.

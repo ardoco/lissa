@@ -1,0 +1,1 @@
+SRS 84 - Libwarc shall be made available as a binary for at least GNU/Linux, FreeBSD, Mac OS X and Windows XP.

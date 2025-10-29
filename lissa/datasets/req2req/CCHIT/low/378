@@ -1,0 +1,1 @@
+The system shall be able to express age in hours and minutes for the first 4 days of life, in days for the first 28 days, in weeks for the first three months of life, and in months until age 2. Year expressions of age should permit a decimal place for expressing part of years (i.e. 2.5 years old).

@@ -1,0 +1,3 @@
+UI middleware releases control locks
+
+If the heartbeat fails for a client holding one or more control locks after  {{CLIENT_HEARTBEAT_TIME}}   then the _UIMiddleware_ shall release all of its control locks.

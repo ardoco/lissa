@@ -1,0 +1,1 @@
+SRS 35 - For security reasons, it shall not be possible to perform write or update operations on a WARC-record remotely

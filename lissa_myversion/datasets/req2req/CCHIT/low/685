@@ -1,0 +1,1 @@
+When sending user identity information between HIEs, both the HIE identifier and the unique user identity within the sending HIE must be used to ensure uniqueness between HIEs.

@@ -1,0 +1,2 @@
+To add tasks as subtasks a method which indent the selected task nodes in GUI and change them to be subtasks is used. A manager of task hierarchy provides functions to update the relationship between tasks.
+

@@ -1,0 +1,3 @@
+Assigning new flight plan upon completion of previous flight
+
+If a UAV has pending flight plans  then when it reaches the final waypoint of its current flight plan  the _SingleUAVFlightPlanScheduler_ shall execute the next assigned flight plan.

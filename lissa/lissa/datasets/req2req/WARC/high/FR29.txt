@@ -1,0 +1,1 @@
+FR 29 - It shall be possible to walk a curl directory and write the data to WARC files

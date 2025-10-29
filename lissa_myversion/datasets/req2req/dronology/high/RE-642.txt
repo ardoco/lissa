@@ -1,0 +1,3 @@
+Load configuration
+
+When the _VaadinUI_ is activated  the _VaadinUI_ shall be configured according to stored configuration parameters.

@@ -1,0 +1,1 @@
+When passwords are used, the system shall prevent the reuse of passwords previously used within a specific (configurable) timeframe (i.e., within the last X days, etc. - e.g. last 180 days), or shall prevent the reuse of a certain (configurable) number of the most recently used passwords (e.g. last 5 passwords).

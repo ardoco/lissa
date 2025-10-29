@@ -1,0 +1,1 @@
+The human resource class contains the variable holidays. The class provides functions to change and to get holidays. There can be multiple holidays. 

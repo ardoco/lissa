@@ -1,0 +1,3 @@
+Wait at synchronization points
+
+When a UAV is executing flight plans and reaches a synchronization point  it shall wait to proceed until all other UAVs sharing the same synchronization point have also reached this point.

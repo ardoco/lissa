@@ -1,0 +1,3 @@
+Applying emergency operations
+
+When requested by the user  the UI shall apply the requested emergency action to all selected UAVs; if no UAV is selected  the UI shall apply the emergency action to all UAVs by default.

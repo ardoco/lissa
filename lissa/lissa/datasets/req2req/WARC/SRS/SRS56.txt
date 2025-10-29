@@ -1,0 +1,1 @@
+SRS 56 - WarcMdoule and WarcHandler plugin modules shall be implemented for Jhove Plugin layer to enable identification and validation of WARC files.

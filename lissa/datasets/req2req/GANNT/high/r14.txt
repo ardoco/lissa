@@ -1,0 +1,1 @@
+Prevent Circular Dependencies;Links among tasks may not be circular in that task 1 cannot depend on task 2 if task 2 already depends on task 1.

@@ -1,0 +1,1 @@
+SRS 65 - It shall be possible for libwarc to be able to handle WARC file of any size, with minimal memory usage.

@@ -1,0 +1,3 @@
+Remove flight plan from queue
+
+A flight plan shall be unassigned from a UAV by removing it from the UAV's flight plan queue.

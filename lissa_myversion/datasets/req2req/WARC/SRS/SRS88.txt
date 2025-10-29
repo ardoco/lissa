@@ -1,0 +1,1 @@
+SRS 88 - Only essential external libraries shall be used in libwarc, such as Gzip compression and wide characters encoding libraries.

@@ -1,0 +1,1 @@
+SRS 3 - It shall be possible for developers to access, modify and manipulate of all aspects of the WARC file format by including this single header file.

@@ -1,0 +1,3 @@
+Simulate land
+
+When given a landing command the _InternalSimulator_ shall move the UAV from to the ground altitude corresponding to its current longitude and latitude.

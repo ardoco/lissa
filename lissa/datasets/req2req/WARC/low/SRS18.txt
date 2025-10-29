@@ -1,0 +1,1 @@
+SRS 18 - Libwarc shall provide a WARC-record-type iterator

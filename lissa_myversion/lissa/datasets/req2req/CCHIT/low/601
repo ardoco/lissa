@@ -1,0 +1,1 @@
+Every transaction that  requests or contains protected health information,  and  is imputed directly to a specific user shall contain an unambiguous ID of the user and any organization IDs that are necessary to ensure that the combination of the IDs identifies a unique user within an HIE

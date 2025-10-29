@@ -1,0 +1,1 @@
+IF transmitting, transporting, translating or mapping lab result terminology THEN the HIE SHALL have the ability to support SNOMED-CT VA Problem List Subset (FDA Structured Product Labeling Problem List Subset), SNOMED-CT Lab Test Findings Table, SNOMED-CT Organisms, Laboratory LOINC, UCUM, as documented in HITSP C35 Lab Result Terminology.

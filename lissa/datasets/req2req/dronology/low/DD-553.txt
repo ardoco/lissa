@@ -1,0 +1,3 @@
+Remove pending plans when return-to-home
+
+When a UAV is issued a return-to-home command during a flight then the current flight plan is aborted and all scheduled flight plans are removed from its flight plan queue.

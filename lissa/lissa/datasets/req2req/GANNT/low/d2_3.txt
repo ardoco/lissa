@@ -1,0 +1,1 @@
+When deleting a task the GanttProject class calls AdjustTaskBoundsAlgorithm and passes the parent of the deleted task as a parameter. The AdjustTaskBoundsAlgorithm takes care of handling and releasing resources associated with the deleted task. 

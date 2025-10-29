@@ -1,0 +1,1 @@
+The system shall provide the ability to generate and format CCD documents with narrative sections and structured entries (discrete fields) as specified by the HITSP IS03/C32 specification of the Registration Information module subset.  For 2008, the values within the structured entries do not have to use industry standard vocabularies/terminologies (such as RxNorm or SNOMED-CT)

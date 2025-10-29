@@ -1,0 +1,1 @@
+SRS 62 - An independent Java implementation of libwarc may be implemented subject to review of deliverables satisfying SRS 61

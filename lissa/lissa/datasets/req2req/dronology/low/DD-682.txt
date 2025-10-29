@@ -1,0 +1,3 @@
+Request UAV state upon loading
+
+Upon loading  the UI shall request information about all activated UAVs from the _UIMiddleware_ . Once the _UIMiddleware_ respond to the request  the UI shall display a list of all currently activated UAVs.

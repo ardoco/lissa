@@ -1,0 +1,3 @@
+Client registration
+
+A client shall register to the _UIMiddleware_ using a unique id

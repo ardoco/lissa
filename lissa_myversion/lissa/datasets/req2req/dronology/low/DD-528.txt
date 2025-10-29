@@ -1,0 +1,3 @@
+Compute distance to next waypoint
+
+When the _VehicleCore_ receives the UAV's current coordinates and if the UAV has an assigned target waypoint  then the _VehicleCore_ shall compute the current distance to the target waypoint.

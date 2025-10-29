@@ -1,0 +1,3 @@
+Initialize connection to GCS middleware
+
+The _GCSMiddleware_ shall specify a predefined {{GCS_PORT}} where _GCS_ can connect.

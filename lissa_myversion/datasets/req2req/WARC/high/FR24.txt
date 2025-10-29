@@ -1,0 +1,1 @@
+FR 24 - An Apache and Lighttp plug-in shall provide access to the libwarc API and WARC Browser over http

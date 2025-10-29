@@ -1,0 +1,1 @@
+SRS 6 - The interfaces in libwarc shall ensure that any changes to the library, will not affect any tool or application based on libwarc.

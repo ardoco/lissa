@@ -1,0 +1,1 @@
+SRS 42 - The default operation of "arc2warc" shall carry out a one-to-one mapping of record fields, by converting each ARC-record to a corresponding "response" WARC-record and "metadata" WARCrecord, which shall include information about the conversion process.

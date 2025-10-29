@@ -1,0 +1,3 @@
+Forward commands to UAV
+
+When the _GCS_ receives a UAV command from the _GCSMiddleware_  the _GCS_ shall forward the command to the respective UAV.

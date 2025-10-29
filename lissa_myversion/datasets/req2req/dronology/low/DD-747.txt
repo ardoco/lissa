@@ -1,0 +1,3 @@
+Notify GCSMiddleware upon UAV Activation
+
+The _GCS_ shall send the home location  a time stamp  and the {{UAV_ID}} to the _GCSMiddleware_.

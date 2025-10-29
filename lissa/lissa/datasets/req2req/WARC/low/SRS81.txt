@@ -1,0 +1,1 @@
+SRS 81 - Command line tools incorporating libwarc shall be atomic - i.e. each tool performing a single function, performing it perfectly, and in the spirit of Unix command lines tools. These may be combined using pipes and redirection and scripting, to create more high level commands.

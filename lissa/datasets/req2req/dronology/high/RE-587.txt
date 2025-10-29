@@ -1,0 +1,3 @@
+Deactivates Physical UAVs
+
+When a UAV is deactivated the _UAVActivationManager_ shall cancel all current and scheduled flight plans

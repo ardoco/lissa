@@ -1,0 +1,3 @@
+Check for registered ID
+
+When receiving a new activation request from the _GCS_Middleware_  the _UAVActivationManager_ shall check that the presented {{UAV_ID}} represents a currently registered and non-activated UAV.

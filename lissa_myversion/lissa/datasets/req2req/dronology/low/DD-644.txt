@@ -1,0 +1,3 @@
+UI binding to a UAV
+
+Before issuing commands to an UAV the _VaadinUI_ shall request control via the _UIMiddleware_.

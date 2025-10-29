@@ -1,0 +1,1 @@
+process input data sets with the following nominal attributes: * Time transitions, including Greenwich Meridian crossing, leap year, beginning of the year, beginning of the millennium, and/or start of data collection not on a granule boundary. * Terminator crossing , International Date Line crossing, and/or Earth pole within a granule. Day, Night, or mixed  mode data.  

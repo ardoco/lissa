@@ -1,0 +1,1 @@
+There is a class to represent holiday. The holiday class provides functions to set the begin date and the end date of the holiday, to check if a date is in the holiday, and to get the duration of the holiday.

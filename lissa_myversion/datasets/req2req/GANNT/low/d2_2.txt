@@ -1,0 +1,1 @@
+When deleting a task the GanttProject class calls GanttTreeTableNode and DefaultMutableTreeNode classes to identify the parent of the task being deleted.

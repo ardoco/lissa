@@ -1,0 +1,1 @@
+SRS 85 - Libwarc shall compile and run under Solaris, AIX, MingW or other Unix compliant system and may compile and run under Windows XP.

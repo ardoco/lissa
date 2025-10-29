@@ -1,0 +1,1 @@
+Milestone should be displayed visually differently from regular tasks.

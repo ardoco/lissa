@@ -1,0 +1,1 @@
+The system shall store demographic information in the patient medical record in separate discrete data fields, such that data extraction tools can retrieve these data.

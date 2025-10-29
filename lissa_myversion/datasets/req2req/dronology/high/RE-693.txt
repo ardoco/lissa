@@ -1,0 +1,3 @@
+Emergency operations
+
+The _RealTimeFlightUI_ shall allow users to perform emergency operations (e.g. hovering multiple UAVs  sending multiple UAVs to home) to a group of UAVs

@@ -1,0 +1,1 @@
+The system shall only auto-select(highlights in blue and places that entry in the field) a patient name if the user types enough characters to uniquely identify a name in the list.

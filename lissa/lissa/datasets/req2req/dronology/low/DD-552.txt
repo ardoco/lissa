@@ -1,0 +1,3 @@
+Automatic Flight Plan Assignment
+
+If a flight plan is not assigned to a specific UAV the flight plan scheduler shall automatically assign it to the next available UAV.

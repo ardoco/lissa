@@ -1,0 +1,1 @@
+SRS 14 - Any operations on WARC-records shall be possible using functions accepting the abstract handle as an argument.

@@ -1,0 +1,3 @@
+Mission Planning
+
+When a predefined FlightPattern is included in a MissionPlan  it shall be expanded  prior to use into a set of waypoints and synchronization points for each of the participating UAVs.

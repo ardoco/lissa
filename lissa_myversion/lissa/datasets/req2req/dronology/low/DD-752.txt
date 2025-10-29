@@ -1,0 +1,3 @@
+Frequency of UAV coordinates requests
+
+The _GCS_ requests the UAV's current coordinates every {{UAV_MESSAGE_STATE_FREQUENCY}} seconds.

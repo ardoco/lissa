@@ -1,0 +1,1 @@
+SRS 40 - Libwarc shall be incorporated within a Lighttp module to enable all actions specified in SRS 34-36 to be executed within lighttp.

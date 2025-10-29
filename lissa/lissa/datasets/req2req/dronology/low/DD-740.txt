@@ -1,0 +1,3 @@
+Forward commands to UAV
+
+The _GCS_ shall transform commands into a vehicle specific format.

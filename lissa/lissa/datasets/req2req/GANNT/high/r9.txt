@@ -1,0 +1,1 @@
+Add/Remove Task links; Tasks can be linked with one another to indicate the sequence in which they have to be performed. For example, if there is a link from task 1 to task 2 then task 2 can only be started after task 1 is completed. The start date of task 2 must thus be after the end date of task 1.

@@ -1,0 +1,3 @@
+Managed flight plan queue
+
+The _SingleUAVFlightPlanScheduler_ shall maintain a managed list of pending flight plans for Each UAV.

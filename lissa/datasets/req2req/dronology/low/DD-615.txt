@@ -1,0 +1,3 @@
+Log actions and timestamps for flight plan events
+
+"The timestamp and the type of action shall be logged into the mission log for each flight plan related event.   This includes (1) time of scheduling  (2) time of execution  (3) time of completing plan  (4) reordering plan  (5) canceling plan"

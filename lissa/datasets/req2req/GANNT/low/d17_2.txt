@@ -1,0 +1,1 @@
+GUI needs to provide ability to assign persons to tasks.

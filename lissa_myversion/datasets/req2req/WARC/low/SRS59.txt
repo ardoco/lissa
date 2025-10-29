@@ -1,0 +1,1 @@
+SRS 59 - Libwarc shall provide interfaces to SWIG wrappers to allow dynamic language bindings (Python, Ruby, Perl, Lua ...)

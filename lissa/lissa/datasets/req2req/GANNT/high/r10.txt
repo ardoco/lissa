@@ -1,0 +1,1 @@
+Add/Remove Resources to Tasks Dependencies;Dependencies between tasks and resources indicate the resources who are supposed to complete a task. Each task could be worked on by multiple persons and each person could work on multiple tasks. Dependencies may also be annotated to capture how many hours each person is supposed to work on a task on a daily basis.

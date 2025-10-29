@@ -1,0 +1,3 @@
+GCS connection to GCS Middleware
+
+In step one  the _GCS_ announces itself to the _GCSMiddleware_ providing its unique ID.

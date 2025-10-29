@@ -1,0 +1,3 @@
+Delete a route
+
+When the user presses the route delete button  a confirmation message shall be displayed and if confirmed by the user then the route shall be deleted.

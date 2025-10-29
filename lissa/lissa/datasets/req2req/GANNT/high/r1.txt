@@ -1,0 +1,1 @@
+Create a new task which typically has a  start date and an end date. Tasks are activities that one or more persons resources are expected to complete in the specified time frame.

@@ -1,0 +1,1 @@
+Show Critical Path; The critical path indicates which tasks will cause project delays if they are delayed.

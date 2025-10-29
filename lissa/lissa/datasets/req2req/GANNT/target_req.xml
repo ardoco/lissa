@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<artifacts_collection>
+<collection_info>
+	<id>Requirements</id>
+	<name>Requirements</name>
+	<version>1.1</version>
+	<description>Low level requirements</description>
+	<content_location>external</content_location>
+</collection_info>
+<artifacts>
+	<artifact><id>d10_1</id><content>low/d10_1.txt</content><parent_id/></artifact>
+	<artifact><id>d10_2</id><content>low/d10_2.txt</content><parent_id/></artifact>
+	<artifact><id>d10_3</id><content>low/d10_3.txt</content><parent_id/></artifact>
+	<artifact><id>d10_4</id><content>low/d10_4.txt</content><parent_id/></artifact>
+	<artifact><id>d10_5</id><content>low/d10_5.txt</content><parent_id/></artifact>
+	<artifact><id>d10_6</id><content>low/d10_6.txt</content><parent_id/></artifact>
+	<artifact><id>d10_7</id><content>low/d10_7.txt</content><parent_id/></artifact>
+	<artifact><id>d10_8</id><content>low/d10_8.txt</content><parent_id/></artifact>
+	<artifact><id>d11_1</id><content>low/d11_1.txt</content><parent_id/></artifact>
+	<artifact><id>d11_2</id><content>low/d11_2.txt</content><parent_id/></artifact>
+	<artifact><id>d11_3</id><content>low/d11_3.txt</content><parent_id/></artifact>
+	<artifact><id>d12_1</id><content>low/d12_1.txt</content><parent_id/></artifact>
+	<artifact><id>d12_2</id><content>low/d12_2.txt</content><parent_id/></artifact>
+	<artifact><id>d12_3</id><content>low/d12_3.txt</content><parent_id/></artifact>
+	<artifact><id>d12_4</id><content>low/d12_4.txt</content><parent_id/></artifact>
+	<artifact><id>d12_5</id><content>low/d12_5.txt</content><parent_id/></artifact>
+	<artifact><id>d12_6</id><content>low/d12_6.txt</content><parent_id/></artifact>
+	<artifact><id>d12_7</id><content>low/d12_7.txt</content><parent_id/></artifact>
+	<artifact><id>d13_1</id><content>low/d13_1.txt</content><parent_id/></artifact>
+	<artifact><id>d13_2</id><content>low/d13_2.txt</content><parent_id/></artifact>
+	<artifact><id>d13_3</id><content>low/d13_3.txt</content><parent_id/></artifact>
+	<artifact><id>d13_4</id><content>low/d13_4.txt</content><parent_id/></artifact>
+	<artifact><id>d14_1</id><content>low/d14_1.txt</content><parent_id/></artifact>
+	<artifact><id>d14_2</id><content>low/d14_2.txt</content><parent_id/></artifact>
+	<artifact><id>d14_3</id><content>low/d14_3.txt</content><parent_id/></artifact>
+	<artifact><id>d15_1</id><content>low/d15_1.txt</content><parent_id/></artifact>
+	<artifact><id>d15_2</id><content>low/d15_2.txt</content><parent_id/></artifact>
+	<artifact><id>d16_1</id><content>low/d16_1.txt</content><parent_id/></artifact>
+	<artifact><id>d16_2</id><content>low/d16_2.txt</content><parent_id/></artifact>
+	<artifact><id>d16_3</id><content>low/d16_3.txt</content><parent_id/></artifact>
+	<artifact><id>d17_1</id><content>low/d17_1.txt</content><parent_id/></artifact>
+	<artifact><id>d17_2</id><content>low/d17_2.txt</content><parent_id/></artifact>
+	<artifact><id>d17_3</id><content>low/d17_3.txt</content><parent_id/></artifact>
+	<artifact><id>d17_4</id><content>low/d17_4.txt</content><parent_id/></artifact>
+	<artifact><id>d1_1</id><content>low/d1_1.txt</content><parent_id/></artifact>
+	<artifact><id>d1_2</id><content>low/d1_2.txt</content><parent_id/></artifact>
+	<artifact><id>d1_3</id><content>low/d1_3.txt</content><parent_id/></artifact>
+	<artifact><id>d1_4</id><content>low/d1_4.txt</content><parent_id/></artifact>
+	<artifact><id>d2_1</id><content>low/d2_1.txt</content><parent_id/></artifact>
+	<artifact><id>d2_2</id><content>low/d2_2.txt</content><parent_id/></artifact>
+	<artifact><id>d2_3</id><content>low/d2_3.txt</content><parent_id/></artifact>
+	<artifact><id>d3_1</id><content>low/d3_1.txt</content><parent_id/></artifact>
+	<artifact><id>d3_2</id><content>low/d3_2.txt</content><parent_id/></artifact>
+	<artifact><id>d3_3</id><content>low/d3_3.txt</content><parent_id/></artifact>
+	<artifact><id>d3_4</id><content>low/d3_4.txt</content><parent_id/></artifact>
+	<artifact><id>d4_1</id><content>low/d4_1.txt</content><parent_id/></artifact>
+	<artifact><id>d4_2</id><content>low/d4_2.txt</content><parent_id/></artifact>
+	<artifact><id>d4_3</id><content>low/d4_3.txt</content><parent_id/></artifact>
+	<artifact><id>d4_4</id><content>low/d4_4.txt</content><parent_id/></artifact>
+	<artifact><id>d5_1</id><content>low/d5_1.txt</content><parent_id/></artifact>
+	<artifact><id>d5_2</id><content>low/d5_2.txt</content><parent_id/></artifact>
+	<artifact><id>d5_3</id><content>low/d5_3.txt</content><parent_id/></artifact>
+	<artifact><id>d5_4</id><content>low/d5_4.txt</content><parent_id/></artifact>
+	<artifact><id>d6_1</id><content>low/d6_1.txt</content><parent_id/></artifact>
+	<artifact><id>d6_2</id><content>low/d6_2.txt</content><parent_id/></artifact>
+	<artifact><id>d6_3</id><content>low/d6_3.txt</content><parent_id/></artifact>
+	<artifact><id>d6_4</id><content>low/d6_4.txt</content><parent_id/></artifact>
+	<artifact><id>d6_5</id><content>low/d6_5.txt</content><parent_id/></artifact>
+	<artifact><id>d6_6</id><content>low/d6_6.txt</content><parent_id/></artifact>
+	<artifact><id>d7_1</id><content>low/d7_1.txt</content><parent_id/></artifact>
+	<artifact><id>d7_2</id><content>low/d7_2.txt</content><parent_id/></artifact>
+	<artifact><id>d7_3</id><content>low/d7_3.txt</content><parent_id/></artifact>
+	<artifact><id>d8_1</id><content>low/d8_1.txt</content><parent_id/></artifact>
+	<artifact><id>d8_2</id><content>low/d8_2.txt</content><parent_id/></artifact>
+	<artifact><id>d8_3</id><content>low/d8_3.txt</content><parent_id/></artifact>
+	<artifact><id>d9_1</id><content>low/d9_1.txt</content><parent_id/></artifact>
+	<artifact><id>d9_2</id><content>low/d9_2.txt</content><parent_id/></artifact>
+	<artifact><id>d9_3</id><content>low/d9_3.txt</content><parent_id/></artifact>
+	<artifact><id>d9_4</id><content>low/d9_4.txt</content><parent_id/></artifact>
+</artifacts>
+</artifacts_collection>

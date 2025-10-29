@@ -1,0 +1,3 @@
+Revert to previous state after rescinding Hover In Place
+
+When the hover in place command is rescinded the UAV's state is reverted to its previous state.

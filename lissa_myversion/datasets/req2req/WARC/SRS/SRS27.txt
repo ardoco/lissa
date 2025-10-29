@@ -1,0 +1,1 @@
+SRS 27 - Libwarc shall support non-compressed WARC-records and compressed WARC-records and files

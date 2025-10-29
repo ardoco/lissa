@@ -1,0 +1,1 @@
+A GUI class of human resource load distribution uses objects of a load distribution class to capture the hours each person is supposed to work.

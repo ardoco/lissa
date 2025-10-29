@@ -1,0 +1,3 @@
+Emergency Battery Notification
+
+When the UAV's battery level drops below a predefined threshold  then the UAV health indicator is activated.

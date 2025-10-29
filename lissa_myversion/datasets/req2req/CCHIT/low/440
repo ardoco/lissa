@@ -1,0 +1,1 @@
+The system shall have the ability to format for export recorded time stamps using UTC based on ISO 8601.? Example: 1994-11-05T08:15:30-05:00 corresponds to November 5, 1994, 8:15:30 am, US Eastern Standard Time.

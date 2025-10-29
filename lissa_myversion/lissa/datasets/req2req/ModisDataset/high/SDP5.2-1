@@ -1,0 +1,2 @@
+Each software process shall trap and properly process all exceptions that may produce an abnormal termination
+and report all such events using the SDPTK error message functions.

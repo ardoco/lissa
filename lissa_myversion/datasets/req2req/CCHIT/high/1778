@@ -1,0 +1,1 @@
+The system shall sort notifications based on column heading: Urgency (valued HIGH, Moderate, or low as indicated by the CPRS parameter ORB URGENCY. TIU alerts are given a Moderate urgency value. Other alerts without a parameter value are given an urgency of low.)

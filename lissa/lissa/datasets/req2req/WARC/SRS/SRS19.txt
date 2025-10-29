@@ -1,0 +1,1 @@
+SRS 19 - Libwarc's generic iterators may be customised for different purposes via callback handlers (i.e. hooks)

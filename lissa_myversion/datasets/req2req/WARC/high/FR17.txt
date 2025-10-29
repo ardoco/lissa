@@ -1,0 +1,1 @@
+FR 17 - Libwarc shall use gzip as the default compression format

@@ -1,0 +1,1 @@
+FR 1 - Any software tool or application based on libwarc shall require just a single header file.

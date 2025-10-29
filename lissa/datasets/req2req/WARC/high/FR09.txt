@@ -1,0 +1,1 @@
+FR 9 - Libwarc shall provide a records iterator to handle WARC-type records

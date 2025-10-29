@@ -1,0 +1,1 @@
+FR 26 - ARC to WARC conversions made by arc2warc shall be carried out according to a specification in a configuration file

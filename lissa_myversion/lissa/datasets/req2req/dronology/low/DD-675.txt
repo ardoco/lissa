@@ -1,0 +1,3 @@
+Waypoints connecte by arcs
+
+Consecutive waypoints in a route on a map shall be connected by lines.

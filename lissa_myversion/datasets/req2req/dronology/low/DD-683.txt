@@ -1,0 +1,3 @@
+Periodically request UAV state
+
+The UI shall periodically request the list of all activated UAVs from the _UIMiddleware_ and updates the display of currently activated UAVs

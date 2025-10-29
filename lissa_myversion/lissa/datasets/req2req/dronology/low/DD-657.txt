@@ -1,0 +1,3 @@
+Reorder routes
+
+Flight plans assigned to an UAV that have not yet been executed may be reordered by dragging a route within the list of assigned routes to a new position.

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<answer_set>
+<answer_info>
+	<source_artifacts_collection>Requirements</source_artifacts_collection>
+	<target_artifacts_collection>Requirements</target_artifacts_collection>
+</answer_info>
+<links>
+	<link><source_artifact_id>r1</source_artifact_id><target_artifact_id>d1_1</target_artifact_id></link>
+	<link><source_artifact_id>r1</source_artifact_id><target_artifact_id>d1_2</target_artifact_id></link>
+	<link><source_artifact_id>r1</source_artifact_id><target_artifact_id>d1_3</target_artifact_id></link>
+	<link><source_artifact_id>r1</source_artifact_id><target_artifact_id>d1_4</target_artifact_id></link>
+	<link><source_artifact_id>r2</source_artifact_id><target_artifact_id>d2_1</target_artifact_id></link>
+	<link><source_artifact_id>r2</source_artifact_id><target_artifact_id>d2_2</target_artifact_id></link>
+	<link><source_artifact_id>r2</source_artifact_id><target_artifact_id>d2_3</target_artifact_id></link>
+	<link><source_artifact_id>r3</source_artifact_id><target_artifact_id>d3_1</target_artifact_id></link>
+	<link><source_artifact_id>r3</source_artifact_id><target_artifact_id>d3_2</target_artifact_id></link>
+	<link><source_artifact_id>r3</source_artifact_id><target_artifact_id>d3_3</target_artifact_id></link>
+	<link><source_artifact_id>r4</source_artifact_id><target_artifact_id>d4_1</target_artifact_id></link>
+	<link><source_artifact_id>r4</source_artifact_id><target_artifact_id>d4_2</target_artifact_id></link>
+	<link><source_artifact_id>r4</source_artifact_id><target_artifact_id>d4_3</target_artifact_id></link>
+	<link><source_artifact_id>r4</source_artifact_id><target_artifact_id>d4_4</target_artifact_id></link>
+	<link><source_artifact_id>r5</source_artifact_id><target_artifact_id>d5_1</target_artifact_id></link>
+	<link><source_artifact_id>r5</source_artifact_id><target_artifact_id>d5_2</target_artifact_id></link>
+	<link><source_artifact_id>r5</source_artifact_id><target_artifact_id>d5_3</target_artifact_id></link>
+	<link><source_artifact_id>r5</source_artifact_id><target_artifact_id>d5_4</target_artifact_id></link>
+	<link><source_artifact_id>r6</source_artifact_id><target_artifact_id>d6_1</target_artifact_id></link>
+	<link><source_artifact_id>r6</source_artifact_id><target_artifact_id>d6_2</target_artifact_id></link>
+	<link><source_artifact_id>r6</source_artifact_id><target_artifact_id>d6_3</target_artifact_id></link>
+	<link><source_artifact_id>r6</source_artifact_id><target_artifact_id>d6_4</target_artifact_id></link>
+	<link><source_artifact_id>r6</source_artifact_id><target_artifact_id>d6_5</target_artifact_id></link>
+	<link><source_artifact_id>r6</source_artifact_id><target_artifact_id>d6_6</target_artifact_id></link>
+	<link><source_artifact_id>r7</source_artifact_id><target_artifact_id>d7_1</target_artifact_id></link>
+	<link><source_artifact_id>r7</source_artifact_id><target_artifact_id>d7_2</target_artifact_id></link>
+	<link><source_artifact_id>r7</source_artifact_id><target_artifact_id>d7_3</target_artifact_id></link>
+	<link><source_artifact_id>r8</source_artifact_id><target_artifact_id>d8_1</target_artifact_id></link>
+	<link><source_artifact_id>r8</source_artifact_id><target_artifact_id>d8_2</target_artifact_id></link>
+	<link><source_artifact_id>r8</source_artifact_id><target_artifact_id>d8_3</target_artifact_id></link>
+	<link><source_artifact_id>r9</source_artifact_id><target_artifact_id>d9_1</target_artifact_id></link>
+	<link><source_artifact_id>r9</source_artifact_id><target_artifact_id>d9_2</target_artifact_id></link>
+	<link><source_artifact_id>r9</source_artifact_id><target_artifact_id>d9_3</target_artifact_id></link>
+	<link><source_artifact_id>r9</source_artifact_id><target_artifact_id>d9_4</target_artifact_id></link>
+	<link><source_artifact_id>r10</source_artifact_id><target_artifact_id>d10_1</target_artifact_id></link>
+	<link><source_artifact_id>r10</source_artifact_id><target_artifact_id>d10_2</target_artifact_id></link>
+	<link><source_artifact_id>r10</source_artifact_id><target_artifact_id>d10_3</target_artifact_id></link>
+	<link><source_artifact_id>r10</source_artifact_id><target_artifact_id>d10_4</target_artifact_id></link>
+	<link><source_artifact_id>r10</source_artifact_id><target_artifact_id>d10_5</target_artifact_id></link>
+	<link><source_artifact_id>r10</source_artifact_id><target_artifact_id>d10_6</target_artifact_id></link>
+	<link><source_artifact_id>r10</source_artifact_id><target_artifact_id>d10_7</target_artifact_id></link>
+	<link><source_artifact_id>r10</source_artifact_id><target_artifact_id>d10_8</target_artifact_id></link>
+	<link><source_artifact_id>r11</source_artifact_id><target_artifact_id>d11_1</target_artifact_id></link>
+	<link><source_artifact_id>r11</source_artifact_id><target_artifact_id>d11_2</target_artifact_id></link>
+	<link><source_artifact_id>r11</source_artifact_id><target_artifact_id>d11_3</target_artifact_id></link>
+	<link><source_artifact_id>r12</source_artifact_id><target_artifact_id>d12_1</target_artifact_id></link>
+	<link><source_artifact_id>r12</source_artifact_id><target_artifact_id>d12_2</target_artifact_id></link>
+	<link><source_artifact_id>r12</source_artifact_id><target_artifact_id>d12_3</target_artifact_id></link>
+	<link><source_artifact_id>r12</source_artifact_id><target_artifact_id>d12_4</target_artifact_id></link>
+	<link><source_artifact_id>r12</source_artifact_id><target_artifact_id>d12_5</target_artifact_id></link>
+	<link><source_artifact_id>r12</source_artifact_id><target_artifact_id>d12_6</target_artifact_id></link>
+	<link><source_artifact_id>r12</source_artifact_id><target_artifact_id>d12_7</target_artifact_id></link>
+	<link><source_artifact_id>r13</source_artifact_id><target_artifact_id>d13_1</target_artifact_id></link>
+	<link><source_artifact_id>r13</source_artifact_id><target_artifact_id>d13_2</target_artifact_id></link>
+	<link><source_artifact_id>r13</source_artifact_id><target_artifact_id>d13_3</target_artifact_id></link>
+	<link><source_artifact_id>r13</source_artifact_id><target_artifact_id>d13_4</target_artifact_id></link>
+	<link><source_artifact_id>r14</source_artifact_id><target_artifact_id>d14_1</target_artifact_id></link>
+	<link><source_artifact_id>r14</source_artifact_id><target_artifact_id>d14_2</target_artifact_id></link>
+	<link><source_artifact_id>r14</source_artifact_id><target_artifact_id>d14_3</target_artifact_id></link>
+	<link><source_artifact_id>r15</source_artifact_id><target_artifact_id>d15_1</target_artifact_id></link>
+	<link><source_artifact_id>r15</source_artifact_id><target_artifact_id>d15_2</target_artifact_id></link>
+	<link><source_artifact_id>r16</source_artifact_id><target_artifact_id>d16_1</target_artifact_id></link>
+	<link><source_artifact_id>r16</source_artifact_id><target_artifact_id>d16_2</target_artifact_id></link>
+	<link><source_artifact_id>r16</source_artifact_id><target_artifact_id>d16_3</target_artifact_id></link>
+	<link><source_artifact_id>r17</source_artifact_id><target_artifact_id>d17_1</target_artifact_id></link>
+	<link><source_artifact_id>r17</source_artifact_id><target_artifact_id>d17_2</target_artifact_id></link>
+	<link><source_artifact_id>r17</source_artifact_id><target_artifact_id>d17_3</target_artifact_id></link>
+	<link><source_artifact_id>r17</source_artifact_id><target_artifact_id>d17_4</target_artifact_id></link>
+</links>
+</answer_set>

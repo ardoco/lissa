@@ -1,0 +1,1 @@
+SRS 70 - Libwarc shall be shipped with a manual and build scripts

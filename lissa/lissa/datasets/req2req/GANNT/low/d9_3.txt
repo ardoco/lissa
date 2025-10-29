@@ -1,0 +1,1 @@
+When a two or more tasks are link, there should be check conducted for potential collisions on the chart.

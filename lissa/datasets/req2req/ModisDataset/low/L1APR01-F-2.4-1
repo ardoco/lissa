@@ -1,0 +1,1 @@
+Shall unpack all radiance data from 12-bits in the MODIS_pkt to Unpacked_MODIS_radiance when the packet contains radiance data, using the format documented in SBRS CDRL 305. 

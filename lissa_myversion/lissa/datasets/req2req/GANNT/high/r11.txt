@@ -1,0 +1,1 @@
+Change Task Begin/End Times manually with user changes; Change the start or end date either by editing its properties or by dragging-and-dropping the bar in the GUI.

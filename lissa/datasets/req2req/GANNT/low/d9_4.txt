@@ -1,0 +1,1 @@
+The start and end dates for the graph can be either flexible or rigid for the purpose of adjusting and fixing potential collisions. 

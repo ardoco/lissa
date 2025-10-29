@@ -1,0 +1,3 @@
+Cancel Mission
+
+When requested  if a mission is currently active  the _MissionPlanner _shall cancel the active mission.

@@ -1,0 +1,1 @@
+SRS 66 - It shall be possible for libwarc to be able to read, write and update WARC files at high speed, i.e. the design should focus on minimum memory footprint and performance.

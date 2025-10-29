@@ -1,0 +1,3 @@
+Groundstation-Middleware Communication Protocol
+
+The _GCSMiddleware _ shall follow a predefined set of steps to establish a connection between a _GCS_ and Dronology

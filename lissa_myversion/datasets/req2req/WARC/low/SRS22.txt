@@ -1,0 +1,1 @@
+SRS 22 - Developers using libwarc shall not be required to allocate/release memory directly, instead the developer shall use libwarc's object constructor and destructor functions.

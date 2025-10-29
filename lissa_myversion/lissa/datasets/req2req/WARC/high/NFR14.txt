@@ -1,0 +1,1 @@
+NFR 14 - Web server plug-ins shall conform to the Apache 'mod' API and shall operate correctly with both Apache and Lighttp servers and shall be compatible with appropriate web sever programming standards, such as WSGI in Python and the Servlet API in Java.

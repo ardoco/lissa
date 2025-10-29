@@ -1,0 +1,1 @@
+SRS 20 - Libwarc's iterators may be combined into composite iterators to enable the developer to more than one search field

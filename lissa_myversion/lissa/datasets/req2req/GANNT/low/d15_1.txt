@@ -1,0 +1,1 @@
+GUI needs to provide ability to display critical path and make the changes affecting critical path updated.

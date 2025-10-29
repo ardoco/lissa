@@ -1,0 +1,1 @@
+SRS 61 - A Java interface to libwarc shall be implemented using the SWIG wrapper and/or JNI

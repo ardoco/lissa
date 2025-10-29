@@ -1,0 +1,1 @@
+The task manager class uses an object of dependency collection class to manage dependencies.

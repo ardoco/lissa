@@ -1,0 +1,3 @@
+UI middleware supports flight route creation
+
+When requested by a UI client  the _UIMiddleware_ shall create a new flight route with a unique ID.

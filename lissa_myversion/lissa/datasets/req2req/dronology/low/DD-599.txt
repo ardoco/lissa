@@ -1,0 +1,3 @@
+Simulate takeoff in internal simulator
+
+When given a takeoff command the _InternalSimulator_ shall move with infinite acceleration the UAV to the takeoff altitude corresponding to its current longitude and latitude.

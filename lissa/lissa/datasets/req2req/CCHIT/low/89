@@ -1,0 +1,1 @@
+The system shall provide the ability for the user to expressly indicate that the medication list has been reviewed this must be stored as structured data.  The system must capture and display the ID of the user conducting the review, and the date of the review.

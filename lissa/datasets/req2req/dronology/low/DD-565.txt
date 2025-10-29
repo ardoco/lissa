@@ -1,0 +1,3 @@
+Check UAV specific properties
+
+The _ObjectAvoidance_ system shall retrieve UAV properties and shall check all directives against them.

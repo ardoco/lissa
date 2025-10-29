@@ -1,0 +1,3 @@
+UAV Commands
+
+The _GCSMiddleware_ shall forward commands sent from Dronology to a _GCS_

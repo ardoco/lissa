@@ -1,0 +1,1 @@
+SRS 73 - Libwarc shall be shipped with a number of ready-to-use command lines, for example, warcdump (to dump the contents of a WARC file), w-filter, etc.

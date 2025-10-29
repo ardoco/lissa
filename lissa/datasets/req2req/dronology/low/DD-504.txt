@@ -1,0 +1,3 @@
+Flight route must be valid
+
+Upon receipt of a new or modified flight route from the UI middleware  the _FlightRouteManager_ shall check that it is a {{VALID_FLIGHT_ROUTE}}  i.e.  that all waypoints are valid coordinates and that the flight route contains at least one waypoint.

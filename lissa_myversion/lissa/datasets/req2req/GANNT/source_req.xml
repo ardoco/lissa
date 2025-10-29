@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<artifacts_collection>
+<collection_info>
+	<id>Requirements</id>
+	<name>Requirements</name>
+	<version>1.1</version>
+	<description>High level requirements</description>
+	<content_location>external</content_location>
+</collection_info>
+<artifacts>
+	<artifact><id>r1</id><content>high/r1.txt</content><parent_id/></artifact>
+	<artifact><id>r10</id><content>high/r10.txt</content><parent_id/></artifact>
+	<artifact><id>r11</id><content>high/r11.txt</content><parent_id/></artifact>
+	<artifact><id>r12</id><content>high/r12.txt</content><parent_id/></artifact>
+	<artifact><id>r13</id><content>high/r13.txt</content><parent_id/></artifact>
+	<artifact><id>r14</id><content>high/r14.txt</content><parent_id/></artifact>
+	<artifact><id>r15</id><content>high/r15.txt</content><parent_id/></artifact>
+	<artifact><id>r16</id><content>high/r16.txt</content><parent_id/></artifact>
+	<artifact><id>r17</id><content>high/r17.txt</content><parent_id/></artifact>
+	<artifact><id>r2</id><content>high/r2.txt</content><parent_id/></artifact>
+	<artifact><id>r3</id><content>high/r3.txt</content><parent_id/></artifact>
+	<artifact><id>r4</id><content>high/r4.txt</content><parent_id/></artifact>
+	<artifact><id>r5</id><content>high/r5.txt</content><parent_id/></artifact>
+	<artifact><id>r6</id><content>high/r6.txt</content><parent_id/></artifact>
+	<artifact><id>r7</id><content>high/r7.txt</content><parent_id/></artifact>
+	<artifact><id>r8</id><content>high/r8.txt</content><parent_id/></artifact>
+	<artifact><id>r9</id><content>high/r9.txt</content><parent_id/></artifact>
+</artifacts>
+</artifacts_collection>

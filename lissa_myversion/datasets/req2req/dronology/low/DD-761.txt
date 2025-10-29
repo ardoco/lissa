@@ -1,0 +1,3 @@
+Display assigned routes
+
+The display of active flight plans shall include time in flight  traveled distance  remaining distance  completed and total waypoints.

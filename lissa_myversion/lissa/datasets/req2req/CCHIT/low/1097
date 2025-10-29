@@ -1,0 +1,1 @@
+The system should provide a way to export problems that have been entered on the wrong patient into the correct patient record. An audit trail must be created in both the incorrect and correct patient records.

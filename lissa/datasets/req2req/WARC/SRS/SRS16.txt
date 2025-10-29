@@ -1,0 +1,1 @@
+SRS 16 - Libwarc shall provide a generic iterator, to enable the developer to iterate over all WARCrecords and create an abstract WARC-document as a simple container

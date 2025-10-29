@@ -1,0 +1,1 @@
+The system shall prohibit all users read access to the audit records, except those users that have been granted explicit read-access.  The system shall protect the stored audit records from unauthorized deletion. The system shall prevent modifications to the audit records.

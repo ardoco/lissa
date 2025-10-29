@@ -1,0 +1,1 @@
+NFR 4 - Utility and application level functionality of WARC Tools shall be made available to end users as command line tools, extensions to existing tools, and simple web applications for accessing WARC content.

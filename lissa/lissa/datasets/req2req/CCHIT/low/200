@@ -1,0 +1,1 @@
+The system shall provide the ability to generate and format CCD documents with narrative sections and structured entries (discrete fields) as specified by the HITSP IS03/C32 specification of the Medication and Immunization History module subset.  Structured entries value sets must adopt industry-standard vocabularies/terminologies (such as RxNORM or SNOMED-CT).

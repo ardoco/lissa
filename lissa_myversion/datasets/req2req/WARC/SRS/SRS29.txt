@@ -1,0 +1,1 @@
+SRS 29 - Libwarc shall support multiple compression schemas, loading a specific compressor at runtime as an external shared library.

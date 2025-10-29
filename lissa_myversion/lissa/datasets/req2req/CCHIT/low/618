@@ -1,0 +1,1 @@
+The HIE shall be able to pseudo-anonymize as defined in HITSP T24.  The pseudo identifier will be unique to the patient and the data source, i.e., it will not be unique to the patient

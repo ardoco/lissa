@@ -1,0 +1,1 @@
+When a resource is removed, all the tasks where the resource is assigned need to be updated. 

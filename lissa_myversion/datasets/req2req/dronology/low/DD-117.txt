@@ -1,0 +1,3 @@
+Load default map scale
+
+If no scale information is provided in the configuration  the map shall display at a scale of {{MAP_DEFAULT_SCALE}}.

@@ -1,0 +1,1 @@
+For systems that provide?access to PHI through a web browser interface (i.e. HTML over HTTP) shall include the?capability to?encrypt the data communicated over the network?via SSL (HTML over HTTPS).?Note: Web browser interfaces are often used beyond the perimeter of the protected enterprise network

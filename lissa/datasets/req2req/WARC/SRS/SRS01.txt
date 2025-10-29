@@ -1,0 +1,1 @@
+SRS 1 - There shall be a single entry point to libwarc, called "warc.h".

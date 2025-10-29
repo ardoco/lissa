@@ -1,0 +1,3 @@
+Simulated UAVs assigned unique IDs
+
+An internally simulated UAV is instantiated with an ID that is unique from the IDs of all other currently activated UAVs.

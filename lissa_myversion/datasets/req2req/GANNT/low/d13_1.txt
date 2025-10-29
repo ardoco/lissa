@@ -1,0 +1,1 @@
+Application needs to keep track of task's begin and end times.

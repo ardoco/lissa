@@ -1,0 +1,3 @@
+Object Avoidance
+
+When a stationary or moving object is within the proximity of a UAV the _ObjectAvoidance_ system shall issue evasive directives to the UAV

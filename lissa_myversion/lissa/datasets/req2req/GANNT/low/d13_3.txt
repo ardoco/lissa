@@ -1,0 +1,1 @@
+Every time Start/End time for a subtask changes, the start/end time for the parent task need to change accordingly.

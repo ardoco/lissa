@@ -1,0 +1,3 @@
+Periodically update UAV location
+
+The UI shall periodically request current locations of all registered UAVs from the _UIMiddleware_ and update their locations on the map.

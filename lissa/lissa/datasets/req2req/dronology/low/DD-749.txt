@@ -1,0 +1,3 @@
+Notify Dronology on lost connection
+
+If the connection to an UAV is lost and the _GCS_ fails to reconnect  the _GCS_ shall notify the _GCSMiddleware_.

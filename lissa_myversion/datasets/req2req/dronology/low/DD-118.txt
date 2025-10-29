@@ -1,0 +1,3 @@
+Load saved map scale
+
+When loading the map  it shall be scaled as specified in the configuration.

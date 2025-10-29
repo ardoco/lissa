@@ -1,0 +1,3 @@
+Coordinate synchronous flights in Mission Planner
+
+The _MissionPlanner _shall synchronize and coordinate the flights of multiple UAVs.

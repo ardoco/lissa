@@ -1,0 +1,3 @@
+Adjust message frequency upon command
+
+When the _GCS_ receives a set frequency command from the _GCSMiddleware_ it shall adjust its messange frequency accordingly.

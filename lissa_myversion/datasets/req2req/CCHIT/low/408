@@ -1,0 +1,1 @@
+The system restore functionality shall result in a fully operational and secure state.  This state shall include the restoration of the application data, security credentials, and log/audit files to their previous state.

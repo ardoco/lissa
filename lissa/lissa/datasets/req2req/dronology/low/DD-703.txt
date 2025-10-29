@@ -1,0 +1,3 @@
+Subscribe to monitoring topics
+
+Clients shall be able to subscribe to any number of topics

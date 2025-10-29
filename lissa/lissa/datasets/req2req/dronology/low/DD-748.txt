@@ -1,0 +1,3 @@
+Close connection if incorrect UAV registration
+
+If the _GCS_ receives notification that the UAV is incorrectly registered then the _GCS_ closes the connection with the UAV.

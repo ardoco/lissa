@@ -1,0 +1,1 @@
+The system shall store medication information in discrete data fields.  At a minimum, there must be one field for each of the following: - medication name, form and strength - dispense quantity - refills and - sig.

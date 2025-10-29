@@ -1,0 +1,1 @@
+FR 10 - Libwarc shall provide a MIMES iterator to handle MIME-types payloads

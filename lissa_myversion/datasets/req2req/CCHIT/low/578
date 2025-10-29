@@ -1,0 +1,1 @@
+The system shall support removal of a user?s privileges without deleting the user from the system.  The purpose of the criteria is to provide the ability to remove a user?s privileges, but maintain a history of the user in the system.

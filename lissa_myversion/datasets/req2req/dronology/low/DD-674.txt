@@ -1,0 +1,3 @@
+Create and modify route in visual mode
+
+"The _RouteCreationUI_ shall support route creation and modification in visual mode allowing the user to click on a location in order to create  modify  or delete a waypoint.  "

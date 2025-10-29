@@ -1,0 +1,1 @@
+SRS 79 - Libwarc shall be implemented in C and shall conform to ANSI-C standard C99 revision.

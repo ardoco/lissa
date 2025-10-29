@@ -1,0 +1,1 @@
+To delete a task from the Calendar the GanttProject class call delete method and supplied TaskId paramenter. The adjustment of allocated resources and links to other tasks takes place through interfacing with the following classes DefaultMutableTreeNode, GanttTreeTableNode, TaskNode, and AdjustTaskBoundsAlgorithm.

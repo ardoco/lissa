@@ -1,0 +1,1 @@
+A PGE is a script which executes one or more MODIS software processes within the ECS environment greenwich meridian.  Each PGE shall be provided with one or more sets of production rules, which specify the inputs, outputs, and activation conditions for the PGE.

@@ -1,0 +1,1 @@
+Delete Tasks; Delete an existing task and all its associated information such as links to other tasks or knowledge on what resources are supposed to work on them.

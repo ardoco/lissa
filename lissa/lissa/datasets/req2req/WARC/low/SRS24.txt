@@ -1,0 +1,1 @@
+SRS 24 - Libwarc shall allocate minimum memory heap to store WARC-record metadata.

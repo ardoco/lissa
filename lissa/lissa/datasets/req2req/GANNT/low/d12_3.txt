@@ -1,0 +1,1 @@
+A collection of dependency class is used to manage dependencies. It contains objects of dependency classes and provides functions to create, delete, and get dependencies. 

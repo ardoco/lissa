@@ -1,0 +1,1 @@
+SRS 36 - WARC browser shall not support CDX files because the CDX file format is not a standard at this time and is outside of scope.

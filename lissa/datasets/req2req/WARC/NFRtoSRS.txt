@@ -1,0 +1,42 @@
+%
+NFR01.txt	SRS49.txt
+%
+NFR02.txt	SRS67.txt
+%
+NFR03.txt	SRS69.txt SRS70.txt SRS71.txt SRS72.txt SRS80.txt SRS84.txt SRS85.txt SRS89.txt
+%
+NFR04.txt	SRS31.txt SRS41.txt SRS45.txt SRS47.txt SRS48.txt SRS49.txt SRS52.txt SRS73.txt SRS74.txt
+%
+NFR05.txt	SRS75.txt
+%
+NFR06.txt	SRS70.txt SRS71.txt SRS72.txt
+%
+NFR07.txt
+%
+NFR08.txt	SRS76.txt
+%
+NFR09.txt	SRS77.txt
+%
+NFR10.txt	SRS70.txt SRS78.txt
+%
+NFR11.txt	SRS79.txt SRS80.txt
+%
+NFR12.txt	SRS51.txt SRS59.txt SRS60.txt SRS63.txt
+%
+NFR13.txt	
+%
+NFR14.txt	SRS39.txt SRS40.txt 
+%
+NFR15.txt	SRS82.txt SRS83.txt SRS84.txt
+%
+NFR16.txt	SRS84.txt SRS85.txt
+%
+NFR17.txt	SRS80.txt SRS88.txt SRS89.txt
+%
+NFR18.txt	SRS59.txt
+%
+NFR19.txt	SRS51.txt SRS59.txt SRS60.txt
+%
+NFR20.txt	SRS61.txt SRS62.txt SRS63.txt SRS64.txt
+%
+NFR21.txt	SRS51.txt SRS59.txt SRS60.txt SRS61.txt SRS62.txt SRS63.txt SRS64.txt

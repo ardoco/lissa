@@ -1,0 +1,3 @@
+ListenerNotifications
+
+If a client registers for notifications  the _UIMiddleware_ shall send notifications for specific events

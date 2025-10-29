@@ -1,0 +1,1 @@
+The system shall support the use of the National Provider Identifier or NPI in the EHR audit log to identify the individual provider or, in situations when an NPI is not available for an individual, a single unique internal provider identifier is assigned.

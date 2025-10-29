@@ -1,0 +1,1 @@
+The load distribution class provides functions to calculate the distribution based on tasks and human resources. The functions uses the task manager.

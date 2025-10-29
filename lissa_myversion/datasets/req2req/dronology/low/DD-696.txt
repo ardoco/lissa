@@ -1,0 +1,3 @@
+Initiating the follow mode
+
+"When ""UI follow mode"" is initiated  the map shall automatically zoom and pan so that all selected UAVs are centered and their active routes constitutes 60% of the view."

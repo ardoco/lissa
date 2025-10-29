@@ -1,0 +1,1 @@
+SRS 43 - "arc2warc" shall have make a default operation in cases where an ARC-record has no corresponding field in the WARC-record.

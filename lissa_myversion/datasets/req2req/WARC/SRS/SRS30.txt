@@ -1,0 +1,1 @@
+SRS 30 - It shall not be possible to use more than one compression schema (including noncompression) within a single WARC file. (i.e. it is not possible to mix compression schemes within a single WARC file).

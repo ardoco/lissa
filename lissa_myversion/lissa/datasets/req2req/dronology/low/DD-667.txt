@@ -1,0 +1,3 @@
+Validate route altitude and speed
+
+The altitude and speed values shall not exceed the current maximum {{UAV_MAX_ALTITUDE}}. {{UAV_MAX_GROUND_SPEED}} set in the system.

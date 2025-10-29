@@ -1,0 +1,1 @@
+SRS 68 - Major revisions to the WARC ISO standard may lead to revisions of libwarc, but these revisions should be isolated and not affect any tools developed incorporating libwarc

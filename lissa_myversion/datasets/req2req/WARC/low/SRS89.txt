@@ -1,0 +1,1 @@
+SRS 89 - Assembly code and specific system features shall not be used in libwarc to ensure resulting code is widely portable across multiple target architectures

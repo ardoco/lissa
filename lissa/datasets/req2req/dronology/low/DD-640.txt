@@ -1,0 +1,3 @@
+UI forwards mission plan requests to dronology
+
+The _UIMiddleware_ shall forward a mission plan request to dronology.

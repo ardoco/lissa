@@ -1,0 +1,3 @@
+Distinguish key waypoints
+
+The _RouteCreationUI_ shall distinguish between starting  ending  and intermediate waypoint markers.

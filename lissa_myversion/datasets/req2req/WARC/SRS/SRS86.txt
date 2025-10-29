@@ -1,0 +1,1 @@
+SRS 86 - Libwarc shall not depend on a specific build tool in order to be built from source. However, makefiles for each target shall be included to simplify deployment.

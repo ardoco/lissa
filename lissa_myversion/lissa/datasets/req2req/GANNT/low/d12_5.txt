@@ -1,0 +1,1 @@
+A GUI class of graphic area provides function to draw dependency. The function uses an object of task manager to add dependencies.

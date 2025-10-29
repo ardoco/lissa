@@ -1,0 +1,1 @@
+A class is used to represent the dependency between one task and one human resource. The dependency class provides functions to get the task and the human resource. 

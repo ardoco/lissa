@@ -1,0 +1,1 @@
+The class for holidays provides functions to get the start date and the finish date. The class also provides a function to check if a special date is in holiday.

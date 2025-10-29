@@ -1,0 +1,3 @@
+GCS transmits monitoring messages
+
+The _GCS_ requests the UAV's properties every {{UAV_MESSAGE_MONITORING_FREQUENCY}} seconds.

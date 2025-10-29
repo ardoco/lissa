@@ -1,0 +1,3 @@
+UAV Messages
+
+The _GCSMiddleware_ shall handle state messages   monitoring messages  and mode change messages  received from an _GCS_.

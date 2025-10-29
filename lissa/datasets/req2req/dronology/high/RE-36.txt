@@ -1,0 +1,3 @@
+Only one instance of each registered drone may be active any any time
+
+The _UAVActivationManager_ shall ensure that only one instance of each registered drone is active at any time.

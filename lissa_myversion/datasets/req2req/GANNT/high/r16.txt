@@ -1,0 +1,1 @@
+Add/Remove Holidays and Vacation Days;Holidays and vacation days are properties of persons (resources). changing this information also changes the availability of a person on certain days.

@@ -1,0 +1,1 @@
+SRS 87 - The default compiler used for all Unix systems to build libwarc will be gcc v.3.4.4 (or above). For Windows, the default compiler will be Microsoft Visual C++ 6.X (or above).

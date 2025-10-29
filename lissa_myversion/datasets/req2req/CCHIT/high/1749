@@ -1,0 +1,1 @@
+The system shall view users who hold the OREMAS key to be a clerical user, and, consequently, the verify, remove, restore, and view removed options will not be available.

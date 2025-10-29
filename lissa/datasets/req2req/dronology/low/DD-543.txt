@@ -1,0 +1,3 @@
+Synchronized Takeoff
+
+The FlightPattern for synchronized takeoff shall direct each UAV to takeoff to a unique altitude  synchronize with other UAVs  fly at the unique altitude to the longitude and latitude of the first waypoint of the subsequent route  synchronize with other UAVs  descend or ascend to the target waypoint  and synchronize with other UAVs to complete the flight pattern.

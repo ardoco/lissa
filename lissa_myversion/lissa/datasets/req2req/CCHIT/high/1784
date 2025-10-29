@@ -1,0 +1,1 @@
+The system shall check ICD and CPT code validity as of a specified date when codes are entered, when a new code set is implemented, and whenever CACs or IRM personnel choose to run the option.

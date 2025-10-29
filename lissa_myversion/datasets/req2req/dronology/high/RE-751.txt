@@ -1,0 +1,3 @@
+GCS transmits UAV coordinates
+
+The _GCS_ shall transmit the UAV's current location to the _GCSMiddleware_

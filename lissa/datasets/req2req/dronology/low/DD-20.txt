@@ -1,0 +1,3 @@
+Client registers for flight plan events
+
+A client shall register with the _UIMiddleware_ to receive notifications whenever a new flight plan is activated or executed

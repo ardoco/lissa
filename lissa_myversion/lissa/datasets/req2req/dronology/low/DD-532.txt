@@ -1,0 +1,3 @@
+Check flight plan for takeoff altitude
+
+When the takeoff command is issued  the _FlightSchedulingAndExecution _checks for a pre-specified altitude in the flight plan.

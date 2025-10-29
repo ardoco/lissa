@@ -1,0 +1,62 @@
+
+{
+  "cache_dir": "./cache/WARC",
+
+  "gold_standard_configuration": {
+    "path": "./datasets/req2req/WARC/answer.csv",
+    "hasHeader": "true"
+  },
+
+  "source_artifact_provider" : {
+    "name" : "text",
+    "args" : {
+      "artifact_type" : "requirement",
+      "path" : "./datasets/req2req/WARC/high"
+    }
+  },
+  "target_artifact_provider" : {
+    "name" : "text",
+    "args" : {
+      "artifact_type" : "requirement",
+      "path" : "./datasets/req2req/WARC/low"
+    }
+  },
+  "source_preprocessor" : {
+    "name" : "artifact",
+    "args" : {}
+  },
+  "target_preprocessor" : {
+    "name" : "artifact",
+    "args" : {}
+  },
+  "embedding_creator" : {
+    "name" : "openai",
+    "args" : {
+      "model": "text-embedding-3-large"
+    }
+  },
+  "source_store" : {
+    "name" : "custom",
+    "args" : { }
+  },
+  "target_store" : {
+    "name" : "custom",
+    "args" : {
+      "max_results" : "4"
+    }
+  },
+  "classifier" : {
+    "name" : "mock",
+    "args" : {
+      
+    }
+  },
+  "result_aggregator" : {
+    "name" : "any_connection",
+    "args" : {}
+  },
+  "tracelinkid_postprocessor" : {
+    "name" : "req2req",
+    "args" : {}
+  }
+}

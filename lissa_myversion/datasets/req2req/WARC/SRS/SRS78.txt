@@ -1,0 +1,1 @@
+SRS 78 - Libwarc and associated tools shall be shipped with installers to "mod_warc" for Apache (v2.X) and Lighttpd (v1.4.X) servers

@@ -1,0 +1,3 @@
+Predefined flight patterns
+
+The _MissionPlanner _shall manage predefined FlightPatterns

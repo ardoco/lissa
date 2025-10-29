@@ -1,0 +1,3 @@
+Takeoff Altitude Tag
+
+The flight route xml format includes an optional takeoff altitude tag

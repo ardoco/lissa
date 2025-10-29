@@ -1,0 +1,1 @@
+The human resource class contains name, phone, email, and holidays. The class provides functions to set and get these properties. A class is used to represent the holidays. There can be multiple holidays. 

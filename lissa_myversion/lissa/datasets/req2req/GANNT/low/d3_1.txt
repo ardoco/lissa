@@ -1,0 +1,1 @@
+GUI should able to provide ability to change task name. 

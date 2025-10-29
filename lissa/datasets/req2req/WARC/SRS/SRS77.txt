@@ -1,0 +1,1 @@
+SRS 77 - The code and documentation of libwarc shall be licensed to the community using an IIPC approved license, such as Apache 2.0 or BSD licence

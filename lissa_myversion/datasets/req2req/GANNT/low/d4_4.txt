@@ -1,0 +1,1 @@
+To remove tasks as subtasks a method which dedent selected task nodes in GUI so that they will not be subtasks of their original parents tasks is used. The task tree model provides methods to remove relationship between selected tasks and their original parents and add relationship between selected tasks and their new parents.

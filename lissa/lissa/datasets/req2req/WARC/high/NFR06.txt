@@ -1,0 +1,1 @@
+NFR 6 - The library and each tool or extension shall be documented for developers and end users, using man pages and other common document forms.

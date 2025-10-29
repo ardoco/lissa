@@ -1,0 +1,1 @@
+Handle Milestones; A milestone is a special task. Whereas a task typically has a timeframe specified (the time needed to complete the task), a milestone is typically an event. For example, the release date of a software is an event rather than a timeframe.

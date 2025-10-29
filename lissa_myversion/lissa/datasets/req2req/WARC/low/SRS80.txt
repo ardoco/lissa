@@ -1,0 +1,1 @@
+SRS 80 - To ensure code portability on older computer architectures, Libwarc shall be compatible with any compiler conforming to the ANSI-C standard C89 revision.

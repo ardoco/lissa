@@ -1,0 +1,1 @@
+A MODIS Computer Software Configuration Item (CSCI) is any independently tracked and configured unit of software within the MODIS SDP S/W, including processes, scripts, and utility libraries.  Each CSCI in the MODIS SDP S/W shall run in the ECS production environment.

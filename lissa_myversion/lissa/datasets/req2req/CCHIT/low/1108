@@ -1,0 +1,1 @@
+When using barcode scanners, the system shall provide the ability to alert the end user that the medication being administered has triggered one or more of the following errors: wrong patient, wrong med, wrong time, wrong route or wrong dose.

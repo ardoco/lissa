@@ -1,0 +1,3 @@
+Create log event when flight plan is executed
+
+When a flight plan is executed a log event shall be created that includes the name of the route  the UAV it is assigned to  and the execution time stamp.

@@ -1,0 +1,1 @@
+A collection of resource assignments is used to manage the relationships between multiple human resources and a single task. It contains multiple objects of the human resource assignment class. The collection provides functions to add and remove human resource assignments.

@@ -1,0 +1,3 @@
+Message frequency assignment
+
+The _GCS_ shall assign a message frequency for all UAVs.

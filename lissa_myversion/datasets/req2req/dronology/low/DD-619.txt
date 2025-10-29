@@ -1,0 +1,3 @@
+Log state and monitoring messages
+
+While the log level {{HW_TRACE}} is active each state and monitoring message shall be logged.

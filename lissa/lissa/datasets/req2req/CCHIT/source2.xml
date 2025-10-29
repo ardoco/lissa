@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<artifacts_collection>
+<collection_info>
+	<id>Requirements</id>
+	<name>Requirements</name>
+	<version>1.1</version>
+	<description>Requirements</description>
+	<content_location>internal</content_location>
+</collection_info>
+<artifacts>
+	<artifact><id>1674</id><content>The system shall improve accessibility of online clinical information and results.</content><parent_id/></artifact>
+	<artifact><id>1688</id><content>The system shall integrate all components of the patient record to provide comprehensive and intelligent clinical information access and reporting.</content><parent_id/></artifact>
+	<artifact><id>1689</id><content>"The system shall allow multiple use and integration of information, including cutting and pasting among components, boilerplate capabilities, templates, etc., thus decreasing the amount of duplicate entry of data."</content><parent_id/></artifact>
+	<artifact><id>1690</id><content>The system shall be easy to use by improving the user interface to reflect industry standards and principles of usability and user-centered design.</content><parent_id/></artifact>
+	<artifact><id>1691</id><content>The system shall use HL-7 communications protocol for transferring messages among packages</content><parent_id/></artifact>
+	<artifact><id>1692</id><content>"The system shall allow setting of business rules, document types, user classes, etc. to control access to documents, reports, verification, signing, and so on"</content><parent_id/></artifact>
+	<artifact><id>1693</id><content>"The system shall support the Ambulatory Care Date Capture project for capturing encounter data for workload credit, as well as capturing clinically relevant data for reminders and reports"</content><parent_id/></artifact>
+	<artifact><id>1694</id><content>The system shall have pre-defined progress note templates.</content><parent_id/></artifact>
+	<artifact><id>1695</id><content>The system shall allow creation of personalized templates to fit the specific needs of individual practices.</content><parent_id/></artifact>
+	<artifact><id>1696</id><content>"The system shall include clinical reminders to provide relevant information to providers, at the point of care, for improving patient care."</content><parent_id/></artifact>
+	<artifact><id>1697</id><content>The system shall include a graphing feature to allow users to view lab test results and vital signs in a graph.</content><parent_id/></artifact>
+	<artifact><id>1675</id><content>"The system shall provide a means to view patient demographics, allergies and adverse reactions, postings (cautions, warnings, allergies, and advance directives), clinical reminders, current medications, problems, appointments, etc."</content><parent_id/></artifact>
+	<artifact><id>1698</id><content>"The system shall include a report construction feature so each site can individually run related to patient data including: Health Summary, Vitals Cumulative, Nutritional Assessment, Daily Order Summary and Order Summary for a Date Range reports."</content><parent_id/></artifact>
+	<artifact><id>1699</id><content>The system shall support role-based access for security controls.</content><parent_id/></artifact>
+	<artifact><id>1700</id><content>The system shall support audit capability.</content><parent_id/></artifact>
+	<artifact><id>1701</id><content>"The system shall support requirements for codified data, including diagnosis data using ICD-9 codes."</content><parent_id/></artifact>
+	<artifact><id>1702</id><content>"The system shall have the capability to capture and store risk, social and medical factors; including, but not limited to the following: Tobacco use and history including number of years and packs per day (PPD), Alcohol use history, Drug use history, Occupational environment, Marital status, Occupation, Religious preference, Ethnicity, Healthcare surrogate with alert, Guardian/legal representative with alert."</content><parent_id/></artifact>
+	<artifact><id>1703</id><content>"The system shall document discharge summary hospitalization data, as well as procedure and diagnosis-related information."</content><parent_id/></artifact>
+	<artifact><id>1704</id><content>The system shall capture history of received immunizations.</content><parent_id/></artifact>
+	<artifact><id>1705</id><content>The system shall include capabilities for ordering laboratory tests and reviewing results.</content><parent_id/></artifact>
+	<artifact><id>1706</id><content>The system shall allow medication orders to be placed and filled from local stocks of medications while providing full auditing of all medication orders within the medication profile.</content><parent_id/></artifact>
+	<artifact><id>1707</id><content>The system shall provide the following pediatric functionality including: Pediatric progress note templates based on the Indian Health Services (IHS) progress note templates and American Academy of Pediatric Bright Futures templates</content><parent_id/></artifact>
+	<artifact><id>1708</id><content>The system shall provide OB/GYN progress note templates based on the IHS progress note templates.</content><parent_id/></artifact>
+	<artifact><id>1676</id><content>The system shall improve efficiency of entering orders.</content><parent_id/></artifact>
+	<artifact><id>1677</id><content>The system shall provide a way for user to quickly click on the specifications that he or she wants for each order placed.</content><parent_id/></artifact>
+	<artifact><id>1678</id><content>The system shall provide an option to so a user can quickly set up orders for frequently placed orders.</content><parent_id/></artifact>
+	<artifact><id>1679</id><content>The system shall allow several orders to be placed with the ability for a user to sign for them all at once.</content><parent_id/></artifact>
+	<artifact><id>1680</id><content>"The system shall allow event-delay capability for pre-admission, discharge, and transfer orders"</content><parent_id/></artifact>
+	<artifact><id>1709</id><content>The system will provide the ability to register patients of all types.</content><parent_id/></artifact>
+	<artifact><id>1710</id><content>"The system shall have the capability to capture and store risk, social, and medical factors for each new patient."</content><parent_id/></artifact>
+	<artifact><id>1711</id><content>The system shall allow physician offices to use social security numbers or medical record numbers to identify patients.</content><parent_id/></artifact>
+	<artifact><id>1712</id><content>The system shall support the requirements for codified data specified by the DOQ-IT quality improvement measures.</content><parent_id/></artifact>
+	<artifact><id>1713</id><content>The system shall trigger registration reminders when patient meets eligibility requirements for the DOQ-IT program.</content><parent_id/></artifact>
+	<artifact><id>1714</id><content>The system shall include Standard Laboratory and Medication orderable files.</content><parent_id/></artifact>
+	<artifact><id>1715</id><content>The system shall include the ability to print prescriptions for signature and fax prescriptions to a local pharmacy with an electronic signature.</content><parent_id/></artifact>
+	<artifact><id>1716</id><content>The system shall provide a platform for building interfaces to external lab services enabling automated order entry and results reporting.</content><parent_id/></artifact>
+	<artifact><id>1717</id><content>The system shall provide an open source integration platform to build interfaces to Billing/Practice Management systems.</content><parent_id/></artifact>
+	<artifact><id>1718</id><content>The system shall require handwritten signatures for outpatient medication orders of schedule 2 and schedule 2n controlled substances due to DEA policy.</content><parent_id/></artifact>
+	<artifact><id>1719</id><content>The system's pilot program shall use a smart card to digitally sign medication orders.</content><parent_id/></artifact>
+	<artifact><id>1720</id><content>"The system shall require a smart card reader, smart card, and a PIN to digitally sign an order."</content><parent_id/></artifact>
+	<artifact><id>1721</id><content>"The system shall require most orders or documents, such as progress notes, reports, or health summaries, to have an electronic signature."</content><parent_id/></artifact>
+	<artifact><id>1722</id><content>The system shall not release orders to services or activated until they are signed if they require a signature.</content><parent_id/></artifact>
+	<artifact><id>1723</id><content>"The system shall not require a signature for an order if the order is designated as ""signed on chart"" or a generic order that does not require a signature."</content><parent_id/></artifact>
+	<artifact><id>1681</id><content>The system shall allow complete order sets to be predefined and personalized.</content><parent_id/></artifact>
+	<artifact><id>1724</id><content>The system shall implement a user class hierarchy to identify the roles that different users fulfill within the hospital.</content><parent_id/></artifact>
+	<artifact><id>1725</id><content>The system shall provide tools for creating business rules that apply to documents used by members of such groups.</content><parent_id/></artifact>
+	<artifact><id>1734</id><content>The system shall automatically considered any member of a given User Class to be a member of all superclasses of that class.</content><parent_id/></artifact>
+	<artifact><id>1735</id><content>The system shall automatically include membership in a given User Class to all member of subclasses of that class.</content><parent_id/></artifact>
+	<artifact><id>1736</id><content>The system shall design the Kernel Person Class File to accommodate the HCFA National Provider System Taxonomy of Professionals/Occupations.</content><parent_id/></artifact>
+	<artifact><id>1726</id><content>"The system shall provide a method for identifying who is AUTHORIZED to do something (for example, sign and order)."</content><parent_id/></artifact>
+	<artifact><id>1727</id><content>"The system shall define, populate, and retrieve information about user classes."</content><parent_id/></artifact>
+	<artifact><id>1728</id><content>The system shall allow user classes to be defined hospital-wide or more narrowly for a specific service.</content><parent_id/></artifact>
+	<artifact><id>1729</id><content>The system shall allow user classes to be used across VistA to replace and/or complement security keys.</content><parent_id/></artifact>
+	<artifact><id>1730</id><content>The system shall allow infinite hierarchies of subclasses to be created in the User Hierarchy Class structure.</content><parent_id/></artifact>
+	<artifact><id>1731</id><content>The system shall allow document types to inherit authorizations from a higher level when using classes to assign roles.</content><parent_id/></artifact>
+	<artifact><id>1732</id><content>The system shall impose no limitation on the depth or specificity of the User Class hierarchy which a site may choose to develop.</content><parent_id/></artifact>
+	<artifact><id>1733</id><content>The system shall allow concurrent membership in more than one User Class.</content><parent_id/></artifact>
+	<artifact><id>1737</id><content>"The document-handling system (TIU) shall include Consults/Request Tracking, Discharge Summary, and Progress Notes."</content><parent_id/></artifact>
+	<artifact><id>1738</id><content>The document-handling system (TIU) shall have boilerplate and cut and paste capabilities.</content><parent_id/></artifact>
+	<artifact><id>1739</id><content>The system shall allow other VistA applications to access the user class file to determine the role of an employee.</content><parent_id/></artifact>
+	<artifact><id>1740</id><content>"The system shall require provider, location, date and time encounter data to be entered for each visit (or telephone call) with a patient."</content><parent_id/></artifact>
+	<artifact><id>1741</id><content>"The system shall require service connection, provider name, location, date, diagnosis, procedure, and visit information to be entered in the enounter form to receive workload credit."</content><parent_id/></artifact>
+	<artifact><id>1742</id><content>The system shall timeout after a period of inactivity.</content><parent_id/></artifact>
+	<artifact><id>1743</id><content>The system shall ask the user if the user wants to continue using the system before timing out.</content><parent_id/></artifact>
+	<artifact><id>1744</id><content>The system shall require the entry of an access code and a verify code to gain access to the system.</content><parent_id/></artifact>
+	<artifact><id>1745</id><content>The system shall stored the names of users who view remote data in the remote site's database.</content><parent_id/></artifact>
+	<artifact><id>1746</id><content>"The system shall audit sensitive records, enabling a site to follow up on a record accessed by a remote location."</content><parent_id/></artifact>
+	<artifact><id>1747</id><content>The system shall provide a way to limit the users or sites that have access to remote retrievable data.</content><parent_id/></artifact>
+	<artifact><id>1748</id><content>The system shall allow users who hold any of the ORES/ORELSE/PROVIDER keys to be viewed as a clinical user and has full access privileges to all problem list options.</content><parent_id/></artifact>
+	<artifact><id>1749</id><content>"The system shall view users who hold the OREMAS key to be a clerical user, and, consequently, the verify, remove, restore, and view removed options will not be available."</content><parent_id/></artifact>
+	<artifact><id>1750</id><content>The system shall enforce these access levels when problems are entered via the encounter form. Problems entered on the encounter form by clerical personnel shall be left as UNVERIFIED.</content><parent_id/></artifact>
+	<artifact><id>1751</id><content>"The system shall require a unique match in the Medication, Dosage, Route, and Schedule fields for inpatient medications before CPRS will auto-select an item from the list. The system shall require the Medication and Schedule fields to be an item from the list for inpatient medications, but the Dosage and Route can be a free-text entry (the route must be in the MEDICATION ROUTES file #51.2)."</content><parent_id/></artifact>
+	<artifact><id>1682</id><content>The system shall allow order checking.</content><parent_id/></artifact>
+	<artifact><id>1683</id><content>"The system shall provide background checks on duplicate orders, drug-drug interactions, and many other criteria that a user can choose."</content><parent_id/></artifact>
+	<artifact><id>1752</id><content>The system shall allow users to enter time in several different formats.</content><parent_id/></artifact>
+	<artifact><id>1753</id><content>"The system shall require times to be entered as a 24-hour time, not with a 12-hour clock and an a.m. and p.m."</content><parent_id/></artifact>
+	<artifact><id>1754</id><content>The system shall require a user to review and sign changed if a user has just entered orders or documents that are unsigned.</content><parent_id/></artifact>
+	<artifact><id>1755</id><content>The system shall only auto-select(highlights in blue and places that entry in the field) a patient name if the user types enough characters to uniquely identify a name in the list.</content><parent_id/></artifact>
+	<artifact><id>1756</id><content>The system shall wait until the user explicitly selects an item using the mouse or the keyboard if the user does not enter enough characters to uniquely identify an item.</content><parent_id/></artifact>
+	<artifact><id>1757</id><content>The system shall display a box listing possible matches if CPRS finds more than one patient with the same last name and same last four digits of the social security numbers.</content><parent_id/></artifact>
+	<artifact><id>1758</id><content>"The system shall allow the user to group the patient list according to provider, team, specialty, clinic, or ward."</content><parent_id/></artifact>
+	<artifact><id>1759</id><content>"The system shall use a set of characters that include uppercase and lowercase Latin alphabetic characters (A-Z, a-z), numbers (0-9), and other special characters."</content><parent_id/></artifact>
+	<artifact><id>1760</id><content>The system shall display a message indicating the patient?s ability to pay for medical services must be evaluated.</content><parent_id/></artifact>
+	<artifact><id>1761</id><content>The system shall display a message that a patient has data from the legacy system used before the site was consolidated that is not being displayed which a user may want to access.</content><parent_id/></artifact>
+	<artifact><id>1762</id><content>The system shall indicate that the record is sensitive and may only be viewed by authorized users.</content><parent_id/></artifact>
+	<artifact><id>1763</id><content>The system shall display a message telling the user that the selected patient is deceased.</content><parent_id/></artifact>
+	<artifact><id>1764</id><content>The system shall display a message of possible matches if more than one match is found when a user partially enters a patient's name and last four digits of a social security number.</content><parent_id/></artifact>
+	<artifact><id>1765</id><content>"The system shall allow the creation of  patient lists or team lists that simplify tasks such as reviewing patient charts, ordering, and signing orders and notes and these  lists can be based on wards, clinics, teams, or other groups."</content><parent_id/></artifact>
+	<artifact><id>1766</id><content>The system shall use patient lists allow a person to quickly locate patients without going through all the patients in the list.</content><parent_id/></artifact>
+	<artifact><id>1767</id><content>The system shall allow clinicians to create patient lists for who can sign or cosign for each other.</content><parent_id/></artifact>
+	<artifact><id>1768</id><content>The system shall ensure that all team members receive necessary information about a patient by using patient lists to tie notifications to teams.</content><parent_id/></artifact>
+	<artifact><id>1769</id><content>The system shall allow notifications to be renewed if the user decides the alert should not go away when the user views it.</content><parent_id/></artifact>
+	<artifact><id>1778</id><content>"The system shall sort notifications based on column heading: Urgency (valued HIGH, Moderate, or low as indicated by the CPRS parameter ORB URGENCY. TIU alerts are given a Moderate urgency value. Other alerts without a parameter value are given an urgency of low.)"</content><parent_id/></artifact>
+	<artifact><id>1779</id><content>"The system shall sort notifications based on column heading: Alert Date/Time (date/time the alert was triggered, newest to oldest or oldest to newest)"</content><parent_id/></artifact>
+	<artifact><id>1780</id><content>"The system shall sort notifications based on column heading: Message (alert message or text, alphabetical or reverse alphabetical)"</content><parent_id/></artifact>
+	<artifact><id>1781</id><content>The system shall sort notifications based on column heading: Forwarded By/When (sorts alerts alphabetically and then by time for the same forwarding person)</content><parent_id/></artifact>
+	<artifact><id>1782</id><content>The system shall store which column the user sorted by when the user exits or changes patients and sorts by that column again when the Patient Selection/Notifications screen is next displayed.</content><parent_id/></artifact>
+	<artifact><id>1770</id><content>The system shall allow a user to foward notification to someone else at the site.</content><parent_id/></artifact>
+	<artifact><id>1771</id><content>The system shall allow users to disable unwanted notifications as desired.</content><parent_id/></artifact>
+	<artifact><id>1772</id><content>The system shall not allow mandatory notifications to be disabled.</content><parent_id/></artifact>
+	<artifact><id>1773</id><content>"The system shall retain notifications for a predetermined amount of time (up to 30 days), after which they may be sent to another destination, such as your MailMan surrogate or your supervisor."</content><parent_id/></artifact>
+	<artifact><id>1774</id><content>The system shall only display notifications for a user's patients or notifications that have been forwarded.</content><parent_id/></artifact>
+	<artifact><id>1775</id><content>The system shall sort notifications based on column heading: Info (information alerts are preceded with an ?I?)</content><parent_id/></artifact>
+	<artifact><id>1776</id><content>The system shall sort notifications based on column heading: Patient name (alphabetical or reverse alphabetical)</content><parent_id/></artifact>
+	<artifact><id>1777</id><content>"The system shall sort notifications based on column heading: Location (patient location, if known, alphabetical or reverse alphabetical)"</content><parent_id/></artifact>
+	<artifact><id>1684</id><content>"The system shall integrate orders with progress notes, results, procedures, diagnosis, and Problem List."</content><parent_id/></artifact>
+	<artifact><id>1783</id><content>The system shall update diagnostic and procedure codes used for billing purposes so codes are applicable at the time the service was provided.</content><parent_id/></artifact>
+	<artifact><id>1784</id><content>"The system shall check ICD and CPT code validity as of a specified date when codes are entered, when a new code set is implemented, and whenever CACs or IRM personnel choose to run the option."</content><parent_id/></artifact>
+	<artifact><id>1785</id><content>The system shall indicate problems with inactive codes have the ?#? symbol in the status column.</content><parent_id/></artifact>
+	<artifact><id>1786</id><content>The system will abort when the user tries to login if tabs are not assigned to the user in their NEW PERSON file or if the RESTRICT PATIENT SELECTION prompt does not contain a Yes or No.</content><parent_id/></artifact>
+	<artifact><id>1787</id><content>"The system shall allow the CAC, or whoever is responsible for granting access to the CPRS GUI at each site, to assign the appropriate access each time a new user is added to the system, or if restricted access is needed for existing users."</content><parent_id/></artifact>
+	<artifact><id>1788</id><content>The system shall require the user to have acess to the Clinical Coorindator menu in the List Manager Interface to assign CPRS tab access.</content><parent_id/></artifact>
+	<artifact><id>1789</id><content>The system shall require an OEER List to be defined to contain the selected patients in order to grant restricted access to the CPRS GUI.</content><parent_id/></artifact>
+	<artifact><id>1685</id><content>The system shall mimic traditional order entry processes where necessary to accommodate established clinical practices.</content><parent_id/></artifact>
+	<artifact><id>1686</id><content>The system's design shall follow hospital work flow patterns and allow local site and individual customization to make it fit specific needs.</content><parent_id/></artifact>
+	<artifact><id>1687</id><content>"The system shall provide real-time order checking, as well as extended expert system/decision support capabilities that enhance the order entry process."</content><parent_id/></artifact>
+</artifacts>
+</artifacts_collection>

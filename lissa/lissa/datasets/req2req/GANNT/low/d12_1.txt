@@ -1,0 +1,1 @@
+A dependency class contains a dependant task and a dependee task. It provides functions to get the dependant task and the dependee task. The dependency class also contains constraint to show the constraint of the dependency. 

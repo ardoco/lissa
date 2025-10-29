@@ -1,0 +1,3 @@
+Maintain position during Hover In Place
+
+"When the ""hover in place"" command is issued  the _FlightManager_ shall halt the UAV in place and maintain its current position."

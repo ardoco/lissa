@@ -1,0 +1,1 @@
+A class is used to represent the constraint that the start date of the dependee task should not be earlier than the end date of the dependent task.

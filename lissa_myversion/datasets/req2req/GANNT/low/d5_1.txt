@@ -1,0 +1,1 @@
+Milestone is a task with no duration. It has only time point of occurrence.

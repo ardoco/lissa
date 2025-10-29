@@ -1,0 +1,1 @@
+SRS 52 - Extensions to "HTTrack", "wget" and "curl" incorporating libwarc shall be provided as patches to recent and specific versions of each tool, to enable users of the tool to access functionality of libwarc

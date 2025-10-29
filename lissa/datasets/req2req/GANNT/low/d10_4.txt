@@ -1,0 +1,1 @@
+The human resource class can have multiple objects of resource assignments which assigns this resource to tasks. The class provides function to get the list of these objects.

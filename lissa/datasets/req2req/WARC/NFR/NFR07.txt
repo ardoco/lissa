@@ -1,0 +1,1 @@
+NFR 7 - Patches implemented for third party projects shall be documented for developers and end users, using man pages and other common document forms.

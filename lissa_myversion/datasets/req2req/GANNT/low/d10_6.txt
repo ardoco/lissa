@@ -1,0 +1,1 @@
+A GUI class uses an object of resource tree table model class to display the resource tree. The resource tree table model provides functions build subtrees based on dependencies.

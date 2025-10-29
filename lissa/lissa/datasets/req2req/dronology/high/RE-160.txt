@@ -1,0 +1,3 @@
+Activation of an additional UAV detected by the GCS
+
+When a _GCS_ requests activation of a newly detected UAV  the _GCSMiddleware_ shall forward the request to Dronology.

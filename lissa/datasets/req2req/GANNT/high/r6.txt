@@ -1,0 +1,1 @@
+Create Resources (person);GanttProject supports Persons as resources. Persons have names and holidays or vacation days. Persons can be assigned to work on tasks.

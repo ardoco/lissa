@@ -1,0 +1,3 @@
+Cancel active plan
+
+If requested  the _SingleUAVFlightPlanScheduler_ shall abort the currently executing flight plan of an UAV

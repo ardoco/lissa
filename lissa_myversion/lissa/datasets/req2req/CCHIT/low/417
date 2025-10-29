@@ -1,0 +1,1 @@
+The system shall be able to support time synchronization using NTP/SNTP, and use this synchronized time in all security records of time.

@@ -1,0 +1,1 @@
+FR 36 - A Jhove plugin module and an output handler shall be made available for WARC files

@@ -1,0 +1,84 @@
+%
+FR01.txt		SRS01.txt SRS02.txt SRS03.txt SRS04.txt SRS05.txt SRS07.txt
+%
+FR02.txt		SRS04.txt SRS05.txt SRS06.txt SRS11.txt SRS21.txt SRS68.txt
+%
+FR03.txt		SRS07.txt
+%
+FR04.txt		SRS08.txt SRS09.txt SRS10.txt
+%
+FR05.txt		SRS11.txt SRS14.txt
+%
+FR06.txt		SRS11.txt SRS12.txt SRS14.txt
+%
+FR07.txt		SRS15.txt
+%
+FR08.txt		SRS16.txt
+%
+FR09.txt		SRS16.txt SRS18.txt		
+%
+FR10.txt	SRS17.txt
+%
+FR11.txt	SRS19.txt
+%
+FR12.txt	SRS19.txt
+%
+FR13.txt	SRS20.txt
+%
+FR14.txt	SRS21.txt SRS22.txt SRS23.txt SRS24.txt SRS25.txt SRS26.txt
+%
+FR15.txt	SRS25.txt
+%
+FR16.txt	SRS21.txt SRS22.txt SRS23.txt SRS24.txt SRS25.txt SRS26.txt
+%
+FR17.txt	SRS27.txt SRS28.txt
+%
+FR18.txt	SRS29.txt SRS30.txt
+%
+FR19.txt	
+%
+FR20.txt	SRS31.txt SRS32.txt
+%
+FR21.txt	SRS34.txt SRS36.txt
+%
+FR22.txt	SRS37.txt
+%
+FR23.txt	SRS38.txt
+%
+FR24.txt	SRS39.txt SRS40.txt
+%
+FR25.txt	SRS41.txt SRS42.txt SRS43.txt
+%
+FR26.txt	SRS44.txt
+%
+FR27.txt	SRS45.txt SRS46.txt
+%
+FR28.txt	SRS47.txt
+%
+FR29.txt	SRS48.txt
+%
+FR30.txt	SRS49.txt
+%
+FR31.txt	SRS51.txt
+%
+FR32.txt	SRS52.txt
+%
+FR33.txt	SRS53.txt
+%
+FR34.txt	SRS54.txt
+%
+FR35.txt	SRS55.txt SRS56.txt
+%
+FR36.txt	SRS56.txt
+%
+FR37.txt	SRS57.txt
+%
+FR38.txt	SRS59.txt
+%
+FR39.txt	SRS51.txt SRS60.txt
+%
+FR40.txt	SRS61.txt
+%
+FR41.txt	SRS62.txt
+%
+FR42.txt	SRS63.txt SRS64.txt

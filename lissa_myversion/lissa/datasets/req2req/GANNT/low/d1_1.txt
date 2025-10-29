@@ -1,0 +1,1 @@
+To create a new task an object of TaskManager class is passed to the class constructor. The TaskManager in its turn takes care of a resource allocation using ResourceAssignmentCollection class. 

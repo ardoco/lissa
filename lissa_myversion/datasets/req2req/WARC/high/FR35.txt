@@ -1,0 +1,1 @@
+FR 35 - It shall be possible to identify and validate WARC files using "Jhove"

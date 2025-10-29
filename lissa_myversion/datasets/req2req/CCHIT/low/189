@@ -1,0 +1,1 @@
+The system shall provide the ability to export structured data which removes those identifiers listed in the HIPAA definition of a limited dataset.  This export on hardcopy and electronic output shall leave the actual PHI data unmodified in the original record.

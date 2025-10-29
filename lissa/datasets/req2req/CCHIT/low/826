@@ -1,0 +1,1 @@
+The system shall provide the ability to access demographic information needed for clinician ordering, verification and medication administration. When SSN is documented within the EHR the first 5 digits should be blind and only the last 4 digits available to use for patient identification.

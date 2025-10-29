@@ -1,0 +1,9 @@
+SRS 7 - The universal header "warc.h" shall provide normalised interfaces to enable developers to create valid and compliant WARC-records, based on the definition in the "ISO TC 46/SC 4 N 595" standards document. The interfaces shall be made available to create WARC records of the following types:
+- "warinfo"
+- "response"
+- "request"
+- "metadata"
+- "revisit"
+- "conversion"
+- "continuation"
+- "resource"

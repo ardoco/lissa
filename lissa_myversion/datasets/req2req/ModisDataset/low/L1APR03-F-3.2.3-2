@@ -1,0 +1,1 @@
+Shall generate computation_status_messages and set spatial_element_quality_flags in response to errors in determining ellipsoid_intersection.  

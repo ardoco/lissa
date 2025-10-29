@@ -1,0 +1,3 @@
+Message frequency units
+
+Message frequency shall be defined in units of seconds.

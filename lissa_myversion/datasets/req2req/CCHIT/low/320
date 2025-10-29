@@ -1,0 +1,1 @@
+The system shall provide the ability to send text or coded allergy information with new electronic prescriptions via NCPDP Script v8.1 (NEWRX) using the free text field of the message drug segment (DRU 090).

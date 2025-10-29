@@ -1,0 +1,1 @@
+A GUI class of task property provides interface and functions to add and remove dependencies by using an object of the dependency collection.
