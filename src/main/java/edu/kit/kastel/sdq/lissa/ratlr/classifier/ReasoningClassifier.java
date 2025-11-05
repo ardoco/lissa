@@ -213,16 +213,18 @@ public class ReasoningClassifier extends Classifier {
                 yield "UserMessage { name = %s contents = %s }".formatted(quoted(userMessage.name()), content);
             }
 
-            default -> throw new IllegalStateException(
-                "Unexpected message type: %s. Expected SystemMessage or UserMessage"
-                    .formatted(message.getClass().getName()));
+            default ->
+                throw new IllegalStateException("Unexpected message type: %s. Expected SystemMessage or UserMessage"
+                        .formatted(message.getClass().getName()));
         };
     }
 
     private String getRepresentation(Content content) {
         return switch (content) {
             case TextContent textContent -> "TextContent { text = %s }".formatted(quoted(textContent.text()));
-            default -> throw new IllegalStateException("Unexpected content type: %s. Expected TextContent".formatted(content.getClass().getName()));
+            default ->
+                throw new IllegalStateException("Unexpected content type: %s. Expected TextContent"
+                        .formatted(content.getClass().getName()));
         };
     }
 }
