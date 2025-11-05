@@ -1,6 +1,8 @@
 /* Licensed under MIT 2025. */
 package edu.kit.kastel.sdq.lissa.ratlr.classifier;
 
+import static dev.langchain4j.internal.Utils.quoted;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -14,9 +16,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 
-import dev.langchain4j.data.message.ChatMessage;
-import dev.langchain4j.data.message.SystemMessage;
-import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.data.message.*;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.response.ChatResponse;
 
@@ -63,7 +63,8 @@ public class ReasoningClassifier extends Classifier {
         super(ChatLanguageModelProvider.threads(configuration), contextStore);
         this.provider = new ChatLanguageModelProvider(configuration);
         this.cache = CacheManager.getDefaultInstance().getCache(this, provider.getCacheParameters());
-        this.prompt = configuration.argumentAsStringByEnumIndex("prompt", 0, Prompt.values(), it -> it.promptTemplate);
+        this.prompt = configuration.argumentAsStringByEnumIndex(
+                "prompt", 0, ReasoningClassifierPrompt.values(), ReasoningClassifierPrompt::getPromptTemplate);
         this.useOriginalArtifacts = configuration.argumentAsBoolean("use_original_artifacts", false);
         this.useSystemMessage = configuration.argumentAsBoolean("use_system_message", true);
         this.llm = this.provider.createChatModel();
@@ -176,9 +177,9 @@ public class ReasoningClassifier extends Classifier {
                 .replace("{target_content}", target.getContent());
         messages.add(new UserMessage(request));
 
-        // TODO Don't rely on messages.toString() as it is not stable
+        String messageString = getRepresentation(messages);
         CacheKey cacheKey = CacheKey.of(
-                provider.modelName(), provider.seed(), provider.temperature(), CacheKey.Mode.CHAT, messages.toString());
+                provider.modelName(), provider.seed(), provider.temperature(), CacheKey.Mode.CHAT, messageString);
 
         String cachedResponse = cache.get(cacheKey, String.class);
         if (cachedResponse != null) {
@@ -196,40 +197,30 @@ public class ReasoningClassifier extends Classifier {
         }
     }
 
-    /**
-     * Defines the available prompt templates for classification.
-     */
-    private enum Prompt {
-        /**
-         * Basic prompt that asks for reasoning about trace links.
-         */
-        REASON_WITH_NAME(
-                "Below are two artifacts from the same software system. Is there a traceability link between (1) and (2)? Give your reasoning and then answer with 'yes' or 'no' enclosed in <trace> </trace>.\n (1) {source_type}: '''{source_content}''' \n (2) {target_type}: '''{target_content}''' "),
+    private String getRepresentation(List<ChatMessage> messages) {
+        List<String> messageStrings =
+                messages.stream().map(this::getRepresentation).toList();
+        return messageStrings.toString();
+    }
 
-        /**
-         * Prompt that asks for conceivable trace links.
-         */
-        REASON_WITH_NAME_CONCEIVABLE(
-                "Below are two artifacts from the same software system. Is there a conceivable traceability link between (1) and (2)? Give your reasoning and then answer with 'yes' or 'no' enclosed in <trace> </trace>.\n (1) {source_type}: '''{source_content}''' \n (2) {target_type}: '''{target_content}''' "),
+    private String getRepresentation(ChatMessage message) {
+        return switch (message) {
+            case SystemMessage systemMessage -> "SystemMessage { text = %s }".formatted(quoted(systemMessage.text()));
+            case UserMessage userMessage -> {
+                List<String> content = userMessage.contents().stream()
+                        .map(this::getRepresentation)
+                        .toList();
+                yield "UserMessage { name = %s contents = %s }".formatted(quoted(userMessage.name()), content);
+            }
 
-        /**
-         * Prompt that requires high certainty for positive responses.
-         */
-        REASON_WITH_NAME_YES_IF_CERTAIN(
-                "Below are two artifacts from the same software system.\n Is there a traceability link between (1) and (2)? Give your reasoning and then answer with 'yes' or 'no' enclosed in <trace> </trace>. Only answer yes if you are absolutely certain.\n (1) {source_type}: '''{source_content}''' \n (2) {target_type}: '''{target_content}''' ");
+            default -> throw new IllegalStateException("Unexpected value: " + message);
+        };
+    }
 
-        /**
-         * The template string for this prompt.
-         */
-        private final String promptTemplate;
-
-        /**
-         * Creates a new prompt with the specified template.
-         *
-         * @param promptTemplate The template string for the prompt
-         */
-        Prompt(String promptTemplate) {
-            this.promptTemplate = promptTemplate;
-        }
+    private String getRepresentation(Content content) {
+        return switch (content) {
+            case TextContent textContent -> "TextContent { text = %s }".formatted(quoted(textContent.text()));
+            default -> throw new IllegalStateException("Unexpected value: " + content);
+        };
     }
 }
