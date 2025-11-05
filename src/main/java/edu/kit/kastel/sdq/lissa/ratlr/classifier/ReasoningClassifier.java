@@ -213,7 +213,9 @@ public class ReasoningClassifier extends Classifier {
                 yield "UserMessage { name = %s contents = %s }".formatted(quoted(userMessage.name()), content);
             }
 
-            default -> throw new IllegalStateException("Unexpected value: " + message);
+            default -> throw new IllegalStateException(
+                "Unexpected message type: %s. Expected SystemMessage or UserMessage"
+                    .formatted(message.getClass().getName()));
         };
     }
 
