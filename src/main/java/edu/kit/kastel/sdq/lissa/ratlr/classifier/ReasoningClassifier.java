@@ -222,7 +222,7 @@ public class ReasoningClassifier extends Classifier {
     private String getRepresentation(Content content) {
         return switch (content) {
             case TextContent textContent -> "TextContent { text = %s }".formatted(quoted(textContent.text()));
-            default -> throw new IllegalStateException("Unexpected value: " + content);
+            default -> throw new IllegalStateException("Unexpected content type: %s. Expected TextContent".formatted(content.getClass().getName()));
         };
     }
 }
