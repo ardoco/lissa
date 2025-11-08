@@ -1,3 +1,0 @@
-Takeoff Altitude
-
-If a takeoff altitude is prescribed in the flight plan assigned to a UAV currently on the ground  then that altitude is used as the target takeoff altitude.

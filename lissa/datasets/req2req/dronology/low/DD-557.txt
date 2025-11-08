@@ -1,3 +1,0 @@
-Only one executing flight plan per UAV
-
-Each UAV can only store one currently executing flight plan ID.

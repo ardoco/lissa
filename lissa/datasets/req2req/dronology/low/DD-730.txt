@@ -1,3 +1,0 @@
-UAV Command ID
-
-Each command shall include a unique {{UAV_ID}}

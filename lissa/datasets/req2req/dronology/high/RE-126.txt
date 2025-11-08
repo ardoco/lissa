@@ -1,3 +1,0 @@
-Collision avoidance activation
-
-The _ObjectAvoidance_ system only issues commands within the capabilities of the UAV

@@ -1,3 +1,0 @@
-Manual Flight Plan Assignment
-
-If a route contains a specific {{UAV_ID}}  the _SingleUAVFlightPlanScheduler_ shall assign the route to the given UAV.

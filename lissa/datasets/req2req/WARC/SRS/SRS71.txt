@@ -1,1 +1,0 @@
-SRS 71 - Libwarc shall be shipped with installation guides for Fedora, Debian, FreeBSD, Mac OS X 10.5 and Windows XP.

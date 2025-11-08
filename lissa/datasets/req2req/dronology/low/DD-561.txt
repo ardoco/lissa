@@ -1,3 +1,0 @@
-Hover when active plan cancelled
-
-When the flight plan is aborted the UAV switches to hover in place mode

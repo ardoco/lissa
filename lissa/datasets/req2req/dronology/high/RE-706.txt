@@ -1,3 +1,0 @@
-Publishing Monitoring Messages
-
-The _DronologyRuntimeMonitor_ shall be able to receive messages from any Dronology component

@@ -1,3 +1,0 @@
-UAV Registration
-
-The _UAVRegistrationManager_ shall store UAV meta-data information  such as the UAV's technical characteristics

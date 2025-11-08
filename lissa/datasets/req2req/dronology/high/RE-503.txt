@@ -1,3 +1,0 @@
-Valid Flight Route
-
-The _FlightRouteManager_ shall ensure that all flight routes represent a {{VALID_FLIGHT_ROUTE}}.

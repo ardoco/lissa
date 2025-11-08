@@ -1,1 +1,0 @@
-GUI needs to provide ability to show utilization of a person.

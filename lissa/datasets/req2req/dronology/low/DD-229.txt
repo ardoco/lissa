@@ -1,3 +1,0 @@
-Display active route details
-
-The UI shall display the waypoints and their connections.

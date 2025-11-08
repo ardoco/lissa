@@ -1,3 +1,0 @@
-UAV Set Monitoring Frequency Command
-
-The _GCSMiddleware_ shall be able to handle and send a setMonitoringFrequency command to the respective _GCS_ containing the desired Frequency in ms.

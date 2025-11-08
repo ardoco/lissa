@@ -1,3 +1,0 @@
-Default sequencing of UAV's flight plans
-
-By default  the pending flight plansof a UAV's shall be serviced in FCFS order.

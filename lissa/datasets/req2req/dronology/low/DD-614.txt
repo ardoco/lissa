@@ -1,3 +1,0 @@
-Create log event when UAV reaches a waypoint
-
-When a UAV reaches a waypoint while executing a flight plan  a log event shall be created that includes the coordinates of the waypoint  the UAV the flight plan is assigned to  the flight plan ID  and the timestamp.

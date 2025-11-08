@@ -1,3 +1,0 @@
-Persist Route
-
-When requested  the _RouteCreationUI_ shall send a newly created or modified route to dronology.

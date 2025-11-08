@@ -1,3 +1,0 @@
-UAV Activation notification
-
-The _GCS_ shall report newly connected UAVs to the _GCSMiddleware_.

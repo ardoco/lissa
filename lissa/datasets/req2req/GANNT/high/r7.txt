@@ -1,1 +1,0 @@
-Delete Resources (person); Delete a person and all its associated information such as dependencies to all tasks the person is supposed to work on.

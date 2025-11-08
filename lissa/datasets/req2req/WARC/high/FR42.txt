@@ -1,1 +1,0 @@
-FR 42 - The functionality of the library shall be exposed in such a way as to fit the metaphors and paradigms of the implementation language

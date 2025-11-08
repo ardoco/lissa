@@ -1,3 +1,0 @@
-Default message frequency
-
-The default message frequency for UAV state messages shall be {{UAV_MESSAGE_STATE_FREQUENCY}}

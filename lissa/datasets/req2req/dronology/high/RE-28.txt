@@ -1,3 +1,0 @@
-UAV Flight Plan Execution
-
-The _SingleUAVFlightPlanScheduler_ shall only execute one flight plan at a time for each UAV.

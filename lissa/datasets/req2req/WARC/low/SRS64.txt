@@ -1,1 +1,0 @@
-SRS 64 - Libwarc and the bindings to its functionality shall enable the use of libwarc's iterators described in SRS 16-20 to be used within Java v1.5 and and later, using Java's new container iterators, such as "for" and "foreach".

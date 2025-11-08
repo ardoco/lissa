@@ -1,3 +1,0 @@
-Activation request results
-
-The _GCS_ shall be informed of the result of the activation request.

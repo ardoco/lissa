@@ -1,3 +1,0 @@
-Transmit Route removals to UI Middleware
-
-When route assignments are removed from a UAV  a request shall be sent to the _UIMiddleware_ to remove the assignment in Dronology.

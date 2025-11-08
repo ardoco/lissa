@@ -1,1 +1,0 @@
-FR 7 - Libwarc shall provide ARC-record reader functionality Libwarc reader will thereby make read operations as simple as possible.

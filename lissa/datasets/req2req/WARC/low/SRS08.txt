@@ -1,1 +1,0 @@
-SRS 8 - Each WARC-record shall be accessible via a peer C class of the same name.

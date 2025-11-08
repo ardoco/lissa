@@ -1,3 +1,0 @@
-Flight route defined as waypoints
-
-The _FlightRouteManager_ shall define flight routes as an ordered sequence of waypoints in which the first waypoint represents the first target location and the final waypoint represents the final target location.

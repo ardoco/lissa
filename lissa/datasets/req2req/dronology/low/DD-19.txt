@@ -1,3 +1,0 @@
-Client registers for UAV configuration event
-
-A client shall register with the _UIMiddleware_ to receive notifications whenever a new UAV type configuration is created  modified  or deleted.

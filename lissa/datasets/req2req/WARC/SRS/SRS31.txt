@@ -1,1 +1,0 @@
-SRS 31 - A command line tool shall be implemented utilising libwarc to check the consistency of WARC-records and their conformance to the WARC ISO standard.

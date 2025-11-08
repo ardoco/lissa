@@ -1,3 +1,0 @@
-Real-Time Flight UI
-
-The _RealTimeFlightUI_ shall display the location of active UAVs as icons on the map.

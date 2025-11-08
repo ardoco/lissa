@@ -1,3 +1,0 @@
-UAV Operations
-
-Operations shall include RTL  takeoff  hover-in-place  and resend command.

@@ -1,1 +1,0 @@
-SRS 25 - The payload (or the WARC-record document itself) are stored on disk, to avoid using memory heap, even for small objects.

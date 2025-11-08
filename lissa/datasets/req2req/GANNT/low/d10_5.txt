@@ -1,1 +1,0 @@
-A GUI class of task property provides interface and functions to add and remove human resource assignments.

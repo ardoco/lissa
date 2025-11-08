@@ -1,1 +1,0 @@
-NFR 16 - The deliverables shall be ported to the following platforms: Linux, FreeBSD, Mac OS X 10.5 and Windows.
