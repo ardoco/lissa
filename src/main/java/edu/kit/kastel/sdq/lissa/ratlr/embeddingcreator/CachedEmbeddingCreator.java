@@ -81,6 +81,9 @@ abstract class CachedEmbeddingCreator extends EmbeddingCreator {
      */
     @Override
     public final List<float[]> calculateEmbeddings(List<Element> elements) {
+        if (elements.isEmpty()) {
+            return new ArrayList<>();
+        }
         if (threads == 1) return calculateEmbeddingsSequential(elements);
 
         int threadCount = Math.min(threads, elements.size());

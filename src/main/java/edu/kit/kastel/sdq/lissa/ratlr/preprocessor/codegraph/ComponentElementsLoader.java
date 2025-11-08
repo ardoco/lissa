@@ -26,6 +26,7 @@ public class ComponentElementsLoader extends CodeGraphPreprocessor {
     private final ElementRetrieval retrieval = new ElementRetrieval();
     private final ComponentFormatter formatter;
     private final CodeGraph codeGraph;
+    private final boolean includeDummy;
 
     /**
      * Creates a new preprocessor with the specified context store.
@@ -39,6 +40,7 @@ public class ComponentElementsLoader extends CodeGraphPreprocessor {
         this.formatter = new ComponentFormatter(configuration, contextStore);
         this.codeGraph = contextStore.getContext(CodeGraph.CONTEXT_IDENTIFIER, CodeGraph.class);
         this.codeGraph.initializeComponentExtraction(configuration, contextStore);
+        this.includeDummy = configuration.argumentAsBoolean("include_dummy", true);
     }
 
     @Override
@@ -55,7 +57,11 @@ public class ComponentElementsLoader extends CodeGraphPreprocessor {
             elements.add(componentInformation);
 
             formatter.setValue(component);
-            Element componentElement = new Element(component.getQualifiedName(), "source code component", formatter.format(), 0, componentInformation, true);
+            String content = formatter.format();
+            if (content.isEmpty()) {
+                continue;
+            }
+            Element componentElement = new Element(component.getQualifiedName(), "source code component", content, 0, componentInformation, true);
             elements.add(componentElement);
 
             List<Element> artifactElementsOfComponent = component.getContainedArtifacts().stream()
@@ -64,10 +70,12 @@ public class ComponentElementsLoader extends CodeGraphPreprocessor {
             retrieval.setRetrieval(componentElement, artifactElementsOfComponent);
         }
 
-        Element componentDummy = new Element("-", "source code component dummy", "-", 0, null, true);
-        ElementRetrieval elementRetrieval = contextStore.getContext(ElementRetrieval.IDENTIFIER, ElementRetrieval.class);
-        elementRetrieval.setRetrieval(componentDummy, List.of());
-        elements.add(componentDummy);
+        if (includeDummy) {
+            Element componentDummy = new Element("-", "source code component dummy", "-", 0, null, true);
+            ElementRetrieval elementRetrieval = contextStore.getContext(ElementRetrieval.IDENTIFIER, ElementRetrieval.class);
+            elementRetrieval.setRetrieval(componentDummy, List.of());
+            elements.add(componentDummy);
+        }
         
         return elements;
     }

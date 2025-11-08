@@ -47,6 +47,9 @@ public class CodeGraphStrategyLoader implements RetrievalStrategy {
      */
     public List<Pair<Element, Float>> findSingleComponent(Pair<Element, float[]> query, List<Pair<Element, float[]>> components) {
         List<Pair<Element, Float>> similarityResult = cosineSimilarity.findSimilarElements(query, components);
+        if (similarityResult.isEmpty()) {
+            return List.of();
+        }
 //        for (Pair<Element, Float> pair : similarityResult) {
 //            logger.info("similarity for {} and {}: {}", query.first().getIdentifier(), pair.first().getIdentifier(), pair.second());
 //        }

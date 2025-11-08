@@ -78,12 +78,14 @@ public class PipelinePreprocessor extends Preprocessor {
         if (stages.isEmpty()) {
             return new ArrayList<>(elements);
         }
+
+        // only elements designed to be classified are provided to the next preprocessor
+        List<Element> toCompare = elements.stream().filter(Element::isCompare).toList();
         
         for (Element element : elements) {
             element.setCompare(false);
         }
         
-        List<Element> toCompare = new ArrayList<>(elements);
         List<Pipelineable> pipelinedPreprocessors = this.stages;
         for (int i = 0; i < pipelinedPreprocessors.size(); i++) {
             if (toCompare.isEmpty()) {

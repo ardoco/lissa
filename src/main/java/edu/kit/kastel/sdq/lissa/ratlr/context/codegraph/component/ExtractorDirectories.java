@@ -115,7 +115,7 @@ public class ExtractorDirectories extends ComponentExtractor {
                 Follow the instructions to identify the production directories, i.e., those directories that contain the main purpose of the component.
                 
                 Instructions to identify directories of a component:
-                1. Retrieve more information about the component you need to resolve using function `retrieveInformationForCodeObject`. Ensure to use the keys being provided.
+                1. Retrieve more information about the component you need to resolve using function `getComponentInformation`. Ensure to use the keys being provided.
                 2. Try to find directories with the name of the component using `findDirectories`.
                 3. Make a first prediction about the directories of the component using the retrieved information about them and the project overview.
                 4. If there is information about its contained packages, then check the sub-directories of its predicted directories using the function `showSubDirectoryOfDirectory`. If there is information about the components contained file types, then check the contained types of the predicted directories using the function `fileExtensionsSummary`.
@@ -127,7 +127,7 @@ public class ExtractorDirectories extends ComponentExtractor {
                 Follow the instructions to identify the test directories. Test directories only contain elements that are related to testing the component itself.
                 
                 Instructions to identify directories of a component:
-                1. Retrieve more information about the component you need to resolve using function `retrieveInformationForCodeObject`. Ensure to use the keys being provided.
+                1. Retrieve more information about the component you need to resolve using function `getComponentInformation`. Ensure to use the keys being provided.
                 2. Try to find directories with the name of the component using `findDirectories`.
                 3. Make a first prediction about the directories of the component using the retrieved information about them and the project overview.
                 4. If there is information about its contained packages, then check the sub-directories of its predicted directories using the function `showSubDirectoryOfDirectory`. If there is information about the components contained file types, then check the contained types of the predicted directories using the function `fileExtensionsSummary`.

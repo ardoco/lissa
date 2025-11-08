@@ -2,13 +2,13 @@ package edu.kit.kastel.sdq.lissa.ratlr.context.documentation;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import edu.kit.kastel.sdq.lissa.ratlr.context.Context;
+import edu.kit.kastel.sdq.lissa.ratlr.context.SerializedContext;
 
 import java.util.Collections;
 import java.util.SortedSet;
 import java.util.stream.Collectors;
 
-public class ComponentNames implements Context {
+public class ComponentNames implements SerializedContext {
     
     public static final String IDENTIFIER = "documentation_component_names";
     @JsonProperty
@@ -38,5 +38,10 @@ public class ComponentNames implements Context {
     @Override
     public String getId() {
         return IDENTIFIER;
+    }
+
+    @Override
+    public String asString() {
+        return asListing();
     }
 }
