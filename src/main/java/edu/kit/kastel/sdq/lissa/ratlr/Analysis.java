@@ -20,6 +20,16 @@ import java.util.Set;
 public class Analysis {
 
     @JsonProperty
+    private final float snF1;
+    @JsonProperty
+    private final float snRecall;
+    @JsonProperty
+    private final float snPrecision;
+    @JsonProperty
+    private final float snRecallClean;
+    @JsonProperty
+    private final float snPrecisionClean;
+    @JsonProperty
     private final Map<Integer, String> sentenceF1 = new LinkedHashMap<>();
     @JsonProperty
     private final Map<Integer, String> sentenceRecall = new LinkedHashMap<>();
@@ -60,6 +70,32 @@ public class Analysis {
             sentenceRecall.put(i, getHistogramValue(sentenceAnalysis.recall, max, i) + "| " + sentenceAnalysis.expectedPos);
             sentenceF1.put(i, getHistogramValue(sentenceAnalysis.f1, max, i));
         }
+        float sumF1 = 0;
+        float sumRecall = 0;
+        float sumPrecision = 0;
+        float sumRecallClean = 0;
+        int recallCleanCount = 0;
+        float sumPrecisionClean = 0;
+        int precisionCleanCount = 0;
+        for (SentenceAnalysis analysis : statisticsBySentenceId.values()) {
+            sumF1 += analysis.f1;
+            sumRecall += analysis.recall;
+            sumPrecision += analysis.precision;
+            
+            if (analysis.expectedPos != 0) {
+                recallCleanCount++;
+                sumRecallClean += analysis.recall;
+            }
+            if (analysis.predictedPos != 0) {
+                precisionCleanCount++;
+                sumPrecisionClean += analysis.precision;
+            }
+        }
+        snF1 = sumF1 / (float) statisticsBySentenceId.size();
+        snRecall = sumRecall / (float) statisticsBySentenceId.size();
+        snPrecision = sumPrecision / (float) statisticsBySentenceId.size();
+        snRecallClean = sumRecallClean / (float) recallCleanCount;
+        snPrecisionClean = sumPrecisionClean / (float) precisionCleanCount;
         
         this.sourceElements = sourceElements.stream()
                 .filter(element -> element.getParent() == null)
@@ -175,7 +211,7 @@ public class Analysis {
             this.precision = predictedPos == 0 ? 1.0f : ((float) truePositives) / predictedPos;
             this.expectedPos = truePositives + falseNegatives;
             this.recall = expectedPos == 0 ? 1.0f : ((float) truePositives) / expectedPos;
-            this.f1 = (precision + recall) == 0.0f ? 0.0f : (2 * precision * recall) / (precision + recall);
+            this.f1 = (truePositives + falsePositives + falseNegatives) == 0 ? 1.0f : (2 * truePositives) / (2.0f *truePositives + falsePositives + falseNegatives);
         }
     }
 }
