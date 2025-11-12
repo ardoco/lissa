@@ -17,7 +17,7 @@
     <maven.compiler.target>21</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <picocli.version>4.7.7</picocli.version>
-    <record-builder.version>50</record-builder.version>
+    <record-builder.version>51</record-builder.version>
     <metrics.version>0.1.2</metrics.version>
   </properties>
 
