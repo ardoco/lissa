@@ -1,3 +1,0 @@
-UAV Takeoff Command
-
-The {{TAKEOFF}} command shall specify the target altitude

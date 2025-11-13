@@ -1,3 +1,0 @@
-Route creation and modification
-
-The _RouteCreationUI_ shall allow the user to create and modify a route.

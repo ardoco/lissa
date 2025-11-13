@@ -1,3 +1,0 @@
-Display state of activated UAVs
-
-The name  state  battery level  speed  and current coordinates of each UAV shall be displayed.

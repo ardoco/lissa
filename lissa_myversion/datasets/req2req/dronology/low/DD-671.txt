@@ -1,3 +1,0 @@
-Persist Route
-
-The route information shall be represented using the Standard Route XML format and transmitted to the _UIMiddleware_

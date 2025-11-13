@@ -1,3 +1,0 @@
-UAV Goto Command
-
-The {{GOTO_WAYPOINT}} command shall include a target latitude  longitude  and altitude coordinate

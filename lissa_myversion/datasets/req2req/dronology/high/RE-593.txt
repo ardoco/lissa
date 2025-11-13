@@ -1,3 +1,0 @@
-Simulate behavior of a virtual UAV
-
-The _InternalSimulator_ shall approximate the behavior of a UAV.

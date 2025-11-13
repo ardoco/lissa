@@ -1,1 +1,0 @@
-The human resource class provides a function to change the availability of the person based on holidays. 

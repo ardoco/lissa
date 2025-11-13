@@ -1,3 +1,0 @@
-Visiting waypoints during flight plan
-
-When the UAV reaches a target waypoint  if additional waypoints are specified in the flight plan  then the _VehicleCore_  shall send the next waypoint to the UAV's _GCS_.

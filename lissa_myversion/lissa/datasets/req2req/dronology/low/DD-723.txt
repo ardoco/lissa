@@ -1,3 +1,0 @@
-UAV Monitoring Messages
-
-UAV Monitoring messages shall be formatted as JSON objects and contain arbitrary information regarding a single UAV.

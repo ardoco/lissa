@@ -1,3 +1,0 @@
-Unique ID for each GCS
-
-Each _GCS_ connecting to the  _GCSMiddleware_ shall be identified through a unique {{GROUNDSTATION_ID}}.

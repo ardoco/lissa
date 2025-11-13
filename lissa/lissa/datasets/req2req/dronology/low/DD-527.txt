@@ -1,3 +1,0 @@
-Send first waypoint at start of flight plan
-
-At the start of a flight plan the system shall send the first target waypoint to the UAV's _GCS_.

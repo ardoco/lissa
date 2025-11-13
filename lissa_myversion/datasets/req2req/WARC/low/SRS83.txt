@@ -1,1 +1,0 @@
-SRS 83 - Libwarc binary modules, ready to use binary commands and libraries (both static and shared), compiled with generic optimisation flags, shall be released also

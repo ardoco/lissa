@@ -1,3 +1,0 @@
-Simulate battery drain in simple simulator
-
-When a simulated UAV is in flight  the _InternalSimulator_ shall reduce the battery every second by {{SIMULATOR_BATTERY_DRAIN_VOLTS}}.

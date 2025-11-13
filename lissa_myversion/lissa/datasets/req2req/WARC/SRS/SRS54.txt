@@ -1,1 +1,0 @@
-SRS 54 - A magic number for WARC shall be created and incorporated in the "file" mime-type database, enabling the simple identification of WARC files via the Unix "file" command

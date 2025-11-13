@@ -1,1 +1,0 @@
-SRS 49 - A set of command line tools and an API incorporating libwarc shall enable the collection of online documents, such as html and embedded files, etc., and write them to valid WARC- records.

@@ -1,3 +1,0 @@
-Activation of an additional UAV detected by the GCS
-
-The _GCSMiddleware_ shall call the _UAVActivationManager_ to request UAV activation.

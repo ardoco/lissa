@@ -1,2 +1,0 @@
-A MODIS Computer Software Configuration Item (CSCI) is any independently tracked and configured unit of software within the MODIS SDP S/W, including processes, scripts, and utility libraries.  Each CSCI within the MODIS SDP S/W system
-shall employ the Earth Science Data and Information System (ESDIS)-supplied SDPTK mandatory functions to access the DAAC production environment and services.

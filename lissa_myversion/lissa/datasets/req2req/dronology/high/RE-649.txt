@@ -1,3 +1,0 @@
-Transmit Route assignments to UI Middleware
-
-When a route is assigned or removed from a UAV  the _RouteAssignmentUI_ shall notify Dronology.

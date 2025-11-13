@@ -1,3 +1,0 @@
-UAV Identification
-
-The _VehicleCore_ shall assign a unique ID to each activated UAV.

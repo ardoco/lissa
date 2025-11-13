@@ -1,3 +1,0 @@
-Reject non registered UAV
-
-If the presented {{UAV_ID}} does not represent a currently registered UAV  then the _UAVActivationManager_ will reject the activation and notify the _GCS_Middleware_

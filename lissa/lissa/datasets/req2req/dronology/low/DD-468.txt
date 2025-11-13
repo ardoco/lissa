@@ -1,3 +1,0 @@
-Import saved Mission Plans
-
-The _MissionPlanner_ shall provide an interface to support the execution of predefined missions specified in JSON.

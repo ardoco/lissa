@@ -1,3 +1,0 @@
-Connection lost
-
-When a socket error or time-out occurs  all UAVs associated with the _GCS_ shall be deactivated.

@@ -1,3 +1,0 @@
-Transition from IN_AIR to LANDING
-
-When a UAV is in {{IN_AIR}} state and receives a command to land it transitions to {{LANDING}} state

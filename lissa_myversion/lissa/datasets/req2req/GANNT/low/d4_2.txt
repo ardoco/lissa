@@ -1,1 +1,0 @@
-The manager of task hierarchy provides a method to move a task node to a specific position.

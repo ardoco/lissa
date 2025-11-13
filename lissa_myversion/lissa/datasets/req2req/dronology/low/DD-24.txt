@@ -1,3 +1,0 @@
-Coordinate Units
-
-Altitude shall be specified in meters

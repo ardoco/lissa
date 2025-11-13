@@ -1,1 +1,0 @@
-NFR 9 - The code and documentation shall be licensed using an open source license.

@@ -1,3 +1,0 @@
-Synchronized Landing
-
-The FlightPattern for synchronized landing shall direct each UAV to synchronize at the final waypoint of the preceding route  ascend or descend to a unique altitude  synchronize  fly to the longitude and latitude of the home coordinates  synchronize  and then descend to the landing altitude.

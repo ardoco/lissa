@@ -1,1 +1,0 @@
-SRS 82 - Libwarc source code shall be released in the following archives: "libwarc-version.tar.gz", "libwarc-version.tar.bz2", "libwarc-version.zip" together with their corresponding digests. Developers may then adapt the build configuration files for best performance on their target machines.

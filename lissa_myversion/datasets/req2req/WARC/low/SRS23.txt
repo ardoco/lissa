@@ -1,1 +1,0 @@
-SRS 23 - Libwarc shall use dynamic heap memory for its internal usage.

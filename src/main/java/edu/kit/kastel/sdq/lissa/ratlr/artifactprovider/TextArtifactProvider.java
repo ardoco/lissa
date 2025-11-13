@@ -1,18 +1,16 @@
 /* Licensed under MIT 2025. */
 package edu.kit.kastel.sdq.lissa.ratlr.artifactprovider;
 
+import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
+import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
+import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Knowledge;
+import org.apache.commons.io.IOUtils;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-
-import org.apache.commons.io.IOUtils;
-
-import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
-import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
-import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
-import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Knowledge;
 
 /**
  * Provides text-based artifacts from a configured file or directory.
@@ -47,11 +45,9 @@ public class TextArtifactProvider extends ArtifactProvider {
      * Creates a new text artifact provider with the specified configuration.
      *
      * @param configuration The configuration containing the path and artifact type
-     * @param contextStore The shared context store for pipeline components
      * @throws IllegalArgumentException If the specified path does not exist
      */
-    public TextArtifactProvider(ModuleConfiguration configuration, ContextStore contextStore) {
-        super(contextStore);
+    public TextArtifactProvider(ModuleConfiguration configuration) {
         this.path = new File(configuration.argumentAsString("path"));
         if (!path.exists()) {
             throw new IllegalArgumentException("Path does not exist: " + path.getAbsolutePath());

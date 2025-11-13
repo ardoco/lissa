@@ -1,3 +1,0 @@
-Takeoff Altitude
-
-When a flight plan is activated for a UAV currently on the ground  the _FlightSchedulingandExecution _shall notify the UAV to takeoff vertically until it reaches the prescribed altitude.

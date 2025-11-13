@@ -1,3 +1,0 @@
-Transition from FLYING to IN_AIR
-
-When a UAV is in {{FLYING}} state and has no currently executing flight plan it transitions to {{IN_AIR}}

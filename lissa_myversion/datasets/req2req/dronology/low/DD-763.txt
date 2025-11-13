@@ -1,3 +1,0 @@
-UAV ModeChangeMessages
-
-UAV State messages shall be formatted as JSON objects and contain the {{UAV_ID}} and the {{MODE}}

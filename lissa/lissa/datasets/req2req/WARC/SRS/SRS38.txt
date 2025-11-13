@@ -1,1 +1,0 @@
-SRS 38 -A web proxy interface shall be implemented that allows the user to set their web browser proxy to the one provided by the interface and thereby ensure all content is delivered from the archive and not from the live web.

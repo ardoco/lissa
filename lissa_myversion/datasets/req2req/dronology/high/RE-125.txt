@@ -1,3 +1,0 @@
-Reach destination while avoiding  objects
-
-If a UAV takes evasive actions the system will ensure that it will eventually reach its destination

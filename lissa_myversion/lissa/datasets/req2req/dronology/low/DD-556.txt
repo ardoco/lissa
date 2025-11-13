@@ -1,3 +1,0 @@
-Executing flight plan associated with UAV
-
-The currently executing flight plan ID is associated with the UAV executing it.

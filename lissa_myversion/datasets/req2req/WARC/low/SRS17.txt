@@ -1,1 +1,0 @@
-SRS 17 - Libwarc shall provide a WARC-record MIME-type iterator

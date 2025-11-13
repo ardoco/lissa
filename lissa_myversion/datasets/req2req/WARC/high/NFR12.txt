@@ -1,1 +1,0 @@
-NFR 12 - Library functionality shall have APIs and dynamic language bindings to be made available as software libraries for developers.

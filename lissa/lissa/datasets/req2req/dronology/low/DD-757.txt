@@ -1,3 +1,0 @@
-UAV properties
-
-The properties that the _GCS_ sends to the _GCSMiddleware_ shall be defined in JSON

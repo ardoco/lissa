@@ -1,1 +1,0 @@
-SRS 9 - The attributes of each WARC-record, as per the ISO standard specification, shall have a corresponding attribute in its peer C class.

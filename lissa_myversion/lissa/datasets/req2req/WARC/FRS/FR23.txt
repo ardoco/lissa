@@ -1,1 +1,0 @@
-FR 23 - WARC Browser shall support a proxy-style interface

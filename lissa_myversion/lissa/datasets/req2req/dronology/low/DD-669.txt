@@ -1,3 +1,0 @@
-Route description
-
-The UI shall provide respective fields for displaying and modifying the ID  textual description  waypoints  and other route information.

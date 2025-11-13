@@ -1,3 +1,0 @@
-UI middleware retrieves flight routes
-
-The _UIMiddleware_ retrieves and returns a list of previously saved flight routes

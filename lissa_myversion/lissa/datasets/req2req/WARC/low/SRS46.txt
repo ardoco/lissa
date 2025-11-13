@@ -1,1 +1,0 @@
-SRS 46 - The HTTrack archive file format and link strategy may vary from version to version of HTTrack, therefore it shall be possible to adapt the migration scripts to deal with these changes.

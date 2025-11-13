@@ -1,1 +1,0 @@
-The fact of linking of one task to another should be captured as dependency between two tasks.

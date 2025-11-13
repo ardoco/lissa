@@ -1,1 +1,0 @@
-FR 21 - WARC Browser shall provide an API that allows browsing of WARC files and associated CDX files via an HTTP server

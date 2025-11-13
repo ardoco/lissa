@@ -1,1 +1,0 @@
-SRS 5 - The universal header "warc.h" shall ensure that deprecated function calls and changes to the library are notified at compile time.

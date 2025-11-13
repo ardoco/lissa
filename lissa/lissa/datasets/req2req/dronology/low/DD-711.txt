@@ -1,3 +1,0 @@
-Establish conneciton with GCT middleware
-
-The _GCSMiddleware_ shall accept connections with multiple _GCS_ 

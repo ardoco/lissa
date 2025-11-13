@@ -1,1 +1,0 @@
-SRS 34 - It shall be possible to perform read operations (read from offset, filters, etc.) on WARCrecords from a remote location via http.

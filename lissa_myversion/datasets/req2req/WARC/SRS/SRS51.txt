@@ -1,1 +1,0 @@
-SRS 51 - Python scripts shall be implemented incorporating libwarc, and making all of the functionality of libwarc and API available in Python.

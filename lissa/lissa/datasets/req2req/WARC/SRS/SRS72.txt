@@ -1,1 +1,0 @@
-SRS 72 - Libwarc shall be shipped with a developer guide and useful examples.

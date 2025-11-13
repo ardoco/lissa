@@ -1,3 +1,0 @@
-Coordinate system conversion
-
-When requested  the _CoordinateSystem_ shall transform coordinates to alternate formats.

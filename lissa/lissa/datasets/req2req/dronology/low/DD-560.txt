@@ -1,3 +1,0 @@
-No reassignment of aborted flight plan
-
-An aborted flight plan shall not be reassigned to any UAV

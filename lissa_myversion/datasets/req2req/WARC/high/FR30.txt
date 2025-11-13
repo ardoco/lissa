@@ -1,1 +1,0 @@
-FR 30 - It shall be possible to collect arbitrary web content, such as html files, images etc. (for example from a web server document root directory), and write the data to WARC files

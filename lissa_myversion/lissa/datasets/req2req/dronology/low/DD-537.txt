@@ -1,3 +1,0 @@
-Mission plan synchronization points
-
-The flight plans of two or more UAVs shall be synchronized by inserting shared synchronization points between the ordered list of flight routes assigned to each participating UAV.

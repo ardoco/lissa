@@ -1,1 +1,0 @@
-FR 33 - WARC extensions help content will be provided each of the commands "curl", "wget", and "httrack"

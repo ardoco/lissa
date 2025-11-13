@@ -1,1 +1,0 @@
-FR 14 - Libwarc shall be memory safe and manage dynamic memory internally

@@ -1,3 +1,0 @@
-"Transition to USER_CONTROLLED	"
-
-When a mode change message to {USER_CONTROLLED}} is received the Vehicle shall transition to  {USER_CONTROLLED}}.

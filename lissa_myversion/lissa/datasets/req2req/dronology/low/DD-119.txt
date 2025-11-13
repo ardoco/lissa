@@ -1,3 +1,0 @@
-Load default coordinates
-
-Unless otherwise configured in the configuration parameters  the map shall be centered at White Field  University of Notre Dame  South Bend IN.

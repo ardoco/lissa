@@ -1,3 +1,0 @@
-Continual following UAVs
-
-"When ""UI follow mode"" is active  the map should continually zoom and pan so that all selected UAVs are centered and their active routes constitutes 60% of the view."

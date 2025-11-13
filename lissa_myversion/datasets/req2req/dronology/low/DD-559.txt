@@ -1,3 +1,0 @@
-Remove aborted flight plan
-
-When the flight plan is aborted it shall be removed from the associated UAV.

@@ -1,1 +1,0 @@
-SRS 10 - Each peer class shall expose a set a class functions to read, write, and update attributes for the corresponding WARC-record.

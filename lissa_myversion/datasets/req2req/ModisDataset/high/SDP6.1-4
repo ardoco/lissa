@@ -1,2 +1,0 @@
-A PGE is a script which executes one or more MODIS software processes within the ECS environment.  A PGE shall not set or redefine environmental variables.
-

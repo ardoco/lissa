@@ -1,1 +1,0 @@
-SRS 26 - Libwarc shall not use file to memory mapping technology, instead libwarc will explicitly allocate memory as needed.

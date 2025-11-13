@@ -1,1 +1,0 @@
-NFR 5 - Communication and support shall be provided to the open source community. This support must be provided for at least term of the project.

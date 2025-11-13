@@ -1,6 +1,14 @@
 /* Licensed under MIT 2025. */
 package edu.kit.kastel.sdq.lissa.ratlr;
 
+import edu.kit.kastel.mcse.ardoco.metrics.ClassificationMetricsCalculator;
+import edu.kit.kastel.sdq.lissa.ratlr.configuration.Configuration;
+import edu.kit.kastel.sdq.lissa.ratlr.configuration.GoldStandardConfiguration;
+import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -9,15 +17,6 @@ import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import org.jspecify.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import edu.kit.kastel.mcse.ardoco.metrics.ClassificationMetricsCalculator;
-import edu.kit.kastel.sdq.lissa.ratlr.configuration.Configuration;
-import edu.kit.kastel.sdq.lissa.ratlr.configuration.GoldStandardConfiguration;
-import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
 
 /**
  * Utility class for generating and saving statistics about trace link analysis results.
@@ -28,7 +27,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
  *     <li>Save trace links to CSV files</li>
  *     <li>Compare results against gold standards</li>
  * </ul>
- *
+ * <p>
  * The statistics include:
  * <ul>
  *     <li>Number of trace links in gold standard</li>
@@ -54,9 +53,9 @@ public final class Statistics {
      *     <li>Saves the report to a markdown file</li>
      * </ol>
      *
-     * @param traceLinks Set of identified trace links
-     * @param configFile Configuration file used for the analysis
-     * @param configuration Configuration object used for the analysis
+     * @param traceLinks      Set of identified trace links
+     * @param configFile      Configuration file used for the analysis
+     * @param configuration   Configuration object used for the analysis
      * @param sourceArtifacts Number of source artifacts
      * @param targetArtifacts Number of target artifacts
      * @throws UncheckedIOException If there are issues writing the statistics file
@@ -88,19 +87,19 @@ public final class Statistics {
      *     <li>Saves the report to a markdown file</li>
      * </ol>
      *
-     * @param configurationIdentifier Unique identifier for the configuration
-     * @param configurationSummary Summary of the configuration used
-     * @param traceLinks Set of identified trace links
+     * @param configurationIdentifier   Unique identifier for the configuration
+     * @param configurationSummary      Summary of the configuration used
+     * @param traceLinks                Set of identified trace links
      * @param goldStandardConfiguration Gold standard configuration for comparison
-     * @param sourceArtifacts Number of source artifacts
-     * @param targetArtifacts Number of target artifacts
+     * @param sourceArtifacts           Number of source artifacts
+     * @param targetArtifacts           Number of target artifacts
      * @throws UncheckedIOException If there are issues writing the statistics file
      */
     public static void generateStatistics(
             String configurationIdentifier,
             String configurationSummary,
             Set<TraceLink> traceLinks,
-            @Nullable GoldStandardConfiguration goldStandardConfiguration,
+            GoldStandardConfiguration goldStandardConfiguration,
             int sourceArtifacts,
             int targetArtifacts)
             throws UncheckedIOException {
@@ -167,6 +166,7 @@ public final class Statistics {
      * @return Set of valid trace links from the gold standard
      * @throws UncheckedIOException If there are issues reading the gold standard file
      */
+    @NotNull
     public static Set<TraceLink> getTraceLinksFromGoldStandard(GoldStandardConfiguration goldStandardConfiguration) {
         File groundTruth = new File(goldStandardConfiguration.path());
         boolean header = goldStandardConfiguration.hasHeader();
@@ -194,8 +194,8 @@ public final class Statistics {
      *     <li>Delegates to the main save method</li>
      * </ol>
      *
-     * @param traceLinks Set of trace links to save
-     * @param configFile Configuration file used for the analysis
+     * @param traceLinks    Set of trace links to save
+     * @param configFile    Configuration file used for the analysis
      * @param configuration Configuration object used for the analysis
      * @throws UncheckedIOException If there are issues writing the trace links file
      */
@@ -214,7 +214,7 @@ public final class Statistics {
      *     <li>Writes the result to the specified file</li>
      * </ol>
      *
-     * @param traceLinks Set of trace links to save
+     * @param traceLinks  Set of trace links to save
      * @param destination Path to the output file
      * @throws UncheckedIOException If there are issues writing the trace links file
      */

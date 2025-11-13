@@ -1,3 +1,0 @@
-Connect GCS to Dronology via Middleware
-
-The _GCSMiddleware_ shall handle multiple _GCS_

@@ -1,3 +1,0 @@
-Emergency Notification
-
-The _RealTimeFlightUI_ shall notify users when an emergency occurs.

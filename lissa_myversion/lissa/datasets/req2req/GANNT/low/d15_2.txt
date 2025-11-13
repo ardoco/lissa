@@ -1,1 +1,0 @@
-The system should be able to evaluate critical path in a project.

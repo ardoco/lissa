@@ -1,3 +1,0 @@
-Flight route assignment during Hover In Place
-
-If a flight route is assigned to a UAV which is currently hovering in place  the _FlightManager_ shall assign the route and maintain the hover in place mode.

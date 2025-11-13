@@ -1,1 +1,0 @@
-FR 4 - For each type of WARC-record, a set of functions shall be made available to create/modify the records properties.

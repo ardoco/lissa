@@ -1,3 +1,0 @@
-Location accuracy
-
-Distances computed between two coordinates shall be accurate within 1 meter over a distance of 400 000 meters.

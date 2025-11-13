@@ -12,7 +12,7 @@ import java.util.UUID;
  *     <li>Normalize line endings in input strings</li>
  *     <li>Create consistent keys for caching and identification purposes</li>
  * </ul>
- *
+ * <p>
  * The generated keys are:
  * <ul>
  *     <li>Deterministic - same input always produces the same key</li>

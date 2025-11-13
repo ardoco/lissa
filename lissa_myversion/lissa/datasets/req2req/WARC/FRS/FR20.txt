@@ -1,1 +1,0 @@
-FR 20 - WARC files shall be validated using a command line tool, "w-validator", which will enable validation or rejection of WARC files.

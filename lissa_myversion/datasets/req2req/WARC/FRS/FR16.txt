@@ -1,1 +1,0 @@
-FR 16 - Dynamic memory management shall be hidden inside libwarc

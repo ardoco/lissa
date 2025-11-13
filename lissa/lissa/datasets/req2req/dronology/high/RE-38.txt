@@ -1,3 +1,0 @@
-UAV type specification assignment
-
-The _VehicleCore_ shall associate a {{UAV_TYPE}} for each UAV defining its basic attributes.

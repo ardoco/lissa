@@ -1,3 +1,0 @@
-UAV Set State Message Frequency Command
-
-The _GCSMiddleware_ shall be able to handle and send a setStateFrequency command to the respective _GCS_ containing the desired Frequency in ms.

@@ -1,3 +1,0 @@
-Publishing of Monitoring Message
-
-A monitoring message shall contain a (hierarchical) identifier describing the topic  a message type  a timestamp  and arbitrary serializeable data attached to the message

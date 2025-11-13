@@ -1,1 +1,0 @@
-SRS 13 - It shall be possible to release the WARC-record using a destructor.

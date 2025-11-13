@@ -1,1 +1,0 @@
-FR 34 - It shall be possible to identify WARC files using the unix "file" command

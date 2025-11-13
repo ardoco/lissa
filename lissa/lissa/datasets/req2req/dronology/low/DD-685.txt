@@ -1,3 +1,0 @@
-Display UAVs on map
-
-When the map is loaded and the all active UAVs list is obtained the _UIRealTimeFlightView_ shall display an icon on the map for each registered UAV based on its current location.

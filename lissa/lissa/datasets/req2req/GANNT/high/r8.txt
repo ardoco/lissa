@@ -1,1 +1,0 @@
-Maintain Resource Properties;A resource has a range of properties, including name and holidays

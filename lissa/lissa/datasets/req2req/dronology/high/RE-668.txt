@@ -1,3 +1,0 @@
-Route description
-
-Each route shall include a unique ID  a textual description  and a set of waypoints  all of which are editable in the UI.

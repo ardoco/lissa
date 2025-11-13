@@ -1,3 +1,0 @@
-Upload externally created flight route
-
-Flight routes shall be created externally and uploaded to Dronology via the UI middleware.

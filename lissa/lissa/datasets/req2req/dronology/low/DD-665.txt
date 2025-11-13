@@ -1,3 +1,0 @@
-Updating waypoint colors
-
-Waypoint colors shall be updated as the flight route is edited (e.g.  when a new first or last waypoint is added.) If current edits are canceled  the colors shall be reset to reflect current waypoints.

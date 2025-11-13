@@ -1,1 +1,0 @@
-NFR 15 - The deliverables shall be made available in source code, named as "libwarc-version.tar.gz", where version is the version of the library. A number of binary distributions may be made, including RPM, DEB and EXE.

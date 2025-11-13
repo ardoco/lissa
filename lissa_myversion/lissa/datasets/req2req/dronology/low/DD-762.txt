@@ -1,3 +1,0 @@
-Route Name
-
-If a user attempts to create a route without providing a name then the system shall not save the route.

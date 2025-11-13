@@ -1,1 +1,0 @@
-SRS 11 - Libwarc shall provide an API describing (1) the set of data, and (2) the set of operations that can be performed on the data. The data types shall be abstract (abstract data types - ADT), to ensure independence of concrete implementations.

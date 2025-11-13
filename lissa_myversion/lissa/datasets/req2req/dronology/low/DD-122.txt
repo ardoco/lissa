@@ -1,3 +1,0 @@
-Load configuration
-
-Configuration parameters  including map coordinates  scale  map style  and color scheme shall be stored in a JSON Object on the server

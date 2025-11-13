@@ -1,3 +1,0 @@
-Return To Home without detours
-
-"When the ""return to home"" command is issued  the _FlightManager_ shall return the UAV to its original launch location without issuing any additional waypoint or routing commands."

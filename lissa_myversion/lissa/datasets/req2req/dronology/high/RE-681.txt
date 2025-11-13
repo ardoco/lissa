@@ -1,3 +1,0 @@
-Display activated UAVs
-
-The _RealTimeFlightUI_ shall display the name and status of all currently activated UAVs

@@ -1,3 +1,0 @@
-UAV activation
-
-The _UAVActivationManager_ shall only activate UAVs that are registered.

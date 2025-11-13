@@ -1,1 +1,0 @@
-FR 2 - The libwarc interfaces shall fully encapsulate and internal functionality, isolating by abstraction any tool or application based on libwarc from changes in the internal implementation.

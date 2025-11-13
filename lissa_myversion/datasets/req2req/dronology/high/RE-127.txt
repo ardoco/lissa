@@ -1,3 +1,0 @@
-Onboard obstacle avoidance
-
-When a UAV has an active onboard Obstacle Avoidance  then the _ObstacleAvoidance_ system shall not issue directives

@@ -1,1 +1,0 @@
-SRS 28 - The default compression format shall be Gzip

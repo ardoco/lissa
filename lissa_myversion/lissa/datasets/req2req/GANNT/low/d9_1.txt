@@ -1,1 +1,0 @@
-GUI needs to provide ability to link tasks in a project.

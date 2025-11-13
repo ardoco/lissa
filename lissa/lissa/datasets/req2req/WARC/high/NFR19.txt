@@ -1,1 +1,0 @@
-NFR 19 - An interface implementation may be made for Python to allow the library to be used natively by Python programmers requiring no knowledge of the internal implementation of libwarc or C.

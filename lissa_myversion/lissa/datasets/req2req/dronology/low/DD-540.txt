@@ -1,3 +1,0 @@
-Store mission plan as JSON
-
-The MissionPlan shall be specified as a JSON file (see attached example).

@@ -1,3 +1,0 @@
-Delete a route
-
-The _RouteCreationUI_ shall allow a user to delete a route.

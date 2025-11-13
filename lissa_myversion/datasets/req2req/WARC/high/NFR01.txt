@@ -1,1 +1,0 @@
-NFR 1 - The core functionality of WARC Tools, specifically the WARC writer/reader, shall be implemented as a comprehensive, standalone, general purpose software library - libwarc.

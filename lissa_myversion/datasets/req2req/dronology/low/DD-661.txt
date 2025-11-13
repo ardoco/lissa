@@ -1,3 +1,0 @@
-Request UI_Middleware to cancel pending flight
-
-When the user presses the cancel pending flight plan button a request is sent to the _UI_Middleware_ to cancel the flight.

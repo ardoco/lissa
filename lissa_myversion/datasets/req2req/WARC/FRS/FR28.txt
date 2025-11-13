@@ -1,1 +1,0 @@
-FR 28 - It shall be possible to walk a wget mirror and write the data to WARC files

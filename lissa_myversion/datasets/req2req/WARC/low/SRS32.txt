@@ -1,1 +1,0 @@
-SRS 32 - The command line tool shall notify the user of any WARC-record's anomalies, missing required fields or incompatible fields types.

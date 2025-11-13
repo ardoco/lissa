@@ -1,1 +1,0 @@
-An assignment of a resource to a task is captured as a relationship.

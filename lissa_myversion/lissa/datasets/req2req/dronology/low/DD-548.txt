@@ -1,3 +1,0 @@
-Flight Plan scheduling
-
-When a flight route is scheduled for execution  its waypoints  takeoff altitude  and identifier shall be used to instantiate a new flight plan

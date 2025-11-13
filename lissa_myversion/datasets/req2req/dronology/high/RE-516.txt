@@ -1,3 +1,0 @@
-Calculate distances
-
-When given two coordinates the _CoordinateSystem_ shall compute the distance between them.

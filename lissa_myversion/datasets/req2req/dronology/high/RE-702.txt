@@ -1,3 +1,0 @@
-Forwarding of Monitoring Message
-
-When a new monitoring message is received the _DronologyRuntimeMonitor_ shall forward the message to all subscribed clients

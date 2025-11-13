@@ -1,3 +1,0 @@
-UAV Distance
-
-The ObjectAvoidance system shall compute pair-wise distances between UAVs

@@ -1,3 +1,0 @@
-Determine if waypoint is reached
-
-If the computed distance from the UAV to the target waypoint is less than {{THRESHOLD_WAYPOINT_DISTANCE}} than the waypoint shall be considered reached.

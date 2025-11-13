@@ -1,3 +1,0 @@
-Define groups of topics to monitor
-
-The _DronologyRuntimeMonitor_ shall provide means to define wildcards i.e.  a client receives messages from all topics associated with the wildcard

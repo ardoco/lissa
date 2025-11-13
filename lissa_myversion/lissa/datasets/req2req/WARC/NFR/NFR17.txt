@@ -1,1 +1,0 @@
-NFR 17 - The final WARC API shall be coded in C with minimum dependencies or external libraries (e.g. GZIP). It must not include any assembly code.

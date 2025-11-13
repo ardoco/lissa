@@ -1,1 +1,0 @@
-FR 18 - Libwarc shall provide a plug-in interface to enable use of alternative compression libraries, such as "gzip2", "7zip", etc.

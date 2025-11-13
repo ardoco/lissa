@@ -1,1 +1,0 @@
-FR 22 - WARC Browser shall support a rewriting interface

@@ -1,1 +1,0 @@
-FR 27 - It shall be possible to collect HTTrack data from the directories output by HTTrack and write the data to WARC files

@@ -1,3 +1,0 @@
-Log flight plans and waypoints reached
-
-All flight plans executed and waypoints reached shall be logged to a dedicated flight log file.

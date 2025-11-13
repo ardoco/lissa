@@ -1,15 +1,15 @@
 /* Licensed under MIT 2025. */
 package edu.kit.kastel.sdq.lissa.ratlr.configuration;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
-
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Represents the configuration for a module in the trace link analysis system.
@@ -53,7 +53,7 @@ public final class ModuleConfiguration {
     /**
      * Creates a new module configuration with the specified name and arguments.
      *
-     * @param name The name of the module
+     * @param name      The name of the module
      * @param arguments The arguments for the module
      */
     @JsonCreator
@@ -88,7 +88,7 @@ public final class ModuleConfiguration {
      *
      * @param key The key of the argument to retrieve
      * @return The argument value as a string
-     * @throws IllegalStateException If the configuration has been finalized
+     * @throws IllegalStateException    If the configuration has been finalized
      * @throws IllegalArgumentException If the argument is not found
      */
     public String argumentAsString(String key) {
@@ -109,10 +109,10 @@ public final class ModuleConfiguration {
      * Throws an exception if the configuration has been finalized for serialization
      * or if the default value conflicts with a previously retrieved value.
      *
-     * @param key The key of the argument to retrieve
+     * @param key          The key of the argument to retrieve
      * @param defaultValue The default value to use if the argument is not found
      * @return The argument value as a string, or the default value
-     * @throws IllegalStateException If the configuration has been finalized
+     * @throws IllegalStateException    If the configuration has been finalized
      * @throws IllegalArgumentException If the default value conflicts with a previously retrieved value
      */
     public String argumentAsString(String key, String defaultValue) {
@@ -143,36 +143,13 @@ public final class ModuleConfiguration {
     /**
      * Retrieves an argument as an integer, using a default value if not found.
      *
-     * @param key The key of the argument to retrieve
+     * @param key          The key of the argument to retrieve
      * @param defaultValue The default value to use if the argument is not found
      * @return The argument value as an integer, or the default value
      * @throws NumberFormatException If the argument cannot be parsed as an integer
      */
     public int argumentAsInt(String key, int defaultValue) {
         return Integer.parseInt(argumentAsString(key, String.valueOf(defaultValue)));
-    }
-
-    /**
-     * Retrieves an argument as a double.
-     *
-     * @param key The key of the argument to retrieve
-     * @return The argument value as a double
-     * @throws NumberFormatException If the argument cannot be parsed as a double
-     */
-    public double argumentAsDouble(String key) {
-        return Double.parseDouble(argumentAsString(key));
-    }
-
-    /**
-     * Retrieves an argument as a double, using a default value if not found.
-     *
-     * @param key The key of the argument to retrieve
-     * @param defaultValue The default value to use if the argument is not found
-     * @return The argument value as a double, or the default value
-     * @throws NumberFormatException If the argument cannot be parsed as a double
-     */
-    public double argumentAsDouble(String key, double defaultValue) {
-        return Double.parseDouble(argumentAsString(key, String.valueOf(defaultValue)));
     }
 
     /**
@@ -188,7 +165,7 @@ public final class ModuleConfiguration {
     /**
      * Retrieves an argument as a boolean, using a default value if not found.
      *
-     * @param key The key of the argument to retrieve
+     * @param key          The key of the argument to retrieve
      * @param defaultValue The default value to use if the argument is not found
      * @return The argument value as a boolean, or the default value
      */
@@ -201,13 +178,13 @@ public final class ModuleConfiguration {
      * The argument can be either a numeric index into the enum array or the
      * transformed string value itself.
      *
-     * @param <E> The enum type
-     * @param key The key of the argument to retrieve
+     * @param <E>          The enum type
+     * @param key          The key of the argument to retrieve
      * @param defaultIndex The default index to use if the argument is not found
-     * @param values The array of enum values
-     * @param transform Function to transform enum values to strings
+     * @param values       The array of enum values
+     * @param transform    Function to transform enum values to strings
      * @return The transformed string value
-     * @throws IllegalStateException If the configuration has been finalized
+     * @throws IllegalStateException    If the configuration has been finalized
      * @throws IllegalArgumentException If the index is out of bounds or if the default value conflicts
      */
     public <E extends Enum<E>> String argumentAsStringByEnumIndex(
@@ -268,13 +245,33 @@ public final class ModuleConfiguration {
         return Objects.equals(this.name, that.name) && Objects.equals(this.arguments, that.arguments);
     }
 
+    /**
+     * Returns a hash code for this ModuleConfiguration, based on its name and arguments.
+     *
+     * @return Hash code for this configuration
+     */
     @Override
     public int hashCode() {
         return Objects.hash(name, arguments);
     }
 
+    /**
+     * Returns a string representation of this ModuleConfiguration,
+     * including the module name and all argument key-value pairs.
+     *
+     * @return String representation of this ModuleConfiguration
+     */
     @Override
     public String toString() {
         return "ModuleConfiguration[name=" + name + ", arguments=" + arguments + ']';
+    }
+
+    /**
+     * Returns the argument map for this ModuleConfiguration.
+     *
+     * @return A map of argument names to values
+     */
+    public Map<String, String> arguments() {
+        return arguments;
     }
 }

@@ -1,1 +1,0 @@
-SRS 33 - Libwarc shall provide a set of classes to enable remote management of WARC-records

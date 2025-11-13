@@ -1,3 +1,0 @@
-GCS handshake
-
-In step two  the _GCSMiddleware_ accepts the connection and sends a handshake message.

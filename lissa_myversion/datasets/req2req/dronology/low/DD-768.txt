@@ -1,3 +1,0 @@
-UAV Configuration Command Types
-
-Each movement command shall specify one of the following command types: {{SET_MONITORING_FREQUENCY  SET_STATE_FREQUENCY}}

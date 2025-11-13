@@ -1,3 +1,0 @@
-Direction between waypoints
-
-Direction between two coordinates shall be specified using a velocity vector from the first coordinate.

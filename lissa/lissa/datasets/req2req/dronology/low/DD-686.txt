@@ -1,3 +1,0 @@
-Differentiate UAV types
-
-Different types of UAVs shall have different icons.

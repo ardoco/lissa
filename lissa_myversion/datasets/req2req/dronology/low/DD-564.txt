@@ -1,3 +1,0 @@
-Continue to original destination
-
-When a UAV which has been receiving evasive directives is no longer in close proximity to an object  the _ObjectAvoidance_ system shall stop sending directives and the UAV will continue towards its destination.

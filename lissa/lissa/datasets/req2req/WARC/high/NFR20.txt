@@ -1,1 +1,0 @@
-NFR 20 - An interface implementation shall be made for Java to allow the library to be used natively by Java programmers requiring no knowledge of the internal implementation of libwarc or C.

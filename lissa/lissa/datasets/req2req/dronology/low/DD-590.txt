@@ -1,3 +1,0 @@
-Establish maximum number of activated UAVs
-
-The maximum number of activated UAVS shall be defined as {{MAX_UAV}}

@@ -1,1 +1,0 @@
-SRS 41 - A command line tool "arc2warc" incorporating libwarc shall be able to migrate data in ARC-records to WARC-record format.

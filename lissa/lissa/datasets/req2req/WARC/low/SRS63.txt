@@ -1,1 +1,0 @@
-SRS 63 - Libwarc and the bindings to its functionality shall enable the use of libwarc's iterators described in SRS 16-20 to be used within various dynamic languages and in Java v1.4 and earlier, using metaphors and paradigms familiar to those languages.

@@ -1,3 +1,0 @@
-UI accepts mission plans
-
-The _UIMiddleware_ shall accept and activate a mission plan upon request.

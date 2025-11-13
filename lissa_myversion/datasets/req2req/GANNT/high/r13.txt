@@ -1,1 +1,0 @@
-Change Task Begin/End Times automatically with dependency changes; The start or end date should be changed automatically if one of its subtasks changes.

@@ -1,1 +1,0 @@
-Shall compute solar_vectors at the observed location from the 	sun_reference_vector and the 	observed_locations_with_terrain_correction as defined in the 	Geolocation ATBD, section 3.1.4.2.  

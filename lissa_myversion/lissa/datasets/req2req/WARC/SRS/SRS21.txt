@@ -1,1 +1,0 @@
-SRS 21 - Libwarc shall encapsulate and handle all memory management when processing WARCrecords.

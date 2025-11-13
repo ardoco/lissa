@@ -1,3 +1,0 @@
-Return To Home as single waypoint
-
-When the UAV is commanded to return to home  the current flight plan shall be removed and a new flight plan shall be created containing only a single waypoint representing its original launch coordinates.

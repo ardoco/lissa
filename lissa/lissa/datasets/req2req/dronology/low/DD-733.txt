@@ -1,3 +1,0 @@
-UAV SetGroundspeed Command
-
-The {{SET_GROUNDSPEED}} command shall specify ground speed in meters per second.

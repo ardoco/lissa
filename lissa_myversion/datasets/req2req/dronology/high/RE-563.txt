@@ -1,3 +1,0 @@
-Multiple UAVs in pattern based flight
-
-When a group of UAVs are assigned flight patterns as part of a mission  the system shall provide a warning if any paths overlap.

@@ -1,3 +1,0 @@
-Connection lost
-
-When the connection to the _GCS_ from the _GCSMiddleware_ is lost  the _GCSMiddleware_ shall notify Dronology and deactivate all associated UAVs.

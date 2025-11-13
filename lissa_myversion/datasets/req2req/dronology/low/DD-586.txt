@@ -1,3 +1,0 @@
-Activate registered UAV
-
-If the presented {{UAV_ID}} represents a currently registered UAV  then the _UAVActivationManager_ shall activate the UAV.

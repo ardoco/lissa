@@ -1,1 +1,0 @@
-NFR 13 - The functionality of the API shall enable the appropriate functionality in the library scriptable1 and programmable2.

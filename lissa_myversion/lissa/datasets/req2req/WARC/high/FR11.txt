@@ -1,1 +1,0 @@
-FR 11 - Iterators can use exact pattern search or regex expressions

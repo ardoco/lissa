@@ -1,3 +1,0 @@
-Transition from LANDING to ON_GROUND
-
-When a UAV is in {{LANDING}} state and reaches zero altitude it transitions to {{ON_GROUND}}

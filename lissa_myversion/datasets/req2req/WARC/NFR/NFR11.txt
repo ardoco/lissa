@@ -1,1 +1,0 @@
-NFR 11 - The WARC Tools shall be implemented as a C library

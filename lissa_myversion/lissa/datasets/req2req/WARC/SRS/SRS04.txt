@@ -1,1 +1,0 @@
-SRS 4 - The universal header "warc.h" shall ensure compatibility between all versions of libwarc.

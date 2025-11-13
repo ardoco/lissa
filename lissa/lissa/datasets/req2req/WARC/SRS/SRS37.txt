@@ -1,1 +1,0 @@
-SRS 37 - WARC Browser shall support a client-side rewriting interface by using javascript code to rewrite links being delivered alongside archived content. This is based on the principles implemented in the Wayback Machine.

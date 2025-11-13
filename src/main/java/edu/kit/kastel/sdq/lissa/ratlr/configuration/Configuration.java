@@ -1,33 +1,25 @@
 /* Licensed under MIT 2025. */
 package edu.kit.kastel.sdq.lissa.ratlr.configuration;
 
-import java.io.UncheckedIOException;
-import java.util.List;
-import java.util.Objects;
-
-import org.jspecify.annotations.Nullable;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.Classifier;
-import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.KeyGenerator;
-
 import io.soabase.recordbuilder.core.RecordBuilder;
+
+import java.io.UncheckedIOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Represents the complete configuration for a trace link analysis run.
  * This record contains all necessary configurations for artifact providers,
  * preprocessors, embedding creators, stores, classifiers, and postprocessors.
  * It supports both single-classifier and multi-stage classifier configurations.
- * <p>
- * The configuration is used to instantiate pipeline components, each of which can access shared context
- * via a {@link edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore} passed to their factory methods.
- * </p>
  */
 @RecordBuilder()
 public record Configuration(
@@ -80,13 +72,13 @@ public record Configuration(
          * Configuration for a single classifier.
          * Either this or {@link #classifiers} must be set, but not both.
          */
-        @JsonProperty("classifier") @Nullable ModuleConfiguration classifier,
+        @JsonProperty("classifier") ModuleConfiguration classifier,
 
         /**
          * Configuration for a multi-stage classifier pipeline.
          * Either this or {@link #classifier} must be set, but not both.
          */
-        @JsonProperty("classifiers") @Nullable List<List<ModuleConfiguration>> classifiers,
+        @JsonProperty("classifiers") List<List<ModuleConfiguration>> classifiers,
 
         /**
          * Configuration for the result aggregator.
@@ -94,9 +86,14 @@ public record Configuration(
         @JsonProperty("result_aggregator") ModuleConfiguration resultAggregator,
 
         /**
+         * Configuration for the optimizer.
+         */
+        @JsonProperty("optimizer_configuration") ModuleConfiguration optimizerConfiguration,
+
+        /**
          * Configuration for the trace link ID postprocessor.
          */
-        @JsonProperty("tracelinkid_postprocessor") @Nullable ModuleConfiguration traceLinkIdPostprocessor)
+        @JsonProperty("tracelinkid_postprocessor") ModuleConfiguration traceLinkIdPostprocessor)
         implements ConfigurationBuilder.With {
 
     /**
@@ -130,10 +127,14 @@ public record Configuration(
             traceLinkIdPostprocessor.finalizeForSerialization();
         }
 
+        if (optimizerConfiguration != null) {
+            optimizerConfiguration.finalizeForSerialization();
+        }
+
         try {
             return new ObjectMapper()
                     .enable(SerializationFeature.INDENT_OUTPUT)
-                    .setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL)
+                    .setSerializationInclusion(JsonInclude.Include.NON_NULL)
                     .writeValueAsString(this);
         } catch (JsonProcessingException e) {
             throw new UncheckedIOException(e);
@@ -160,7 +161,8 @@ public record Configuration(
                 + classifier + ", classifiers="
                 + classifiers + ", resultAggregator="
                 + resultAggregator + ", traceLinkIdPostprocessor="
-                + traceLinkIdPostprocessor + '}';
+                + traceLinkIdPostprocessor + ", optimizerConfiguration="
+                + optimizerConfiguration + '}';
     }
 
     /**
@@ -179,19 +181,45 @@ public record Configuration(
     /**
      * Creates a classifier instance based on this configuration.
      * Either a single classifier or a multi-stage classifier pipeline is created,
-     * depending on which configuration is set. The shared {@link ContextStore} is passed to all classifiers.
+     * depending on which configuration is set.
      *
-     * @param contextStore The shared context store for pipeline components
      * @return A classifier instance
      * @throws IllegalStateException If neither or both classifier configurations are set
      */
-    public Classifier createClassifier(ContextStore contextStore) {
+    public Classifier createClassifier() {
         if ((classifier == null) == (classifiers == null)) {
             throw new IllegalStateException("Either 'classifier' or 'classifiers' must be set, but not both.");
         }
 
         return classifier != null
-                ? Classifier.createClassifier(classifier, contextStore)
-                : Classifier.createMultiStageClassifier(classifiers, contextStore);
+                ? Classifier.createClassifier(classifier)
+                : Classifier.createMultiStageClassifier(classifiers);
+    }
+
+    /**
+     * Creates a new Configuration instance with a replaced classifier.
+     * Useful for generating optimized configurations while keeping the rest of the configuration intact.
+     *
+     * @param newClassifier The new ModuleConfiguration to replace the current classifier
+     * @return A new Configuration instance with the updated classifier
+     */
+    public Configuration withReplacedClassifier(ModuleConfiguration newClassifier) {
+        return new Configuration(
+                cacheDir,
+                goldStandardConfiguration,
+                sourceArtifactProvider,
+                targetArtifactProvider,
+                sourcePreprocessor,
+                targetPreprocessor,
+                embeddingCreator,
+                sourceStore,
+                targetStore,
+                newClassifier,
+                classifiers,
+                resultAggregator,
+                optimizerConfiguration,
+                (traceLinkIdPostprocessor != null ? traceLinkIdPostprocessor
+                        : new ModuleConfiguration("TraceLinkIdPostprocessor", Map.of()))
+        );
     }
 }

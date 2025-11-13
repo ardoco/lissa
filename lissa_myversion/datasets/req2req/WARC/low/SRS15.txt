@@ -1,1 +1,0 @@
-SRS 15 -Libwarc shall include ADT objects to handle read operations on ARC-records

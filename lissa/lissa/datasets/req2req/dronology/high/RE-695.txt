@@ -1,3 +1,0 @@
-Following UAVs
-
-The _RealTimeFlightUI_ shall allow users to follow one or multiple UAVs on the map.

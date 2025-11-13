@@ -1,1 +1,0 @@
-NFR 10 - Installation scripts and/or instructions shall be made for the library and tools for each target platform, including Linux, Unix and Windows, as well as apache and lighttp installation scripts

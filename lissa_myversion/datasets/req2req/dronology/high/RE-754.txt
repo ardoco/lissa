@@ -1,3 +1,0 @@
-GCS transmits UAV monitoring data
-
-The _GCS_ shall transmit the UAV's properties to the _GCSMiddleware_

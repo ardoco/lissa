@@ -1,1 +1,0 @@
-Using GUI user should be able to change the length of a task by dragging-and-dropping the bar on the GUI.

@@ -1,1 +1,0 @@
-NFR 2 - WARC v0.17 shall be the baseline version of the WARC standard used in this project.

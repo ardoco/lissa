@@ -1,1 +1,0 @@
-FR 12 - Libwarc shall provide an abstract interface for iterators, to enable custom iterators

@@ -1,2 +1,0 @@
-The class of dependency collection provides a function to check if the new dependency will cause a loop each time a object of dependency class is created. The function returns an exception if there is a loop. 
-

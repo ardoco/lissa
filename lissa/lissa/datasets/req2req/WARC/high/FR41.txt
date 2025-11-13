@@ -1,1 +1,0 @@
-FR 41 - An independent Java implementation of libwarc may be implemented

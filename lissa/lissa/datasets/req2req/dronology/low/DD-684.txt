@@ -1,3 +1,0 @@
-Display map in UI
-
-When the _RealTimeFlightUI_ is loaded  a map shall be displayed with the default zoom level and center coordinates specified in a configuration file.

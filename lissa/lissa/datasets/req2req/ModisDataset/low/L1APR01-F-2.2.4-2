@@ -1,1 +1,0 @@
-Shall Abort_current_packet_processing if the calculated packet 			checksum is not the same as the packet_checksum in the 				MODIS_pkt.   

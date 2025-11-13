@@ -1,1 +1,0 @@
-FR 19 - Libwarc shall manage all write and read access

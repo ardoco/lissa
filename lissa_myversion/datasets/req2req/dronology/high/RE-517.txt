@@ -1,3 +1,0 @@
-Calculate directions
-
-When given two coordinates the _CoordinateSystem_ shall compute the direction from the first coordinate to the second coordinate.

@@ -1,1 +1,0 @@
-FR 8 - Libwarc shall provide a default iterator as a built-in function

@@ -1,3 +1,0 @@
-Manual Flight Plan Assignment
-
-When a flight plan is assigned to a specific UAV it shall be placed in the UAV's execution queue.

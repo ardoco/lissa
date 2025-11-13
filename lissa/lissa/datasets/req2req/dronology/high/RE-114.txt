@@ -1,3 +1,0 @@
-Display map in UI
-
-When the _RealTimeFlightUI_ is loaded  a map shall be displayed.

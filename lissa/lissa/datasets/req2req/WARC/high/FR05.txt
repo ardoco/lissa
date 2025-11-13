@@ -1,1 +1,0 @@
-FR 5 - Libwarc shall provide a range of functions through a universal interface for reading a range of valid WARC-records

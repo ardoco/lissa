@@ -1,3 +1,0 @@
-GCS transmits UAV properties
-
-The _GCS_ shall send the UAV's current properties to the _GCSMiddleware_ when they are received from the UAV.

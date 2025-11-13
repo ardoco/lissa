@@ -1,3 +1,0 @@
-UAV State Messages
-
-UAV State messages shall be formatted as JSON objects and contain both mandatory and optional elements.
