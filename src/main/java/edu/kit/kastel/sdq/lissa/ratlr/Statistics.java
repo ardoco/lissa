@@ -1,14 +1,6 @@
 /* Licensed under MIT 2025. */
 package edu.kit.kastel.sdq.lissa.ratlr;
 
-import edu.kit.kastel.mcse.ardoco.metrics.ClassificationMetricsCalculator;
-import edu.kit.kastel.sdq.lissa.ratlr.configuration.Configuration;
-import edu.kit.kastel.sdq.lissa.ratlr.configuration.GoldStandardConfiguration;
-import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
-import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -17,6 +9,15 @@ import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import edu.kit.kastel.mcse.ardoco.metrics.ClassificationMetricsCalculator;
+import edu.kit.kastel.sdq.lissa.ratlr.configuration.Configuration;
+import edu.kit.kastel.sdq.lissa.ratlr.configuration.GoldStandardConfiguration;
+import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
 
 /**
  * Utility class for generating and saving statistics about trace link analysis results.

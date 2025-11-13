@@ -1,15 +1,17 @@
+/* Licensed under MIT 2025. */
 package edu.kit.kastel.sdq.lissa.ratlr.optimizer;
 
-import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager;
 
 /**
  * Integration tests for the PromptOptimizer.
@@ -66,13 +68,12 @@ class PromptOptimizerTest {
         var optimizer = new PromptOptimizer(baseConfigPath, 10, f1ImprovementThreshold);
         optimizer.optimize();
 
-        String lastF1String = Files.readAllLines(logFilePath)
-                .stream()
+        String lastF1String = Files.readAllLines(logFilePath).stream()
                 .filter(line -> line.startsWith("Best F1: "))
-                .toList().getLast();
-        double lastF1Score = Double.parseDouble(
-                lastF1String.substring("Best F1: ".length()).replace(',', '.')
-        );
+                .toList()
+                .getLast();
+        double lastF1Score =
+                Double.parseDouble(lastF1String.substring("Best F1: ".length()).replace(',', '.'));
 
         assertTrue(lastF1Score >= f1ImprovementThreshold);
     }

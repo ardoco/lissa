@@ -1,7 +1,18 @@
 /* Licensed under MIT 2025. */
 package edu.kit.kastel.sdq.lissa.ratlr.optimizer;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import edu.kit.kastel.mcse.ardoco.metrics.ClassificationMetricsCalculator;
 import edu.kit.kastel.sdq.lissa.ratlr.Evaluation;
 import edu.kit.kastel.sdq.lissa.ratlr.Statistics;
@@ -10,15 +21,6 @@ import edu.kit.kastel.sdq.lissa.ratlr.configuration.GoldStandardConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.LogWriter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 /**
  * Optimizes the classification prompt used in LiSSA through iterative evaluations.
@@ -62,7 +64,6 @@ public final class PromptOptimizer {
         }
     }
 
-
     /**
      * Runs the optimization loop until the target F1 score or the maximum
      * number of iterations is reached. Intermediate results and the best
@@ -80,8 +81,8 @@ public final class PromptOptimizer {
 
             int width = String.valueOf(maxIterations).length();
             String iterationString = String.format("%" + width + "d", iteration);
-            LogWriter.write("f1_log.txt",
-                    "Iteration " + iterationString + " | F1 = " + String.format("%.4f", f1), true);
+            LogWriter.write(
+                    "f1_log.txt", "Iteration " + iterationString + " | F1 = " + String.format("%.4f", f1), true);
 
             String currentPrompt = readCurrentPrompt(currentConfig);
 
@@ -104,14 +105,12 @@ public final class PromptOptimizer {
         logger.info("=== Best Result ===");
         logger.info("Best F1 Score: {}", String.format("%.4f", bestF1));
         logger.info("Best Prompt:\n{}", bestPrompt);
-        //Log Best Prompt
-        LogWriter.write("best_prompt.txt",
-                "Best F1: " + String.format("%.4f", bestF1) + "\n\n" + bestPrompt,
-                false
-        );
-        LogWriter.write("f1_log.txt",
-                "Best F1: " + String.format("%.4f", bestF1) +
-                        "\n----------------------------------------------------\n",
+        // Log Best Prompt
+        LogWriter.write("best_prompt.txt", "Best F1: " + String.format("%.4f", bestF1) + "\n\n" + bestPrompt, false);
+        LogWriter.write(
+                "f1_log.txt",
+                "Best F1: " + String.format("%.4f", bestF1)
+                        + "\n----------------------------------------------------\n",
                 true);
     }
 
@@ -123,7 +122,6 @@ public final class PromptOptimizer {
         var classification = cmc.calculateMetrics(traceLinks, validTraceLinks, null);
 
         return classification.getF1();
-
     }
 
     private String readCurrentPrompt(Path configPath) {
@@ -146,22 +144,24 @@ public final class PromptOptimizer {
      * @return the path to the newly written optimized configuration file
      * @throws IOException if reading the previous configuration or writing the new one fails
      */
-    private Path tweakPromptAndSave(int iteration,
-                                    Path previousConfig,
-                                    String currentPrompt,
-                                    double lastF1) throws IOException {
+    private Path tweakPromptAndSave(int iteration, Path previousConfig, String currentPrompt, double lastF1)
+            throws IOException {
         try {
             Configuration oldConfig = mapper.readValue(previousConfig.toFile(), Configuration.class);
 
             PromptGenerationResult result = promptWriter.improve(currentPrompt, iteration, lastF1);
 
-            LogWriter.write("promptsToImprove_log.txt",
-                    "=== Iteration " + iteration + " ===\nF1 last iteration: " +
-                            String.format("%.4f", lastF1) + "\n" + result.aiPrompt() + "\n\n", true);
+            LogWriter.write(
+                    "promptsToImprove_log.txt",
+                    "=== Iteration " + iteration + " ===\nF1 last iteration: " + String.format("%.4f", lastF1) + "\n"
+                            + result.aiPrompt() + "\n\n",
+                    true);
 
-            LogWriter.write("promptsToLissa_log.txt",
-                    "=== Iteration " + iteration + " ===\nF1 last iteration: " +
-                            String.format("%.4f", lastF1) + "\n" + result.lissaPrompt() + "\n\n", true);
+            LogWriter.write(
+                    "promptsToLissa_log.txt",
+                    "=== Iteration " + iteration + " ===\nF1 last iteration: " + String.format("%.4f", lastF1) + "\n"
+                            + result.lissaPrompt() + "\n\n",
+                    true);
 
             // Replace the "template" argument in the classifier with the improved LiSSA prompt
             ModuleConfiguration oldClassifier = oldConfig.classifier();

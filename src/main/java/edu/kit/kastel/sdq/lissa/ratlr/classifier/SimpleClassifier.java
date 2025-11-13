@@ -1,7 +1,8 @@
 /* Licensed under MIT 2025. */
 package edu.kit.kastel.sdq.lissa.ratlr.classifier;
 
-import dev.langchain4j.model.chat.ChatModel;
+import java.util.Optional;
+
 import edu.kit.kastel.sdq.lissa.ratlr.cache.Cache;
 import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheKey;
 import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager;
@@ -9,7 +10,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.KeyGenerator;
 
-import java.util.Optional;
+import dev.langchain4j.model.chat.ChatModel;
 
 /**
  * A simple classifier that uses a language model to determine trace links between elements.
@@ -26,12 +27,12 @@ public class SimpleClassifier extends Classifier {
     private static final String DEFAULT_TEMPLATE =
             """
                     Question: Here are two parts of software development artifacts.
-                    
+
                     {source_type}: '''{source_content}'''
-                    
+
                     {target_type}: '''{target_content}'''
                     Are they related?
-                    
+
                     Answer with 'yes' or 'no'.
                     """;
 

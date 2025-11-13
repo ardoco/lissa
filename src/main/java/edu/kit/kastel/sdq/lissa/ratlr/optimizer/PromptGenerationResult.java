@@ -8,5 +8,4 @@ package edu.kit.kastel.sdq.lissa.ratlr.optimizer;
  * @param aiPrompt    the prompt intended for the AI model
  * @param lissaPrompt the prompt formatted for LiSSA
  */
-public record PromptGenerationResult(String aiPrompt, String lissaPrompt) {
-}
+public record PromptGenerationResult(String aiPrompt, String lissaPrompt) {}

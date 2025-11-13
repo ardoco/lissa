@@ -1,19 +1,21 @@
 /* Licensed under MIT 2025. */
 package edu.kit.kastel.sdq.lissa.ratlr.configuration;
 
+import java.io.UncheckedIOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.Classifier;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.KeyGenerator;
-import io.soabase.recordbuilder.core.RecordBuilder;
 
-import java.io.UncheckedIOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import io.soabase.recordbuilder.core.RecordBuilder;
 
 /**
  * Represents the complete configuration for a trace link analysis run.
@@ -218,8 +220,8 @@ public record Configuration(
                 classifiers,
                 resultAggregator,
                 optimizerConfiguration,
-                (traceLinkIdPostprocessor != null ? traceLinkIdPostprocessor
-                        : new ModuleConfiguration("TraceLinkIdPostprocessor", Map.of()))
-        );
+                (traceLinkIdPostprocessor != null
+                        ? traceLinkIdPostprocessor
+                        : new ModuleConfiguration("TraceLinkIdPostprocessor", Map.of())));
     }
 }

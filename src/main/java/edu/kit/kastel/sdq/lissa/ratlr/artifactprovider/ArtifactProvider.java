@@ -1,10 +1,10 @@
 /* Licensed under MIT 2025. */
 package edu.kit.kastel.sdq.lissa.ratlr.artifactprovider;
 
+import java.util.List;
+
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
-
-import java.util.List;
 
 /**
  * Abstract base class for artifact providers in the LiSSA framework.

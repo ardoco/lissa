@@ -7,5 +7,4 @@ package edu.kit.kastel.sdq.lissa.ratlr.utils;
  * @param <F> The type of the first value in the pair
  * @param <S> The type of the second value in the pair
  */
-public record Pair<F, S>(F first, S second) {
-}
+public record Pair<F, S>(F first, S second) {}

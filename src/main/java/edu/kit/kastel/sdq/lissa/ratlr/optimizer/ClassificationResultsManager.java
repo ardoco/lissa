@@ -1,18 +1,20 @@
 /* Licensed under MIT 2025. */
 package edu.kit.kastel.sdq.lissa.ratlr.optimizer;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import edu.kit.kastel.sdq.lissa.ratlr.configuration.GoldStandardConfiguration;
-import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
-import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import edu.kit.kastel.sdq.lissa.ratlr.configuration.GoldStandardConfiguration;
+import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
+import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
 
 /**
  * Manages the storage, retrieval, and processing of classification results.
@@ -24,7 +26,7 @@ public class ClassificationResultsManager {
 
     private final Path resultsFile;
     private final ObjectMapper mapper;
-    private final Random random; //used to pick random elements from a list
+    private final Random random; // used to pick random elements from a list
 
     /**
      * Creates a new results manager bound to the given output file.
@@ -56,7 +58,8 @@ public class ClassificationResultsManager {
      * @param targetElements target elements
      * @return combined map of all elements
      */
-    public static SortedMap<String, Element> mergeElements(Collection<Element> sourceElements, Collection<Element> targetElements) {
+    public static SortedMap<String, Element> mergeElements(
+            Collection<Element> sourceElements, Collection<Element> targetElements) {
         SortedMap<String, Element> all = new TreeMap<>();
         for (Element e : sourceElements) all.put(e.getIdentifier(), e);
         for (Element e : targetElements) all.put(e.getIdentifier(), e);
@@ -71,8 +74,7 @@ public class ClassificationResultsManager {
     private void saveResults(List<DetailedClassificationResult> results) {
         try {
             Files.createDirectories(resultsFile.getParent());
-            mapper.writerWithDefaultPrettyPrinter()
-                    .writeValue(resultsFile.toFile(), results);
+            mapper.writerWithDefaultPrettyPrinter().writeValue(resultsFile.toFile(), results);
             logger.info("Classification results written to {}", resultsFile.toAbsolutePath());
         } catch (IOException e) {
             logger.error("Failed to write classification results file", e);
@@ -90,8 +92,7 @@ public class ClassificationResultsManager {
             return List.of();
         }
         try {
-            return mapper.readValue(resultsFile.toFile(), new TypeReference<>() {
-            });
+            return mapper.readValue(resultsFile.toFile(), new TypeReference<>() {});
         } catch (IOException e) {
             logger.error("Error reading classification results file", e);
             return List.of();
@@ -111,8 +112,11 @@ public class ClassificationResultsManager {
         categorized.put("FN", new ArrayList<>());
         for (DetailedClassificationResult detailedClassificationResult : loadResults()) {
             String category = detailedClassificationResult.getCategory().name();
-            String example = String.format("[%s] Source: %s || Target: %s",
-                    category, detailedClassificationResult.getSourceContent(), detailedClassificationResult.getTargetContent());
+            String example = String.format(
+                    "[%s] Source: %s || Target: %s",
+                    category,
+                    detailedClassificationResult.getSourceContent(),
+                    detailedClassificationResult.getTargetContent());
             if (categorized.containsKey(category)) {
                 categorized.get(category).add(example);
             }
@@ -144,7 +148,9 @@ public class ClassificationResultsManager {
      * @param goldConfig  configuration for the gold standard CSV
      * @throws IOException if the gold CSV cannot be read
      */
-    public void saveDetailedResults(Set<TraceLink> traceLinks, SortedMap<String, Element> allElements, GoldStandardConfiguration goldConfig) throws IOException {
+    public void saveDetailedResults(
+            Set<TraceLink> traceLinks, SortedMap<String, Element> allElements, GoldStandardConfiguration goldConfig)
+            throws IOException {
         Set<TraceLink> goldLinks = new HashSet<>();
         boolean skipHeader = goldConfig.hasHeader();
         boolean swapColumns = goldConfig.swapColumns();
@@ -165,12 +171,13 @@ public class ClassificationResultsManager {
             Element target = allElements.get(link.targetId());
 
             DetailedClassificationResult detailedClassificationResult = new DetailedClassificationResult(
-                    goldLinks.contains(link) ? DetailedClassificationResult.Category.TP : DetailedClassificationResult.Category.FP,
+                    goldLinks.contains(link)
+                            ? DetailedClassificationResult.Category.TP
+                            : DetailedClassificationResult.Category.FP,
                     link.sourceId(),
                     source != null ? source.getContent() : "",
                     link.targetId(),
-                    target != null ? target.getContent() : ""
-            );
+                    target != null ? target.getContent() : "");
 
             results.add(detailedClassificationResult);
         }
@@ -185,15 +192,13 @@ public class ClassificationResultsManager {
                         link.sourceId(),
                         source != null ? source.getContent() : "",
                         link.targetId(),
-                        target != null ? target.getContent() : ""
-                );
+                        target != null ? target.getContent() : "");
 
                 results.add(cr);
             }
         }
         saveResults(results);
     }
-
 
     /**
      * Picks numberOfElements random elements from a list.
@@ -205,4 +210,3 @@ public class ClassificationResultsManager {
         return copy.subList(0, Math.min(numberOfElements, copy.size()));
     }
 }
-

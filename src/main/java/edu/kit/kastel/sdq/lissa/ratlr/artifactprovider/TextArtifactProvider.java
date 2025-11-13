@@ -1,16 +1,17 @@
 /* Licensed under MIT 2025. */
 package edu.kit.kastel.sdq.lissa.ratlr.artifactprovider;
 
-import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
-import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
-import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Knowledge;
-import org.apache.commons.io.IOUtils;
-
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+
+import org.apache.commons.io.IOUtils;
+
+import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
+import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
+import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Knowledge;
 
 /**
  * Provides text-based artifacts from a configured file or directory.

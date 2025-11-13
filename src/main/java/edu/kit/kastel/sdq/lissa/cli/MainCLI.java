@@ -1,13 +1,14 @@
 /* Licensed under MIT 2025. */
 package edu.kit.kastel.sdq.lissa.cli;
 
+import java.nio.file.Path;
+import java.util.Arrays;
+
 import edu.kit.kastel.sdq.lissa.cli.command.EvaluateCommand;
 import edu.kit.kastel.sdq.lissa.cli.command.OptimizeCommand;
 import edu.kit.kastel.sdq.lissa.cli.command.TransitiveTraceCommand;
-import picocli.CommandLine;
 
-import java.nio.file.Path;
-import java.util.Arrays;
+import picocli.CommandLine;
 
 /**
  * Main command-line interface for the LiSSA framework.
@@ -27,8 +28,7 @@ public final class MainCLI {
     /**
      * Private constructor to prevent instantiation of this utility class.
      */
-    private MainCLI() {
-    }
+    private MainCLI() {}
 
     /**
      * Main entry point for the CLI application.
@@ -37,11 +37,14 @@ public final class MainCLI {
      */
     public static void main(String[] args) {
         if (args.length == 0) {
-            args = new String[]{
-                    "optimize",
-                    "-c", "configs\\req2req\\CM1-NASA_simple_gpt_gpt-4o-mini-2024-07-18.json",
-                    "--max-iter", "3",
-                    "--target-f1", "0.40"
+            args = new String[] {
+                "optimize",
+                "-c",
+                "configs\\req2req\\CM1-NASA_simple_gpt_gpt-4o-mini-2024-07-18.json",
+                "--max-iter",
+                "3",
+                "--target-f1",
+                "0.40"
             };
         }
         System.out.println("ARGS: " + Arrays.toString(args));

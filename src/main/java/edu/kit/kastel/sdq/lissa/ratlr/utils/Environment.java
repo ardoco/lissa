@@ -1,12 +1,13 @@
 /* Licensed under MIT 2025. */
 package edu.kit.kastel.sdq.lissa.ratlr.utils;
 
-import io.github.cdimascio.dotenv.Dotenv;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
+import io.github.cdimascio.dotenv.Dotenv;
 
 /**
  * A utility class for managing environment variables in the application.
@@ -31,9 +32,11 @@ import java.nio.file.Path;
  */
 public final class Environment {
     private static final Logger logger = LoggerFactory.getLogger(Environment.class);
+
     private Environment() {
         throw new IllegalAccessError("Utility class");
-    }    /**
+    }
+    /**
      * The loaded .env configuration, or null if no .env file exists
      */
     private static final Dotenv DOTENV = load();
@@ -102,6 +105,4 @@ public final class Environment {
             return null;
         }
     }
-
-
 }

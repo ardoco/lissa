@@ -17,9 +17,7 @@ public class LogWriter {
     /**
      * Private constructor to prevent instantiation of this utility class.
      */
-    private LogWriter() {
-    }
-
+    private LogWriter() {}
 
     /**
      * Writes the given content to a log file in the logs directory.
@@ -33,12 +31,14 @@ public class LogWriter {
         Path file = Path.of(LOG_DIR, fileName);
 
         if (append) {
-            Files.writeString(file, content + System.lineSeparator(),
-                    StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+            Files.writeString(
+                    file, content + System.lineSeparator(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         } else {
-            Files.writeString(file, content + System.lineSeparator(),
-                    StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            Files.writeString(
+                    file,
+                    content + System.lineSeparator(),
+                    StandardOpenOption.CREATE,
+                    StandardOpenOption.TRUNCATE_EXISTING);
         }
     }
 }
-

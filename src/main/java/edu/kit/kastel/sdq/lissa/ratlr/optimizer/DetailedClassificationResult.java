@@ -42,8 +42,7 @@ public class DetailedClassificationResult {
     /**
      * Default constructor required for JSON deserialization.
      */
-    public DetailedClassificationResult() {
-    }
+    public DetailedClassificationResult() {}
 
     /**
      * Creates a new classification result.
@@ -54,8 +53,8 @@ public class DetailedClassificationResult {
      * @param targetId      target element identifier
      * @param targetContent target element content
      */
-    public DetailedClassificationResult(Category category, String sourceId, String sourceContent,
-                                        String targetId, String targetContent) {
+    public DetailedClassificationResult(
+            Category category, String sourceId, String sourceContent, String targetId, String targetContent) {
         this.category = category;
         this.sourceId = sourceId;
         this.sourceContent = sourceContent;
@@ -101,5 +100,10 @@ public class DetailedClassificationResult {
     /**
      * Classification outcome category: True-Positive, False-Positive, True-Negative, False-Negative
      */
-    public enum Category {TP, FP, TN, FN}
+    public enum Category {
+        TP,
+        FP,
+        TN,
+        FN
+    }
 }

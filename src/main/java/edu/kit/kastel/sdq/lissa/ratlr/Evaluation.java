@@ -1,7 +1,18 @@
 /* Licensed under MIT 2025. */
 package edu.kit.kastel.sdq.lissa.ratlr;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Objects;
+import java.util.Set;
+import java.util.SortedMap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import edu.kit.kastel.sdq.lissa.ratlr.artifactprovider.ArtifactProvider;
 import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.Classifier;
@@ -15,15 +26,6 @@ import edu.kit.kastel.sdq.lissa.ratlr.optimizer.ClassificationResultsManager;
 import edu.kit.kastel.sdq.lissa.ratlr.postprocessor.TraceLinkIdPostprocessor;
 import edu.kit.kastel.sdq.lissa.ratlr.preprocessor.Preprocessor;
 import edu.kit.kastel.sdq.lissa.ratlr.resultaggregator.ResultAggregator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Objects;
-import java.util.Set;
-import java.util.SortedMap;
 
 /**
  * Represents a single evaluation run of the LiSSA framework.
@@ -222,7 +224,8 @@ public class Evaluation {
 
             ClassificationResultsManager classificationResultsManager = new ClassificationResultsManager(jsonFile);
 
-            SortedMap<String, Element> allElements = ClassificationResultsManager.mergeElements(sourceElements, targetElements);
+            SortedMap<String, Element> allElements =
+                    ClassificationResultsManager.mergeElements(sourceElements, targetElements);
             GoldStandardConfiguration goldConfig = configuration.goldStandardConfiguration();
             classificationResultsManager.saveDetailedResults(traceLinks, allElements, goldConfig);
 
