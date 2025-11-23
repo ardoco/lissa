@@ -53,13 +53,21 @@ public class Analysis {
     public Analysis(List<Element> sourceElements, List<Element> targetElements, List<Pair<Element, Element>> retrieved,
                     List<ClassificationResult> llmResults, ResultAggregator aggregator, TraceLinkIdPostprocessor postprocessor, 
                     SingleClassificationResult<TraceLink> statistics) {
-        
+
+        int max = postprocessor.postprocess(aggregator.aggregate(sourceElements, targetElements,
+                        sourceElements.stream()
+                                .map(source -> new ClassificationResult(source, targetElements.getFirst(), 1.0)).toList()))
+                .stream()
+                .map(TraceLink::sourceId)
+                .map(Integer::parseInt)
+                .max(Integer::compare)
+                .orElseThrow();
         Map<Integer, Integer> truePositivesBySentenceId = new LinkedHashMap<>();
-        int max = collectSentenceStatistics(statistics.getTruePositives(), truePositivesBySentenceId, false);
+        collectSentenceStatistics(statistics.getTruePositives(), truePositivesBySentenceId, false);
         Map<Integer, Integer> falseNegativesBySentenceId = new LinkedHashMap<>();
-        max = Math.max(max, collectSentenceStatistics(statistics.getFalseNegatives(), falseNegativesBySentenceId, true));
+        collectSentenceStatistics(statistics.getFalseNegatives(), falseNegativesBySentenceId, true);
         Map<Integer, Integer> falsePositivesBySentenceId = new LinkedHashMap<>();
-        max = Math.max(max, collectSentenceStatistics(statistics.getFalsePositives(), falsePositivesBySentenceId, false));
+        collectSentenceStatistics(statistics.getFalsePositives(), falsePositivesBySentenceId, false);
         for (int i = 1; i <= max; i++) {
             statisticsBySentenceId.put(i, new SentenceAnalysis(
                     truePositivesBySentenceId.getOrDefault(i, 0), 
@@ -113,6 +121,7 @@ public class Analysis {
                     return map;
                 })
                 .toList();
+
         for (Pair<Element, Element> retrievedPair : retrieved) {
             CacheKey key = CacheManager.getDefaultInstance().getKey(retrievedPair.first(), retrievedPair.second());
             TraceLink retrievedProcessed = postprocessor.postprocess(aggregator.aggregate(sourceElements, targetElements, 
@@ -130,15 +139,12 @@ public class Analysis {
         return " ".repeat(String.valueOf(maxId).length() - String.valueOf(id).length()) + "|".repeat(shifted) + " ".repeat(100 - shifted);
     }
 
-    private static int collectSentenceStatistics(Set<TraceLink> traceLinks, Map<Integer, Integer> collector, boolean print) {
-        int max = 0;
+    private static void collectSentenceStatistics(Set<TraceLink> traceLinks, Map<Integer, Integer> collector, boolean print) {
         for (TraceLink traceLink : traceLinks) {
             int sourceId = Integer.parseInt(traceLink.sourceId());
-            max = Math.max(max, sourceId);
             collector.putIfAbsent(sourceId, 0);
             collector.computeIfPresent(sourceId, (key, value) -> ++value);
         }
-        return max;
     }
 
     private Map<String, Map<String, String>> getConfusionCollection(SingleClassificationResult<TraceLink> statistics, TraceLink retrievedProcessed) {
