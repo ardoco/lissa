@@ -12,11 +12,12 @@ from template_utils import available_templates, default_template_label, initial_
 from ui_sections import (
     render_artifact_provider_section,
     render_classifier_and_aggregation_section,
-    render_embedding_and_store_section,
+    render_embedding_section,
     render_general_section,
     render_overrides_section,
     render_preprocessor_section,
     render_preview_and_export,
+    render_store_section,
 )
 
 
@@ -107,7 +108,8 @@ def main() -> None:
     render_general_section(config)
     render_artifact_provider_section(config, CATALOG)
     render_preprocessor_section(config, CATALOG)
-    render_embedding_and_store_section(config, CATALOG)
+    render_embedding_section(config, CATALOG)
+    render_store_section(config, CATALOG)
     render_classifier_and_aggregation_section(config, CATALOG)
     render_overrides_section(config)
     render_preview_and_export(config, SAVE_TO_DISK_ENABLED)

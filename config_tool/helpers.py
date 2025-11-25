@@ -68,28 +68,122 @@ def parse_arg_value(raw_value: str) -> Any:
     return raw_value
 
 
+def _rows_state_key(key_prefix: str) -> str:
+    return f"{key_prefix}-args-rows"
+
+
+def _rows_epoch_key(key_prefix: str) -> str:
+    return f"{key_prefix}-args-rows-epoch"
+
+
+def _rows_counter_key(key_prefix: str) -> str:
+    return f"{key_prefix}-args-rows-counter"
+
+
 def render_args_editor(label: str, args: Dict[str, Any], key_prefix: str) -> Dict[str, Any]:
-    rows = [{"Parameter": k, "Value": value_to_text(v)} for k, v in args.items()]
-    if not rows:
-        rows = [{"Parameter": "", "Value": ""}]
-    edited_rows = st.data_editor(
-        rows,
-        num_rows="dynamic",
-        key=widget_key(f"{key_prefix}-editor"),
-        column_config={
-            "Parameter": st.column_config.TextColumn("Parameter", width="medium"),
-            "Value": st.column_config.TextColumn("Value", width="large"),
-        },
-        width="stretch",
-        hide_index=True,
-        disabled=False,
-    )
+    state_key = _rows_state_key(key_prefix)
+    epoch_key = _rows_epoch_key(key_prefix)
+    counter_key = _rows_counter_key(key_prefix)
+    current_epoch = widget_epoch()
+    if st.session_state.get(epoch_key) != current_epoch or state_key not in st.session_state:
+        st.session_state[state_key] = [
+            {"id": idx, "parameter": k, "value": value_to_text(v)}
+            for idx, (k, v) in enumerate(args.items())
+        ]
+        st.session_state[epoch_key] = current_epoch
+        st.session_state[counter_key] = len(st.session_state[state_key])
+    elif counter_key not in st.session_state:
+        st.session_state[counter_key] = len(st.session_state[state_key])
+
+    rows: list[Dict[str, str]] = copy.deepcopy(st.session_state[state_key])
+
+    def _ensure_row_ids() -> None:
+        next_id = st.session_state.get(counter_key, 0)
+        updated = False
+        for row in rows:
+            if "id" not in row:
+                row["id"] = next_id
+                next_id += 1
+                updated = True
+        if updated:
+            st.session_state[counter_key] = next_id
+            st.session_state[state_key] = copy.deepcopy(rows)
+
+    _ensure_row_ids()
+
+    st.markdown(f"**{label}**")
+    header_cols = st.columns([3, 3, 0.8], vertical_alignment="center")
+    header_cols[0].caption("Parameter")
+    header_cols[1].caption("Value")
+    with header_cols[2]:
+        if st.button(
+                "＋",
+                key=widget_key(f"{key_prefix}-add-row"),
+                use_container_width=True,
+                help="Add parameter",
+                type="secondary",
+        ):
+            next_id = st.session_state.get(counter_key, 0)
+            rows.append({"id": next_id, "parameter": "", "value": ""})
+            st.session_state[counter_key] = next_id + 1
+
+    def _commit_rows(updated_rows: list[Dict[str, str]]) -> None:
+        """Persist the current rows and refresh UI when needed."""
+        st.session_state[state_key] = copy.deepcopy(updated_rows)
+
+    def _trigger_rerun() -> None:
+        rerun = getattr(st, "rerun", None)
+        if rerun is not None:
+            rerun()
+        else:  # pragma: no cover - fallback for older Streamlit versions
+            st.experimental_rerun()
+
+    def _remove_row(row_id: int) -> None:
+        remaining = [row for row in rows if row.get("id") != row_id]
+        if len(remaining) != len(rows):
+            rows[:] = remaining
+            _commit_rows(rows)
+            _trigger_rerun()
+
+    for idx, row in enumerate(rows):
+        param_col, value_col, remove_col = st.columns([3, 3, 0.8], vertical_alignment="center")
+        row_id = row.get("id", idx)
+        param_key = widget_key(f"{key_prefix}-row-{row_id}-param")
+        value_key = widget_key(f"{key_prefix}-row-{row_id}-value")
+        with param_col:
+            param_value = st.text_input(
+                "Parameter",
+                value=row.get("parameter", ""),
+                key=param_key,
+                label_visibility="collapsed",
+            )
+        with value_col:
+            value_value = st.text_input(
+                "Value",
+                value=row.get("value", ""),
+                key=value_key,
+                label_visibility="collapsed",
+            )
+        with remove_col:
+            st.button(
+                "－",
+                key=widget_key(f"{key_prefix}-row-{row_id}-remove"),
+                help="Remove this parameter",
+                type="secondary",
+                use_container_width=True,
+                on_click=_remove_row,
+                args=(row_id,),
+            )
+        row["parameter"] = param_value
+        row["value"] = value_value
+
+    _commit_rows(rows)
     updated: Dict[str, Any] = {}
-    for row in edited_rows:
-        name = str(row.get("Parameter", "")).strip()
+    for row in rows:
+        name = row.get("parameter", "").strip()
         if not name:
             continue
-        updated[name] = parse_arg_value(str(row.get("Value", "")))
+        updated[name] = parse_arg_value(row.get("value", ""))
     return updated
 
 
@@ -188,9 +282,10 @@ def module_name_input(
     return module_def
 
 
-def render_module_help(title: str, module_def: Optional[Dict[str, Any]], extra: Optional[str] = None) -> None:
+def module_help_markdown(module_def: Optional[Dict[str, Any]], extra: Optional[str] = None) -> Optional[str]:
+    """Build the markdown snippet that explains a selected module."""
     if not module_def and not extra:
-        return
+        return None
     parts = []
     if module_def:
         help_text = module_help_text(module_def)
@@ -199,7 +294,14 @@ def render_module_help(title: str, module_def: Optional[Dict[str, Any]], extra: 
     if extra:
         parts.append(extra)
     if parts:
-        st.markdown("\n\n".join(parts))
+        return "\n\n".join(parts)
+    return None
+
+
+def render_module_help(title: str, module_def: Optional[Dict[str, Any]], extra: Optional[str] = None) -> None:
+    help_text = module_help_markdown(module_def, extra)
+    if help_text:
+        st.markdown(help_text)
 
 
 def classifier_help(name: str, catalog: Dict[str, Any]) -> Optional[str]:
@@ -218,17 +320,15 @@ def classifier_help(name: str, catalog: Dict[str, Any]) -> Optional[str]:
         mode_def = mode_defs.get(mode_key)
         platform_def = platform_defs.get(platform_key) if platform_key else None
 
-    fragments = []
-    if mode_def:
-        fragments.append(module_help_text(mode_def))
     if platform_def:
         envs = platform_def.get("env", [])
         env_text = ", ".join(envs) if envs else "No required env vars listed."
-        fragments.append(
+        return (
             "Platform **{name}** -> default model `{model}`, threads={threads}. Required env: {envs}.".format(
                 name=platform_key or "platform",
                 model=platform_def.get("default_model", "n/a"),
                 threads=platform_def.get("threads", "?"),
                 envs=env_text,
-            ))
-    return "\n\n".join(fragment for fragment in fragments if fragment)
+            )
+        )
+    return None

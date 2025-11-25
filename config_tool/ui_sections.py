@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import streamlit as st
 
@@ -13,6 +13,7 @@ from helpers import (
     classifier_help,
     ensure_section,
     merge_dict,
+    module_help_markdown,
     module_name_input,
     render_args_editor,
     render_module_help,
@@ -29,7 +30,7 @@ def render_general_section(config: ConfigDict) -> None:
     )
 
     gold_config = ensure_section(config, ["gold_standard_configuration"], {"path": "", "hasHeader": "false"})
-    col1, col2 = st.columns(2)
+    col1, col2 = st.columns(2, vertical_alignment="top")
     with col1:
         gold_config["path"] = st.text_input(
             "Gold standard CSV",
@@ -47,7 +48,8 @@ def render_general_section(config: ConfigDict) -> None:
 def render_artifact_provider_section(config: ConfigDict, catalog: Dict[str, Any]) -> None:
     st.divider()
     st.subheader("2. Artifact providers")
-    provider_cols = st.columns(2)
+    provider_cols = st.columns(2, vertical_alignment="top")
+    help_blocks: list[Optional[str]] = [None, None]
     for idx, (label, key_name) in enumerate(
         (("Source", "source_artifact_provider"), ("Target", "target_artifact_provider")),
     ):
@@ -59,15 +61,23 @@ def render_artifact_provider_section(config: ConfigDict, catalog: Dict[str, Any]
                 module_config=provider,
                 definitions=catalog.get("artifact_providers", {}),
             )
-            render_module_help(f"{label} provider", provider_def)
             provider_args = ensure_section(provider, ["args"], {})
             provider["args"] = render_args_editor(f"{label} provider args", provider_args, key_prefix=f"{label}-provider")
+            help_blocks[idx] = module_help_markdown(provider_def)
+
+    if any(help_blocks):
+        help_cols = st.columns(2, vertical_alignment="top")
+        for idx, help_md in enumerate(help_blocks):
+            if help_md:
+                with help_cols[idx]:
+                    st.markdown(help_md)
 
 
 def render_preprocessor_section(config: ConfigDict, catalog: Dict[str, Any]) -> None:
     st.divider()
     st.subheader("3. Preprocessors")
-    pre_cols = st.columns(2)
+    pre_cols = st.columns(2, vertical_alignment="top")
+    help_blocks: list[Optional[str]] = [None, None]
     for idx, (label, key_name) in enumerate(
         (("Source", "source_preprocessor"), ("Target", "target_preprocessor")),
     ):
@@ -79,14 +89,21 @@ def render_preprocessor_section(config: ConfigDict, catalog: Dict[str, Any]) -> 
                 module_config=pre,
                 definitions=catalog.get("preprocessors", {}),
             )
-            render_module_help(f"{label} preprocessor", pre_def)
             pre_args = ensure_section(pre, ["args"], {})
             pre["args"] = render_args_editor(f"{label} preprocessor args", pre_args, key_prefix=f"{label}-pre")
+            help_blocks[idx] = module_help_markdown(pre_def)
+
+    if any(help_blocks):
+        help_cols = st.columns(2, vertical_alignment="top")
+        for idx, help_md in enumerate(help_blocks):
+            if help_md:
+                with help_cols[idx]:
+                    st.markdown(help_md)
 
 
-def render_embedding_and_store_section(config: ConfigDict, catalog: Dict[str, Any]) -> None:
+def render_embedding_section(config: ConfigDict, catalog: Dict[str, Any]) -> None:
     st.divider()
-    st.subheader("4. Embeddings & stores")
+    st.subheader("4. Embeddings")
     emb = ensure_section(config, ["embedding_creator"], {"name": "openai", "args": {}})
     emb_def = module_name_input(
         label="Embedding creator",
@@ -94,11 +111,15 @@ def render_embedding_and_store_section(config: ConfigDict, catalog: Dict[str, An
         module_config=emb,
         definitions=catalog.get("embedding_creators", {}),
     )
-    render_module_help("Embedding creator", emb_def)
     emb_args = ensure_section(emb, ["args"], {})
     emb["args"] = render_args_editor("Embedding args", emb_args, key_prefix="embedding")
+    render_module_help("Embedding creator", emb_def)
 
-    store_cols = st.columns(2)
+
+def render_store_section(config: ConfigDict, catalog: Dict[str, Any]) -> None:
+    st.divider()
+    st.subheader("5. Stores")
+    store_cols = st.columns(2, vertical_alignment="top")
     with store_cols[0]:
         source_store = ensure_section(config, ["source_store"], {"name": "custom", "args": {}})
         source_store["name"] = "custom"
@@ -107,6 +128,7 @@ def render_embedding_and_store_section(config: ConfigDict, catalog: Dict[str, An
         st.caption("Fixed to the plain element store (no similarity search); nothing to configure here.")
 
     with store_cols[1]:
+        st.markdown("**Target store**")
         target_store = ensure_section(config, ["target_store"], {"name": "cosine_similarity", "args": {}})
         target_store_def = module_name_input(
             label="Target store",
@@ -114,14 +136,14 @@ def render_embedding_and_store_section(config: ConfigDict, catalog: Dict[str, An
             module_config=target_store,
             definitions=catalog.get("target_store", {}),
         )
-        render_module_help("Target store", target_store_def)
         target_store_args = ensure_section(target_store, ["args"], {})
         target_store["args"] = render_args_editor("Target store args", target_store_args, key_prefix="target-store-args")
+        render_module_help("Target store", target_store_def)
 
 
 def render_classifier_and_aggregation_section(config: ConfigDict, catalog: Dict[str, Any]) -> None:
     st.divider()
-    st.subheader("5. Classifier & aggregation")
+    st.subheader("6. Classifier & aggregation")
     multi_stage_classifier = config.get("classifiers")
     if isinstance(multi_stage_classifier, list):
         st.info(
@@ -198,9 +220,9 @@ def render_classifier_and_aggregation_section(config: ConfigDict, catalog: Dict[
         else:
             classifier["name"] = ""
 
-        render_module_help("Classifier", mode_def, extra=classifier_help(classifier.get("name", ""), catalog))
         classifier_args = ensure_section(classifier, ["args"], {})
         classifier["args"] = render_args_editor("Classifier args", classifier_args, key_prefix="classifier")
+        render_module_help("Classifier", mode_def, extra=classifier_help(classifier.get("name", ""), catalog))
 
     result_agg = ensure_section(config, ["result_aggregator"], {"name": "any_connection", "args": {}})
     result_agg_def = module_name_input(
@@ -209,9 +231,9 @@ def render_classifier_and_aggregation_section(config: ConfigDict, catalog: Dict[
         module_config=result_agg,
         definitions=catalog.get("result_aggregators", {}),
     )
-    render_module_help("Result aggregator", result_agg_def)
     result_agg_args = ensure_section(result_agg, ["args"], {})
     result_agg["args"] = render_args_editor("Aggregator args", result_agg_args, key_prefix="result-agg")
+    render_module_help("Result aggregator", result_agg_def)
 
     post = ensure_section(config, ["tracelinkid_postprocessor"], {"name": "identity", "args": {}})
     post_def = module_name_input(
@@ -220,14 +242,14 @@ def render_classifier_and_aggregation_section(config: ConfigDict, catalog: Dict[
         module_config=post,
         definitions=catalog.get("postprocessors", {}),
     )
-    render_module_help("Trace link post-processor", post_def)
     post_args = ensure_section(post, ["args"], {})
     post["args"] = render_args_editor("Post-processor args", post_args, key_prefix="post")
+    render_module_help("Trace link post-processor", post_def)
 
 
 def render_overrides_section(config: ConfigDict) -> None:
     st.divider()
-    st.subheader("6. Raw JSON overrides (optional)")
+    st.subheader("7. Raw JSON overrides (optional)")
     st.caption("Paste any JSON snippet to merge it into the current configuration.")
     override_text = st.text_area(
         "Override payload",
@@ -248,7 +270,7 @@ def render_overrides_section(config: ConfigDict) -> None:
 
 def render_preview_and_export(config: ConfigDict, save_enabled: bool) -> None:
     st.divider()
-    st.subheader("7. Preview & export")
+    st.subheader("8. Preview & export")
     preview = json.dumps(config, indent=2)
     st.code(preview, language="json")
 
@@ -260,7 +282,7 @@ def render_preview_and_export(config: ConfigDict, save_enabled: bool) -> None:
     if not save_enabled:
         st.caption("Destination path editing is disabled because saving to disk is turned off.")
 
-    col_save, col_download = st.columns(2)
+    col_save, col_download = st.columns(2, vertical_alignment="top")
     with col_save:
         if save_enabled:
             if st.button("Save to disk", width="stretch"):

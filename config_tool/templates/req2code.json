@@ -45,8 +45,7 @@
   "classifier": {
     "name": "reasoning_openai",
     "args": {
-      "model": "gpt-4o-mini-2024-07-18",
-      "seed": "1337"
+      "model": "gpt-4o-mini-2024-07-18"
     }
   },
   "result_aggregator": {
