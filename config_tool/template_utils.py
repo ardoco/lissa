@@ -1,4 +1,5 @@
 """Template handling helpers."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -35,10 +36,16 @@ def initial_config() -> ConfigDict:
         "target_artifact_provider": {"name": "text", "args": {}},
         "source_preprocessor": {"name": "artifact", "args": {}},
         "target_preprocessor": {"name": "artifact", "args": {}},
-        "embedding_creator": {"name": "openai", "args": {"model": "text-embedding-3-large"}},
+        "embedding_creator": {
+            "name": "openai",
+            "args": {"model": "text-embedding-3-large"},
+        },
         "source_store": {"name": "custom", "args": {}},
         "target_store": {"name": "cosine_similarity", "args": {"max_results": "20"}},
-        "classifier": {"name": "reasoning_openai", "args": {"model": "gpt-4o-mini-2024-07-18"}},
+        "classifier": {
+            "name": "reasoning_openai",
+            "args": {"model": "gpt-4o-mini-2024-07-18"},
+        },
         "result_aggregator": {"name": "any_connection", "args": {}},
         "tracelinkid_postprocessor": {"name": "identity", "args": {}},
     }

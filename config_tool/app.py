@@ -1,4 +1,5 @@
 """Streamlit UI for authoring LiSSA configuration files."""
+
 from __future__ import annotations
 
 import json
@@ -43,7 +44,9 @@ def render_sidebar() -> None:
         template_options = available_templates()
         template_keys = list(template_options.keys()) or ["<no templates found>"]
         selected_name = st.session_state.get("template_name", template_keys[0])
-        default_index = template_keys.index(selected_name) if selected_name in template_keys else 0
+        default_index = (
+            template_keys.index(selected_name) if selected_name in template_keys else 0
+        )
         selected_template = st.selectbox(
             "Base template",
             options=template_keys,
@@ -52,7 +55,9 @@ def render_sidebar() -> None:
 
         if template_options and st.button("Load template", use_container_width=True):
             try:
-                st.session_state["config_data"] = load_json(template_options[selected_template])
+                st.session_state["config_data"] = load_json(
+                    template_options[selected_template]
+                )
                 st.session_state["template_name"] = selected_template
                 bump_widget_epoch()
                 st.success(f"Loaded {selected_template}")
@@ -61,7 +66,9 @@ def render_sidebar() -> None:
         elif not template_options:
             st.warning("No template files detected.")
 
-        uploaded_config = st.file_uploader("Open JSON configuration", type=["json"], key="open-config-uploader")
+        uploaded_config = st.file_uploader(
+            "Open JSON configuration", type=["json"], key="open-config-uploader"
+        )
         if uploaded_config is not None:
             try:
                 st.session_state["config_data"] = json.load(uploaded_config)
@@ -90,7 +97,9 @@ def main() -> None:
     init_session()
 
     st.title("LiSSA Configuration Tool")
-    st.caption("Interactive editor for doc2code, req2code, and req2req configuration files.")
+    st.caption(
+        "Interactive editor for doc2code, req2code, and req2req configuration files."
+    )
     if CATALOG.get("error"):
         st.warning(
             "Module catalog missing: %s. Falling back to text inputs."

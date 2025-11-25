@@ -1,4 +1,5 @@
 """Reusable helpers for the config tool UI."""
+
 from __future__ import annotations
 
 import copy
@@ -80,12 +81,17 @@ def _rows_counter_key(key_prefix: str) -> str:
     return f"{key_prefix}-args-rows-counter"
 
 
-def render_args_editor(label: str, args: Dict[str, Any], key_prefix: str) -> Dict[str, Any]:
+def render_args_editor(
+    label: str, args: Dict[str, Any], key_prefix: str
+) -> Dict[str, Any]:
     state_key = _rows_state_key(key_prefix)
     epoch_key = _rows_epoch_key(key_prefix)
     counter_key = _rows_counter_key(key_prefix)
     current_epoch = widget_epoch()
-    if st.session_state.get(epoch_key) != current_epoch or state_key not in st.session_state:
+    if (
+        st.session_state.get(epoch_key) != current_epoch
+        or state_key not in st.session_state
+    ):
         st.session_state[state_key] = [
             {"id": idx, "parameter": k, "value": value_to_text(v)}
             for idx, (k, v) in enumerate(args.items())
@@ -117,11 +123,11 @@ def render_args_editor(label: str, args: Dict[str, Any], key_prefix: str) -> Dic
     header_cols[1].caption("Value")
     with header_cols[2]:
         if st.button(
-                "＋",
-                key=widget_key(f"{key_prefix}-add-row"),
-                use_container_width=True,
-                help="Add parameter",
-                type="secondary",
+            "＋",
+            key=widget_key(f"{key_prefix}-add-row"),
+            use_container_width=True,
+            help="Add parameter",
+            type="secondary",
         ):
             next_id = st.session_state.get(counter_key, 0)
             rows.append({"id": next_id, "parameter": "", "value": ""})
@@ -146,7 +152,9 @@ def render_args_editor(label: str, args: Dict[str, Any], key_prefix: str) -> Dic
             _trigger_rerun()
 
     for idx, row in enumerate(rows):
-        param_col, value_col, remove_col = st.columns([3, 3, 0.8], vertical_alignment="center")
+        param_col, value_col, remove_col = st.columns(
+            [3, 3, 0.8], vertical_alignment="center"
+        )
         row_id = row.get("id", idx)
         param_key = widget_key(f"{key_prefix}-row-{row_id}-param")
         value_key = widget_key(f"{key_prefix}-row-{row_id}-value")
@@ -222,7 +230,9 @@ def normalize_store_config(config: ConfigDict) -> list[str]:
     else:
         if target_store.get("name") == "custom":
             target_store["name"] = "cosine_similarity"
-            notes.append("target store renamed from legacy 'custom' to 'cosine_similarity'")
+            notes.append(
+                "target store renamed from legacy 'custom' to 'cosine_similarity'"
+            )
         if "args" not in target_store or not isinstance(target_store["args"], dict):
             target_store["args"] = {}
 
@@ -241,11 +251,11 @@ def normalize_store_config(config: ConfigDict) -> list[str]:
 
 
 def module_name_input(
-        *,
-        label: str,
-        key_prefix: str,
-        module_config: ConfigDict,
-        definitions: Dict[str, Dict[str, Any]],
+    *,
+    label: str,
+    key_prefix: str,
+    module_config: ConfigDict,
+    definitions: Dict[str, Dict[str, Any]],
 ) -> Optional[Dict[str, Any]]:
     current = module_config.get("name", "") or ""
     if not definitions:
@@ -282,7 +292,9 @@ def module_name_input(
     return module_def
 
 
-def module_help_markdown(module_def: Optional[Dict[str, Any]], extra: Optional[str] = None) -> Optional[str]:
+def module_help_markdown(
+    module_def: Optional[Dict[str, Any]], extra: Optional[str] = None
+) -> Optional[str]:
     """Build the markdown snippet that explains a selected module."""
     if not module_def and not extra:
         return None
@@ -298,7 +310,9 @@ def module_help_markdown(module_def: Optional[Dict[str, Any]], extra: Optional[s
     return None
 
 
-def render_module_help(title: str, module_def: Optional[Dict[str, Any]], extra: Optional[str] = None) -> None:
+def render_module_help(
+    title: str, module_def: Optional[Dict[str, Any]], extra: Optional[str] = None
+) -> None:
     help_text = module_help_markdown(module_def, extra)
     if help_text:
         st.markdown(help_text)
@@ -323,12 +337,10 @@ def classifier_help(name: str, catalog: Dict[str, Any]) -> Optional[str]:
     if platform_def:
         envs = platform_def.get("env", [])
         env_text = ", ".join(envs) if envs else "No required env vars listed."
-        return (
-            "Platform **{name}** -> default model `{model}`, threads={threads}. Required env: {envs}.".format(
-                name=platform_key or "platform",
-                model=platform_def.get("default_model", "n/a"),
-                threads=platform_def.get("threads", "?"),
-                envs=env_text,
-            )
+        return "Platform **{name}** -> default model `{model}`, threads={threads}. Required env: {envs}.".format(
+            name=platform_key or "platform",
+            model=platform_def.get("default_model", "n/a"),
+            threads=platform_def.get("threads", "?"),
+            envs=env_text,
         )
     return None

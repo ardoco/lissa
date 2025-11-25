@@ -1,4 +1,5 @@
 """Helpers to access module_catalog.json metadata."""
+
 from __future__ import annotations
 
 from functools import lru_cache
@@ -91,12 +92,14 @@ def describe_args(args: Dict[str, Any]) -> List[str]:
                 preview = ", ".join(str(v) for v in resolved_values)
             else:
                 preview = str(resolved_values)
-            source_hint = f" via {values}" if isinstance(values, str) and values.startswith("@") else ""
+            source_hint = (
+                f" via {values}"
+                if isinstance(values, str) and values.startswith("@")
+                else ""
+            )
             values_part = f", choices=[{preview}]{source_hint}"
 
-        entry = (
-            f"- `{key}` [{arg_type}{required_part}{default_part}{values_part}]: {description}".rstrip()
-        )
+        entry = f"- `{key}` [{arg_type}{required_part}{default_part}{values_part}]: {description}".rstrip()
         items.append(entry)
     return items
 
@@ -119,8 +122,10 @@ def module_help_text(module_def: Optional[Dict[str, Any]]) -> str:
     if isinstance(granularity_levels, dict) and granularity_levels:
         lines: List[str] = []
         for level, text in sorted(
-                granularity_levels.items(),
-                key=lambda item: (0, int(item[0])) if str(item[0]).isdigit() else (1, str(item[0])),
+            granularity_levels.items(),
+            key=lambda item: (
+                (0, int(item[0])) if str(item[0]).isdigit() else (1, str(item[0]))
+            ),
         ):
             lines.append(f"- Level `{level}`: {text}")
         sections.append("Granularity levels:\n" + "\n".join(lines))

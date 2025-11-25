@@ -1,4 +1,5 @@
 """Loads definitions from the module catalog."""
+
 from __future__ import annotations
 
 from catalog import (
