@@ -254,9 +254,11 @@ def render_preview_and_export(config: ConfigDict, save_enabled: bool) -> None:
 
     st.text_input(
         "Destination path",
-        value=st.session_state.get("output_path", "output/config.json"),
         key="output_path",
+        disabled=not save_enabled,
     )
+    if not save_enabled:
+        st.caption("Destination path editing is disabled because saving to disk is turned off.")
 
     col_save, col_download = st.columns(2)
     with col_save:
@@ -282,6 +284,7 @@ def render_preview_and_export(config: ConfigDict, save_enabled: bool) -> None:
             file_name=filename,
             mime="application/json",
             width="stretch",
+            disabled=False,
         )
 
     st.info("Tip: use the download button to export configurations if saving is disabled.")

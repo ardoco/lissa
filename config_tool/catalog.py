@@ -115,6 +115,15 @@ def module_help_text(module_def: Optional[Dict[str, Any]]) -> str:
     if env_vars:
         env_text = ", ".join(env_vars)
         sections.append(f"Environment variables: `{env_text}`")
+    granularity_levels = module_def.get("granularity_levels")
+    if isinstance(granularity_levels, dict) and granularity_levels:
+        lines: List[str] = []
+        for level, text in sorted(
+                granularity_levels.items(),
+                key=lambda item: (0, int(item[0])) if str(item[0]).isdigit() else (1, str(item[0])),
+        ):
+            lines.append(f"- Level `{level}`: {text}")
+        sections.append("Granularity levels:\n" + "\n".join(lines))
     arg_lines = describe_args(module_def.get("args", {}))
     if arg_lines:
         sections.append("Arguments:\n" + "\n".join(arg_lines))

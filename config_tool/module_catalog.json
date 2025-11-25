@@ -54,78 +54,99 @@
     {
       "name": "sentence",
       "class": "edu.kit.kastel.sdq.lissa.ratlr.preprocessor.SentencePreprocessor",
-      "description": "Splits documentation into sentences (artifact granularity 0, sentence granularity 1).",
+      "description": "Splits documentation into sentences and keeps the artifact node as parent.",
+      "granularity_levels": {
+        "0": "Whole artifact element (compare=false) used as parent container, see SentencePreprocessor.java.",
+        "1": "Sentence elements flagged compare=true so aggregators can emit links at level 1."
+      },
       "args": {}
     },
     {
       "name": "code_chunking",
       "class": "edu.kit.kastel.sdq.lissa.ratlr.preprocessor.CodeChunkingPreprocessor",
       "description": "Splits source code into overlapping chunks using RecursiveSplitter with language specific separators.",
+      "granularity_levels": {
+        "0": "Entire code file, compare=false (parent node).",
+        "1": "Code chunks created by RecursiveSplitter, compare=true; use aggregator granularity 1 to export chunk-level links."
+      },
       "args": {
         "language": {
           "type": "enum[]",
           "required": true,
           "values": ["JAVA", "PYTHON"],
-          "description": "Comma separated list; file extension decides which entry to use if more than one is provided."
+          "description": "Comma separated list of RecursiveSplitter languages; when multiple are provided the preprocessor picks one based on artifact file extension (see CodeChunkingPreprocessor#getLanguage in Java)."
         },
         "chunk_size": {
           "type": "int",
           "required": false,
           "default": 60,
-          "description": "Target number of tokens/characters per chunk."
+          "description": "Target number of characters per chunk; RecursiveSplitter merges/splits text until this soft limit is met (values above ~200 create larger chunks)."
         }
       }
     },
     {
       "name": "code_method",
       "class": "edu.kit.kastel.sdq.lissa.ratlr.preprocessor.CodeMethodPreprocessor",
-      "description": "Uses Tree-Sitter to extract Java classes (granularity 1) and methods (granularity 2).",
+      "description": "Uses Tree-Sitter to extract Java classes and their methods.",
+      "granularity_levels": {
+        "0": "Whole file element (compare=false).",
+        "1": "Class definition elements (compare=false) produced from Tree-Sitter class bodies.",
+        "2": "Method elements (compare=true) nested under their enclosing class; set aggregator granularity 2 for method-level links."
+      },
       "args": {
         "language": {
           "type": "enum",
           "values": ["JAVA"],
           "default": "JAVA",
-          "description": "Future proof: factory expects comma free enum literal."
+          "description": "Tree-Sitter language enum; currently only JAVA is supported (CodeMethodPreprocessor.Language)."
         }
       }
     },
     {
       "name": "code_tree",
       "class": "edu.kit.kastel.sdq.lissa.ratlr.preprocessor.CodeTreePreprocessor",
-      "description": "Creates package (granularity 0) ➜ class (granularity 1) hierarchies for code bases.",
+      "description": "Creates package ➜ class hierarchies for code bases.",
+      "granularity_levels": {
+        "0": "Synthetic package elements (compare=true) describing grouped classes.",
+        "1": "Class definition elements (compare flag controlled by compare_classes argument)."
+      },
       "args": {
         "language": {
           "type": "enum",
           "values": ["JAVA"],
           "default": "JAVA",
-          "description": "Currently only Java packages are supported."
+          "description": "Currently only Java packages are supported (CodeTreePreprocessor.Language)."
         },
         "compare_classes": {
           "type": "boolean",
           "default": false,
-          "description": "Whether class level elements should be marked as comparable."
+          "description": "Maps directly to CodeTreePreprocessor#compareClasses; true marks granularity 1 class elements with compare=true so classifiers consider them."
         }
       }
     },
     {
       "name": "model_uml",
       "class": "edu.kit.kastel.sdq.lissa.ratlr.preprocessor.ModelUMLPreprocessor",
-      "description": "Parses UML XMI files and emits elements for components/interfaces with optional usages/operations data.",
+      "description": "Parses UML XMI files and emits component/interface elements with optional usages/operations data.",
+      "granularity_levels": {
+        "0": "UML model root element (compare=false).",
+        "1": "Component elements (compare=true) and interface elements (compare=false) derived from UmlComponent/UmlInterface."
+      },
       "args": {
         "includeUsages": {
           "type": "boolean",
           "default": true,
-          "description": "Emit component usage relations."
+          "description": "Controls whether addComponent() lists \"Uses\" entries for required interfaces (ModelUMLPreprocessor#includeUsages)."
         },
         "includeOperations": {
           "type": "boolean",
           "default": true,
-          "description": "Emit operation signatures for components and interfaces."
+          "description": "Adds OwnedOperation names to component/interface content when true (see ModelUMLPreprocessor#addComponent/#addInterface)."
         },
         "includeInterfaceRealizations": {
           "type": "boolean",
           "default": true,
-          "description": "Include provided interfaces for each component."
+          "description": "When true, component representations include \"Interface Realization\" lines for provided interfaces."
         }
       }
     },
@@ -134,6 +155,9 @@
       "class": "edu.kit.kastel.sdq.lissa.ratlr.preprocessor.SummarizePreprocessor",
       "description": "Calls an LLM to summarize each artifact via a configurable prompt template.",
       "naming_rule": "Use 'summarize_<platform>' so ChatLanguageModelProvider resolves the backend.",
+      "granularity_levels": {
+        "0": "Summary elements replace the artifact content in-place (compare=true)."
+      },
       "args": {
         "template": {
           "type": "string",
@@ -160,7 +184,10 @@
     {
       "name": "artifact",
       "class": "edu.kit.kastel.sdq.lissa.ratlr.preprocessor.SingleArtifactPreprocessor",
-      "description": "Keeps each artifact as a single comparable element (granularity 0).",
+      "description": "Keeps each artifact as a single comparable element.",
+      "granularity_levels": {
+        "0": "One element per artifact, compare=true."
+      },
       "args": {}
     }
   ],
@@ -379,12 +406,14 @@
         "source_granularity": {
           "type": "int",
           "default": 0,
-          "description": "Which source granularity level should appear in the trace output."
+          "values": [0, 1, 2],
+          "description": "Element granularity level that should appear on the left-hand side. 0 targets artifact/package nodes, 1 targets first-level children such as sentences, chunks, packages or classes, and 2 targets grandchildren (e.g., methods from CodeMethodPreprocessor). AnyResultAggregator will walk up/down the Element hierarchy if the classifier returns a different level, see AnyResultAggregator#buildListOfValidElements."
         },
         "target_granularity": {
           "type": "int",
           "default": 0,
-          "description": "Which target granularity level should appear in the trace output."
+          "values": [0, 1, 2],
+          "description": "Same as source_granularity but for target elements. Use 0 for top-level artifacts, 1 for child nodes (sentences/chunks/classes) or set to 2 when targeting method-level nodes."
         }
       }
     }

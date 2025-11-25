@@ -64,6 +64,22 @@ Configuration options in LiSSA are defined in the code through several mechanism
 }
 ```
 
+### Granularity levels per preprocessor
+
+LiSSA preprocessors emit hierarchical `Element` structures. The `granularity` field on each element determines which level the `result_aggregator` should target via `source_granularity` / `target_granularity`. The following table summarizes what each built-in preprocessor produces according to the Java implementations under `src/main/java/edu/kit/kastel/sdq/lissa/ratlr/preprocessor/`:
+
+| Preprocessor (`name`) | Granularity layout | Notes |
+| --- | --- | --- |
+| `artifact` (`SingleArtifactPreprocessor`) | Level 0: one element per artifact (compare = true). | Use when you want coarse, artifact-level links only. |
+| `sentence` (`SentencePreprocessor`) | Level 0: original artifact container (compare = false).<br>Level 1: sentence elements (compare = true). | Set aggregator granularity to 1 to emit sentence-level links. |
+| `code_chunking` (`CodeChunkingPreprocessor`) | Level 0: entire file (compare = false).<br>Level 1: RecursiveSplitter chunks (compare = true). | `language` decides splitting rules; `chunk_size` is a soft limit enforced by `RecursiveSplitter`. |
+| `code_method` (`CodeMethodPreprocessor`) | Level 0: whole file (compare = false).<br>Level 1: class definitions (compare = false).<br>Level 2: methods (compare = true). | Requires `language = "JAVA"`; choose granularity 2 to compare individual methods. |
+| `code_tree` (`CodeTreePreprocessor`) | Level 0: package nodes (compare = true).<br>Level 1: class definitions (compare flag controlled by `compare_classes`). | Ideal for package-to-package or class-level links; turn on `compare_classes` if classifiers should see level-1 nodes. |
+| `model_uml` (`ModelUMLPreprocessor`) | Level 0: UML model root (compare = false).<br>Level 1: components (compare = true) and interfaces (compare = false). | `includeUsages`, `includeOperations`, `includeInterfaceRealizations` control the textual representation of level-1 nodes. |
+| `summarize` (`SummarizePreprocessor`) | Level 0: replaces each artifact with a summary element (compare = true). | Keeps a single layer but rewrites content with the generated summary. |
+
+When configuring `result_aggregator.any_connection`, pick the `source_granularity` and `target_granularity` that match the levels above. The aggregator will automatically walk up/down the hierarchy (see `AnyResultAggregator.java`) if classifiers return elements at a different level, but aligning the requested level with the preprocessor output avoids surprises.
+
 ## Embedding and Classification
 
 This section describes how to configure the embedding creation and classification steps. You must configure either a single `classifier` or a list of `classifiers` for multi-stage pipelines.
