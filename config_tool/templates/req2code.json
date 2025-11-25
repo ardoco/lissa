@@ -1,0 +1,60 @@
+{
+  "cache_dir": "./cache-r2c/<<PROJECT_NAME>>",
+  "gold_standard_configuration": {
+    "path": "<<REQ2CODE_GOLD_STANDARD_CSV>>",
+    "hasHeader": "false"
+  },
+  "source_artifact_provider": {
+    "name": "text",
+    "args": {
+      "artifact_type": "requirement",
+      "path": "<<PATH_TO_REQUIREMENTS>>"
+    }
+  },
+  "target_artifact_provider": {
+    "name": "text",
+    "args": {
+      "artifact_type": "source code",
+      "path": "<<PATH_TO_SOURCE_CODE>>"
+    }
+  },
+  "source_preprocessor": {
+    "name": "artifact",
+    "args": {}
+  },
+  "target_preprocessor": {
+    "name": "artifact",
+    "args": {}
+  },
+  "embedding_creator": {
+    "name": "openai",
+    "args": {
+      "model": "text-embedding-3-large"
+    }
+  },
+  "source_store": {
+    "name": "custom",
+    "args": {}
+  },
+  "target_store": {
+    "name": "cosine_similarity",
+    "args": {
+      "max_results": "20"
+    }
+  },
+  "classifier": {
+    "name": "reasoning_openai",
+    "args": {
+      "model": "gpt-4o-mini-2024-07-18",
+      "seed": "1337"
+    }
+  },
+  "result_aggregator": {
+    "name": "any_connection",
+    "args": {}
+  },
+  "tracelinkid_postprocessor": {
+    "name": "req2code",
+    "args": {}
+  }
+}

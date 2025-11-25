@@ -1,0 +1,59 @@
+{
+  "cache_dir": "./cache/<<PROJECT_NAME>>",
+  "gold_standard_configuration": {
+    "path": "<<REQ2REQ_GOLD_STANDARD_CSV>>",
+    "hasHeader": "true"
+  },
+  "source_artifact_provider": {
+    "name": "text",
+    "args": {
+      "artifact_type": "requirement",
+      "path": "<<PATH_TO_HIGH_LEVEL_REQUIREMENTS>>"
+    }
+  },
+  "target_artifact_provider": {
+    "name": "text",
+    "args": {
+      "artifact_type": "requirement",
+      "path": "<<PATH_TO_LOW_LEVEL_REQUIREMENTS>>"
+    }
+  },
+  "source_preprocessor": {
+    "name": "artifact",
+    "args": {}
+  },
+  "target_preprocessor": {
+    "name": "artifact",
+    "args": {}
+  },
+  "embedding_creator": {
+    "name": "openai",
+    "args": {
+      "model": "text-embedding-3-large"
+    }
+  },
+  "source_store": {
+    "name": "custom",
+    "args": {}
+  },
+  "target_store": {
+    "name": "cosine_similarity",
+    "args": {
+      "max_results": "4"
+    }
+  },
+  "classifier": {
+    "name": "simple_openwebui",
+    "args": {
+      "model": "gpt-oss:120b"
+    }
+  },
+  "result_aggregator": {
+    "name": "any_connection",
+    "args": {}
+  },
+  "tracelinkid_postprocessor": {
+    "name": "req2req",
+    "args": {}
+  }
+}

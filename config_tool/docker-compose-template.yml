@@ -1,0 +1,10 @@
+services:
+  config-tool:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8501:8501"
+    environment:
+      CONFIG_TOOL_ENABLE_SAVE: "0"  # set to "1" to allow saving configs inside the container
+    restart: unless-stopped

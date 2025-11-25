@@ -50,3 +50,6 @@ build/
 /transitive-trace*.csv
 /config.json
 package-info.java
+/.venv
+/venv
+

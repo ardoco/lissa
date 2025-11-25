@@ -1,0 +1,432 @@
+{
+  "metadata_version": 1,
+  "last_reviewed": "2025-11-24",
+  "artifact_types": [
+    "SOURCE_CODE",
+    "SOFTWARE_ARCHITECTURE_DOCUMENTATION",
+    "REQUIREMENT",
+    "SOFTWARE_ARCHITECTURE_MODEL"
+  ],
+  "artifact_providers": [
+    {
+      "name": "text",
+      "class": "edu.kit.kastel.sdq.lissa.ratlr.artifactprovider.TextArtifactProvider",
+      "description": "Loads artifacts from a single file or a flat directory and keeps the file name as identifier.",
+      "args": {
+        "path": {
+          "type": "path",
+          "required": true,
+          "description": "Absolute or relative path to a text file or directory."
+        },
+        "artifact_type": {
+          "type": "enum",
+          "required": true,
+          "values": "@artifact_types",
+          "description": "Classifies the artifact (converted to lowercase text in runtime)."
+        }
+      }
+    },
+    {
+      "name": "recursive_text",
+      "class": "edu.kit.kastel.sdq.lissa.ratlr.artifactprovider.RecursiveTextArtifactProvider",
+      "description": "Recursively walks a directory tree, preserves relative paths as identifiers, and filters by file extension.",
+      "args": {
+        "path": {
+          "type": "path",
+          "required": true,
+          "description": "Directory that contains the artifacts."
+        },
+        "artifact_type": {
+          "type": "enum",
+          "required": true,
+          "values": "@artifact_types",
+          "description": "Classifies the artifact (converted to lowercase text in runtime)."
+        },
+        "extensions": {
+          "type": "string",
+          "required": true,
+          "description": "Comma separated list of extensions (e.g. '.java,.py,.md')."
+        }
+      }
+    }
+  ],
+  "preprocessors": [
+    {
+      "name": "sentence",
+      "class": "edu.kit.kastel.sdq.lissa.ratlr.preprocessor.SentencePreprocessor",
+      "description": "Splits documentation into sentences (artifact granularity 0, sentence granularity 1).",
+      "args": {}
+    },
+    {
+      "name": "code_chunking",
+      "class": "edu.kit.kastel.sdq.lissa.ratlr.preprocessor.CodeChunkingPreprocessor",
+      "description": "Splits source code into overlapping chunks using RecursiveSplitter with language specific separators.",
+      "args": {
+        "language": {
+          "type": "enum[]",
+          "required": true,
+          "values": ["JAVA", "PYTHON"],
+          "description": "Comma separated list; file extension decides which entry to use if more than one is provided."
+        },
+        "chunk_size": {
+          "type": "int",
+          "required": false,
+          "default": 60,
+          "description": "Target number of tokens/characters per chunk."
+        }
+      }
+    },
+    {
+      "name": "code_method",
+      "class": "edu.kit.kastel.sdq.lissa.ratlr.preprocessor.CodeMethodPreprocessor",
+      "description": "Uses Tree-Sitter to extract Java classes (granularity 1) and methods (granularity 2).",
+      "args": {
+        "language": {
+          "type": "enum",
+          "values": ["JAVA"],
+          "default": "JAVA",
+          "description": "Future proof: factory expects comma free enum literal."
+        }
+      }
+    },
+    {
+      "name": "code_tree",
+      "class": "edu.kit.kastel.sdq.lissa.ratlr.preprocessor.CodeTreePreprocessor",
+      "description": "Creates package (granularity 0) ➜ class (granularity 1) hierarchies for code bases.",
+      "args": {
+        "language": {
+          "type": "enum",
+          "values": ["JAVA"],
+          "default": "JAVA",
+          "description": "Currently only Java packages are supported."
+        },
+        "compare_classes": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether class level elements should be marked as comparable."
+        }
+      }
+    },
+    {
+      "name": "model_uml",
+      "class": "edu.kit.kastel.sdq.lissa.ratlr.preprocessor.ModelUMLPreprocessor",
+      "description": "Parses UML XMI files and emits elements for components/interfaces with optional usages/operations data.",
+      "args": {
+        "includeUsages": {
+          "type": "boolean",
+          "default": true,
+          "description": "Emit component usage relations."
+        },
+        "includeOperations": {
+          "type": "boolean",
+          "default": true,
+          "description": "Emit operation signatures for components and interfaces."
+        },
+        "includeInterfaceRealizations": {
+          "type": "boolean",
+          "default": true,
+          "description": "Include provided interfaces for each component."
+        }
+      }
+    },
+    {
+      "name": "summarize",
+      "class": "edu.kit.kastel.sdq.lissa.ratlr.preprocessor.SummarizePreprocessor",
+      "description": "Calls an LLM to summarize each artifact via a configurable prompt template.",
+      "naming_rule": "Use 'summarize_<platform>' so ChatLanguageModelProvider resolves the backend.",
+      "args": {
+        "template": {
+          "type": "string",
+          "default": "Summarize the following {type}: {content}",
+          "description": "Prompt skeleton passed to the LLM."
+        },
+        "model": {
+          "type": "string",
+          "default": "@platform.default_model",
+          "description": "Model identifier understood by the selected platform."
+        },
+        "seed": {
+          "type": "int",
+          "default": 133742243,
+          "description": "Forwarded to ChatLanguageModelProvider."
+        },
+        "temperature": {
+          "type": "double",
+          "default": 0.0,
+          "description": "Forwarded to ChatLanguageModelProvider."
+        }
+      }
+    },
+    {
+      "name": "artifact",
+      "class": "edu.kit.kastel.sdq.lissa.ratlr.preprocessor.SingleArtifactPreprocessor",
+      "description": "Keeps each artifact as a single comparable element (granularity 0).",
+      "args": {}
+    }
+  ],
+  "embedding_creators": [
+    {
+      "name": "openai",
+      "class": "edu.kit.kastel.sdq.lissa.ratlr.embeddingcreator.OpenAiEmbeddingCreator",
+      "description": "Calls OpenAI's embedding endpoint with 40 parallel threads.",
+      "env": ["OPENAI_ORGANIZATION_ID", "OPENAI_API_KEY"],
+      "args": {
+        "model": {
+          "type": "string",
+          "default": "text-embedding-ada-002",
+          "description": "OpenAI embedding model name."
+        }
+      }
+    },
+    {
+      "name": "openwebui",
+      "class": "edu.kit.kastel.sdq.lissa.ratlr.embeddingcreator.OpenWebUiEmbeddingCreator",
+      "description": "Uses an OpenAI-compatible Open WebUI endpoint for embeddings.",
+      "env": ["OPENWEBUI_URL", "OPENWEBUI_API_KEY"],
+      "args": {
+        "model": {
+          "type": "string",
+          "default": "nomic-embed-text:v1.5",
+          "description": "Model exposed by the Open WebUI server."
+        }
+      }
+    },
+    {
+      "name": "ollama",
+      "class": "edu.kit.kastel.sdq.lissa.ratlr.embeddingcreator.OllamaEmbeddingCreator",
+      "description": "Streams embeddings from an Ollama instance (supports optional basic auth).",
+      "env": ["OLLAMA_EMBEDDING_HOST", "OLLAMA_EMBEDDING_USER?", "OLLAMA_EMBEDDING_PASSWORD?"],
+      "args": {
+        "model": {
+          "type": "string",
+          "default": "nomic-embed-text:v1.5",
+          "description": "Model tag to request from Ollama."
+        }
+      }
+    },
+    {
+      "name": "onnx",
+      "class": "edu.kit.kastel.sdq.lissa.ratlr.embeddingcreator.OnnxEmbeddingCreator",
+      "description": "Loads a local ONNX + tokenizer pair and performs mean pooling on-device.",
+      "args": {
+        "model": {
+          "type": "string",
+          "required": true,
+          "description": "Semantic name for the model (used in logging/caching)."
+        },
+        "path_to_model": {
+          "type": "path",
+          "required": true,
+          "description": "Absolute or relative path to the .onnx file."
+        },
+        "path_to_tokenizer": {
+          "type": "path",
+          "required": true,
+          "description": "Absolute or relative path to the tokenizer JSON."
+        }
+      }
+    },
+    {
+      "name": "mock",
+      "class": "edu.kit.kastel.sdq.lissa.ratlr.embeddingcreator.MockEmbeddingCreator",
+      "description": "Testing helper that returns zero vectors (no args).",
+      "args": {}
+    }
+  ],
+  "stores": {
+    "source_store": [
+      {
+        "name": "custom",
+        "description": "Plain ElementStore without similarity search; required for sources.",
+        "args": {}
+      }
+    ],
+    "target_store": [
+      {
+        "name": "cosine_similarity",
+        "aliases": ["custom"],
+        "description": "ElementStore with cosine similarity retrieval (\"custom\" maps here for backwards compatibility).",
+        "args": {
+          "max_results": {
+            "type": "string|int",
+            "default": 10,
+            "description": "Positive integer or the literal 'infinity' to disable capping."
+          }
+        }
+      }
+    ]
+  },
+  "classifiers": {
+    "platforms": {
+      "OPENAI": {
+        "default_model": "gpt-4o-mini",
+        "threads": 100,
+        "env": ["OPENAI_ORGANIZATION_ID", "OPENAI_API_KEY"]
+      },
+      "OLLAMA": {
+        "default_model": "llama3:8b",
+        "threads": 1,
+        "env": ["OLLAMA_HOST", "OLLAMA_USER?", "OLLAMA_PASSWORD?"]
+      },
+      "BLABLADOR": {
+        "default_model": "2 - Llama 3.3 70B instruct",
+        "threads": 100,
+        "env": ["BLABLADOR_API_KEY"]
+      },
+      "DEEPSEEK": {
+        "default_model": "deepseek-chat",
+        "threads": 1,
+        "env": ["DEEPSEEK_API_KEY"]
+      },
+      "OPENWEBUI": {
+        "default_model": "llama3:8b",
+        "threads": 10,
+        "env": ["OPENWEBUI_URL", "OPENWEBUI_API_KEY"]
+      }
+    },
+    "modes": [
+      {
+        "name": "mock",
+        "class": "edu.kit.kastel.sdq.lissa.ratlr.classifier.MockClassifier",
+        "description": "Returns cached/no-op links; useful for pipeline tests.",
+        "naming_rule": "Use literal 'mock' without platform suffix.",
+        "args": {}
+      },
+      {
+        "name": "simple",
+        "class": "edu.kit.kastel.sdq.lissa.ratlr.classifier.SimpleClassifier",
+        "description": "Single yes/no prompt per source-target pair.",
+        "naming_rule": "Use 'simple_<platform>' to pick a ChatLanguageModelPlatform entry.",
+        "args": {
+          "model": {
+            "type": "string",
+            "default": "@platform.default_model",
+            "description": "Forwarded to the chat backend."
+          },
+          "seed": {
+            "type": "int",
+            "default": 133742243,
+            "description": "LLM seed for reproducibility."
+          },
+          "temperature": {
+            "type": "double",
+            "default": 0.0,
+            "description": "LLM temperature."
+          },
+          "template": {
+            "type": "string",
+            "default": "Question: Here are two parts of software development artifacts...",
+            "description": "Prompt text; placeholders {source_type},{source_content},{target_type},{target_content}."
+          }
+        }
+      },
+      {
+        "name": "reasoning",
+        "class": "edu.kit.kastel.sdq.lissa.ratlr.classifier.ReasoningClassifier",
+        "description": "Chat-style reasoning with selectable prompt templates and optional system message.",
+        "naming_rule": "Use 'reasoning_<platform>' to pick a ChatLanguageModelPlatform entry.",
+        "args": {
+          "model": {
+            "type": "string",
+            "default": "@platform.default_model",
+            "description": "Forwarded to the chat backend."
+          },
+          "seed": {
+            "type": "int",
+            "default": 133742243
+          },
+          "temperature": {
+            "type": "double",
+            "default": 0.0
+          },
+          "prompt": {
+            "type": "enum|int",
+            "values": [
+              "REASON_WITH_NAME",
+              "REASON_WITH_NAME_CONCEIVABLE",
+              "REASON_WITH_NAME_YES_IF_CERTAIN"
+            ],
+            "default": 0,
+            "description": "Either use the enum literal or its numeric index."
+          },
+          "use_original_artifacts": {
+            "type": "boolean",
+            "default": false,
+            "description": "Climb to the top-level target artifact before classification."
+          },
+          "use_system_message": {
+            "type": "boolean",
+            "default": true,
+            "description": "Prepend an instruction system message."
+          }
+        }
+      }
+    ],
+    "multi_stage_pipeline": {
+      "description": "Instead of 'classifier', supply 'classifiers': [[stage1-configs], [stage2-configs], ...].",
+      "rules": [
+        "Each inner list represents a sequential stage processed by PipelineClassifier.",
+        "Every config inside uses the same schema as single classifiers."
+      ]
+    }
+  },
+  "result_aggregators": [
+    {
+      "name": "any_connection",
+      "class": "edu.kit.kastel.sdq.lissa.ratlr.resultaggregator.AnyResultAggregator",
+      "description": "Creates links whenever any element pair at the configured granularities is classified as related.",
+      "args": {
+        "source_granularity": {
+          "type": "int",
+          "default": 0,
+          "description": "Which source granularity level should appear in the trace output."
+        },
+        "target_granularity": {
+          "type": "int",
+          "default": 0,
+          "description": "Which target granularity level should appear in the trace output."
+        }
+      }
+    }
+  ],
+  "tracelink_postprocessors": [
+    {
+      "name": "req2code",
+      "description": "Keeps requirement IDs left, source code IDs right; no transformation beyond format normalization."
+    },
+    {
+      "name": "sad2code",
+      "description": "Software Architecture Documentation ➜ code identifier shaping."
+    },
+    {
+      "name": "sad2sam",
+      "description": "Software Architecture Documentation ➜ Software Architecture Model IDs."
+    },
+    {
+      "name": "sam2sad",
+      "description": "Software Architecture Model ➜ Software Architecture Documentation IDs."
+    },
+    {
+      "name": "sam2code",
+      "description": "Software Architecture Model ➜ code IDs."
+    },
+    {
+      "name": "req2req",
+      "description": "Strips file extensions from both ends of requirement trace links."
+    },
+    {
+      "name": "identity",
+      "description": "No changes; use when downstream tooling expects untouched IDs."
+    }
+  ],
+  "gold_standard_configuration": {
+    "path": {
+      "type": "path",
+      "description": "CSV with reference trace links (format depends on dataset)."
+    },
+    "hasHeader": {
+      "type": "boolean-as-string",
+      "description": "\"true\" or \"false\" (strings); required by the evaluation loader."
+    }
+  }
+}
