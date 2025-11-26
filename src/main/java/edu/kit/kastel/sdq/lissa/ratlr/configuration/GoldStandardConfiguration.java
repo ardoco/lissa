@@ -4,7 +4,6 @@ package edu.kit.kastel.sdq.lissa.ratlr.configuration;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import org.jspecify.annotations.Nullable;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -43,7 +42,7 @@ public record GoldStandardConfiguration(
      * @param evaluationConfig Path to the JSON configuration file
      * @return A new GoldStandardConfiguration instance, or null if loading fails
      */
-    public static @Nullable GoldStandardConfiguration load(@Nullable Path evaluationConfig) {
+    public static GoldStandardConfiguration load(Path evaluationConfig) {
         if (evaluationConfig == null) return null;
 
         try {

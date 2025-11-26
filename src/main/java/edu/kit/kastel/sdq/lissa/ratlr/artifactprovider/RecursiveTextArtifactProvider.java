@@ -9,7 +9,6 @@ import java.util.Scanner;
 import java.util.stream.Stream;
 
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
-import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
 
 /**
@@ -37,11 +36,10 @@ public class RecursiveTextArtifactProvider extends TextArtifactProvider {
      * Creates a new recursive text artifact provider with the specified configuration.
      *
      * @param configuration The configuration containing the path, artifact type, and file extensions
-     * @param contextStore The shared context store for pipeline components
      * @throws IllegalArgumentException If the specified path does not exist
      */
-    public RecursiveTextArtifactProvider(ModuleConfiguration configuration, ContextStore contextStore) {
-        super(configuration, contextStore);
+    public RecursiveTextArtifactProvider(ModuleConfiguration configuration) {
+        super(configuration);
         this.extensions =
                 configuration.argumentAsString("extensions").toLowerCase().split(",");
     }

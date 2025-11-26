@@ -7,8 +7,8 @@ import edu.kit.kastel.sdq.lissa.ratlr.cache.Cache;
 import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheKey;
 import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
-import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
+import edu.kit.kastel.sdq.lissa.ratlr.utils.KeyGenerator;
 
 import dev.langchain4j.model.chat.ChatModel;
 
@@ -26,15 +26,15 @@ public class SimpleClassifier extends Classifier {
      */
     private static final String DEFAULT_TEMPLATE =
             """
-            Question: Here are two parts of software development artifacts.
+                    Question: Here are two parts of software development artifacts.
 
-            {source_type}: '''{source_content}'''
+                    {source_type}: '''{source_content}'''
 
-            {target_type}: '''{target_content}'''
-            Are they related?
+                    {target_type}: '''{target_content}'''
+                    Are they related?
 
-            Answer with 'yes' or 'no'.
-            """;
+                    Answer with 'yes' or 'no'.
+                    """;
 
     private final Cache cache;
 
@@ -51,19 +51,19 @@ public class SimpleClassifier extends Classifier {
     /**
      * The template used for classification requests.
      */
-    private final String template;
+    private String template;
 
     /**
      * Creates a new simple classifier with the specified configuration.
      *
      * @param configuration The module configuration containing classifier settings
-     * @param contextStore The shared context store for pipeline components
      */
-    public SimpleClassifier(ModuleConfiguration configuration, ContextStore contextStore) {
-        super(ChatLanguageModelProvider.threads(configuration), contextStore);
+    public SimpleClassifier(ModuleConfiguration configuration) {
+        super(ChatLanguageModelProvider.threads(configuration));
         this.provider = new ChatLanguageModelProvider(configuration);
         this.template = configuration.argumentAsString("template", DEFAULT_TEMPLATE);
-        this.cache = CacheManager.getDefaultInstance().getCache(this, provider.getCacheParameters());
+        this.cache = CacheManager.getDefaultInstance()
+                .getCache(this.getClass().getSimpleName() + "_" + provider.modelName() + "_" + provider.seed());
         this.llm = provider.createChatModel();
     }
 
@@ -71,14 +71,13 @@ public class SimpleClassifier extends Classifier {
      * Creates a new simple classifier with the specified parameters.
      * This constructor is used internally for creating thread-local copies.
      *
-     * @param threads The number of threads to use for parallel processing
-     * @param cache The cache to use for storing classification results
+     * @param threads  The number of threads to use for parallel processing
+     * @param cache    The cache to use for storing classification results
      * @param provider The language model provider
      * @param template The template to use for classification requests
      */
-    private SimpleClassifier(
-            int threads, Cache cache, ChatLanguageModelProvider provider, String template, ContextStore contextStore) {
-        super(threads, contextStore);
+    private SimpleClassifier(int threads, Cache cache, ChatLanguageModelProvider provider, String template) {
+        super(threads);
         this.cache = cache;
         this.provider = provider;
         this.template = template;
@@ -93,7 +92,7 @@ public class SimpleClassifier extends Classifier {
      */
     @Override
     protected final Classifier copyOf() {
-        return new SimpleClassifier(threads, cache, provider, template, contextStore);
+        return new SimpleClassifier(threads, cache, provider, template);
     }
 
     /**
@@ -138,8 +137,8 @@ public class SimpleClassifier extends Classifier {
                 .replace("{target_type}", target.getType())
                 .replace("{target_content}", target.getContent());
 
-        CacheKey cacheKey =
-                CacheKey.of(provider.modelName(), provider.seed(), provider.temperature(), CacheKey.Mode.CHAT, request);
+        String key = KeyGenerator.generateKey(request);
+        CacheKey cacheKey = new CacheKey(provider.modelName(), provider.seed(), CacheKey.Mode.CHAT, request, key);
         String cachedResponse = cache.get(cacheKey, String.class);
         if (cachedResponse != null) {
             return cachedResponse;
@@ -153,5 +152,26 @@ public class SimpleClassifier extends Classifier {
             cache.put(cacheKey, response);
             return response;
         }
+    }
+
+    /**
+     * Returns the current classification template used by this classifier.
+     *
+     * @return The prompt template as a string
+     */
+    @Override
+    public String getPrompt() {
+        return this.template;
+    }
+
+    /**
+     * Sets a new classification template for this classifier.
+     * This allows dynamic modification of the prompt used in trace link classification.
+     *
+     * @param prompt The new prompt template to use
+     */
+    @Override
+    public void setPrompt(String prompt) {
+        this.template = prompt;
     }
 }

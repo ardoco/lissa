@@ -3,15 +3,13 @@ package edu.kit.kastel.sdq.lissa.ratlr.classifier;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
-import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.elementstore.ElementStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.Pair;
@@ -21,11 +19,6 @@ import edu.kit.kastel.sdq.lissa.ratlr.utils.Pair;
  * This class provides the foundation for implementing different classification strategies
  * for identifying trace links between source and target elements. It supports both
  * sequential and parallel processing of classification tasks.
- * <p>
- * All classifiers have access to a shared {@link edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore} via the protected {@code contextStore} field,
- * which is initialized in the constructor and available to all subclasses.
- * Subclasses should not duplicate context handling.
- * </p>
  */
 public abstract class Classifier {
     /**
@@ -35,21 +28,63 @@ public abstract class Classifier {
 
     protected final Logger logger = LoggerFactory.getLogger(this.getClass());
     protected final int threads;
-    /**
-     * The shared context store for pipeline components.
-     * Available to all subclasses for accessing shared context.
-     */
-    protected final ContextStore contextStore;
 
     /**
-     * Creates a new classifier with the specified number of threads and context store.
+     * Creates a new classifier with the specified number of threads.
      *
      * @param threads The number of threads to use for parallel processing
-     * @param contextStore The shared context store for pipeline components
      */
-    protected Classifier(int threads, ContextStore contextStore) {
+    protected Classifier(int threads) {
         this.threads = Math.max(1, threads);
-        this.contextStore = Objects.requireNonNull(contextStore);
+    }
+
+    /**
+     * Creates a list of classification tasks from source and target element stores.
+     * Each task represents a pair of elements to be classified.
+     *
+     * @param sourceStore The store containing source elements
+     * @param targetStore The store containing target elements
+     * @return A list of element pairs to classify
+     */
+    protected static List<Pair<Element, Element>> createClassificationTasks(
+            ElementStore sourceStore, ElementStore targetStore) {
+        List<Pair<Element, Element>> tasks = new ArrayList<>();
+
+        for (var source : sourceStore.getAllElements(true)) {
+            var targetCandidates = targetStore.findSimilar(source.second());
+            for (Element target : targetCandidates) {
+                tasks.add(new Pair<>(source.first(), target));
+            }
+        }
+        return tasks;
+    }
+
+    /**
+     * Creates a classifier instance based on the provided configuration.
+     * The type of classifier is determined by the first part of the configuration name.
+     *
+     * @param configuration The module configuration for the classifier
+     * @return A new classifier instance
+     * @throws IllegalStateException If the configuration name is not recognized
+     */
+    public static Classifier createClassifier(ModuleConfiguration configuration) {
+        return switch (configuration.name().split(CONFIG_NAME_SEPARATOR)[0]) {
+            case "mock" -> new MockClassifier();
+            case "simple" -> new SimpleClassifier(configuration);
+            case "reasoning" -> new ReasoningClassifier(configuration);
+            default -> throw new IllegalStateException("Unexpected value: " + configuration.name());
+        };
+    }
+
+    /**
+     * Creates a multi-stage classifier that processes elements through a pipeline of classifiers.
+     * Each stage in the pipeline can have multiple configurations that are processed in sequence.
+     *
+     * @param configs A list of configuration lists, where each inner list represents a stage
+     * @return A new pipeline classifier instance
+     */
+    public static Classifier createMultiStageClassifier(List<List<ModuleConfiguration>> configs) {
+        return new PipelineClassifier(configs);
     }
 
     /**
@@ -163,54 +198,22 @@ public abstract class Classifier {
     protected abstract Classifier copyOf();
 
     /**
-     * Creates a list of classification tasks from source and target element stores.
-     * Each task represents a pair of elements to be classified.
+     * Gets the current prompt template used by the classifier, if any.
+     * Default: empty string
      *
-     * @param sourceStore The store containing source elements
-     * @param targetStore The store containing target elements
-     * @return A list of element pairs to classify
+     * @return the current prompt text
      */
-    protected static List<Pair<Element, Element>> createClassificationTasks(
-            ElementStore sourceStore, ElementStore targetStore) {
-        List<Pair<Element, Element>> tasks = new ArrayList<>();
-
-        for (var source : sourceStore.getAllElements(true)) {
-            var targetCandidates = targetStore.findSimilar(source);
-            for (Element target : targetCandidates) {
-                tasks.add(new Pair<>(source.first(), target));
-            }
-        }
-        return tasks;
+    public String getPrompt() {
+        return "";
     }
 
     /**
-     * Creates a classifier instance based on the provided configuration.
-     * The type of classifier is determined by the first part of the configuration name.
+     * Sets a new prompt template for the classifier.
+     * Default: does nothing
      *
-     * @param configuration The module configuration for the classifier
-     * @param contextStore The shared context store for pipeline components
-     * @return A new classifier instance
-     * @throws IllegalStateException If the configuration name is not recognized
+     * @param prompt the new prompt text
      */
-    public static Classifier createClassifier(ModuleConfiguration configuration, ContextStore contextStore) {
-        return switch (configuration.name().split(CONFIG_NAME_SEPARATOR)[0]) {
-            case "mock" -> new MockClassifier(contextStore);
-            case "simple" -> new SimpleClassifier(configuration, contextStore);
-            case "reasoning" -> new ReasoningClassifier(configuration, contextStore);
-            default -> throw new IllegalStateException("Unexpected value: " + configuration.name());
-        };
-    }
-
-    /**
-     * Creates a multi-stage classifier that processes elements through a pipeline of classifiers.
-     * Each stage in the pipeline can have multiple configurations that are processed in sequence.
-     *
-     * @param configs A list of configuration lists, where each inner list represents a stage
-     * @param contextStore The shared context store for pipeline components
-     * @return A new pipeline classifier instance
-     */
-    public static Classifier createMultiStageClassifier(
-            List<List<ModuleConfiguration>> configs, ContextStore contextStore) {
-        return new PipelineClassifier(configs, contextStore);
+    public void setPrompt(String prompt) {
+        // default: ignore
     }
 }
