@@ -233,6 +233,30 @@ public class IterativeOptimizer implements PromptOptimizer {
      * {@value PROMPT_START} and {@value PROMPT_END} tags.
      *
      * @param request The request to send to the language model
+     * @param iteration The current iteration number for logging
+     * @return The optimized prompt extracted from the response
+     */
+    protected String cachedSanitizedRequest(String request, int iteration) {
+        LOGGER.debug("Sending request to LLM (iteration {})...", iteration);
+        LOGGER.trace("Full LLM Request:\n{}", request);
+
+        String response = ChatLanguageModelUtils.cachedRequest(request, provider, llm, cache);
+
+        LOGGER.debug("Received response from LLM (iteration {})", iteration);
+        LOGGER.trace("Full LLM Response:\n{}", response);
+
+        String sanitized = sanitizePrompt(parseTaggedTextFirst(response, PROMPT_START, PROMPT_END));
+        LOGGER.debug("Extracted and sanitized prompt (iteration {})", iteration);
+        LOGGER.trace("Extracted Prompt:\n{}", sanitized);
+
+        return sanitized;
+    }
+
+    /**
+     * Sends a cached request to the language model and extracts the sanitized prompt from the response between the
+     * {@value PROMPT_START} and {@value PROMPT_END} tags.
+     *
+     * @param request The request to send to the language model
      * @return The optimized prompt extracted from the response
      */
     protected String cachedSanitizedRequest(String request) {
