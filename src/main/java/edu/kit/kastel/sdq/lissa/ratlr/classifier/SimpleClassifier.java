@@ -123,7 +123,9 @@ public class SimpleClassifier extends Classifier {
     @Override
     public SortedMap<String, String> getCacheParameters() {
         SortedMap<String, String> providerParams = provider.getCacheParameters();
-        return new TreeMap<>(providerParams);
+        TreeMap<String, String> classifierParams = new TreeMap<>(providerParams);
+        classifierParams.put("classifier_type", SIMPLE_CLASSIFIER_NAME);
+        return classifierParams;
     }
 
     /**

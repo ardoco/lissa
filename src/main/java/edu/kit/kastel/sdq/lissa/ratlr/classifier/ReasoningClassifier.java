@@ -132,7 +132,9 @@ public class ReasoningClassifier extends Classifier {
     @Override
     public SortedMap<String, String> getCacheParameters() {
         SortedMap<String, String> providerParams = provider.getCacheParameters();
-        return new TreeMap<>(providerParams);
+        TreeMap<String, String> classifierParams = new TreeMap<>(providerParams);
+        classifierParams.put("classifier_type", REASONING_CLASSIFIER_NAME);
+        return classifierParams;
     }
 
     /**
