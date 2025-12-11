@@ -1,10 +1,12 @@
 /* Licensed under MIT 2025. */
-package edu.kit.kastel.sdq.lissa.ratlr.cache;
+package edu.kit.kastel.sdq.lissa.ratlr.cache.classifier;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheKey;
+import edu.kit.kastel.sdq.lissa.ratlr.cache.LargeLanguageModelCacheMode;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.KeyGenerator;
 
 /**
@@ -14,7 +16,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.utils.KeyGenerator;
  * <p>
  * The key can be serialized to JSON for storage and retrieval from the cache.
  * <p>
- * Please always use the {@link #of(String, int, double, String)} method to create a new instance.
+ * Please always use the {@link #of(ClassifierCacheParameter, String)} method to create a new instance.
  *
  * @param model The identifier of the model used for the cached operation.
  * @param seed The seed value used for randomization in the cached operation.
@@ -34,8 +36,13 @@ public record ClassifierCacheKey(
         @JsonIgnore String localKey)
         implements CacheKey {
 
-    public static ClassifierCacheKey of(String model, int seed, double temperature, String content) {
+    public static ClassifierCacheKey of(ClassifierCacheParameter cacheParameter, String content) {
         return new ClassifierCacheKey(
-                model, seed, temperature, LargeLanguageModelCacheMode.CHAT, content, KeyGenerator.generateKey(content));
+                cacheParameter.modelName(),
+                cacheParameter.seed(),
+                cacheParameter.temperature(),
+                LargeLanguageModelCacheMode.CHAT,
+                content,
+                KeyGenerator.generateKey(content));
     }
 }
