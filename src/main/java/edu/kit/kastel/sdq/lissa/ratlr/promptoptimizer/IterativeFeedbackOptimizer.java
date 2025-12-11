@@ -188,11 +188,29 @@ public class IterativeFeedbackOptimizer extends IterativeOptimizer {
      */
     private Set<ClassificationTask> getMisclassifiedTasks(String prompt, Collection<ClassificationTask> tasks) {
         Set<ClassificationTask> misclassifiedTasks = new HashSet<>();
+        LOGGER.debug("Checking {} tasks for misclassifications...", tasks.size());
+        int taskNumber = 0;
         for (ClassificationTask task : tasks) {
-            if (!isClassifiedCorrectly(prompt, task)) {
+            taskNumber++;
+            boolean isCorrect = isClassifiedCorrectly(prompt, task);
+            double taskScore = metric.getMetric(prompt, List.of(task));
+
+            LOGGER.debug(
+                    "  Task {}/{}: {} -> {} | Expected: {} | Score: {} | Correct: {}",
+                    taskNumber,
+                    tasks.size(),
+                    task.source().getIdentifier(),
+                    task.target().getIdentifier(),
+                    task.label() ? "Yes" : "No",
+                    taskScore,
+                    isCorrect ? "YES" : "NO");
+
+            if (!isCorrect) {
                 misclassifiedTasks.add(task);
+                LOGGER.debug("    ^-- MISCLASSIFIED: Added to feedback candidates");
             }
         }
+        LOGGER.debug("Total misclassified: {}/{}", misclassifiedTasks.size(), tasks.size());
         return misclassifiedTasks;
     }
 
