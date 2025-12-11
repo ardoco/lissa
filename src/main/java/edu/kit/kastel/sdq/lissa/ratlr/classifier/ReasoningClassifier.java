@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 
 import edu.kit.kastel.sdq.lissa.ratlr.cache.Cache;
 import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager;
-import edu.kit.kastel.sdq.lissa.ratlr.cache.ClassifierCacheKey;
+import edu.kit.kastel.sdq.lissa.ratlr.cache.classifier.ClassifierCacheKey;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
@@ -72,7 +72,7 @@ public class ReasoningClassifier extends Classifier {
     public ReasoningClassifier(ModuleConfiguration configuration, ContextStore contextStore) {
         super(ChatLanguageModelProvider.threads(configuration), contextStore);
         this.provider = new ChatLanguageModelProvider(configuration);
-        this.cache = CacheManager.getDefaultInstance().getCache(this, provider.getCacheParameters());
+        this.cache = CacheManager.getDefaultInstance().getCache(this, provider.cacheParameters());
         this.prompt = configuration.argumentAsStringByEnumIndex(
                 CLASSIFICATION_PROMPT_KEY,
                 0,
@@ -200,8 +200,7 @@ public class ReasoningClassifier extends Classifier {
         messages.add(new UserMessage(request));
 
         String messageString = getRepresentation(messages);
-        ClassifierCacheKey cacheKey =
-                ClassifierCacheKey.of(provider.modelName(), provider.seed(), provider.temperature(), messageString);
+        ClassifierCacheKey cacheKey = ClassifierCacheKey.of(provider.cacheParameters(), messageString);
 
         String cachedResponse = cache.get(cacheKey, String.class);
         if (cachedResponse != null) {
