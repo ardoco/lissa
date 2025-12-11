@@ -176,9 +176,9 @@ class ArchitectureTest {
 
                                 // Get all method calls in the 'of' method
                                 var methodCallsInOf = ofMethod.getMethodCallsFromSelf();
-                                java.util.Set<String> calledMethodNames = methodCallsInOf.stream()
+                                Set<String> calledMethodNames = methodCallsInOf.stream()
                                         .map(call -> call.getTarget().getName())
-                                        .collect(java.util.stream.Collectors.toSet());
+                                        .collect(Collectors.toSet());
 
                                 // Check if all parameter methods are called
                                 for (var paramMethod : parameterMethods) {
