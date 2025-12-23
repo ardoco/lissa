@@ -4,7 +4,7 @@ package edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer;
 import static edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.IterativeFeedbackOptimizer.FEEDBACK_EXAMPLE_BLOCK_CONFIGURATION_KEY;
 import static edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.IterativeOptimizer.SAMPLER_CONFIGURATION_KEY;
 
-import java.security.SecureRandom;
+import java.util.Random;
 
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.SampleStrategy;
@@ -135,12 +135,6 @@ public record GradientOptimizerConfig(
                         FEEDBACK_EXAMPLE_BLOCK_CONFIGURATION_KEY, DEFAULT_FEEDBACK_EXAMPLE_BLOCK),
                 SamplerFactory.createSampler(
                         configuration.argumentAsString(SAMPLER_CONFIGURATION_KEY, DEFAULT_SAMPLER),
-                        createSecureRandom(configuration.argumentAsInt(SEED_CONFIGURATION_KEY, DEFAULT_SEED))));
-    }
-
-    private static SecureRandom createSecureRandom(int seed) {
-        SecureRandom secureRandom = new SecureRandom();
-        secureRandom.setSeed(seed);
-        return secureRandom;
+                        new Random(configuration.argumentAsInt(SEED_CONFIGURATION_KEY, DEFAULT_SEED))));
     }
 }

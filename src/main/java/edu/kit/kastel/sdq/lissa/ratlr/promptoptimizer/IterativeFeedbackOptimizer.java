@@ -1,10 +1,10 @@
 /* Licensed under MIT 2025. */
 package edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer;
 
-import java.security.SecureRandom;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -84,9 +84,7 @@ public class IterativeFeedbackOptimizer extends IterativeOptimizer {
                 FEEDBACK_EXAMPLE_BLOCK_CONFIGURATION_KEY, DEFAULT_FEEDBACK_EXAMPLE_BLOCK);
         String samplerName = configuration.argumentAsString(SAMPLER_CONFIGURATION_KEY, DEFAULT_SAMPLER);
         int randomSeed = configuration.argumentAsInt(SAMPLER_SEED_CONFIGURATION_KEY, DEFAULT_SAMPLER_SEED);
-        SecureRandom secureRandom = new SecureRandom();
-        secureRandom.setSeed(randomSeed);
-        this.sampleStrategy = SamplerFactory.createSampler(samplerName, secureRandom);
+        this.sampleStrategy = SamplerFactory.createSampler(samplerName, new Random(randomSeed));
     }
 
     @Override
