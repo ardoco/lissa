@@ -47,8 +47,8 @@ public class MockClassifier extends Classifier {
 
     @Override
     public void setClassificationPrompt(String prompt) {
-        // TODO: This may / should throw an UnsportedOperationException instead?
-        // as no classification prompt is used, this method does nothing
+        // No-op: Mock classifier does not use classification prompts.
+        // This intentionally does not throw an exception to allow mock usage in tests.
     }
 
     @Override
