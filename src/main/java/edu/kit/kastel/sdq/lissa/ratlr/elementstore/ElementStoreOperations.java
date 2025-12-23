@@ -2,8 +2,7 @@
 package edu.kit.kastel.sdq.lissa.ratlr.elementstore;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.List;
 
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.Pair;
@@ -34,17 +33,17 @@ public final class ElementStoreOperations {
      *
      * @param sourceStore The training source element store
      * @return A new ElementStore containing only the target elements that correspond to the source elements
+     * TODO: This adds duplicates if multiple source elements map to the same target elements. However changeing this
+     *       would change the behavior of LiSSA's optimization.
      */
     public static TargetElementStore reduceTargetElementStore(
             TargetElementStore targetElementStore, SourceElementStore sourceStore) {
-        Map<String, Pair<Element, float[]>> reducedTargetElements = new LinkedHashMap<>();
+        List<Pair<Element, float[]>> reducedTargetElements = new ArrayList<>();
         for (var element : sourceStore.getAllElements(true)) {
             for (Element candidate : targetElementStore.findSimilar(element)) {
-                reducedTargetElements.putIfAbsent(
-                        candidate.getIdentifier(), targetElementStore.getById(candidate.getIdentifier()));
+                reducedTargetElements.add(targetElementStore.getById(candidate.getIdentifier()));
             }
         }
-        return new TargetElementStore(
-                new ArrayList<>(reducedTargetElements.values()), targetElementStore.getRetrievalStrategy());
+        return new TargetElementStore(reducedTargetElements, targetElementStore.getRetrievalStrategy());
     }
 }
