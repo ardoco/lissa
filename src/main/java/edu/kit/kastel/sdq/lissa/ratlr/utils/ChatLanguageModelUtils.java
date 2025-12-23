@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.kit.kastel.sdq.lissa.ratlr.cache.Cache;
-import edu.kit.kastel.sdq.lissa.ratlr.cache.ClassifierCacheKey;
+import edu.kit.kastel.sdq.lissa.ratlr.cache.classifier.ClassifierCacheKey;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.ChatLanguageModelProvider;
 
 import dev.langchain4j.model.chat.ChatModel;
@@ -39,19 +39,31 @@ public final class ChatLanguageModelUtils {
         if (numberOfRequests < 1) {
             throw new IllegalArgumentException("Number of requests must be at least 1");
         }
-        ClassifierCacheKey cacheKey = ClassifierCacheKey.of(
-                provider.modelName(),
-                provider.seed(),
-                provider.temperature(),
-                numberOfRequests + " results: \n" + request);
+        ClassifierCacheKey cacheKey =
+                ClassifierCacheKey.of(provider.cacheParameters(), numberOfRequests + " results: \n" + request);
+
+        LOGGER.debug(
+                "Cache lookup for key: model={}, seed={}, temp={}, mode=CHAT",
+                provider.cacheParameters().modelName(),
+                provider.cacheParameters().seed(),
+                provider.cacheParameters().temperature());
+        LOGGER.debug("Request hash: {}", Integer.toHexString(request.hashCode()));
+
         List<String> responses = cache.get(cacheKey, List.class);
         if (responses == null || responses.size() < numberOfRequests) {
+            LOGGER.debug("CACHE MISS - Making {} new LLM request(s)", numberOfRequests);
             responses = new ArrayList<>();
             LOGGER.info("Optimizing ({}) with {} requests", provider.modelName(), numberOfRequests);
             for (int i = 1; i <= numberOfRequests; i++) {
-                responses.add(llm.chat(request));
+                LOGGER.debug("  Sending LLM request {}/{}", i, numberOfRequests);
+                String response = llm.chat(request);
+                LOGGER.debug("  Received response {}/{} (length: {} chars)", i, numberOfRequests, response.length());
+                responses.add(response);
             }
             cache.put(cacheKey, responses);
+            LOGGER.debug("Cached {} response(s) for future use", numberOfRequests);
+        } else {
+            LOGGER.debug("CACHE HIT - Retrieved {} response(s) from cache", responses.size());
         }
         LOGGER.debug("Responses: {}", responses);
         return responses;

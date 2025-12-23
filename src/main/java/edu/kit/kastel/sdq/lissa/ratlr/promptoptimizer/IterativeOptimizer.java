@@ -176,7 +176,7 @@ public class IterativeOptimizer implements PromptOptimizer {
         this.optimizationPrompt = configuration.argumentAsString(BASE_PROMPT_CONFIGURATION_KEY, "");
         this.thresholdScore =
                 configuration.argumentAsDouble(THRESHOLD_SCORE_CONFIGURATION_KEY, DEFAULT_THRESHOLD_SCORE);
-        this.cache = CacheManager.getDefaultInstance().getCache(this, provider.getCacheParameters());
+        this.cache = CacheManager.getDefaultInstance().getCache(this, provider.cacheParameters());
         this.llm = provider.createChatModel();
         this.validTraceLinks = goldStandard;
         this.metric = metric;
