@@ -8,6 +8,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.ClassificationResult;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.ClassificationTask;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.Classifier;
@@ -25,6 +28,8 @@ import edu.kit.kastel.sdq.lissa.ratlr.utils.Pair;
  * of tasks as a whole.
  */
 public abstract class GlobalMetric implements Metric {
+
+    private static final Logger logger = LoggerFactory.getLogger(GlobalMetric.class);
 
     private final Classifier classifier;
     private final ResultAggregator aggregator;
@@ -59,13 +64,31 @@ public abstract class GlobalMetric implements Metric {
      */
     @Override
     public Double getMetric(String prompt, List<ClassificationTask> examples) {
+        if (examples.size() > 1) {
+            logger.debug("Computing metric for tasks: {}", examples);
+        }
+
         Pair<Set<TraceLink>, Set<TraceLink>> classifiedLinks = classify(prompt, examples);
+
+        if (examples.size() > 1) {
+            logger.debug(
+                    "Results: {} accepted, {} rejected",
+                    classifiedLinks.first().size(),
+                    classifiedLinks.second().size());
+        }
+
         Set<TraceLink> groundTruth = examples.stream()
                 .filter(ClassificationTask::label)
                 .map(task -> TraceLink.of(
                         task.source().getIdentifier(), task.target().getIdentifier()))
                 .collect(Collectors.toSet());
+
         Double score = reduce(classifiedLinks.first(), classifiedLinks.second(), groundTruth);
+
+        if (examples.size() > 1) {
+            logger.debug("Score: {}", score);
+        }
+
         return score;
     }
 
@@ -89,19 +112,48 @@ public abstract class GlobalMetric implements Metric {
      * @return A pair containing two sets of trace links: the first set contains accepted links, and the second set contains rejected links.
      */
     private Pair<Set<TraceLink>, Set<TraceLink>> classify(String prompt, Collection<ClassificationTask> tasks) {
+        if (tasks.size() > 1) {
+            logger.debug("=== Starting classification for {} tasks ===", tasks.size());
+        }
         classifier.setClassificationPrompt(prompt);
         List<ClassificationResult> acceptedTraceLinks = new ArrayList<>();
         List<ClassificationResult> rejectedTraceLinks = new ArrayList<>();
 
+        int taskIndex = 0;
         for (ClassificationTask task : tasks) {
+            if (tasks.size() > 1) {
+                logger.debug(
+                        "Task {}/{}: {} -> {} (label: {})",
+                        ++taskIndex,
+                        tasks.size(),
+                        task.source().getIdentifier(),
+                        task.target().getIdentifier(),
+                        task.label());
+            }
+
             Optional<ClassificationResult> result = classifier.classify(task);
             if (result.isPresent()) {
+                if (tasks.size() > 1) {
+                    logger.debug(
+                            "  -> ACCEPTED with confidence: {}", result.get().confidence());
+                }
                 acceptedTraceLinks.add(result.get());
             } else {
+                if (tasks.size() > 1) {
+                    logger.debug("  -> REJECTED (empty result)");
+                }
                 // TODO: Is there a constant for use instead of 0.0?
                 rejectedTraceLinks.add(new ClassificationResult(task.source(), task.target(), 0.0));
             }
         }
+
+        if (tasks.size() > 1) {
+            logger.debug(
+                    "=== Classification summary: {} accepted, {} rejected ===",
+                    acceptedTraceLinks.size(),
+                    rejectedTraceLinks.size());
+        }
+
         return new Pair<>(aggregate(acceptedTraceLinks), aggregate(rejectedTraceLinks));
     }
 

@@ -94,7 +94,7 @@ public class IterativeFeedbackOptimizer extends IterativeOptimizer {
         String modifiedPrompt = optimizationPrompt;
 
         LOGGER.debug("=".repeat(80));
-        LOGGER.debug("Starting feedback optimization with {} training examples", examples.size());
+        LOGGER.debug("Starting feedback optimization with training examples {}", examples);
         LOGGER.debug("Maximum iterations: {}, Threshold score: {}", maximumIterations, thresholdScore);
         LOGGER.debug("Feedback size: {}", feedbackSize);
         LOGGER.debug("=".repeat(80));
