@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import edu.kit.kastel.mcse.ardoco.metrics.ClassificationMetricsCalculator;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.Configuration;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.GoldStandardConfiguration;
+import edu.kit.kastel.sdq.lissa.ratlr.configuration.OptimizerConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
 
 /**
@@ -223,6 +224,59 @@ public final class Statistics {
                 .collect(Collectors.joining("\n"));
         try {
             Files.writeString(new File(destination).toPath(), csvResult, StandardOpenOption.CREATE);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    /**
+     * Generates statistics for prompt optimization.
+     *
+     * This method:
+     * <ol>
+     *     <li>Generates a detailed report with configuration and results</li>
+     *     <li>Saves the report to a markdown file</li>
+     * </ol>
+     * @param configFile Configuration file used for the optimization
+     * @param configuration Configuration object used for the optimization
+     * @param prompt Optimized prompt generated during the optimization
+     * @throws UncheckedIOException If there are issues writing the statistics file
+     */
+    public static void generateOptimizationStatistics(
+            File configFile, OptimizerConfiguration configuration, String prompt) throws UncheckedIOException {
+        generateOptimizationStatistics(
+                configuration.getConfigurationIdentifierForFile(configFile.getName()),
+                configuration.serializeAndDestroyConfiguration(),
+                prompt);
+    }
+
+    /**
+     * Generates statistics for prompt optimization with custom configuration identifier.
+     *
+     * This method:
+     * <ol>
+     *     <li>Generates a detailed report with configuration and results</li>
+     *     <li>Saves the report to a markdown file</li>
+     * </ol>
+     *
+     * @param configurationIdentifier Unique identifier for the configuration
+     * @param configurationSummary Summary of the configuration used
+     * @param prompt Optimized prompt used in the analysis
+     * @throws UncheckedIOException If there are issues writing the statistics file
+     */
+    public static void generateOptimizationStatistics(
+            String configurationIdentifier, String configurationSummary, String prompt) throws UncheckedIOException {
+
+        // Store information to one file (config and results)
+        var resultFile = new File("results-prompt-optimization-" + configurationIdentifier + ".md");
+        StringBuilder result = new StringBuilder();
+        result.append(configurationToString(configurationIdentifier, configurationSummary));
+        result.append("## Stats\n");
+        result.append(" * Optimized Prompt: ").append(escapeMarkdown(prompt)).append("\n");
+
+        logger.info("Storing results to {}", resultFile.getName());
+        try {
+            Files.writeString(resultFile.toPath(), result.toString(), StandardOpenOption.CREATE);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

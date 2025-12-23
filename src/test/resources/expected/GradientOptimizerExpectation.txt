@@ -1,0 +1,14 @@
+
+```
+Question: We have two software development artifacts that may or may not be related in terms of their purpose and functionality\.
+
+Source Artifact: '''\{source\_content\}'''
+This artifact specifies a non\-functional requirement \(NFR\) that outlines the expected performance and portability of a software tool\.
+
+Target Artifact: '''\{target\_content\}'''
+This artifact describes the functional requirements and capabilities of the software tool, detailing how it will be used by end users\.
+
+Considering the definitions and purposes of these artifacts, do they relate to each other in the context of software development?
+
+Please answer with 'yes' or 'no'\.
+```

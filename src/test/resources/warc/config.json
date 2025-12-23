@@ -56,7 +56,7 @@
     "args" : {}
   },
   "tracelinkid_postprocessor" : {
-    "name" : "req2req",
+    "name" : "identity",
     "args" : {}
   }
 }
