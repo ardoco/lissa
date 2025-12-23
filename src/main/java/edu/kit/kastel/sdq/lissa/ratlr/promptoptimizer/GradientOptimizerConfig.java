@@ -4,7 +4,7 @@ package edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer;
 import static edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.IterativeFeedbackOptimizer.FEEDBACK_EXAMPLE_BLOCK_CONFIGURATION_KEY;
 import static edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.IterativeOptimizer.SAMPLER_CONFIGURATION_KEY;
 
-import java.util.Random;
+import java.security.SecureRandom;
 
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.SampleStrategy;
@@ -31,8 +31,7 @@ public record GradientOptimizerConfig(
     // Default prompts from the original implementation
 
     private static final String GRADIENT_PROMPT_CONFIGURATION_KEY = "gradient_prompt";
-    private static final String DEFAULT_GRADIENT_PROMPT =
-            """
+    private static final String DEFAULT_GRADIENT_PROMPT = """
                 I'm trying to write a zero-shot classifier prompt.
 
                 My current prompt is:
@@ -46,8 +45,7 @@ public record GradientOptimizerConfig(
                 """;
 
     private static final String TRANSFORMATION_PROMPT_CONFIGURATION_KEY = "transformation_prompt";
-    private static final String DEFAULT_TRANSFORMATION_PROMPT =
-            """
+    private static final String DEFAULT_TRANSFORMATION_PROMPT = """
             I'm trying to write a zero-shot classifier.
 
             My current prompt is:
@@ -68,8 +66,7 @@ public record GradientOptimizerConfig(
     private static final String DEFAULT_SYNONYM_PROMPT =
             "Generate a variation of the following instruction while keeping the semantic meaning.%n%nInput: %s%n%nOutput:";
 
-    private static final String DEFAULT_FEEDBACK_EXAMPLE_BLOCK =
-            """
+    private static final String DEFAULT_FEEDBACK_EXAMPLE_BLOCK = """
             Text: "%s"
             Ground Truth: %s
             Classification Result: %s
@@ -138,6 +135,12 @@ public record GradientOptimizerConfig(
                         FEEDBACK_EXAMPLE_BLOCK_CONFIGURATION_KEY, DEFAULT_FEEDBACK_EXAMPLE_BLOCK),
                 SamplerFactory.createSampler(
                         configuration.argumentAsString(SAMPLER_CONFIGURATION_KEY, DEFAULT_SAMPLER),
-                        new Random(configuration.argumentAsInt(SEED_CONFIGURATION_KEY, DEFAULT_SEED))));
+                        createSecureRandom(configuration.argumentAsInt(SEED_CONFIGURATION_KEY, DEFAULT_SEED))));
+    }
+
+    private static SecureRandom createSecureRandom(int seed) {
+        SecureRandom secureRandom = new SecureRandom();
+        secureRandom.setSeed(seed);
+        return secureRandom;
     }
 }
