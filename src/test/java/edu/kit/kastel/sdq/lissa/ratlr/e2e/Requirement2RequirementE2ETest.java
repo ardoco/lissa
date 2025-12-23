@@ -66,12 +66,6 @@ OPENAI_API_KEY=sk-DUMMY
      * @throws Exception If reading the expected prompt files fails.
      */
     private static Stream<Arguments> provideOptimizationTestCases() throws Exception {
-        // TODO TEMPORARY: Only run feedback optimizer test
-        return Stream.of(Arguments.of(
-                "src/test/resources/warc/WARC_feedback_gpt_gpt-4o-mini-2024-07-18_0_mi5_fs3.json",
-                Files.readString(Path.of("src/test/resources/expected/FeedbackOptimizerExpectation.txt"))));
-
-        /* COMMENTED OUT - Restore after debugging
         return Stream.of(
                 Arguments.of(
                         "src/test/resources/warc/WARC_simple_gpt_gpt-4o-mini-2024-07-18_0.json",
@@ -81,11 +75,7 @@ OPENAI_API_KEY=sk-DUMMY
                         Files.readString(Path.of("src/test/resources/expected/IterativeOptimizerExpectation.txt"))),
                 Arguments.of(
                         "src/test/resources/warc/WARC_feedback_gpt_gpt-4o-mini-2024-07-18_0_mi5_fs3.json",
-                        Files.readString(Path.of("src/test/resources/expected/FeedbackOptimizerExpectation.txt"))),
-                Arguments.of(
-                        "src/test/resources/warc/WARC_gradient_gpt_gpt-4o-mini-2024-07-18_0.json",
-                        Files.readString(Path.of("src/test/resources/expected/GradientOptimizerExpectation.txt"))));
-        */
+                        Files.readString(Path.of("src/test/resources/expected/FeedbackOptimizerExpectation.txt"))));
     }
 
     /**
