@@ -76,20 +76,15 @@ public class IterativeOptimizer implements PromptOptimizer {
      * The optimized prompt should be enclosed between {@value PROMPT_START} and {@value PROMPT_END}.
      * TODO: There should probably be spaces around the prompt tags :upsidedown:.
      */
-    private static final String DEFAULT_OPTIMIZATION_TEMPLATE =
-            """
+    private static final String DEFAULT_OPTIMIZATION_TEMPLATE = """
                     Optimize the following prompt to achieve better classification results for traceability link recovery.
                     Traceability links are to be found in the domain of %s to %s.
                     Do not modify the input and output formats specified by the original prompt.
                     Enclose your optimized prompt with%sbrackets.
                     The original prompt is provided below:
                     '''%s'''
-                    """
-                    .formatted(
-                            SOURCE_TYPE_PLACEHOLDER,
-                            TARGET_TYPE_PLACEHOLDER,
-                            PROMPT_START + PROMPT_END,
-                            ORIGINAL_PROMPT_PLACEHOLDER);
+                    """.formatted(
+            SOURCE_TYPE_PLACEHOLDER, TARGET_TYPE_PLACEHOLDER, PROMPT_START + PROMPT_END, ORIGINAL_PROMPT_PLACEHOLDER);
 
     private static final String OPTIMIZATION_TEMPLATE_CONFIGURATION_KEY = "optimization_template";
 

@@ -29,8 +29,7 @@ public class IterativeFeedbackOptimizer extends IterativeOptimizer {
      * The {examples} placeholder will be replaced with specific examples of misclassified trace links, so this key
      * should be included in the prompt.
      */
-    private static final String FEEDBACK_PROMPT_TEMPLATE =
-            """
+    private static final String FEEDBACK_PROMPT_TEMPLATE = """
             The current prompt is not performing well in classifying the following trace links. To help you improve the
             prompt, I will provide examples of misclassified trace links. Please analyze these examples and adjust the
             prompt accordingly. The examples are as follows:
@@ -45,8 +44,7 @@ public class IterativeFeedbackOptimizer extends IterativeOptimizer {
      * The placeholders {identifier}, {source_type}, {source_content}, {target_type}, {target_content}, and {classification}
      * will be replaced with specific values for each trace link.
      */
-    private static final String DEFAULT_FEEDBACK_EXAMPLE_BLOCK =
-            """
+    private static final String DEFAULT_FEEDBACK_EXAMPLE_BLOCK = """
             {identifier}
             {source_type}: '''{source_content}'''
             {target_type}: '''{target_content}'''

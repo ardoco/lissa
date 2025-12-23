@@ -29,9 +29,7 @@ class Requirement2RequirementE2ETest {
     void setUp() throws IOException {
         File envFile = new File(".env");
         if (!envFile.exists() && System.getenv("CI") != null) {
-            Files.writeString(
-                    envFile.toPath(),
-                    """
+            Files.writeString(envFile.toPath(), """
 OLLAMA_EMBEDDING_HOST=http://localhost:11434
 OLLAMA_HOST=http://localhost:11434
 OPENAI_ORGANIZATION_ID=DUMMY
