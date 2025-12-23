@@ -44,6 +44,7 @@ public final class OptimizerFactory {
             case "simple" -> new IterativeOptimizer(configuration, goldStandard, metric, 1);
             case "iterative" -> new IterativeOptimizer(configuration, goldStandard, metric);
             case "feedback" -> new IterativeFeedbackOptimizer(configuration, goldStandard, metric);
+            case "gradient" -> new AutomaticPromptOptimizer(configuration, goldStandard, metric, evaluator);
             default -> throw new IllegalStateException("Unexpected value: " + configuration.name());
         };
     }
