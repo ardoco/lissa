@@ -152,12 +152,6 @@ public class PipelineClassifier extends Classifier {
     }
 
     @Override
-    public SortedMap<String, String> getCacheParameters() {
-        throw new UnsupportedOperationException(
-                "PipelineClassifiers do not support caching directly. Cache individual classifiers instead.");
-    }
-
-    @Override
     public String getClassificationPromptKey() {
         throw new UnsupportedOperationException(
                 "PipelineClassifiers do not support retrieving a single classification prompt key. Access individual classifiers instead.");

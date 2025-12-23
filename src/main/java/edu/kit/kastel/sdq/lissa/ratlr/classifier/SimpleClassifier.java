@@ -2,8 +2,6 @@
 package edu.kit.kastel.sdq.lissa.ratlr.classifier;
 
 import java.util.Optional;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 import edu.kit.kastel.sdq.lissa.ratlr.cache.Cache;
 import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager;
@@ -118,14 +116,6 @@ public class SimpleClassifier extends Classifier {
     @Override
     public String getClassificationPromptKey() {
         return PROMPT_TEMPLATE_KEY;
-    }
-
-    @Override
-    public SortedMap<String, String> getCacheParameters() {
-        SortedMap<String, String> providerParams = provider.getCacheParameters();
-        TreeMap<String, String> classifierParams = new TreeMap<>(providerParams);
-        classifierParams.put("classifier_type", SIMPLE_CLASSIFIER_NAME);
-        return classifierParams;
     }
 
     /**

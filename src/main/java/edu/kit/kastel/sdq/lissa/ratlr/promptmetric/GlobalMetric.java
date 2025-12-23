@@ -6,13 +6,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import edu.kit.kastel.sdq.lissa.ratlr.cache.Cache;
-import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager;
-import edu.kit.kastel.sdq.lissa.ratlr.cache.ScorerCacheKey;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.ClassificationResult;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.ClassificationTask;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.Classifier;
@@ -35,14 +30,12 @@ public abstract class GlobalMetric implements Metric {
     private final ResultAggregator aggregator;
     private final boolean usesCustomAggregator;
     private final TraceLinkIdPostprocessor postprocessor;
-    private final Cache cache;
 
     protected GlobalMetric(Classifier classifier, ResultAggregator aggregator, TraceLinkIdPostprocessor postprocessor) {
         this.classifier = classifier;
         this.aggregator = aggregator;
         this.usesCustomAggregator = aggregator != null;
         this.postprocessor = postprocessor;
-        this.cache = CacheManager.getDefaultInstance().getCache(this, getCacheParameters());
     }
 
     /**
@@ -66,10 +59,6 @@ public abstract class GlobalMetric implements Metric {
      */
     @Override
     public Double getMetric(String prompt, List<ClassificationTask> examples) {
-        ScorerCacheKey key = ScorerCacheKey.of(prompt, examples.toString());
-        if (cache.containsKey(key)) {
-            return cache.get(key, Double.class);
-        }
         Pair<Set<TraceLink>, Set<TraceLink>> classifiedLinks = classify(prompt, examples);
         Set<TraceLink> groundTruth = examples.stream()
                 .filter(ClassificationTask::label)
@@ -77,7 +66,6 @@ public abstract class GlobalMetric implements Metric {
                         task.source().getIdentifier(), task.target().getIdentifier()))
                 .collect(Collectors.toSet());
         Double score = reduce(classifiedLinks.first(), classifiedLinks.second(), groundTruth);
-        cache.put(key, score);
         return score;
     }
 
@@ -151,11 +139,5 @@ public abstract class GlobalMetric implements Metric {
                 .map(result -> TraceLink.of(
                         result.source().getIdentifier(), result.target().getIdentifier()))
                 .collect(Collectors.toSet());
-    }
-
-    private SortedMap<String, String> getCacheParameters() {
-        TreeMap<String, String> params = new TreeMap<>(classifier.getCacheParameters());
-        params.put("metric", this.getName());
-        return params;
     }
 }
