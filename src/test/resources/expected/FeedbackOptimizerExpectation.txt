@@ -5,9 +5,12 @@ Question: Here are two parts of software development artifacts\.
             \{source\_type\}: '''\{source\_content\}'''
 
             \{target\_type\}: '''\{target\_content\}'''
-            Determine if there is a traceability link between these requirements\. Assess whether the target requirement supports, elaborates on, or is directly related to the source requirement in terms of functionality, implementation, compliance with standards, or specific technical details\. Focus on the alignment of functionalities, adherence to relevant standards or specifications, and the context of memory management or remote management capabilities\. Pay particular attention to whether the target requirement provides additional functionality, clarifies implementation details, or ensures compliance with the same standards as the source requirement\. Consider if the target requirement enhances, complements, or is necessary for the fulfillment of the source requirement in a meaningful way\. Additionally, evaluate if the target requirement introduces new concepts or functionalities that are essential for the source requirement's implementation or operation\.
+            Do these requirements demonstrate a direct relationship in terms of functionality, implementation, compliance with standards, or shared objectives? Specifically, assess whether the source requirement provides support, elaboration, or relevant context that enhances the understanding of the target requirement\. Consider if they align in terms of purpose, scope, or technical specifications\.
 
-            Are they related?
+            Focus on the following criteria:
+            1\. Does the source requirement describe a feature or functionality that directly supports or relates to the implementation or behavior described in the target requirement?
+            2\. Are there shared objectives or compliance with standards between the two requirements?
+            3\. Does the source requirement provide necessary context that clarifies or expands upon the target requirement?
 
             Answer with 'yes' or 'no'\.
 ```

@@ -1,11 +1,11 @@
 
 ```
-Question: Here are two parts of software development artifacts that may or may not be related in the context of requirements\.
+Question: Here are two parts of software development artifacts that may represent requirements\.
 
             \{source\_type\}: '''\{source\_content\}'''
 
             \{target\_type\}: '''\{target\_content\}'''
-            Based on the content and context provided, do these artifacts establish a traceability link?
+            Do these artifacts establish a traceability link between requirements?
 
             Answer with 'yes' or 'no'\.
 ```
