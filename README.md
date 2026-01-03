@@ -46,8 +46,8 @@ To get started with LiSSA, follow these steps:
 1. **Clone the Repository**:
 
    ```bash
-   git clone https://github.com/ardoco/lissa-ratlr
-   cd lissa-ratlr
+   git clone https://github.com/ardoco/lissa
+   cd lissa
    ```
 2. **Install Dependencies**:
    Ensure you have Java JDK 21 or later installed. Then, build the project using Maven:
@@ -59,7 +59,7 @@ To get started with LiSSA, follow these steps:
    Execute the main application:
 
    ```bash
-   java -jar target/ratlr-*-jar-with-dependencies.jar eval -c config.json
+   java -jar target/lissa-*-jar-with-dependencies.jar eval -c config.json
    ```
 
 ### Configuration
@@ -67,7 +67,7 @@ To get started with LiSSA, follow these steps:
 1. Create a configuration you want to use for evaluation / execution. E.g., you can find configurations [here](https://github.com/ArDoCo/ReplicationPackage-ICSE25_LiSSA-Toward-Generic-Traceability-Link-Recovery-through-RAG/tree/main/LiSSA-RATLR-V2/lissa/configs/req2code-significance). You can also provide a directory containing multiple configurations.
 2. Configure your API keys for the language model platforms you plan to use as environment variables. See the [configuration documentation](docs/configuration.md#supported-platforms-and-environment-variables) for details on supported platforms (OpenAI, Open WebUI, Ollama, Blablador, DeepSeek) and their required environment variables.
 3. LiSSA caches requests in order to be reproducible. The cache is located in the cache folder that can be specified in the configuration.
-4. Run `java -jar target/ratlr-*-jar-with-dependencies.jar eval -c configs/....` to run the evaluation. You can provide a JSON or a directory containing JSON configurations.
+4. Run `java -jar target/lissa-*-jar-with-dependencies.jar eval -c configs/....` to run the evaluation. You can provide a JSON or a directory containing JSON configurations.
 5. The results will be printed to the console and saved to a file in the current directory. The name is also printed to the console.
 
 ### Results of Evaluation / Execution
