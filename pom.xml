@@ -8,9 +8,12 @@
     <version>0.22.5</version>
   </parent>
 
-  <groupId>edu.kit.kastel.sdq.lissa</groupId>
-  <artifactId>ratlr</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <groupId>io.github.ardoco</groupId>
+  <artifactId>lissa</artifactId>
+  <version>0.2.0-SNAPSHOT</version>
+
+  <name>LiSSA - Linking Software System Artifacts</name>
+  <description>LiSSA (Linking Software System Artifacts) is an LLM-based approach that aims to be generic across artifact types. The key idea is to use a Large Language Model (LLM) together with information retrieval (IR) to find trace links. For a given source artifact (e.g., a requirement or a sentence in documentation), LiSSA first uses IR techniques to retrieve a small set of potentially relevant target artifacts (code files, model elements, etc.). It then queries the LLM with the retrieved context to generate or suggest the most likely trace link.</description>
 
   <properties>
     <maven.compiler.source>21</maven.compiler.source>
