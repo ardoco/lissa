@@ -1,10 +1,12 @@
 /* Licensed under MIT 2025. */
-package edu.kit.kastel.sdq.lissa.ratlr.cache;
+package edu.kit.kastel.sdq.lissa.ratlr.cache.embedding;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheKey;
+import edu.kit.kastel.sdq.lissa.ratlr.cache.LargeLanguageModelCacheMode;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.KeyGenerator;
 
 /**
@@ -14,7 +16,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.utils.KeyGenerator;
  * <p>
  * The key can be serialized to JSON for storage and retrieval from the cache.
  * <p>
- * Please always use the {@link #of(String, String)} method to create a new instance.
+ * Please always use the {@link #of(EmbeddingCacheParameter, String)} method to create a new instance.
  *
  * @param model The identifier of the model used for the cached operation.
  * @param seed The seed value used for randomization in the cached operation (-1 for backward compatibility).
@@ -34,15 +36,20 @@ public record EmbeddingCacheKey(
         @JsonIgnore String localKey)
         implements CacheKey {
 
-    public static EmbeddingCacheKey of(String model, String content) {
+    public static EmbeddingCacheKey of(EmbeddingCacheParameter cacheParameter, String content) {
         return new EmbeddingCacheKey(
-                model, -1, -1, LargeLanguageModelCacheMode.EMBEDDING, content, KeyGenerator.generateKey(content));
+                cacheParameter.modelName(),
+                -1,
+                -1,
+                LargeLanguageModelCacheMode.EMBEDDING,
+                content,
+                KeyGenerator.generateKey(content));
     }
 
     /**
      * Only use this method if you want to use a custom local key. You mostly do not want to do this. Only for special handling of embeddings.
-     * You should always prefer the {@link #of(String, String)} method.
-     * @deprecated please use {@link #of(String, String)} instead.
+     * You should always prefer the {@link #of(EmbeddingCacheParameter, String)} method.
+     * @deprecated please use {@link #of(EmbeddingCacheParameter, String)} instead.
      */
     @Deprecated(forRemoval = false)
     public static EmbeddingCacheKey ofRaw(String model, String content, String localKey) {
