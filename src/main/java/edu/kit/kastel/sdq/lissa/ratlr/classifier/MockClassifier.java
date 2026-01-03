@@ -41,14 +41,14 @@ public class MockClassifier extends Classifier {
     }
 
     @Override
-    protected Classifier copyOf() {
+    public Classifier copyOf() {
         return new MockClassifier(contextStore);
     }
 
     @Override
     public void setClassificationPrompt(String prompt) {
-        throw new UnsupportedOperationException(
-                "MockClassifier does not support setting a single classification prompt.");
+        // TODO: This may / should throw an UnsportedOperationException instead?
+        // as no classification prompt is used, this method does nothing
     }
 
     @Override

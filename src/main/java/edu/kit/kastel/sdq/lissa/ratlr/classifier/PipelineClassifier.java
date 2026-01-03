@@ -141,7 +141,7 @@ public class PipelineClassifier extends Classifier {
     }
 
     @Override
-    protected Classifier copyOf() {
+    public Classifier copyOf() {
         return new PipelineClassifier(classifiers, this.threads, this.contextStore);
     }
 

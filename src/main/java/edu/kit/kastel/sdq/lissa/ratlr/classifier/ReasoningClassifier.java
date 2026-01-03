@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 
 import edu.kit.kastel.sdq.lissa.ratlr.cache.Cache;
 import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager;
-import edu.kit.kastel.sdq.lissa.ratlr.cache.ClassifierCacheKey;
+import edu.kit.kastel.sdq.lissa.ratlr.cache.classifier.ClassifierCacheKey;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
@@ -72,7 +72,7 @@ public class ReasoningClassifier extends Classifier {
     public ReasoningClassifier(ModuleConfiguration configuration, ContextStore contextStore) {
         super(ChatLanguageModelProvider.threads(configuration), contextStore);
         this.provider = new ChatLanguageModelProvider(configuration);
-        this.cache = CacheManager.getDefaultInstance().getCache(this, provider.getCacheParameters());
+        this.cache = CacheManager.getDefaultInstance().getCache(this, provider.cacheParameters());
         this.prompt = configuration.argumentAsStringByEnumIndex(
                 CLASSIFICATION_PROMPT_KEY,
                 0,
@@ -112,7 +112,7 @@ public class ReasoningClassifier extends Classifier {
     }
 
     @Override
-    protected final Classifier copyOf() {
+    public final Classifier copyOf() {
         return new ReasoningClassifier(
                 threads, cache, provider, prompt, useOriginalArtifacts, useSystemMessage, contextStore);
     }
@@ -126,6 +126,7 @@ public class ReasoningClassifier extends Classifier {
     public String getClassificationPromptKey() {
         return CLASSIFICATION_PROMPT_KEY;
     }
+
     /**
      * Classifies a pair of elements by using the language model to reason about their relationship.
      * The classification result is cached to avoid redundant LLM calls.
@@ -200,8 +201,7 @@ public class ReasoningClassifier extends Classifier {
         messages.add(new UserMessage(request));
 
         String messageString = getRepresentation(messages);
-        ClassifierCacheKey cacheKey =
-                ClassifierCacheKey.of(provider.modelName(), provider.seed(), provider.temperature(), messageString);
+        ClassifierCacheKey cacheKey = ClassifierCacheKey.of(provider.cacheParameters(), messageString);
 
         String cachedResponse = cache.get(cacheKey, String.class);
         if (cachedResponse != null) {
