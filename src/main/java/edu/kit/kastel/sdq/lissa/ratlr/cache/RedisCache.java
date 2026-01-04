@@ -149,7 +149,7 @@ class RedisCache<K extends CacheKey> implements Cache<K> {
 
     @Override
     @SuppressWarnings("deprecation")
-    public <T> @Nullable T getViaInternalKey(K cacheKey, Class<T> clazz) {
+    public synchronized <T> @Nullable T getViaInternalKey(K cacheKey, Class<T> clazz) {
         String jsonData = jedis == null ? null : jedis.hget(cacheKey.toJsonKey(), "data");
         if (localCache == null) {
             return convert(jsonData, clazz);

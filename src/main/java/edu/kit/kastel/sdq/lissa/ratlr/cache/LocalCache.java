@@ -133,7 +133,7 @@ class LocalCache<K extends CacheKey> {
      * @deprecated This method exposes internal cache key handling and should not be used in general code.
      */
     @Deprecated(forRemoval = false)
-    public @Nullable String getViaInternalKey(K key) {
+    public synchronized @Nullable String getViaInternalKey(K key) {
         return cache.get(key.localKey());
     }
 
@@ -167,7 +167,7 @@ class LocalCache<K extends CacheKey> {
      * @deprecated This method exposes internal cache key handling and should not be used in general code.
      */
     @Deprecated(forRemoval = false)
-    public void putViaInternalKey(K cacheKey, String value) {
+    public synchronized void putViaInternalKey(K cacheKey, String value) {
         String old = cache.put(cacheKey.localKey(), value);
         if (old == null || !old.equals(value)) {
             dirty++;
