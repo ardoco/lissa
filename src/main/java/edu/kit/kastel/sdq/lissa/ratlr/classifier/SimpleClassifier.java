@@ -1,11 +1,10 @@
-/* Licensed under MIT 2025. */
+/* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.classifier;
 
 import java.util.Optional;
 
 import edu.kit.kastel.sdq.lissa.ratlr.cache.Cache;
 import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager;
-import edu.kit.kastel.sdq.lissa.ratlr.cache.classifier.ClassifierCacheKey;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
@@ -47,7 +46,7 @@ public class SimpleClassifier extends Classifier {
     /**
      * The cache used for storing classification results.
      */
-    private final Cache cache;
+    private final Cache<?> cache;
 
     /**
      * Provider for the language model used in classification.
@@ -88,7 +87,11 @@ public class SimpleClassifier extends Classifier {
      * @param template The template to use for classification requests
      */
     private SimpleClassifier(
-            int threads, Cache cache, ChatLanguageModelProvider provider, String template, ContextStore contextStore) {
+            int threads,
+            Cache<?> cache,
+            ChatLanguageModelProvider provider,
+            String template,
+            ContextStore contextStore) {
         super(threads, contextStore);
         this.cache = cache;
         this.provider = provider;
@@ -159,8 +162,7 @@ public class SimpleClassifier extends Classifier {
                 .replace("{target_type}", target.getType())
                 .replace("{target_content}", target.getContent());
 
-        ClassifierCacheKey cacheKey = ClassifierCacheKey.of(provider.cacheParameters(), request);
-        String cachedResponse = cache.get(cacheKey, String.class);
+        String cachedResponse = cache.get(request, String.class);
         if (cachedResponse != null) {
             return cachedResponse;
         } else {
@@ -170,7 +172,7 @@ public class SimpleClassifier extends Classifier {
                     source.getIdentifier(),
                     target.getIdentifier());
             String response = llm.chat(request);
-            cache.put(cacheKey, response);
+            cache.put(request, response);
             return response;
         }
     }

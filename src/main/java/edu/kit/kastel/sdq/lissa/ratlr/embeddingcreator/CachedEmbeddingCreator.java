@@ -1,4 +1,4 @@
-/* Licensed under MIT 2025. */
+/* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.embeddingcreator;
 
 import java.util.*;
@@ -40,7 +40,7 @@ abstract class CachedEmbeddingCreator extends EmbeddingCreator {
 
     private static final Logger STATIC_LOGGER = LoggerFactory.getLogger(CachedEmbeddingCreator.class);
     protected final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private final Cache cache;
+    private final Cache<EmbeddingCacheKey> cache;
     private final EmbeddingModel embeddingModel;
     private final String rawNameOfModel;
     private final int threads;
@@ -177,28 +177,31 @@ abstract class CachedEmbeddingCreator extends EmbeddingCreator {
      */
     private static float[] calculateFinalEmbedding(
             EmbeddingModel embeddingModel,
-            Cache cache,
+            Cache<EmbeddingCacheKey> cache,
             EmbeddingCacheParameter embeddingCacheParameter,
             Element element) {
 
-        EmbeddingCacheKey cacheKey = EmbeddingCacheKey.of(embeddingCacheParameter, element.getContent());
-
-        float[] cachedEmbedding = cache.get(cacheKey, float[].class);
+        String elementContent = element.getContent();
+        float[] cachedEmbedding = cache.get(elementContent, float[].class);
         if (cachedEmbedding != null) {
             return cachedEmbedding;
         } else {
             STATIC_LOGGER.info("Calculating embedding for: {}", element.getIdentifier());
             try {
                 float[] embedding =
-                        embeddingModel.embed(element.getContent()).content().vector();
-                cache.put(cacheKey, embedding);
+                        embeddingModel.embed(elementContent).content().vector();
+                cache.put(elementContent, embedding);
                 return embedding;
             } catch (Exception e) {
                 STATIC_LOGGER.error(
                         "Error while calculating embedding for .. try to fix ..: {}", element.getIdentifier());
                 // Probably the length was too long .. check that
                 return tryToFixWithLength(
-                        embeddingModel, cache, embeddingCacheParameter.modelName(), cacheKey, element.getContent());
+                        embeddingModel,
+                        cache,
+                        embeddingCacheParameter.modelName(),
+                        elementContent,
+                        element.getContent());
             }
         }
     }
@@ -211,24 +214,30 @@ abstract class CachedEmbeddingCreator extends EmbeddingCreator {
      * @param embeddingModel The model to use for embedding generation
      * @param cache The cache to use for storing and retrieving embeddings
      * @param rawNameOfModel The name of the model being used
-     * @param key The original cache key
+     * @param elementContent The original element content
      * @param content The content that exceeded the token limit
      * @return The vector embedding of the truncated content
      * @throws IllegalArgumentException If the token length was not the cause of the failure
      */
     private static float[] tryToFixWithLength(
-            EmbeddingModel embeddingModel, Cache cache, String rawNameOfModel, CacheKey key, String content) {
-        String newKey = key.localKey() + "_fixed_" + MAX_TOKEN_LENGTH;
+            EmbeddingModel embeddingModel,
+            Cache<EmbeddingCacheKey> cache,
+            String rawNameOfModel,
+            String elementContent,
+            String content) {
+        EmbeddingCacheKey originalKey = cache.getCacheParameter().createCacheKey(elementContent);
+        String newKey = originalKey.localKey() + "_fixed_" + MAX_TOKEN_LENGTH;
 
         // We need the old keys for backwards compatibility
         @SuppressWarnings("deprecation")
         EmbeddingCacheKey newCacheKey =
                 EmbeddingCacheKey.ofRaw(rawNameOfModel, "(FIXED::%d): %s".formatted(MAX_TOKEN_LENGTH, content), newKey);
 
-        float[] cachedEmbedding = cache.get(newCacheKey, float[].class);
+        @SuppressWarnings("deprecation")
+        float[] cachedEmbedding = cache.getViaInternalKey(newCacheKey, float[].class);
         if (cachedEmbedding != null) {
             if (STATIC_LOGGER.isInfoEnabled()) {
-                STATIC_LOGGER.info("using fixed embedding for: {}", key.localKey());
+                STATIC_LOGGER.info("using fixed embedding for: {}", originalKey.localKey());
             }
             return cachedEmbedding;
         }
@@ -257,9 +266,9 @@ abstract class CachedEmbeddingCreator extends EmbeddingCreator {
         String fixedContent = content.substring(0, left);
         float[] embedding = embeddingModel.embed(fixedContent).content().vector();
         if (STATIC_LOGGER.isInfoEnabled()) {
-            STATIC_LOGGER.info("using fixed embedding for: {}", key.localKey());
+            STATIC_LOGGER.info("using fixed embedding for: {}", originalKey.localKey());
         }
-        cache.put(newCacheKey, embedding);
+        cache.putViaInternalKey(newCacheKey, embedding);
         return embedding;
     }
 }

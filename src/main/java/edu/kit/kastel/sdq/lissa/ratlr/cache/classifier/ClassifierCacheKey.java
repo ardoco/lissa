@@ -1,5 +1,7 @@
-/* Licensed under MIT 2025. */
+/* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.cache.classifier;
+
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -11,32 +13,57 @@ import edu.kit.kastel.sdq.lissa.ratlr.utils.KeyGenerator;
 
 /**
  * Represents a key for classification caching operations in the LiSSA framework.
- * This record is used to uniquely identify cached values based on various parameters
+ * This class is used to uniquely identify cached values based on various parameters
  * such as the model used, seed value, operation mode, and content.
  * <p>
  * The key can be serialized to JSON for storage and retrieval from the cache.
- * <p>
- * Please always use the {@link #of(ClassifierCacheParameter, String)} method to create a new instance.
- *
- * @param model The identifier of the model used for the cached operation.
- * @param seed The seed value used for randomization in the cached operation.
- * @param temperature The temperature setting used in the cached operation.
- * @param mode The mode of operation that was cached (classification for backward compatibility).
- * @param content The content that was processed in the cached operation.
- * @param localKey A local key for additional identification, not included in JSON serialization.
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record ClassifierCacheKey(
-        String model,
-        int seed,
-        double temperature,
-        LargeLanguageModelCacheMode mode,
-        String content,
-        @JsonIgnore String localKey)
-        implements CacheKey {
+public final class ClassifierCacheKey implements CacheKey {
+    private final String model;
+    private final int seed;
+    private final double temperature;
+    private final LargeLanguageModelCacheMode mode;
+    private final String content;
 
-    public static ClassifierCacheKey of(ClassifierCacheParameter cacheParameter, String content) {
+    @JsonIgnore
+    private final String localKey;
+
+    /**
+     * Creates a new classifier cache key with the specified parameters.
+     *
+     * @param model The identifier of the model used for the cached operation
+     * @param seed The seed value used for randomization in the cached operation
+     * @param temperature The temperature setting used in the cached operation
+     * @param mode The mode of operation that was cached (classification for backward compatibility)
+     * @param content The content that was processed in the cached operation
+     * @param localKey A local key for additional identification, not included in JSON serialization
+     */
+    private ClassifierCacheKey(
+            String model,
+            int seed,
+            double temperature,
+            LargeLanguageModelCacheMode mode,
+            String content,
+            String localKey) {
+        this.model = model;
+        this.seed = seed;
+        this.temperature = temperature;
+        this.mode = mode;
+        this.content = content;
+        this.localKey = localKey;
+    }
+
+    /**
+     * Creates a classifier cache key from the given cache parameter and content.
+     * This is the preferred way to create cache keys.
+     *
+     * @param cacheParameter The cache parameter containing model configuration
+     * @param content The content to be cached
+     * @return A new classifier cache key
+     */
+    static ClassifierCacheKey of(ClassifierCacheParameter cacheParameter, String content) {
         return new ClassifierCacheKey(
                 cacheParameter.modelName(),
                 cacheParameter.seed(),
@@ -44,5 +71,80 @@ public record ClassifierCacheKey(
                 LargeLanguageModelCacheMode.CHAT,
                 content,
                 KeyGenerator.generateKey(content));
+    }
+
+    /**
+     * Gets the identifier of the model used for the cached operation.
+     *
+     * @return The model identifier
+     */
+    public String model() {
+        return model;
+    }
+
+    /**
+     * Gets the seed value used for randomization in the cached operation.
+     *
+     * @return The seed value
+     */
+    public int seed() {
+        return seed;
+    }
+
+    /**
+     * Gets the temperature setting used in the cached operation.
+     *
+     * @return The temperature value
+     */
+    public double temperature() {
+        return temperature;
+    }
+
+    /**
+     * Gets the mode of operation that was cached.
+     *
+     * @return The cache mode
+     */
+    public LargeLanguageModelCacheMode mode() {
+        return mode;
+    }
+
+    /**
+     * Gets the content that was processed in the cached operation.
+     *
+     * @return The content
+     */
+    public String content() {
+        return content;
+    }
+
+    @Override
+    @JsonIgnore
+    public String localKey() {
+        return localKey;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (ClassifierCacheKey) obj;
+        return Objects.equals(this.model, that.model)
+                && this.seed == that.seed
+                && Double.doubleToLongBits(this.temperature) == Double.doubleToLongBits(that.temperature)
+                && Objects.equals(this.mode, that.mode)
+                && Objects.equals(this.content, that.content)
+                && Objects.equals(this.localKey, that.localKey);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(model, seed, temperature, mode, content, localKey);
+    }
+
+    @Override
+    public String toString() {
+        return "ClassifierCacheKey[" + "model=" + model + ", " + "seed=" + seed + ", " + "temperature=" + temperature
+                + ", " + "mode=" + mode + ", " + "content=" + content + ", " + "localKey=" + localKey + ']';
     }
 }

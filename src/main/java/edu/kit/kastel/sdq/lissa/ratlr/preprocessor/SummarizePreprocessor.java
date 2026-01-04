@@ -1,4 +1,4 @@
-/* Licensed under MIT 2025. */
+/* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.preprocessor;
 
 import java.util.ArrayList;
@@ -51,7 +51,7 @@ public class SummarizePreprocessor extends Preprocessor {
     /** Number of threads to use for parallel processing */
     private final int threads;
     /** Cache for storing and retrieving summaries */
-    private final Cache cache;
+    private final Cache<ClassifierCacheKey> cache;
 
     /**
      * Creates a new summarize preprocessor with the specified configuration and context store.
@@ -107,16 +107,14 @@ public class SummarizePreprocessor extends Preprocessor {
         List<Callable<String>> tasks = new ArrayList<>();
         for (String request : requests) {
             tasks.add(() -> {
-                ClassifierCacheKey cacheKey = ClassifierCacheKey.of(provider.cacheParameters(), request);
-
-                String cachedResponse = cache.get(cacheKey, String.class);
+                String cachedResponse = cache.get(request, String.class);
                 if (cachedResponse != null) {
                     return cachedResponse;
                 }
 
                 ChatModel chatModel = threads > 1 ? provider.createChatModel() : llmInstance;
                 String response = chatModel.chat(request);
-                cache.put(cacheKey, response);
+                cache.put(request, response);
                 return response;
             });
         }

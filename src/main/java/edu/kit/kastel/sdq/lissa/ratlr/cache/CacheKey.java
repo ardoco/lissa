@@ -1,21 +1,13 @@
-/* Licensed under MIT 2025. */
+/* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.cache;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-import edu.kit.kastel.sdq.lissa.ratlr.cache.classifier.ClassifierCacheKey;
-import edu.kit.kastel.sdq.lissa.ratlr.cache.embedding.EmbeddingCacheKey;
-
 /**
  * Represents a key for caching operations in the LiSSA framework.
  *
- * The current types of cache keys are:
- * <ul>
- *     <li>{@link EmbeddingCacheKey EmbeddingCacheKey} for caching embedding generation operations.</li>
- *     <li>{@link ClassifierCacheKey ClassifierCacheKey} for caching classification operations.</li>
- * </ul>
  */
 public interface CacheKey {
     /**

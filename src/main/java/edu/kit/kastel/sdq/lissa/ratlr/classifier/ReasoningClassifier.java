@@ -1,4 +1,4 @@
-/* Licensed under MIT 2025. */
+/* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.classifier;
 
 import static dev.langchain4j.internal.Utils.quoted;
@@ -11,7 +11,6 @@ import java.util.regex.Pattern;
 
 import edu.kit.kastel.sdq.lissa.ratlr.cache.Cache;
 import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager;
-import edu.kit.kastel.sdq.lissa.ratlr.cache.classifier.ClassifierCacheKey;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
@@ -36,7 +35,7 @@ public class ReasoningClassifier extends Classifier {
      */
     private static final String CLASSIFICATION_PROMPT_KEY = "prompt";
 
-    private final Cache cache;
+    private final Cache<?> cache;
 
     /**
      * Provider for the language model used in classification.
@@ -200,9 +199,8 @@ public class ReasoningClassifier extends Classifier {
         messages.add(new UserMessage(request));
 
         String messageString = getRepresentation(messages);
-        ClassifierCacheKey cacheKey = ClassifierCacheKey.of(provider.cacheParameters(), messageString);
 
-        String cachedResponse = cache.get(cacheKey, String.class);
+        String cachedResponse = cache.get(messageString, String.class);
         if (cachedResponse != null) {
             return cachedResponse;
         } else {
@@ -213,7 +211,7 @@ public class ReasoningClassifier extends Classifier {
                     target.getIdentifier());
             ChatResponse response = llm.chat(messages);
             String responseText = response.aiMessage().text();
-            cache.put(cacheKey, responseText);
+            cache.put(messageString, responseText);
             return responseText;
         }
     }

@@ -1,4 +1,4 @@
-/* Licensed under MIT 2025. */
+/* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.cache;
 
 import java.io.File;
@@ -19,13 +19,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * to a JSON file. It includes automatic flushing of changes when a certain threshold
  * of modifications is reached.
  */
-class LocalCache {
+class LocalCache<K extends CacheKey> {
     private final ObjectMapper mapper;
 
     /**
      * Maximum number of modifications before automatic flush.
      */
     private static final int MAX_DIRTY = 50;
+
+    private final CacheParameter<K> cacheParameter;
 
     /**
      * Counter for unflushed modifications.
@@ -46,7 +48,8 @@ class LocalCache {
      *
      * @param cacheFile The path to the cache file
      */
-    LocalCache(String cacheFile) {
+    LocalCache(String cacheFile, CacheParameter<K> cacheParameter) {
+        this.cacheParameter = cacheParameter;
         this.cacheFile = new File(cacheFile);
         mapper = new ObjectMapper();
         createLocalStore();
@@ -117,7 +120,20 @@ class LocalCache {
      * @param key The cache key to look up
      * @return The cached value, or null if not found
      */
-    public synchronized @Nullable String get(CacheKey key) {
+    public synchronized @Nullable String get(String key) {
+        K cacheKey = cacheParameter.createCacheKey(key);
+        return cache.get(cacheKey.localKey());
+    }
+
+    /**
+     * Retrieves a value from the cache.
+     *
+     * @param key The cache key to look up
+     * @return The cached value, or null if not found
+     * @deprecated This method exposes internal cache key handling and should not be used in general code.
+     */
+    @Deprecated(forRemoval = false)
+    public String getViaInternalKey(K key) {
         return cache.get(key.localKey());
     }
 
@@ -129,8 +145,30 @@ class LocalCache {
      * @param key The cache key to store the value under
      * @param value The value to store
      */
-    public synchronized void put(CacheKey key, String value) {
-        String old = cache.put(key.localKey(), value);
+    public synchronized void put(String key, String value) {
+        K cacheKey = cacheParameter.createCacheKey(key);
+        String old = cache.put(cacheKey.localKey(), value);
+        if (old == null || !old.equals(value)) {
+            dirty++;
+        }
+
+        if (dirty > MAX_DIRTY) {
+            write();
+        }
+    }
+
+    /**
+     * Stores a value in the cache.
+     * If the value is different from the existing value (if any), the dirty counter is incremented.
+     * If the dirty counter exceeds the maximum threshold, the cache is automatically flushed to disk.
+     *
+     * @param cacheKey The cache key to store the value under
+     * @param value The value to store
+     * @deprecated This method exposes internal cache key handling and should not be used in general code.
+     */
+    @Deprecated(forRemoval = false)
+    public void putViaInternalKey(K cacheKey, String value) {
+        String old = cache.put(cacheKey.localKey(), value);
         if (old == null || !old.equals(value)) {
             dirty++;
         }
@@ -146,7 +184,12 @@ class LocalCache {
      * @param key The cache key to look up
      * @return true if this map contains a mapping for the specified key
      */
-    public boolean containsKey(CacheKey key) {
-        return cache.containsKey(key.localKey());
+    public boolean containsKey(String key) {
+        K cacheKey = cacheParameter.createCacheKey(key);
+        return cache.containsKey(cacheKey.localKey());
+    }
+
+    public CacheParameter<K> getCacheParameter() {
+        return this.cacheParameter;
     }
 }
