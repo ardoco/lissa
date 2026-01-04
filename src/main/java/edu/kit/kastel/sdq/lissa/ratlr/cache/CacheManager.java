@@ -88,9 +88,10 @@ public final class CacheManager {
     }
 
     /**
-     * Gets a cache instance for the specified name, optionally appending a file extension.
+     * Gets a cache instance for the specified name and parameters.
      *
      * @param name The name of the cache
+     * @param parameters The parameters that define the cache configuration
      * @return A cache instance for the specified name
      */
     private <K extends CacheKey> Cache<K> getCache(String name, CacheParameter<K> parameters) {
