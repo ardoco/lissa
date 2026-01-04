@@ -180,12 +180,11 @@ class ArchitectureTest {
                                 // Exclude inherited methods, utility methods, and factory methods
                                 var parameterMethods = cacheParameterType.getMethods().stream()
                                         .filter(m -> !m.getOwner().isEquivalentTo(Object.class))
-                                        .filter(m -> !m.getName()
-                                                .equals("parameters")) // parameters() generates cache file name, not
-                                        // used for individual key construction
-                                        .filter(m -> !m.getName()
-                                                .equals("createCacheKey")) // createCacheKey() is the factory method
-                                        // called by Cache, not by of()
+                                        // parameters() generates cache file name, not used in key creation
+                                        .filter(m -> !m.getName().equals("parameters"))
+                                        // createCacheKey() is the factory method called by Cache, not by of()
+                                        .filter(m -> !m.getName().equals("createCacheKey"))
+                                        // Default methods from Object
                                         .filter(m -> !m.getName().equals("equals"))
                                         .filter(m -> !m.getName().equals("hashCode"))
                                         .filter(m -> !m.getName().equals("toString"))

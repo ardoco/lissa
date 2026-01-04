@@ -58,7 +58,7 @@ class RedisCache<K extends CacheKey> implements Cache<K> {
             CacheParameter<K> cacheParameter, @Nullable LocalCache<K> localCache, boolean replaceLocalCacheOnConflict) {
         this.cacheParameter = Objects.requireNonNull(cacheParameter);
         this.localCache = localCache == null || !localCache.isReady() ? null : localCache;
-        if (localCache != null && !this.getCacheParameter().equals(localCache.getCacheParameter())) {
+        if (this.localCache != null && !this.getCacheParameter().equals(this.localCache.getCacheParameter())) {
             throw new IllegalArgumentException("Cache parameter of local cache does not match the one of Redis cache");
         }
 
@@ -148,6 +148,7 @@ class RedisCache<K extends CacheKey> implements Cache<K> {
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public <T> @Nullable T getViaInternalKey(K cacheKey, Class<T> clazz) {
         String jsonData = jedis == null ? null : jedis.hget(cacheKey.toJsonKey(), "data");
         if (localCache == null) {
@@ -239,6 +240,7 @@ class RedisCache<K extends CacheKey> implements Cache<K> {
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public synchronized <T> void putViaInternalKey(K key, T value) {
         String data;
         try {

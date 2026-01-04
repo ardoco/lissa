@@ -45,7 +45,7 @@ public interface Cache<K extends CacheKey> {
      *
      * @param <T> The type of the value to store
      * @param key The cache key to store the value under
-     * @param value The string value to store
+     * @param value The value to store
      * @deprecated This method exposes internal cache key handling and should not be used in general code.
      */
     @Deprecated(forRemoval = false)
