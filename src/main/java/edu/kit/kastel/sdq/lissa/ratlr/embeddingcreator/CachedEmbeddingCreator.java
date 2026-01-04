@@ -196,12 +196,7 @@ abstract class CachedEmbeddingCreator extends EmbeddingCreator {
                 STATIC_LOGGER.error(
                         "Error while calculating embedding for .. try to fix ..: {}", element.getIdentifier());
                 // Probably the length was too long .. check that
-                return tryToFixWithLength(
-                        embeddingModel,
-                        cache,
-                        embeddingCacheParameter.modelName(),
-                        elementContent,
-                        element.getContent());
+                return tryToFixWithLength(embeddingModel, cache, embeddingCacheParameter.modelName(), elementContent);
             }
         }
     }
@@ -214,18 +209,13 @@ abstract class CachedEmbeddingCreator extends EmbeddingCreator {
      * @param embeddingModel The model to use for embedding generation
      * @param cache The cache to use for storing and retrieving embeddings
      * @param rawNameOfModel The name of the model being used
-     * @param elementContent The original element content
      * @param content The content that exceeded the token limit
      * @return The vector embedding of the truncated content
      * @throws IllegalArgumentException If the token length was not the cause of the failure
      */
     private static float[] tryToFixWithLength(
-            EmbeddingModel embeddingModel,
-            Cache<EmbeddingCacheKey> cache,
-            String rawNameOfModel,
-            String elementContent,
-            String content) {
-        EmbeddingCacheKey originalKey = cache.getCacheParameter().createCacheKey(elementContent);
+            EmbeddingModel embeddingModel, Cache<EmbeddingCacheKey> cache, String rawNameOfModel, String content) {
+        EmbeddingCacheKey originalKey = cache.getCacheParameter().createCacheKey(content);
         String newKey = originalKey.localKey() + "_fixed_" + MAX_TOKEN_LENGTH;
 
         // We need the old keys for backwards compatibility

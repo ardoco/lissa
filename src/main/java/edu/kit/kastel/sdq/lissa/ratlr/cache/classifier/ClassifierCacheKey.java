@@ -101,15 +101,6 @@ public final class ClassifierCacheKey implements CacheKey {
     }
 
     /**
-     * Gets the mode of operation that was cached.
-     *
-     * @return The cache mode
-     */
-    public LargeLanguageModelCacheMode mode() {
-        return mode;
-    }
-
-    /**
      * Gets the content that was processed in the cached operation.
      *
      * @return The content

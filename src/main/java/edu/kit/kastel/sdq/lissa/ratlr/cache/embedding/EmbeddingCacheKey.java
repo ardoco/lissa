@@ -99,33 +99,6 @@ public final class EmbeddingCacheKey implements CacheKey {
     }
 
     /**
-     * Gets the seed value used for randomization in the cached operation.
-     *
-     * @return The seed value (-1 for backward compatibility)
-     */
-    public int seed() {
-        return seed;
-    }
-
-    /**
-     * Gets the temperature setting used in the cached operation.
-     *
-     * @return The temperature value (-1 for backward compatibility)
-     */
-    public double temperature() {
-        return temperature;
-    }
-
-    /**
-     * Gets the mode of operation that was cached.
-     *
-     * @return The cache mode
-     */
-    public LargeLanguageModelCacheMode mode() {
-        return mode;
-    }
-
-    /**
      * Gets the content that was processed in the cached operation.
      *
      * @return The content
