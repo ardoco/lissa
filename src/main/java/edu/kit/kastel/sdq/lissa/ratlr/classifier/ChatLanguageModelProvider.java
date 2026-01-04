@@ -1,4 +1,4 @@
-/* Licensed under MIT 2025. */
+/* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.classifier;
 
 import java.nio.charset.StandardCharsets;
@@ -6,6 +6,8 @@ import java.time.Duration;
 import java.util.Base64;
 import java.util.Map;
 
+import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheParameter;
+import edu.kit.kastel.sdq.lissa.ratlr.cache.classifier.ClassifierCacheParameter;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.Environment;
 
@@ -302,14 +304,9 @@ public class ChatLanguageModelProvider {
      * This method is used to identify the cache uniquely.
      *
      * @return An array of strings representing the cache parameters
-     * @see edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager#getCache(Object, String[])
+     * @see edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager#getCache(Object, CacheParameter)
      */
-    public String[] getCacheParameters() {
-        if (temperature == 0.0) {
-            // Backwards compatibility with the old mode that did not have temperature
-            return new String[] {modelName(), String.valueOf(seed())};
-        } else {
-            return new String[] {modelName(), String.valueOf(seed()), String.valueOf(temperature())};
-        }
+    public ClassifierCacheParameter cacheParameters() {
+        return new ClassifierCacheParameter(modelName, seed, temperature);
     }
 }

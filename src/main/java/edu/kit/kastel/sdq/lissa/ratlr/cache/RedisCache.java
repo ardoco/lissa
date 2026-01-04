@@ -1,4 +1,4 @@
-/* Licensed under MIT 2025. */
+/* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.cache;
 
 import java.time.Instant;
@@ -26,14 +26,17 @@ import redis.clients.jedis.UnifiedJedis;
  * 2. Local-only: When Redis is unavailable and local cache is configured
  * 3. Hybrid: When both Redis and local cache are available (default)
  */
-class RedisCache implements Cache {
+class RedisCache<K extends CacheKey> implements Cache<K> {
     private static final Logger logger = LoggerFactory.getLogger(RedisCache.class);
-    private final ObjectMapper mapper;
+
+    private final CacheParameter<K> cacheParameter;
 
     /**
      * Local file-based cache used as a backup.
      */
-    private final @Nullable LocalCache localCache;
+    private final @Nullable LocalCache<K> localCache;
+
+    private final ObjectMapper mapper;
 
     /**
      * Redis client instance.
@@ -51,8 +54,14 @@ class RedisCache implements Cache {
      * @param localCache The local cache to use as backup, or null if no backup is needed
      * @throws IllegalArgumentException If neither Redis nor local cache can be initialized
      */
-    RedisCache(@Nullable LocalCache localCache, boolean replaceLocalCacheOnConflict) {
+    RedisCache(
+            CacheParameter<K> cacheParameter, @Nullable LocalCache<K> localCache, boolean replaceLocalCacheOnConflict) {
+        this.cacheParameter = Objects.requireNonNull(cacheParameter);
         this.localCache = localCache == null || !localCache.isReady() ? null : localCache;
+        if (this.localCache != null && !this.getCacheParameter().equals(this.localCache.getCacheParameter())) {
+            throw new IllegalArgumentException("Cache parameter of local cache does not match the one of Redis cache");
+        }
+
         mapper = new ObjectMapper();
         createRedisConnection();
         if (jedis == null && this.localCache == null) {
@@ -69,8 +78,9 @@ class RedisCache implements Cache {
     }
 
     @Override
-    public boolean containsKey(CacheKey key) {
-        if (jedis != null && jedis.exists(key.toJsonKey())) {
+    public boolean containsKey(String key) {
+        K cacheKey = cacheParameter.createCacheKey(key);
+        if (jedis != null && jedis.exists(cacheKey.toJsonKey())) {
             return true;
         }
         return localCache != null && localCache.containsKey(key);
@@ -112,8 +122,9 @@ class RedisCache implements Cache {
      * @return The deserialized value, or null if not found
      */
     @Override
-    public synchronized <T> T get(CacheKey key, Class<T> clazz) {
-        String jsonData = jedis == null ? null : jedis.hget(key.toJsonKey(), "data");
+    public synchronized <T> T get(String key, Class<T> clazz) {
+        K cacheKey = cacheParameter.createCacheKey(key);
+        String jsonData = jedis == null ? null : jedis.hget(cacheKey.toJsonKey(), "data");
         if (localCache == null) {
             return convert(jsonData, clazz);
         }
@@ -124,12 +135,38 @@ class RedisCache implements Cache {
         }
         // Value is in local cache but not in redis cache
         if (localData != null && jsonData == null && jedis != null) {
-            jedis.hset(key.toJsonKey(), "data", localData);
+            jedis.hset(cacheKey.toJsonKey(), "data", localData);
         }
         // Value is in both caches, but they differ
         if (replaceLocalCacheOnConflict && jsonData != null && localData != null && !jsonData.equals(localData)) {
             logger.info("Cache inconsistency detected for key {}, using Redis value and replacing local one", key);
             localCache.put(key, jsonData);
+        }
+
+        String valueToReturn = jsonData != null ? jsonData : localData;
+        return convert(valueToReturn, clazz);
+    }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    public synchronized <T> @Nullable T getViaInternalKey(K cacheKey, Class<T> clazz) {
+        String jsonData = jedis == null ? null : jedis.hget(cacheKey.toJsonKey(), "data");
+        if (localCache == null) {
+            return convert(jsonData, clazz);
+        }
+        String localData = localCache.getViaInternalKey(cacheKey);
+        // Value is in redis cache but not in local cache
+        if (localData == null && jsonData != null) {
+            localCache.putViaInternalKey(cacheKey, jsonData);
+        }
+        // Value is in local cache but not in redis cache
+        if (localData != null && jsonData == null && jedis != null) {
+            jedis.hset(cacheKey.toJsonKey(), "data", localData);
+        }
+        // Value is in both caches, but they differ
+        if (replaceLocalCacheOnConflict && jsonData != null && localData != null && !jsonData.equals(localData)) {
+            logger.info("Cache inconsistency detected for key {}, using Redis value and replacing local one", cacheKey);
+            localCache.putViaInternalKey(cacheKey, jsonData);
         }
 
         String valueToReturn = jsonData != null ? jsonData : localData;
@@ -171,9 +208,10 @@ class RedisCache implements Cache {
      * @param value The string value to store
      */
     @Override
-    public synchronized void put(CacheKey key, String value) {
+    public synchronized void put(String key, String value) {
+        K cacheKey = cacheParameter.createCacheKey(key);
         if (jedis != null) {
-            String jsonKey = key.toJsonKey();
+            String jsonKey = cacheKey.toJsonKey();
             jedis.hset(jsonKey, "data", value);
             jedis.hset(jsonKey, "timestamp", String.valueOf(Instant.now().getEpochSecond()));
         }
@@ -193,11 +231,35 @@ class RedisCache implements Cache {
      * @throws NullPointerException If value is null
      */
     @Override
-    public synchronized <T> void put(CacheKey key, T value) {
+    public synchronized <T> void put(String key, T value) {
         try {
             put(key, mapper.writeValueAsString(Objects.requireNonNull(value)));
         } catch (JsonProcessingException e) {
             throw new IllegalArgumentException("Could not serialize object", e);
         }
+    }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    public synchronized <T> void putViaInternalKey(K key, T value) {
+        String data;
+        try {
+            data = mapper.writeValueAsString(Objects.requireNonNull(value));
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Could not serialize object", e);
+        }
+        if (jedis != null) {
+            String jsonKey = key.toJsonKey();
+            jedis.hset(jsonKey, "data", data);
+            jedis.hset(jsonKey, "timestamp", String.valueOf(Instant.now().getEpochSecond()));
+        }
+        if (localCache != null) {
+            localCache.putViaInternalKey(key, data);
+        }
+    }
+
+    @Override
+    public CacheParameter<K> getCacheParameter() {
+        return this.cacheParameter;
     }
 }

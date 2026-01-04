@@ -1,4 +1,4 @@
-/* Licensed under MIT 2025. */
+/* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.classifier;
 
 import static dev.langchain4j.internal.Utils.quoted;
@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 
 import edu.kit.kastel.sdq.lissa.ratlr.cache.Cache;
 import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager;
-import edu.kit.kastel.sdq.lissa.ratlr.cache.ClassifierCacheKey;
+import edu.kit.kastel.sdq.lissa.ratlr.cache.classifier.ClassifierCacheKey;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
@@ -36,7 +36,7 @@ public class ReasoningClassifier extends Classifier {
      */
     private static final String CLASSIFICATION_PROMPT_KEY = "prompt";
 
-    private final Cache cache;
+    private final Cache<ClassifierCacheKey> cache;
 
     /**
      * Provider for the language model used in classification.
@@ -72,7 +72,7 @@ public class ReasoningClassifier extends Classifier {
     public ReasoningClassifier(ModuleConfiguration configuration, ContextStore contextStore) {
         super(ChatLanguageModelProvider.threads(configuration), contextStore);
         this.provider = new ChatLanguageModelProvider(configuration);
-        this.cache = CacheManager.getDefaultInstance().getCache(this, provider.getCacheParameters());
+        this.cache = CacheManager.getDefaultInstance().getCache(this, provider.cacheParameters());
         this.prompt = configuration.argumentAsStringByEnumIndex(
                 CLASSIFICATION_PROMPT_KEY,
                 0,
@@ -96,7 +96,7 @@ public class ReasoningClassifier extends Classifier {
      */
     private ReasoningClassifier(
             int threads,
-            Cache cache,
+            Cache<ClassifierCacheKey> cache,
             ChatLanguageModelProvider provider,
             String prompt,
             boolean useOriginalArtifacts,
@@ -200,10 +200,8 @@ public class ReasoningClassifier extends Classifier {
         messages.add(new UserMessage(request));
 
         String messageString = getRepresentation(messages);
-        ClassifierCacheKey cacheKey =
-                ClassifierCacheKey.of(provider.modelName(), provider.seed(), provider.temperature(), messageString);
 
-        String cachedResponse = cache.get(cacheKey, String.class);
+        String cachedResponse = cache.get(messageString, String.class);
         if (cachedResponse != null) {
             return cachedResponse;
         } else {
@@ -214,7 +212,7 @@ public class ReasoningClassifier extends Classifier {
                     target.getIdentifier());
             ChatResponse response = llm.chat(messages);
             String responseText = response.aiMessage().text();
-            cache.put(cacheKey, responseText);
+            cache.put(messageString, responseText);
             return responseText;
         }
     }

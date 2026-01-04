@@ -1,4 +1,4 @@
-/* Licensed under MIT 2025. */
+/* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.cache;
 
 import java.io.IOException;
@@ -29,7 +29,7 @@ public final class CacheManager {
 
     private static @Nullable CacheManager defaultInstanceManager;
     private final Path directoryOfCaches;
-    private final Map<String, RedisCache> caches = new HashMap<>();
+    private final Map<String, RedisCache<?>> caches = new HashMap<>();
 
     /**
      * Sets the cache directory for the default cache manager instance.
@@ -79,53 +79,38 @@ public final class CacheManager {
      * @param parameters a list of parameters that define what makes a cache unique. E.g., the model name, temperature, and seed.
      * @return A cache instance for the specified name
      */
-    public Cache getCache(Object origin, String[] parameters) {
+    public <K extends CacheKey> Cache<K> getCache(Object origin, CacheParameter<K> parameters) {
         if (origin == null || parameters == null) {
             throw new IllegalArgumentException("Origin and parameters must not be null");
         }
-        for (String param : parameters) {
-            if (param == null) {
-                throw new IllegalArgumentException("Parameters must not contain null values");
-            }
-        }
-        String name = origin.getClass().getSimpleName() + "_" + String.join("_", parameters);
-        return getCache(name, true);
+        String name = origin.getClass().getSimpleName() + "_" + parameters.parameters();
+        return getCache(name, parameters);
     }
 
     /**
-     * Gets a cache instance for the specified name, optionally appending a file extension.
+     * Gets a cache instance for the specified name and parameters.
      *
      * @param name The name of the cache
-     * @param appendEnding Whether to append the .json extension to the cache name
+     * @param parameters The parameters that define the cache configuration
      * @return A cache instance for the specified name
      */
-    private Cache getCache(String name, boolean appendEnding) {
+    private <K extends CacheKey> Cache<K> getCache(String name, CacheParameter<K> parameters) {
         name = name.replace(":", "__");
 
         if (caches.containsKey(name)) {
-            return caches.get(name);
+            @SuppressWarnings("unchecked")
+            Cache<K> cached = (Cache<K>) caches.get(name);
+            if (!cached.getCacheParameter().equals(parameters)) {
+                throw new IllegalArgumentException(
+                        "Cache with name " + name + " already exists with different parameters");
+            }
+            return cached;
         }
 
-        LocalCache localCache = new LocalCache(directoryOfCaches + "/" + name + (appendEnding ? ".json" : ""));
-        RedisCache cache = new RedisCache(localCache, DEFAULT_REPLACE_LOCAL_CACHE_ON_CONFLICT);
+        LocalCache<K> localCache = new LocalCache<>(directoryOfCaches + "/" + name + ".json", parameters);
+        RedisCache<K> cache = new RedisCache<>(parameters, localCache, DEFAULT_REPLACE_LOCAL_CACHE_ON_CONFLICT);
         caches.put(name, cache);
         return cache;
-    }
-
-    /**
-     * Gets a cache instance for an existing cache file.
-     *
-     * @param path The path to the existing cache file
-     * @param create Whether to create the cache file if it doesn't exist
-     * @return A cache instance for the specified file
-     * @throws IllegalArgumentException If the file doesn't exist (and create is false) or is a directory
-     */
-    public Cache getCache(Path path, boolean create) {
-        path = directoryOfCaches.resolve(path.getFileName());
-        if ((!create && Files.notExists(path)) || Files.isDirectory(path)) {
-            throw new IllegalArgumentException("file does not exist or is a directory: " + path);
-        }
-        return getCache(path.getFileName().toString(), false);
     }
 
     /**
@@ -133,7 +118,7 @@ public final class CacheManager {
      * This ensures that all pending changes are written to disk.
      */
     public void flush() {
-        for (Cache cache : caches.values()) {
+        for (Cache<?> cache : caches.values()) {
             cache.flush();
         }
     }

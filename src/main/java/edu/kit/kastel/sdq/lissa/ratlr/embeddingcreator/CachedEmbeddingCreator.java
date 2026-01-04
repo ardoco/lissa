@@ -1,4 +1,4 @@
-/* Licensed under MIT 2025. */
+/* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.embeddingcreator;
 
 import java.util.*;
@@ -11,10 +11,9 @@ import com.knuddels.jtokkit.Encodings;
 import com.knuddels.jtokkit.api.Encoding;
 import com.knuddels.jtokkit.api.EncodingRegistry;
 
-import edu.kit.kastel.sdq.lissa.ratlr.cache.Cache;
-import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheKey;
-import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager;
-import edu.kit.kastel.sdq.lissa.ratlr.cache.EmbeddingCacheKey;
+import edu.kit.kastel.sdq.lissa.ratlr.cache.*;
+import edu.kit.kastel.sdq.lissa.ratlr.cache.embedding.EmbeddingCacheKey;
+import edu.kit.kastel.sdq.lissa.ratlr.cache.embedding.EmbeddingCacheParameter;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.Futures;
@@ -41,10 +40,11 @@ abstract class CachedEmbeddingCreator extends EmbeddingCreator {
 
     private static final Logger STATIC_LOGGER = LoggerFactory.getLogger(CachedEmbeddingCreator.class);
     protected final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private final Cache cache;
+    private final Cache<EmbeddingCacheKey> cache;
     private final EmbeddingModel embeddingModel;
     private final String rawNameOfModel;
     private final int threads;
+    private final EmbeddingCacheParameter embeddingCacheParameter;
 
     /**
      * Creates a new cached embedding creator with the specified model and thread count.
@@ -56,7 +56,8 @@ abstract class CachedEmbeddingCreator extends EmbeddingCreator {
      */
     protected CachedEmbeddingCreator(ContextStore contextStore, String model, int threads, String... params) {
         super(contextStore);
-        this.cache = CacheManager.getDefaultInstance().getCache(this, new String[] {model});
+        this.embeddingCacheParameter = new EmbeddingCacheParameter(model);
+        this.cache = CacheManager.getDefaultInstance().getCache(this, embeddingCacheParameter);
         this.embeddingModel = Objects.requireNonNull(createEmbeddingModel(model, params));
         this.rawNameOfModel = model;
         this.threads = Math.max(1, threads);
@@ -138,7 +139,7 @@ abstract class CachedEmbeddingCreator extends EmbeddingCreator {
     private List<float[]> calculateEmbeddingsSequential(EmbeddingModel embeddingModel, List<Element> elements) {
         List<float[]> embeddings = new ArrayList<>();
         for (Element element : elements) {
-            embeddings.add(calculateFinalEmbedding(embeddingModel, cache, rawNameOfModel, element));
+            embeddings.add(calculateFinalEmbedding(embeddingModel, cache, embeddingCacheParameter, element));
         }
         return embeddings;
     }
@@ -170,30 +171,32 @@ abstract class CachedEmbeddingCreator extends EmbeddingCreator {
      *
      * @param embeddingModel The model to use for embedding generation
      * @param cache The cache to use for storing and retrieving embeddings
-     * @param rawNameOfModel The name of the model being used
+     * @param embeddingCacheParameter The EmbeddingCacheParameter of the model being used
      * @param element The element to create an embedding for
      * @return The vector embedding of the element, either from cache or newly generated
      */
     private static float[] calculateFinalEmbedding(
-            EmbeddingModel embeddingModel, Cache cache, String rawNameOfModel, Element element) {
+            EmbeddingModel embeddingModel,
+            Cache<EmbeddingCacheKey> cache,
+            EmbeddingCacheParameter embeddingCacheParameter,
+            Element element) {
 
-        EmbeddingCacheKey cacheKey = EmbeddingCacheKey.of(rawNameOfModel, element.getContent());
-
-        float[] cachedEmbedding = cache.get(cacheKey, float[].class);
+        String elementContent = element.getContent();
+        float[] cachedEmbedding = cache.get(elementContent, float[].class);
         if (cachedEmbedding != null) {
             return cachedEmbedding;
         } else {
             STATIC_LOGGER.info("Calculating embedding for: {}", element.getIdentifier());
             try {
                 float[] embedding =
-                        embeddingModel.embed(element.getContent()).content().vector();
-                cache.put(cacheKey, embedding);
+                        embeddingModel.embed(elementContent).content().vector();
+                cache.put(elementContent, embedding);
                 return embedding;
             } catch (Exception e) {
                 STATIC_LOGGER.error(
                         "Error while calculating embedding for .. try to fix ..: {}", element.getIdentifier());
                 // Probably the length was too long .. check that
-                return tryToFixWithLength(embeddingModel, cache, rawNameOfModel, cacheKey, element.getContent());
+                return tryToFixWithLength(embeddingModel, cache, embeddingCacheParameter.modelName(), elementContent);
             }
         }
     }
@@ -206,24 +209,25 @@ abstract class CachedEmbeddingCreator extends EmbeddingCreator {
      * @param embeddingModel The model to use for embedding generation
      * @param cache The cache to use for storing and retrieving embeddings
      * @param rawNameOfModel The name of the model being used
-     * @param key The original cache key
      * @param content The content that exceeded the token limit
      * @return The vector embedding of the truncated content
      * @throws IllegalArgumentException If the token length was not the cause of the failure
      */
     private static float[] tryToFixWithLength(
-            EmbeddingModel embeddingModel, Cache cache, String rawNameOfModel, CacheKey key, String content) {
-        String newKey = key.localKey() + "_fixed_" + MAX_TOKEN_LENGTH;
+            EmbeddingModel embeddingModel, Cache<EmbeddingCacheKey> cache, String rawNameOfModel, String content) {
+        EmbeddingCacheKey originalKey = cache.getCacheParameter().createCacheKey(content);
+        String newKey = originalKey.localKey() + "_fixed_" + MAX_TOKEN_LENGTH;
 
         // We need the old keys for backwards compatibility
         @SuppressWarnings("deprecation")
         EmbeddingCacheKey newCacheKey =
                 EmbeddingCacheKey.ofRaw(rawNameOfModel, "(FIXED::%d): %s".formatted(MAX_TOKEN_LENGTH, content), newKey);
 
-        float[] cachedEmbedding = cache.get(newCacheKey, float[].class);
+        @SuppressWarnings("deprecation")
+        float[] cachedEmbedding = cache.getViaInternalKey(newCacheKey, float[].class);
         if (cachedEmbedding != null) {
             if (STATIC_LOGGER.isInfoEnabled()) {
-                STATIC_LOGGER.info("using fixed embedding for: {}", key.localKey());
+                STATIC_LOGGER.info("using fixed embedding for: {}", originalKey.localKey());
             }
             return cachedEmbedding;
         }
@@ -252,9 +256,9 @@ abstract class CachedEmbeddingCreator extends EmbeddingCreator {
         String fixedContent = content.substring(0, left);
         float[] embedding = embeddingModel.embed(fixedContent).content().vector();
         if (STATIC_LOGGER.isInfoEnabled()) {
-            STATIC_LOGGER.info("using fixed embedding for: {}", key.localKey());
+            STATIC_LOGGER.info("using fixed embedding for: {}", originalKey.localKey());
         }
-        cache.put(newCacheKey, embedding);
+        cache.putViaInternalKey(newCacheKey, embedding);
         return embedding;
     }
 }
