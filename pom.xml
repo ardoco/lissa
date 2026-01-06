@@ -8,9 +8,12 @@
     <version>0.22.5</version>
   </parent>
 
-  <groupId>edu.kit.kastel.sdq.lissa</groupId>
-  <artifactId>ratlr</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <groupId>io.github.ardoco</groupId>
+  <artifactId>lissa</artifactId>
+  <version>0.2.0-SNAPSHOT</version>
+
+  <name>LiSSA - Linking Software System Artifacts</name>
+  <description>LiSSA (Linking Software System Artifacts) is an LLM-based approach that aims to be generic across artifact types. The key idea is to use a Large Language Model (LLM) together with information retrieval (IR) to find trace links. For a given source artifact (e.g., a requirement or a sentence in documentation), LiSSA first uses IR techniques to retrieve a small set of potentially relevant target artifacts (code files, model elements, etc.). It then queries the LLM with the retrieved context to generate or suggest the most likely trace link.</description>
 
   <properties>
     <maven.compiler.source>21</maven.compiler.source>
@@ -26,7 +29,7 @@
       <dependency>
         <groupId>dev.langchain4j</groupId>
         <artifactId>langchain4j-bom</artifactId>
-        <version>1.9.1</version>
+        <version>1.10.0</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -93,7 +96,7 @@
     <dependency>
       <groupId>io.github.bonede</groupId>
       <artifactId>tree-sitter</artifactId>
-      <version>0.25.3</version>
+      <version>0.26.3</version>
     </dependency>
     <dependency>
       <groupId>io.github.bonede</groupId>
@@ -129,7 +132,7 @@
     <dependency>
       <groupId>redis.clients</groupId>
       <artifactId>jedis</artifactId>
-      <version>7.1.0</version>
+      <version>7.2.0</version>
     </dependency>
   </dependencies>
   <repositories>
