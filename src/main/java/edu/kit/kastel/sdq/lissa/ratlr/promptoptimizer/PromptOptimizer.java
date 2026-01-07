@@ -19,5 +19,5 @@ public interface PromptOptimizer {
      * @param targetStore The store containing target elements of the domain/dataset the prompt is optimized for
      * @return A string representing the optimized prompt
      */
-    String optimize(SourceElementStore sourceStore, TargetElementStore targetStore);
+    String[] optimize(SourceElementStore sourceStore, TargetElementStore targetStore);
 }
