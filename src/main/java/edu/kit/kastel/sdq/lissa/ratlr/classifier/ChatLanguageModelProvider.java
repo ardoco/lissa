@@ -67,6 +67,12 @@ public class ChatLanguageModelProvider {
     public static final double DEFAULT_TEMPERATURE = 0.0;
 
     /**
+     * Singleton instance cache for OpenAI chat models.
+     * Key format: "modelName_seed_temperature"
+     */
+    private static final Map<String, OpenAiChatModel> openAiModelCache = new java.util.concurrent.ConcurrentHashMap<>();
+
+    /**
      * The platform to use for the language model.
      */
     private final ChatLanguageModelPlatform platform;
@@ -215,13 +221,14 @@ public class ChatLanguageModelProvider {
         if (openAiOrganizationId == null || openAiApiKey == null) {
             throw new IllegalStateException("OPENAI_ORGANIZATION_ID or OPENAI_API_KEY environment variable not set");
         }
-        return new OpenAiChatModel.OpenAiChatModelBuilder()
+        String cacheKey = model + "_" + seed + "_" + temperature;
+        return openAiModelCache.computeIfAbsent(cacheKey, k -> new OpenAiChatModel.OpenAiChatModelBuilder()
                 .modelName(model)
                 .organizationId(openAiOrganizationId)
                 .apiKey(openAiApiKey)
                 .temperature(temperature)
                 .seed(seed)
-                .build();
+                .build());
     }
 
     /**
