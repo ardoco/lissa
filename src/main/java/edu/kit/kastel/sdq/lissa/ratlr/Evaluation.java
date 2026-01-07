@@ -1,4 +1,4 @@
-/* Licensed under MIT 2025. */
+/* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr;
 
 import java.io.IOException;
@@ -110,7 +110,46 @@ public class Evaluation {
     public Evaluation(Path configFile) throws IOException {
         this.configFile = Objects.requireNonNull(configFile);
         configuration = new ObjectMapper().readValue(configFile.toFile(), Configuration.class);
-        setup();
+        setup("");
+    }
+
+    /**
+     * Creates a new evaluation instance with the specified configuration file. Overwrites the prompt used for classification.
+     * This constructor is only to be used by the class {@link Optimization}, as the resulting configuration will
+     * not include the prompt.
+     * This constructor:
+     * <ol>
+     *     <li>Validates the configuration file path</li>
+     *     <li>Loads and initializes the configuration</li>
+     *     <li>Sets up all required components for the pipeline, sharing a {@link ContextStore}</li>
+     * </ol>
+     *
+     * @param configFile Path to the configuration file
+     * @param prompt The prompt to use for classification
+     * @throws IOException If there are issues reading the configuration file
+     * @throws NullPointerException If configFile is null
+     */
+    public Evaluation(Path configFile, String prompt) throws IOException {
+        this.configFile = Objects.requireNonNull(configFile);
+        configuration = new ObjectMapper().readValue(configFile.toFile(), Configuration.class);
+        setup(prompt);
+    }
+
+    /**
+     * Creates a new evaluation instance with the specified configuration object.
+     * This constructor:
+     * <ol>
+     *     <li>Initializes the configuration</li>
+     *     <li>Sets up all required components for the pipeline, sharing a {@link ContextStore}</li>
+     * </ol>
+     * @param config The configuration object
+     * @throws IOException If there are issues setting up the cache
+     */
+    public Evaluation(Configuration config) throws IOException {
+        this.configuration = config;
+        // TODO maybe dont?
+        this.configFile = null;
+        setup("");
     }
 
     /**
@@ -130,7 +169,7 @@ public class Evaluation {
      *
      * @throws IOException If there are issues reading the configuration
      */
-    private void setup() throws IOException {
+    private void setup(String prompt) throws IOException {
         CacheManager.setCacheDir(configuration.cacheDir());
 
         ContextStore contextStore = new ContextStore();
@@ -146,6 +185,13 @@ public class Evaluation {
         embeddingCreator = EmbeddingCreator.createEmbeddingCreator(configuration.embeddingCreator(), contextStore);
         sourceStore = new SourceElementStore(configuration.sourceStore());
         targetStore = new TargetElementStore(configuration.targetStore());
+        // TODO: careful, this is a hack to allow the optimization to overwrite the prompt and store it to the config
+        //  for serialization. Maybe you can utilize ModuleConfiguration.with() instead?
+        if (!prompt.isEmpty()) {
+            configuration
+                    .classifier()
+                    .setArgument(Classifier.createClassificationPromptKey(configuration.classifier()), prompt);
+        }
         classifier = configuration.createClassifier(contextStore);
         aggregator = ResultAggregator.createResultAggregator(configuration.resultAggregator(), contextStore);
 

@@ -1,0 +1,11 @@
+
+```
+Question: Here are two parts of software development artifacts that may represent requirements\.
+
+            \{source\_type\}: '''\{source\_content\}'''
+
+            \{target\_type\}: '''\{target\_content\}'''
+            Do these artifacts establish a traceability link between requirements?
+
+            Answer with 'yes' or 'no'\.
+```

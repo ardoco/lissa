@@ -1,0 +1,16 @@
+
+```
+Question: Here are two parts of software development artifacts\.
+
+            \{source\_type\}: '''\{source\_content\}'''
+
+            \{target\_type\}: '''\{target\_content\}'''
+            Do these requirements demonstrate a direct relationship in terms of functionality, implementation, compliance with standards, or shared objectives? Specifically, assess whether the source requirement provides support, elaboration, or relevant context that enhances the understanding of the target requirement\. Consider if they align in terms of purpose, scope, or technical specifications\.
+
+            Focus on the following criteria:
+            1\. Does the source requirement describe a feature or functionality that directly supports or relates to the implementation or behavior described in the target requirement?
+            2\. Are there shared objectives or compliance with standards between the two requirements?
+            3\. Does the source requirement provide necessary context that clarifies or expands upon the target requirement?
+
+            Answer with 'yes' or 'no'\.
+```

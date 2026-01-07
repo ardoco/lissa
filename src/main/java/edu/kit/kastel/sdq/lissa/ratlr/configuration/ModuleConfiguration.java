@@ -1,4 +1,4 @@
-/* Licensed under MIT 2025. */
+/* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.configuration;
 
 import java.util.Arrays;
@@ -130,6 +130,27 @@ public final class ModuleConfiguration {
     }
 
     /**
+     * Sets an argument from a string value.
+     * This method allows overwriting the value of an argument specified in the configuration.
+     *
+     * @param key The key of the argument to set
+     * @param value The value to set for the argument
+     * @throws IllegalStateException If the configuration has been finalized
+     * @throws IllegalArgumentException If the value conflicts with a previously retrieved value
+     */
+    public void setArgument(String key, String value) {
+        if (finalized) {
+            throw new IllegalStateException(ALREADY_FINALIZED_FOR_SERIALIZATION);
+        }
+        arguments.put(key, value);
+        String retrievedArgument = retrievedArguments.put(key, value);
+        if (retrievedArgument != null && !retrievedArgument.equals(value)) {
+            throw new IllegalArgumentException("Default argument for key " + key + " already set to "
+                    + retrievedArgument + " and cannot be changed to " + value);
+        }
+    }
+
+    /**
      * Retrieves an argument as an integer.
      *
      * @param key The key of the argument to retrieve
@@ -150,6 +171,19 @@ public final class ModuleConfiguration {
      */
     public int argumentAsInt(String key, int defaultValue) {
         return Integer.parseInt(argumentAsString(key, String.valueOf(defaultValue)));
+    }
+
+    /**
+     * Sets an argument from an integer value.
+     * This method allows overwriting the value of an argument specified in the configuration.
+     *
+     * @param key The key of the argument to set
+     * @param value The integer value to set for the argument
+     * @throws IllegalStateException If the configuration has been finalized
+     * @throws IllegalArgumentException If the value conflicts with a previously retrieved value
+     */
+    public void setArgument(String key, int value) {
+        setArgument(key, String.valueOf(value));
     }
 
     /**

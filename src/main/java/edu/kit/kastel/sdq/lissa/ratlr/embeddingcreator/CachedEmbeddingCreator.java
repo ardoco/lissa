@@ -1,4 +1,4 @@
-/* Licensed under MIT 2025. */
+/* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.embeddingcreator;
 
 import java.util.*;
@@ -11,10 +11,9 @@ import com.knuddels.jtokkit.Encodings;
 import com.knuddels.jtokkit.api.Encoding;
 import com.knuddels.jtokkit.api.EncodingRegistry;
 
-import edu.kit.kastel.sdq.lissa.ratlr.cache.Cache;
-import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheKey;
-import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager;
-import edu.kit.kastel.sdq.lissa.ratlr.cache.EmbeddingCacheKey;
+import edu.kit.kastel.sdq.lissa.ratlr.cache.*;
+import edu.kit.kastel.sdq.lissa.ratlr.cache.embedding.EmbeddingCacheKey;
+import edu.kit.kastel.sdq.lissa.ratlr.cache.embedding.EmbeddingCacheParameter;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.Futures;
@@ -45,6 +44,7 @@ abstract class CachedEmbeddingCreator extends EmbeddingCreator {
     private final EmbeddingModel embeddingModel;
     private final String rawNameOfModel;
     private final int threads;
+    private final EmbeddingCacheParameter embeddingCacheParameter;
 
     /**
      * Creates a new cached embedding creator with the specified model and thread count.
@@ -56,7 +56,8 @@ abstract class CachedEmbeddingCreator extends EmbeddingCreator {
      */
     protected CachedEmbeddingCreator(ContextStore contextStore, String model, int threads, String... params) {
         super(contextStore);
-        this.cache = CacheManager.getDefaultInstance().getCache(this, new String[] {model});
+        this.embeddingCacheParameter = new EmbeddingCacheParameter(model);
+        this.cache = CacheManager.getDefaultInstance().getCache(this, embeddingCacheParameter);
         this.embeddingModel = Objects.requireNonNull(createEmbeddingModel(model, params));
         this.rawNameOfModel = model;
         this.threads = Math.max(1, threads);
@@ -138,7 +139,7 @@ abstract class CachedEmbeddingCreator extends EmbeddingCreator {
     private List<float[]> calculateEmbeddingsSequential(EmbeddingModel embeddingModel, List<Element> elements) {
         List<float[]> embeddings = new ArrayList<>();
         for (Element element : elements) {
-            embeddings.add(calculateFinalEmbedding(embeddingModel, cache, rawNameOfModel, element));
+            embeddings.add(calculateFinalEmbedding(embeddingModel, cache, embeddingCacheParameter, element));
         }
         return embeddings;
     }
@@ -170,14 +171,17 @@ abstract class CachedEmbeddingCreator extends EmbeddingCreator {
      *
      * @param embeddingModel The model to use for embedding generation
      * @param cache The cache to use for storing and retrieving embeddings
-     * @param rawNameOfModel The name of the model being used
+     * @param embeddingCacheParameter The EmbeddingCacheParameter of the model being used
      * @param element The element to create an embedding for
      * @return The vector embedding of the element, either from cache or newly generated
      */
     private static float[] calculateFinalEmbedding(
-            EmbeddingModel embeddingModel, Cache cache, String rawNameOfModel, Element element) {
+            EmbeddingModel embeddingModel,
+            Cache cache,
+            EmbeddingCacheParameter embeddingCacheParameter,
+            Element element) {
 
-        EmbeddingCacheKey cacheKey = EmbeddingCacheKey.of(rawNameOfModel, element.getContent());
+        EmbeddingCacheKey cacheKey = EmbeddingCacheKey.of(embeddingCacheParameter, element.getContent());
 
         float[] cachedEmbedding = cache.get(cacheKey, float[].class);
         if (cachedEmbedding != null) {
@@ -193,7 +197,8 @@ abstract class CachedEmbeddingCreator extends EmbeddingCreator {
                 STATIC_LOGGER.error(
                         "Error while calculating embedding for .. try to fix ..: {}", element.getIdentifier());
                 // Probably the length was too long .. check that
-                return tryToFixWithLength(embeddingModel, cache, rawNameOfModel, cacheKey, element.getContent());
+                return tryToFixWithLength(
+                        embeddingModel, cache, embeddingCacheParameter.modelName(), cacheKey, element.getContent());
             }
         }
     }

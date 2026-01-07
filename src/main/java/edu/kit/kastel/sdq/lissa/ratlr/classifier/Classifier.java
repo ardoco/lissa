@@ -1,4 +1,4 @@
-/* Licensed under MIT 2025. */
+/* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.classifier;
 
 import static edu.kit.kastel.sdq.lissa.ratlr.classifier.MockClassifier.MOCK_CLASSIFIER_NAME;
@@ -113,7 +113,7 @@ public abstract class Classifier {
             });
         }
 
-        logger.info("Waiting for classification to finish. Tasks in queue: {}", taskQueue.size());
+        logger.debug("Waiting for classification to finish. Tasks in queue: {}", taskQueue.size());
 
         for (Thread worker : workers) {
             try {
@@ -125,7 +125,7 @@ public abstract class Classifier {
         }
 
         List<ClassificationResult> resultList = new ArrayList<>(results);
-        logger.info("Finished parallel classification with {} results.", resultList.size());
+        logger.debug("Finished parallel classification with {} results.", resultList.size());
         return resultList;
     }
 
@@ -192,7 +192,7 @@ public abstract class Classifier {
      *
      * @return A new instance of the same classifier type
      */
-    protected abstract Classifier copyOf();
+    public abstract Classifier copyOf();
 
     /**
      * Sets the prompt used for classification.
@@ -201,13 +201,6 @@ public abstract class Classifier {
      * @param prompt The prompt template to use for classification
      */
     public abstract void setClassificationPrompt(String prompt);
-
-    /**
-     * Gets the key used to set the classification prompt in configurations.
-     *
-     * @return The classification prompt key
-     */
-    public abstract String getClassificationPromptKey();
 
     /**
      * Creates a list of classification tasks from source and target element stores.
@@ -253,6 +246,17 @@ public abstract class Classifier {
             case MOCK_CLASSIFIER_NAME -> new MockClassifier(contextStore);
             case SIMPLE_CLASSIFIER_NAME -> new SimpleClassifier(configuration, contextStore);
             case REASONING_CLASSIFIER_NAME -> new ReasoningClassifier(configuration, contextStore);
+            default -> throw new IllegalStateException("Unexpected value: " + configuration.name());
+        };
+    }
+
+    public static String createClassificationPromptKey(ModuleConfiguration configuration) {
+        return switch (configuration.name().split(CONFIG_NAME_SEPARATOR)[0]) {
+            case MOCK_CLASSIFIER_NAME ->
+                throw new UnsupportedOperationException(
+                        "MockClassifier does not support retrieving a single classification prompt key.");
+            case SIMPLE_CLASSIFIER_NAME -> SimpleClassifier.getClassificationPromptKey();
+            case REASONING_CLASSIFIER_NAME -> ReasoningClassifier.getClassificationPromptKey();
             default -> throw new IllegalStateException("Unexpected value: " + configuration.name());
         };
     }

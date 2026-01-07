@@ -1,4 +1,4 @@
-/* Licensed under MIT 2025. */
+/* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.classifier;
 
 import java.nio.charset.StandardCharsets;
@@ -6,6 +6,8 @@ import java.time.Duration;
 import java.util.Base64;
 import java.util.Map;
 
+import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheParameter;
+import edu.kit.kastel.sdq.lissa.ratlr.cache.classifier.ClassifierCacheParameter;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.Environment;
 
@@ -63,6 +65,12 @@ public class ChatLanguageModelProvider {
      * Default temperature setting for the model.
      */
     public static final double DEFAULT_TEMPERATURE = 0.0;
+
+    /**
+     * Singleton instance cache for OpenAI chat models.
+     * Key format: "modelName_seed_temperature"
+     */
+    private static final Map<String, OpenAiChatModel> openAiModelCache = new java.util.concurrent.ConcurrentHashMap<>();
 
     /**
      * The platform to use for the language model.
@@ -213,13 +221,14 @@ public class ChatLanguageModelProvider {
         if (openAiOrganizationId == null || openAiApiKey == null) {
             throw new IllegalStateException("OPENAI_ORGANIZATION_ID or OPENAI_API_KEY environment variable not set");
         }
-        return new OpenAiChatModel.OpenAiChatModelBuilder()
+        String cacheKey = model + "_" + seed + "_" + temperature;
+        return openAiModelCache.computeIfAbsent(cacheKey, k -> new OpenAiChatModel.OpenAiChatModelBuilder()
                 .modelName(model)
                 .organizationId(openAiOrganizationId)
                 .apiKey(openAiApiKey)
                 .temperature(temperature)
                 .seed(seed)
-                .build();
+                .build());
     }
 
     /**
@@ -302,14 +311,9 @@ public class ChatLanguageModelProvider {
      * This method is used to identify the cache uniquely.
      *
      * @return An array of strings representing the cache parameters
-     * @see edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager#getCache(Object, String[])
+     * @see edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager#getCache(Object, CacheParameter)
      */
-    public String[] getCacheParameters() {
-        if (temperature == 0.0) {
-            // Backwards compatibility with the old mode that did not have temperature
-            return new String[] {modelName(), String.valueOf(seed())};
-        } else {
-            return new String[] {modelName(), String.valueOf(seed()), String.valueOf(temperature())};
-        }
+    public ClassifierCacheParameter cacheParameters() {
+        return new ClassifierCacheParameter(modelName, seed, temperature);
     }
 }

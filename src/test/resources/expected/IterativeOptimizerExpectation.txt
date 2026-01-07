@@ -1,0 +1,11 @@
+
+```
+Question: Here are two parts of software development artifacts that may represent requirements\.
+
+            \{source\_type\}: '''\{source\_content\}'''
+
+            \{target\_type\}: '''\{target\_content\}'''
+            Please conduct a comprehensive analysis of the relationship between these artifacts to determine if they establish a traceability link between requirements\. In your evaluation, consider the context, intent, specificity, and any potential dependencies or relationships that may exist between the two requirements\. Additionally, assess how well the source and target align in terms of their goals, functionalities, and overall coherence\. Look for keywords, phrases, and thematic connections that may indicate a direct or indirect relationship\.
+
+            Provide your answer as 'yes' if a traceability link exists, or 'no' if it does not\.
+```

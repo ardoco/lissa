@@ -1,4 +1,4 @@
-/* Licensed under MIT 2025. */
+/* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.preprocessor;
 
 import java.util.ArrayList;
@@ -7,7 +7,7 @@ import java.util.concurrent.*;
 
 import edu.kit.kastel.sdq.lissa.ratlr.cache.Cache;
 import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager;
-import edu.kit.kastel.sdq.lissa.ratlr.cache.ClassifierCacheKey;
+import edu.kit.kastel.sdq.lissa.ratlr.cache.classifier.ClassifierCacheKey;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.ChatLanguageModelProvider;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
@@ -64,7 +64,7 @@ public class SummarizePreprocessor extends Preprocessor {
         this.template = moduleConfiguration.argumentAsString("template", "Summarize the following {type}: {content}");
         this.provider = new ChatLanguageModelProvider(moduleConfiguration);
         this.threads = ChatLanguageModelProvider.threads(moduleConfiguration);
-        this.cache = CacheManager.getDefaultInstance().getCache(this, provider.getCacheParameters());
+        this.cache = CacheManager.getDefaultInstance().getCache(this, provider.cacheParameters());
     }
 
     /**
@@ -107,8 +107,7 @@ public class SummarizePreprocessor extends Preprocessor {
         List<Callable<String>> tasks = new ArrayList<>();
         for (String request : requests) {
             tasks.add(() -> {
-                ClassifierCacheKey cacheKey =
-                        ClassifierCacheKey.of(provider.modelName(), provider.seed(), provider.temperature(), request);
+                ClassifierCacheKey cacheKey = ClassifierCacheKey.of(provider.cacheParameters(), request);
 
                 String cachedResponse = cache.get(cacheKey, String.class);
                 if (cachedResponse != null) {

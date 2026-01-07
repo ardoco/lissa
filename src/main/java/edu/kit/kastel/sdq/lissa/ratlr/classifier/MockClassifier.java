@@ -1,4 +1,4 @@
-/* Licensed under MIT 2025. */
+/* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.classifier;
 
 import java.util.Optional;
@@ -41,19 +41,13 @@ public class MockClassifier extends Classifier {
     }
 
     @Override
-    protected Classifier copyOf() {
+    public Classifier copyOf() {
         return new MockClassifier(contextStore);
     }
 
     @Override
     public void setClassificationPrompt(String prompt) {
-        throw new UnsupportedOperationException(
-                "MockClassifier does not support setting a single classification prompt.");
-    }
-
-    @Override
-    public String getClassificationPromptKey() {
-        throw new UnsupportedOperationException(
-                "MockClassifier does not support retrieving a single classification prompt key.");
+        // TODO: This may / should throw an UnsportedOperationException instead?
+        // as no classification prompt is used, this method does nothing
     }
 }
