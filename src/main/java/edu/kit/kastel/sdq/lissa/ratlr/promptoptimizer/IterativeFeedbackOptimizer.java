@@ -88,8 +88,9 @@ public class IterativeFeedbackOptimizer extends IterativeOptimizer {
     }
 
     @Override
-    protected String optimizeIntern(List<ClassificationTask> examples) {
+    protected String[] optimizeIntern(List<ClassificationTask> examples) {
         double[] promptScores = new double[maximumIterations];
+        String[] optimizedPrompts = new String[maximumIterations];
         int i = 0;
         double promptScore;
         String modifiedPrompt = optimizationPrompt;
@@ -135,6 +136,7 @@ public class IterativeFeedbackOptimizer extends IterativeOptimizer {
 
             LOGGER.debug("Received and extracted new prompt:\n{}", modifiedPrompt);
             modifiedPrompt = cachedSanitizedRequest(request);
+            optimizedPrompts[i] = modifiedPrompt;
             i++;
         } while (i < maximumIterations && promptScore < thresholdScore);
 
@@ -144,7 +146,7 @@ public class IterativeFeedbackOptimizer extends IterativeOptimizer {
         LOGGER.debug("Final score: {}", promptScore);
         LOGGER.debug("Final Prompt:\n{}", modifiedPrompt);
         LOGGER.debug("=".repeat(80));
-        return modifiedPrompt;
+        return optimizedPrompts;
     }
 
     /**

@@ -95,7 +95,8 @@ OPENAI_API_KEY=sk-DUMMY
         Assertions.assertTrue(
                 config.exists(), "The configuration file should exist at %s".formatted(config.getAbsolutePath()));
         Optimization optimization = new Optimization(config.toPath());
-        String optimizedPrompt = optimization.run();
+        String[] optimizedPrompts = optimization.run();
+        String optimizedPrompt = optimizedPrompts[optimizedPrompts.length - 1];
         String escapedOptimizedPrompt = escapeMarkdown(optimizedPrompt);
 
         Assertions.assertEquals(

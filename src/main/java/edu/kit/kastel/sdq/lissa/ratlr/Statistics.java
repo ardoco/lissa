@@ -251,6 +251,42 @@ public final class Statistics {
     }
 
     /**
+     * Generates statistics for prompt optimization with a specific iteration count.
+     * This method modifies the maximum_iterations field in the serialized configuration JSON
+     * to reflect the actual iteration number.
+     *
+     * @param configFile Configuration file used for the optimization
+     * @param configurationSummary Already serialized configuration JSON
+     * @param prompt Optimized prompt generated during the optimization
+     * @param iterationCount The actual iteration count to set in the configuration
+     * @throws UncheckedIOException If there are issues writing the statistics file
+     */
+    public static void generateOptimizationStatistics(
+            File configFile, String configurationSummary, String prompt, int iterationCount)
+            throws UncheckedIOException {
+        // Modify the maximum_iterations in the serialized JSON
+        String modifiedConfig = modifyMaxIterationsInJson(configurationSummary, iterationCount);
+
+        // Generate a unique identifier for this iteration
+        String configurationIdentifier = configFile.getName() + "_iter" + iterationCount;
+
+        generateOptimizationStatistics(configurationIdentifier, modifiedConfig, prompt);
+    }
+
+    /**
+     * Modifies the maximum_iterations field in a JSON configuration string.
+     *
+     * @param jsonConfig The original JSON configuration string
+     * @param iterationCount The new iteration count to set
+     * @return The modified JSON configuration string
+     */
+    private static String modifyMaxIterationsInJson(String jsonConfig, int iterationCount) {
+        // Use regex to replace the maximum_iterations value
+        return jsonConfig.replaceAll(
+                "\"maximum_iterations\"\\s*:\\s*\"?\\d+\"?", "\"maximum_iterations\" : \"" + iterationCount + "\"");
+    }
+
+    /**
      * Generates statistics for prompt optimization with custom configuration identifier.
      *
      * This method:

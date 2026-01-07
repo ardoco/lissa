@@ -78,10 +78,10 @@ public class OptimizeCommand implements Runnable {
 
         for (Path optimizationConfig : configsToOptimize) {
             LOGGER.info("Invoking the optimization pipeline with '{}'", optimizationConfig);
-            String optimizedPrompt = "";
+            String[] optimizedPrompts = {};
             try {
                 var optimization = new Optimization(optimizationConfig);
-                optimizedPrompt = optimization.run();
+                optimizedPrompts = optimization.run();
             } catch (IOException e) {
                 LOGGER.warn(
                         "Optimization configuration '{}' threw an exception: {} \n Maybe the file does not exist?",
@@ -89,7 +89,9 @@ public class OptimizeCommand implements Runnable {
                         e.getMessage());
             }
             for (Path evaluationConfig : configsToEvaluate) {
-                runEvaluation(evaluationConfig, optimizedPrompt);
+                for (String optimizedPrompt : optimizedPrompts) {
+                    runEvaluation(evaluationConfig, optimizedPrompt);
+                }
             }
         }
     }

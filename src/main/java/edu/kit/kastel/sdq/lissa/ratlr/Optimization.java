@@ -100,24 +100,30 @@ public class Optimization {
      * <ol>
      *     <li>Sets up the source and target stores</li>
      *     <li>Optimizes the prompt using the configured optimizer</li>
-     *     <li>Generates and saves optimization statistics</li>
+     *     <li>Generates and saves optimization statistics for each intermediate prompt</li>
+     *     <li>Generates and saves optimization statistics for the final prompt</li>
      *     <li>Flushes the cache to persist changes</li>
      * </ol>
      *
      * @return The optimized prompt as a String
      */
-    public String run() {
+    public String[] run() {
         evaluationPipeline.initializeSourceAndTargetStores();
 
         LOGGER.info("Optimizing Prompt");
-        String result =
-                promptOptimizer.optimize(evaluationPipeline.getSourceStore(), evaluationPipeline.getTargetStore());
-        LOGGER.info("Optimized Prompt: {}", result);
 
-        Statistics.generateOptimizationStatistics(configFile.toFile(), configuration, result);
+        String[] results =
+                promptOptimizer.optimize(evaluationPipeline.getSourceStore(), evaluationPipeline.getTargetStore());
+
+        String configurationSummary = configuration.serializeAndDestroyConfiguration();
+
+        for (int i = 0; i < results.length; i++) {
+            Statistics.generateOptimizationStatistics(configFile.toFile(), configurationSummary, results[i], i + 1);
+        }
+        LOGGER.info("Optimized prompt after {} steps: \n {}", results.length, results[results.length - 1]);
 
         CacheManager.getDefaultInstance().flush();
 
-        return result;
+        return results;
     }
 }

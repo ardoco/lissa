@@ -92,7 +92,8 @@ public class AutomaticPromptOptimizer extends IterativeOptimizer {
      * @return The optimized prompt after the specified number of iterations
      */
     @Override
-    public String optimize(SourceElementStore sourceStore, TargetElementStore targetStore) {
+    public String[] optimize(SourceElementStore sourceStore, TargetElementStore targetStore) {
+        String[] optimizedPrompts = new String[maximumIterations];
         List<ClassificationTask> tasks = getClassificationTasks(sourceStore, targetStore, validTraceLinks);
         List<String> candidatePrompts = new ArrayList<>(Collections.singleton(optimizationPrompt));
         for (int round = 0; round < maximumIterations; round++) {
@@ -109,8 +110,9 @@ public class AutomaticPromptOptimizer extends IterativeOptimizer {
             List<Double> scores = candidatesAndScores.second();
             // record candidates, estimated scores, and true scores
             LOGGER.info("Scores: {}", scores);
+            optimizedPrompts[round] = candidatePrompts.getFirst();
         }
-        return candidatePrompts.getFirst();
+        return optimizedPrompts;
     }
 
     /**

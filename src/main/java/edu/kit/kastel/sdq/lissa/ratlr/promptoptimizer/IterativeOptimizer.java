@@ -184,7 +184,7 @@ public class IterativeOptimizer implements PromptOptimizer {
     }
 
     @Override
-    public String optimize(SourceElementStore sourceStore, TargetElementStore targetStore) {
+    public String[] optimize(SourceElementStore sourceStore, TargetElementStore targetStore) {
         var source = sourceStore.getAllElements(false).getFirst();
         Element target = targetStore.findSimilar(source).getFirst();
         formattedTemplate = template.replace(
@@ -205,8 +205,9 @@ public class IterativeOptimizer implements PromptOptimizer {
      * @param examples The classification tasks used to evaluate the prompts performance
      * @return The optimized prompt after the iterative process
      */
-    protected String optimizeIntern(List<ClassificationTask> examples) {
+    protected String[] optimizeIntern(List<ClassificationTask> examples) {
         double[] promptScores = new double[maximumIterations];
+        String[] optimizedPrompts = new String[maximumIterations];
         int i = 0;
         double promptScore;
         String modifiedPrompt = optimizationPrompt;
@@ -216,10 +217,11 @@ public class IterativeOptimizer implements PromptOptimizer {
             LOGGER.debug("Iteration {}: {} = {}", i, metric.getName(), promptScore);
             promptScores[i] = promptScore;
             modifiedPrompt = cachedSanitizedRequest(generateOptimizationPrompt(modifiedPrompt));
+            optimizedPrompts[i] = modifiedPrompt;
             i++;
         } while (i < maximumIterations && promptScore < thresholdScore);
         LOGGER.info("Iterations {}: {} = {}", i, metric.getName(), promptScores);
-        return modifiedPrompt;
+        return optimizedPrompts;
     }
 
     /**

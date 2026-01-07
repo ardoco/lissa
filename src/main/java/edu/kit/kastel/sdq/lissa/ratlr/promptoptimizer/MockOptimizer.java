@@ -15,7 +15,7 @@ public class MockOptimizer implements PromptOptimizer {
     }
 
     @Override
-    public String optimize(SourceElementStore sourceStore, TargetElementStore targetStore) {
-        return "";
+    public String[] optimize(SourceElementStore sourceStore, TargetElementStore targetStore) {
+        return new String[] {""};
     }
 }
