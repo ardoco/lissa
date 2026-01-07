@@ -50,10 +50,4 @@ public class MockClassifier extends Classifier {
         // TODO: This may / should throw an UnsportedOperationException instead?
         // as no classification prompt is used, this method does nothing
     }
-
-    @Override
-    public String getClassificationPromptKey() {
-        throw new UnsupportedOperationException(
-                "MockClassifier does not support retrieving a single classification prompt key.");
-    }
 }

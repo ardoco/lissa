@@ -188,7 +188,9 @@ public class Evaluation {
         // TODO: careful, this is a hack to allow the optimization to overwrite the prompt and store it to the config
         //  for serialization. Maybe you can utilize ModuleConfiguration.with() instead?
         if (!prompt.isEmpty()) {
-            configuration.classifier().setArgument(classifier.getClassificationPromptKey(), prompt);
+            configuration
+                    .classifier()
+                    .setArgument(Classifier.createClassificationPromptKey(configuration.classifier()), prompt);
         }
         classifier = configuration.createClassifier(contextStore);
         aggregator = ResultAggregator.createResultAggregator(configuration.resultAggregator(), contextStore);

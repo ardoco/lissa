@@ -122,8 +122,7 @@ public class ReasoningClassifier extends Classifier {
         this.prompt = prompt;
     }
 
-    @Override
-    public String getClassificationPromptKey() {
+    public static String getClassificationPromptKey() {
         return CLASSIFICATION_PROMPT_KEY;
     }
 

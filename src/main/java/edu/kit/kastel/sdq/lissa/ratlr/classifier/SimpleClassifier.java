@@ -112,8 +112,7 @@ public class SimpleClassifier extends Classifier {
         this.template = prompt;
     }
 
-    @Override
-    public String getClassificationPromptKey() {
+    public static String getClassificationPromptKey() {
         return PROMPT_TEMPLATE_KEY;
     }
 
