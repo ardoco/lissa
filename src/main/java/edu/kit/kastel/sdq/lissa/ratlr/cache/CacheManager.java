@@ -23,9 +23,10 @@ public final class CacheManager {
 
     /**
      * The default strategy for handling cache conflicts between local and Redis caches.
-     * When true, Redis values take precedence over local cache values in case of conflicts.
+     * Redis values take precedence over local cache values in case of conflicts.
      */
-    private static final boolean DEFAULT_REPLACE_LOCAL_CACHE_ON_CONFLICT = true;
+    private static final CacheReplacementStrategy DEFAULT_CONFLICT_RESOLUTION =
+            CacheReplacementStrategy.REPLACE_LOCAL_VALUE;
 
     private static @Nullable CacheManager defaultInstanceManager;
     private final Path directoryOfCaches;
@@ -101,7 +102,7 @@ public final class CacheManager {
         }
 
         LocalCache localCache = new LocalCache(directoryOfCaches + "/" + name + ".json");
-        RedisCache cache = new RedisCache(localCache, DEFAULT_REPLACE_LOCAL_CACHE_ON_CONFLICT);
+        RedisCache cache = new RedisCache(localCache, DEFAULT_CONFLICT_RESOLUTION);
         caches.put(name, cache);
         return cache;
     }

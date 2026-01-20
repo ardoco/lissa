@@ -41,24 +41,25 @@ class RedisCache implements Cache {
     private @Nullable UnifiedJedis jedis;
 
     /**
-     * Flag indicating whether to replace local cache entries on conflict with Redis values.
+     * Strategy for resolving conflicts between Redis and local cache values.
      */
-    private final boolean replaceLocalCacheOnConflict;
+    private final CacheReplacementStrategy conflictResolution;
 
     /**
      * Creates a new Redis cache instance with an optional local cache backup.
      *
      * @param localCache The local cache to use as backup, or null if no backup is needed
+     * @param conflictResolution Strategy for resolving conflicts between Redis and local cache values
      * @throws IllegalArgumentException If neither Redis nor local cache can be initialized
      */
-    RedisCache(@Nullable LocalCache localCache, boolean replaceLocalCacheOnConflict) {
+    RedisCache(@Nullable LocalCache localCache, CacheReplacementStrategy conflictResolution) {
         this.localCache = localCache == null || !localCache.isReady() ? null : localCache;
         mapper = new ObjectMapper();
         createRedisConnection();
         if (jedis == null && this.localCache == null) {
             throw new IllegalArgumentException("Could not create cache");
         }
-        this.replaceLocalCacheOnConflict = replaceLocalCacheOnConflict;
+        this.conflictResolution = conflictResolution;
     }
 
     @Override
@@ -102,9 +103,8 @@ class RedisCache implements Cache {
      * falls back to the local cache.
      * If the value is found in the local cache and Redis is available, it will be synchronized to Redis.
      * If the value is found in Redis and the local cache is available, it will be synchronized to the local cache.
-     * In case of a mismatch between Redis and local cache values, a warning is logged and the replacement strategy
-     * is applied: if {@link #replaceLocalCacheOnConflict} is true, the Redis value takes precedence and replaces
-     * the local cache value; otherwise, the Redis cache value is returned without modification.
+     * In case of a mismatch between Redis and local cache values, a warning is logged and the configured
+     * {@link #conflictResolution} strategy is applied.
      *
      * @param <T> The type to deserialize the value to
      * @param key The cache key to look up
@@ -126,13 +126,13 @@ class RedisCache implements Cache {
         if (localData != null && jsonData == null && jedis != null) {
             jedis.hset(key.toJsonKey(), "data", localData);
         }
-        // Value is in both caches, but they differ
-        if (replaceLocalCacheOnConflict && jsonData != null && localData != null && !jsonData.equals(localData)) {
-            logger.info("Cache inconsistency detected for key {}, using Redis value and replacing local one", key);
-            localCache.put(key, jsonData);
+        String valueToReturn;
+        if (jsonData != null && localData != null && !jsonData.equals(localData)) {
+            // Value is in both caches, but they differ - apply conflict resolution strategy
+            valueToReturn = conflictResolution.resolve(key, jsonData, localData, localCache, jedis);
+        } else {
+            valueToReturn = jsonData != null ? jsonData : localData;
         }
-
-        String valueToReturn = jsonData != null ? jsonData : localData;
         return convert(valueToReturn, clazz);
     }
 
