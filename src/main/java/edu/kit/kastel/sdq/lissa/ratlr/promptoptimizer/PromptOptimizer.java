@@ -6,6 +6,8 @@ import static edu.kit.kastel.sdq.lissa.ratlr.configuration.Configuration.CONFIG_
 import java.util.List;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
+
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.elementstore.SourceElementStore;
 import edu.kit.kastel.sdq.lissa.ratlr.elementstore.TargetElementStore;
@@ -39,17 +41,25 @@ public interface PromptOptimizer {
      * @param configuration The configuration for the optimizer
      * @param goldStandard The gold standard trace links for evaluation
      * @param metric The metric used to evaluate the prompt performance
-     * @param selector The selector used to assess the optimization results
+     * @param selector The selector used to assess the optimization results (nullable, only required for {@link ProTeGiOptimizer})
      * @return An instance of PromptOptimizer based on the configuration
      */
     static PromptOptimizer createOptimizer(
-            ModuleConfiguration configuration, Set<TraceLink> goldStandard, Metric metric, Selector selector) {
+            ModuleConfiguration configuration,
+            Set<TraceLink> goldStandard,
+            Metric metric,
+            @Nullable Selector selector) {
         return switch (configuration.name().split(CONFIG_NAME_SEPARATOR)[0]) {
             case "mock" -> new MockOptimizer();
             case "simple" -> new IterativeOptimizer(configuration, goldStandard, metric, 1);
             case "iterative" -> new IterativeOptimizer(configuration, goldStandard, metric);
             case "feedback" -> new IterativeFeedbackOptimizer(configuration, goldStandard, metric);
-            case "gradient", "protegi" -> new ProTeGiOptimizer(configuration, goldStandard, metric, selector);
+            case "gradient", "protegi" -> {
+                if (selector == null) {
+                    throw new IllegalArgumentException("Selector must not be null for ProTeGi optimizers");
+                }
+                yield new ProTeGiOptimizer(configuration, goldStandard, metric, selector);
+            }
             default -> throw new IllegalStateException("Unexpected value: " + configuration.name());
         };
     }

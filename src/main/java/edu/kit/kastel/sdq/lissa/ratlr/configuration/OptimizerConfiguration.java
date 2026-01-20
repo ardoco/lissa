@@ -62,10 +62,11 @@ public record OptimizerConfiguration(
      */
     @Override
     public String toString() {
+        String selectorPart = selector != null ? ", selector=" + selector : "";
         return "Configuration{" + "evaluationConfiguration="
                 + evaluationConfiguration + ", metric="
-                + metric + ", selector="
-                + selector + ", promptOptimizer="
+                + metric + selectorPart
+                + ", promptOptimizer="
                 + promptOptimizer + '}';
     }
 }

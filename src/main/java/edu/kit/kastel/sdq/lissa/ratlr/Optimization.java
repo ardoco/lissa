@@ -86,7 +86,10 @@ public class Optimization {
                 evaluationPipeline.getClassifier(),
                 evaluationPipeline.getAggregator(),
                 evaluationPipeline.getTraceLinkIdPostProcessor());
-        Selector selector = Selector.createSelector(configuration.selector());
+        Selector selector = null;
+        if (configuration.selector() != null) {
+            selector = Selector.createSelector(configuration.selector());
+        }
 
         promptOptimizer =
                 PromptOptimizer.createOptimizer(configuration.promptOptimizer(), goldStandard, metric, selector);

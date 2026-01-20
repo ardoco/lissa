@@ -68,9 +68,5 @@
   "metric" : {
     "name" : "mock",
     "args" : {}
-  },
-  "selector" : {
-    "name" : "mock",
-    "args" : {}
   }
 }
