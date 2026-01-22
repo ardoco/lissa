@@ -71,14 +71,17 @@ The `Cache` interface provides two API levels:
    - `getViaInternalKey(K key, Class<T> clazz)`
    - `putViaInternalKey(K key, T value)`
    - Only use for backward compatibility or special handling scenarios
-3. **Configuration**
+
+## Usage Instructions
+
+1. **Configuration**
 
    ```json
    {
      "cache_dir": "./cache/path"  // Directory for cache storage
    }
    ```
-4. **Redis Setup**
+2. **Redis Setup**
    To use Redis for caching, you need to set up a Redis server. Here's a recommended Docker Compose configuration:
 
    ```yaml
@@ -99,9 +102,9 @@ The `Cache` interface provides two API levels:
    To use Redis with LiSSA:
    1. Start the Redis server using Docker Compose
    2. The system will automatically use Redis if available
-   3. If Redis is unavailable, it will fall back to local file-based caching
+   3. If Redis is unavailable, it will fall back to local file-based caching (useful for replication packages)
 
-5. **Best Practices**
+3. **Best Practices**
 
    - Use the cache directory specified in the configuration
    - Clear the cache directory if you encounter issues
