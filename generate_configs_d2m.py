@@ -102,23 +102,27 @@ for project, uml, text, gs in zip(projects, uml_paths, text_paths, goldstandard_
         os.makedirs("./configs/doc2model", exist_ok=True)
         os.makedirs("./configs/doc2model", exist_ok=True)
         # Generate
-        for model in models:
-            # Only Name
-            with open(f"./configs/doc2model/{project}_d2m_{seed}_{model}.json", "w") as f:
-                f.write(template_d2m.replace("<<SEED>>", seed).replace("<<MODEL>>", model).replace("<<SWAP_COLUMNS>>", "true"))
-            with open(f"./configs/doc2model/{project}_m2d_{seed}_{model}.json", "w") as f:
-                f.write(template_m2d.replace("<<SEED>>", seed).replace("<<MODEL>>", model).replace("<<SWAP_COLUMNS>>", "false"))
+        for prompting in ["reasoning_openai", "simple_openai"]:
+          if prompting != "reasoning_openai":
+              template_d2m = template_d2m.replace("reasoning_openai", prompting)
+              template_m2d = template_m2d.replace("reasoning_openai", prompting)
+          for model in models:
+              # Only Name
+              with open(f"./configs/doc2model/{project}_d2m_{seed}_{model}_{prompting}.json", "w") as f:
+                  f.write(template_d2m.replace("<<SEED>>", seed).replace("<<MODEL>>", model).replace("<<SWAP_COLUMNS>>", "true"))
+              with open(f"./configs/doc2model/{project}_m2d_{seed}_{model}_{prompting}.json", "w") as f:
+                  f.write(template_m2d.replace("<<SEED>>", seed).replace("<<MODEL>>", model).replace("<<SWAP_COLUMNS>>", "false"))
 
-            # With Interfaces & Usages
-            with open(f"./configs/doc2model/{project}_d2m_{seed}_{model}_iface_usages.json", "w") as f:
-                f.write(template_d2m.replace("<<SEED>>", seed).replace("<<MODEL>>", model).replace("<<SWAP_COLUMNS>>", "true").replace('"includeInterfaceRealizations" : false', '"includeInterfaceRealizations" : true').replace('"includeUsages" : false', '"includeUsages" : true'))
-            with open(f"./configs/doc2model/{project}_m2d_{seed}_{model}_iface_usages.json", "w") as f:
-                f.write(template_m2d.replace("<<SEED>>", seed).replace("<<MODEL>>", model).replace("<<SWAP_COLUMNS>>", "false").replace('"includeInterfaceRealizations" : false', '"includeInterfaceRealizations" : true').replace('"includeUsages" : false', '"includeUsages" : true'))
+              # With Interfaces & Usages
+              with open(f"./configs/doc2model/{project}_d2m_{seed}_{model}_{prompting}_iface_usages.json", "w") as f:
+                  f.write(template_d2m.replace("<<SEED>>", seed).replace("<<MODEL>>", model).replace("<<SWAP_COLUMNS>>", "true").replace('"includeInterfaceRealizations" : false', '"includeInterfaceRealizations" : true').replace('"includeUsages" : false', '"includeUsages" : true'))
+              with open(f"./configs/doc2model/{project}_m2d_{seed}_{model}_{prompting}_iface_usages.json", "w") as f:
+                  f.write(template_m2d.replace("<<SEED>>", seed).replace("<<MODEL>>", model).replace("<<SWAP_COLUMNS>>", "false").replace('"includeInterfaceRealizations" : false', '"includeInterfaceRealizations" : true').replace('"includeUsages" : false', '"includeUsages" : true'))
 
 
 
-            # With Interfaces & Usages & Operations
-            with open(f"./configs/doc2model/{project}_d2m_{seed}_{model}_iface_usages_ops.json", "w") as f:
-                f.write(template_d2m.replace("<<SEED>>", seed).replace("<<MODEL>>", model).replace("<<SWAP_COLUMNS>>", "true").replace('"includeInterfaceRealizations" : false', '"includeInterfaceRealizations" : true').replace('"includeUsages" : false', '"includeUsages" : true').replace('"includeOperations" : false', '"includeOperations" : true'))
-            with open(f"./configs/doc2model/{project}_m2d_{seed}_{model}_iface_usages_ops.json", "w") as f:
-                f.write(template_m2d.replace("<<SEED>>", seed).replace("<<MODEL>>", model).replace("<<SWAP_COLUMNS>>", "false").replace('"includeInterfaceRealizations" : false', '"includeInterfaceRealizations" : true').replace('"includeUsages" : false', '"includeUsages" : true').replace('"includeOperations" : false', '"includeOperations" : true'))
+              # With Interfaces & Usages & Operations
+              with open(f"./configs/doc2model/{project}_d2m_{seed}_{model}_{prompting}_iface_usages_ops.json", "w") as f:
+                  f.write(template_d2m.replace("<<SEED>>", seed).replace("<<MODEL>>", model).replace("<<SWAP_COLUMNS>>", "true").replace('"includeInterfaceRealizations" : false', '"includeInterfaceRealizations" : true').replace('"includeUsages" : false', '"includeUsages" : true').replace('"includeOperations" : false', '"includeOperations" : true'))
+              with open(f"./configs/doc2model/{project}_m2d_{seed}_{model}_{prompting}_iface_usages_ops.json", "w") as f:
+                  f.write(template_m2d.replace("<<SEED>>", seed).replace("<<MODEL>>", model).replace("<<SWAP_COLUMNS>>", "false").replace('"includeInterfaceRealizations" : false', '"includeInterfaceRealizations" : true').replace('"includeUsages" : false', '"includeUsages" : true').replace('"includeOperations" : false', '"includeOperations" : true'))
