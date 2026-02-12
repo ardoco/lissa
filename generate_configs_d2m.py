@@ -1,6 +1,6 @@
 TEMPLATE_D2M = """
 {
-  "cache_dir": "./cache-d2m/mediastore-<<SEED>>",
+  "cache_dir": "./cache-d2m/<<PROJECT>>-<<SEED>>",
   "gold_standard_configuration": {
     "path": "<<GS_PATH>>",
     "hasHeader": "true",
@@ -95,22 +95,30 @@ for project, uml, text, gs in zip(projects, uml_paths, text_paths, goldstandard_
     uml_path = f"./datasets/doc2model/{project}/{uml}"
     text_path = f"./datasets/doc2model/{project}/{text}"
 
-    template_d2m = TEMPLATE_D2M.replace("<<GS_PATH>>", gs_path).replace("<<UML_PATH>>", uml_path).replace("<<TEXT_PATH>>", text_path)
-    template_m2d = TEMPLATE_M2D.replace("<<GS_PATH>>", gs_path).replace("<<UML_PATH>>", uml_path).replace("<<TEXT_PATH>>", text_path)
+    template_d2m = TEMPLATE_D2M.replace("<<GS_PATH>>", gs_path).replace("<<UML_PATH>>", uml_path).replace("<<TEXT_PATH>>", text_path).replace("<<PROJECT>>", project)
+    template_m2d = TEMPLATE_M2D.replace("<<GS_PATH>>", gs_path).replace("<<UML_PATH>>", uml_path).replace("<<TEXT_PATH>>", text_path).replace("<<PROJECT>>", project)
 
     for seed in seeds:
         os.makedirs("./configs/doc2model", exist_ok=True)
         os.makedirs("./configs/doc2model", exist_ok=True)
         # Generate
         for model in models:
+            # Only Name
             with open(f"./configs/doc2model/{project}_d2m_{seed}_{model}.json", "w") as f:
                 f.write(template_d2m.replace("<<SEED>>", seed).replace("<<MODEL>>", model).replace("<<SWAP_COLUMNS>>", "true"))
-            # With Operations
-            with open(f"./configs/doc2model/{project}_d2m_{seed}_{model}_ops.json", "w") as f:
-                f.write(template_d2m.replace("<<SEED>>", seed).replace("<<MODEL>>", model).replace("<<SWAP_COLUMNS>>", "true").replace('"includeOperations" : false', '"includeOperations" : true'))
-
             with open(f"./configs/doc2model/{project}_m2d_{seed}_{model}.json", "w") as f:
                 f.write(template_m2d.replace("<<SEED>>", seed).replace("<<MODEL>>", model).replace("<<SWAP_COLUMNS>>", "false"))
-            # With Operations
-            with open(f"./configs/doc2model/{project}_m2d_{seed}_{model}_ops.json", "w") as f:
-                f.write(template_m2d.replace("<<SEED>>", seed).replace("<<MODEL>>", model).replace("<<SWAP_COLUMNS>>", "false").replace('"includeOperations" : false', '"includeOperations" : true'))
+
+            # With Interfaces & Usages
+            with open(f"./configs/doc2model/{project}_d2m_{seed}_{model}_iface_usages.json", "w") as f:
+                f.write(template_d2m.replace("<<SEED>>", seed).replace("<<MODEL>>", model).replace("<<SWAP_COLUMNS>>", "true").replace('"includeInterfaceRealizations" : false', '"includeInterfaceRealizations" : true').replace('"includeUsages" : false', '"includeUsages" : true'))
+            with open(f"./configs/doc2model/{project}_m2d_{seed}_{model}_iface_usages.json", "w") as f:
+                f.write(template_m2d.replace("<<SEED>>", seed).replace("<<MODEL>>", model).replace("<<SWAP_COLUMNS>>", "false").replace('"includeInterfaceRealizations" : false', '"includeInterfaceRealizations" : true').replace('"includeUsages" : false', '"includeUsages" : true'))
+
+
+
+            # With Interfaces & Usages & Operations
+            with open(f"./configs/doc2model/{project}_d2m_{seed}_{model}_iface_usages_ops.json", "w") as f:
+                f.write(template_d2m.replace("<<SEED>>", seed).replace("<<MODEL>>", model).replace("<<SWAP_COLUMNS>>", "true").replace('"includeInterfaceRealizations" : false', '"includeInterfaceRealizations" : true').replace('"includeUsages" : false', '"includeUsages" : true').replace('"includeOperations" : false', '"includeOperations" : true'))
+            with open(f"./configs/doc2model/{project}_m2d_{seed}_{model}_iface_usages_ops.json", "w") as f:
+                f.write(template_m2d.replace("<<SEED>>", seed).replace("<<MODEL>>", model).replace("<<SWAP_COLUMNS>>", "false").replace('"includeInterfaceRealizations" : false', '"includeInterfaceRealizations" : true').replace('"includeUsages" : false', '"includeUsages" : true').replace('"includeOperations" : false', '"includeOperations" : true'))
