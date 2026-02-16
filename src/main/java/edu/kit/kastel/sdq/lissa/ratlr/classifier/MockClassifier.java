@@ -41,13 +41,13 @@ public class MockClassifier extends Classifier {
     }
 
     @Override
-    public Classifier copyOf() {
+    protected Classifier copyOf() {
         return new MockClassifier(contextStore);
     }
 
     @Override
     public void setClassificationPrompt(String prompt) {
-        // TODO: This may / should throw an UnsportedOperationException instead?
         // as no classification prompt is used, this method does nothing
+        // This is intentionally blank instead of forbidden as otherwise usage of the mock classifier would be hindered
     }
 }

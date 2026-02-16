@@ -49,10 +49,6 @@
     "name" : "mock",
     "args" : {}
   },
-  "evaluator" : {
-    "name" : "mock",
-    "args" : {}
-  },
   "prompt_optimizer": {
     "name" : "simple_openai",
     "args" : {

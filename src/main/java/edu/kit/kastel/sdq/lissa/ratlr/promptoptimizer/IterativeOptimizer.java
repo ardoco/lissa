@@ -3,7 +3,7 @@ package edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer;
 
 import static edu.kit.kastel.sdq.lissa.ratlr.elementstore.ElementStoreOperations.reduceSourceElementStore;
 import static edu.kit.kastel.sdq.lissa.ratlr.elementstore.ElementStoreOperations.reduceTargetElementStore;
-import static edu.kit.kastel.sdq.lissa.ratlr.promptmetric.MetricUtils.MAXIMUM_SCORE;
+import static edu.kit.kastel.sdq.lissa.ratlr.promptmetric.Metric.MAXIMUM_SCORE;
 import static edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.PromptOptimizationUtils.getClassificationTasks;
 import static edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.PromptOptimizationUtils.parseTaggedTextFirst;
 import static edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.PromptOptimizationUtils.sanitizePrompt;
@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import edu.kit.kastel.sdq.lissa.ratlr.cache.Cache;
 import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager;
+import edu.kit.kastel.sdq.lissa.ratlr.cache.classifier.ClassifierCacheKey;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.ChatLanguageModelProvider;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.ClassificationTask;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
@@ -28,6 +29,11 @@ import edu.kit.kastel.sdq.lissa.ratlr.utils.ChatLanguageModelUtils;
 
 import dev.langchain4j.model.chat.ChatModel;
 
+/**
+ * An iterative prompt optimizer that refines a given prompt through multiple iterations using a language model.
+ * This optimizer does not consider any feedback and naively modifies it
+ * until a specified performance threshold is met or the maximum number of iterations is reached.
+ */
 public class IterativeOptimizer implements PromptOptimizer {
 
     /**
@@ -114,7 +120,7 @@ public class IterativeOptimizer implements PromptOptimizer {
     /**
      * The cache used to store and retrieve prompt optimization LLM requests.
      */
-    protected final Cache cache;
+    protected final Cache<ClassifierCacheKey> cache;
 
     /**
      * Provider for the language model used in classification.
@@ -170,8 +176,7 @@ public class IterativeOptimizer implements PromptOptimizer {
         this.provider = new ChatLanguageModelProvider(configuration);
         this.template =
                 configuration.argumentAsString(OPTIMIZATION_TEMPLATE_CONFIGURATION_KEY, DEFAULT_OPTIMIZATION_TEMPLATE);
-        configuration.setArgument(MAXIMUM_ITERATIONS_CONFIGURATION_KEY, maximumIterations);
-        this.maximumIterations = maximumIterations;
+        this.maximumIterations = configuration.argumentAsInt(MAXIMUM_ITERATIONS_CONFIGURATION_KEY, maximumIterations);
         this.optimizationPrompt = configuration.argumentAsString(BASE_PROMPT_CONFIGURATION_KEY, "");
         this.thresholdScore =
                 configuration.argumentAsDouble(THRESHOLD_SCORE_CONFIGURATION_KEY, DEFAULT_THRESHOLD_SCORE);
@@ -185,8 +190,20 @@ public class IterativeOptimizer implements PromptOptimizer {
 
     @Override
     public String[] optimize(SourceElementStore sourceStore, TargetElementStore targetStore) {
-        var source = sourceStore.getAllElements(false).getFirst();
-        Element target = targetStore.findSimilar(source).getFirst();
+        var sourceElements = sourceStore.getAllElements(false);
+        if (sourceElements.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Source element store is empty. Cannot optimize prompt without source elements.");
+        }
+
+        var source = sourceElements.getFirst();
+        var similarTargets = targetStore.findSimilar(source);
+        if (similarTargets.isEmpty()) {
+            throw new IllegalArgumentException("Target element store has no similar elements for source: "
+                    + source.first().getIdentifier() + ". Cannot optimize prompt without target elements.");
+        }
+
+        Element target = similarTargets.getFirst();
         formattedTemplate = template.replace(
                         SOURCE_TYPE_PLACEHOLDER, source.first().getType())
                 .replace(TARGET_TYPE_PLACEHOLDER, target.getType());
@@ -236,7 +253,7 @@ public class IterativeOptimizer implements PromptOptimizer {
         LOGGER.debug("Sending request to LLM (iteration {})...", iteration);
         LOGGER.trace("Full LLM Request:\n{}", request);
 
-        String response = ChatLanguageModelUtils.cachedRequest(request, provider, llm, cache);
+        String response = ChatLanguageModelUtils.cachedRequest(request, llm, cache);
 
         LOGGER.debug("Received response from LLM (iteration {})", iteration);
         LOGGER.trace("Full LLM Response:\n{}", response);
@@ -256,7 +273,7 @@ public class IterativeOptimizer implements PromptOptimizer {
      * @return The optimized prompt extracted from the response
      */
     protected String cachedSanitizedRequest(String request) {
-        String response = ChatLanguageModelUtils.cachedRequest(request, provider, llm, cache);
+        String response = ChatLanguageModelUtils.cachedRequest(request, llm, cache);
         return sanitizePrompt(parseTaggedTextFirst(response, PROMPT_START, PROMPT_END));
     }
 

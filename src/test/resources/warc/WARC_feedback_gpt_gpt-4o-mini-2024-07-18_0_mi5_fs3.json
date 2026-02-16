@@ -67,7 +67,7 @@
     "args" : {}
   },
   "metric" : {
-    "name" : "f1",
+    "name" : "mock",
     "args" : {}
   },
   "evaluator" : {

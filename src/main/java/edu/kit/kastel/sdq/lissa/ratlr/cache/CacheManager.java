@@ -23,14 +23,13 @@ public final class CacheManager {
 
     /**
      * The default strategy for handling cache conflicts between local and Redis caches.
-     * Redis values take precedence over local cache values in case of conflicts.
+     * When true, Redis values take precedence over local cache values in case of conflicts.
      */
-    private static final CacheReplacementStrategy DEFAULT_CONFLICT_RESOLUTION =
-            CacheReplacementStrategy.REPLACE_LOCAL_VALUE;
+    private static final boolean DEFAULT_REPLACE_LOCAL_CACHE_ON_CONFLICT = true;
 
     private static @Nullable CacheManager defaultInstanceManager;
     private final Path directoryOfCaches;
-    private final Map<String, RedisCache> caches = new HashMap<>();
+    private final Map<String, RedisCache<?>> caches = new HashMap<>();
 
     /**
      * Sets the cache directory for the default cache manager instance.
@@ -78,31 +77,39 @@ public final class CacheManager {
      *
      * @param origin The class origin (caller, {@code this})
      * @param parameters a list of parameters that define what makes a cache unique. E.g., the model name, temperature, and seed.
+     * @param <K> The type of cache key used in this cache
      * @return A cache instance for the specified name
      */
-    public Cache getCache(Object origin, CacheParameter parameters) {
+    public <K extends CacheKey> Cache<K> getCache(Object origin, CacheParameter<K> parameters) {
         if (origin == null || parameters == null) {
             throw new IllegalArgumentException("Origin and parameters must not be null");
         }
         String name = origin.getClass().getSimpleName() + "_" + parameters.parameters();
-        return getCache(name);
+        return getCache(name, parameters);
     }
 
     /**
-     * Gets a cache instance for the specified name, optionally appending a file extension.
+     * Gets a cache instance for the specified name and parameters.
      *
      * @param name The name of the cache
+     * @param parameters The parameters that define the cache configuration
      * @return A cache instance for the specified name
      */
-    private Cache getCache(String name) {
+    private <K extends CacheKey> Cache<K> getCache(String name, CacheParameter<K> parameters) {
         name = name.replace(":", "__");
 
         if (caches.containsKey(name)) {
-            return caches.get(name);
+            @SuppressWarnings("unchecked")
+            Cache<K> cached = (Cache<K>) caches.get(name);
+            if (!cached.getCacheParameter().equals(parameters)) {
+                throw new IllegalArgumentException(
+                        "Cache with name " + name + " already exists with different parameters");
+            }
+            return cached;
         }
 
-        LocalCache localCache = new LocalCache(directoryOfCaches + "/" + name + ".json");
-        RedisCache cache = new RedisCache(localCache, DEFAULT_CONFLICT_RESOLUTION);
+        LocalCache<K> localCache = new LocalCache<>(directoryOfCaches + "/" + name + ".json", parameters);
+        RedisCache<K> cache = new RedisCache<>(parameters, localCache, DEFAULT_REPLACE_LOCAL_CACHE_ON_CONFLICT);
         caches.put(name, cache);
         return cache;
     }
@@ -112,7 +119,7 @@ public final class CacheManager {
      * This ensures that all pending changes are written to disk.
      */
     public void flush() {
-        for (Cache cache : caches.values()) {
+        for (Cache<?> cache : caches.values()) {
             cache.flush();
         }
     }

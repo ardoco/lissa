@@ -60,8 +60,10 @@ public final class PromptOptimizationUtils {
     public static List<String> parseTaggedText(String text, String startTag, String endTag) {
         List<String> texts = new ArrayList<>();
         // pattern for as few characters as possible between start and end tag
-        Pattern pattern =
-                Pattern.compile("%s(.*?)%s".formatted(startTag, endTag), Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+        // Use Pattern.quote() to escape special regex characters in the tags
+        Pattern pattern = Pattern.compile(
+                "%s(.*?)%s".formatted(Pattern.quote(startTag), Pattern.quote(endTag)),
+                Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(text);
         while (matcher.find()) {
             texts.add(matcher.group(1));

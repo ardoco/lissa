@@ -1,6 +1,8 @@
 /* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.classifier;
 
+import static edu.kit.kastel.sdq.lissa.ratlr.configuration.Configuration.CONFIG_NAME_SEPARATOR;
+
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 
 /**
@@ -72,10 +74,10 @@ public enum ChatLanguageModelPlatform {
      * @throws IllegalArgumentException if the name does not match any platform
      */
     public static ChatLanguageModelPlatform fromModuleConfiguration(ModuleConfiguration moduleConfiguration) {
-        String[] modeXplatform = moduleConfiguration.name().split(Classifier.CONFIG_NAME_SEPARATOR, 2);
+        String[] modeXplatform = moduleConfiguration.name().split(CONFIG_NAME_SEPARATOR, 2);
         if (modeXplatform.length < 2) {
             throw new IllegalArgumentException("Invalid configuration name: '%s'. Expected format: <mode>%s<platform>"
-                    .formatted(moduleConfiguration.name(), Classifier.CONFIG_NAME_SEPARATOR));
+                    .formatted(moduleConfiguration.name(), CONFIG_NAME_SEPARATOR));
         }
 
         String name = modeXplatform[1];

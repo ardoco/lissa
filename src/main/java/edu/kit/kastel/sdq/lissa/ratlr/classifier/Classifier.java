@@ -4,6 +4,7 @@ package edu.kit.kastel.sdq.lissa.ratlr.classifier;
 import static edu.kit.kastel.sdq.lissa.ratlr.classifier.MockClassifier.MOCK_CLASSIFIER_NAME;
 import static edu.kit.kastel.sdq.lissa.ratlr.classifier.ReasoningClassifier.REASONING_CLASSIFIER_NAME;
 import static edu.kit.kastel.sdq.lissa.ratlr.classifier.SimpleClassifier.SIMPLE_CLASSIFIER_NAME;
+import static edu.kit.kastel.sdq.lissa.ratlr.configuration.Configuration.CONFIG_NAME_SEPARATOR;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,11 +36,12 @@ import edu.kit.kastel.sdq.lissa.ratlr.utils.Pair;
  */
 public abstract class Classifier {
     /**
-     * Separator used in configuration names.
+     * Logger instance for logging classifier activities.
      */
-    public static final String CONFIG_NAME_SEPARATOR = "_";
-
     protected final Logger logger = LoggerFactory.getLogger(this.getClass());
+    /**
+     * The number of threads to use for parallel processing.
+     */
     protected final int threads;
     /**
      * The shared context store for pipeline components.
@@ -192,7 +194,7 @@ public abstract class Classifier {
      *
      * @return A new instance of the same classifier type
      */
-    public abstract Classifier copyOf();
+    protected abstract Classifier copyOf();
 
     /**
      * Sets the prompt used for classification.
@@ -250,7 +252,15 @@ public abstract class Classifier {
         };
     }
 
-    public static String createClassificationPromptKey(ModuleConfiguration configuration) {
+    /**
+     * Creates the classification prompt key based on the provided configuration.
+     * The type of classifier is determined by the first part of the configuration name.
+     *
+     * @param configuration The module configuration for the classifier
+     * @return The classification prompt key
+     * @throws IllegalStateException If the configuration name is not recognized
+     */
+    public static String getClassificationPromptConfigurationKey(ModuleConfiguration configuration) {
         return switch (configuration.name().split(CONFIG_NAME_SEPARATOR)[0]) {
             case MOCK_CLASSIFIER_NAME ->
                 throw new UnsupportedOperationException(

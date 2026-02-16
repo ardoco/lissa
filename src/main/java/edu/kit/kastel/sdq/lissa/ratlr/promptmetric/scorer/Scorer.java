@@ -3,6 +3,8 @@ package edu.kit.kastel.sdq.lissa.ratlr.promptmetric.scorer;
 
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.ClassificationResult;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.ClassificationTask;
 
@@ -31,14 +33,15 @@ public interface Scorer {
      * @param result The classification result to be scored
      * @return A double score representing the quality of the classification result
      */
-    double score(ClassificationTask task, ClassificationResult result);
+    double score(ClassificationTask task, @Nullable ClassificationResult result);
 
     /**
-     * Scores a classification task without a classification result.
-     * The absence of a result indicates that no result was classified for the task.
+     * Scores a classification task when no classification result was produced.
+     * This is called when the classifier did not identify a trace link for this task (i.e., the classifier rejected it).
+     * The score should reflect whether this rejection was correct based on the task's ground truth label.
      *
      * @param task The classification task containing the ground truth
-     * @return A double score representing the quality of the classification result absence
+     * @return A score representing how correct the absence of a classification result is for this task
      */
     double score(ClassificationTask task);
 

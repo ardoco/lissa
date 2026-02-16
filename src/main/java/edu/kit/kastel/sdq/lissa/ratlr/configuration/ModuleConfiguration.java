@@ -63,6 +63,21 @@ public final class ModuleConfiguration {
     }
 
     /**
+     * Private constructor for creating a copy of a configuration with modified arguments.
+     * This constructor copies both the arguments and retrievedArguments maps to maintain
+     * consistency when creating modified configurations.
+     *
+     * @param name The name of the module
+     * @param arguments The arguments for the module
+     * @param retrievedArguments The retrieved arguments to copy
+     */
+    private ModuleConfiguration(String name, Map<String, String> arguments, Map<String, String> retrievedArguments) {
+        this.name = name;
+        this.arguments = arguments;
+        this.retrievedArguments.putAll(retrievedArguments);
+    }
+
+    /**
      * Returns the name of the module.
      *
      * @return The module name
@@ -130,27 +145,6 @@ public final class ModuleConfiguration {
     }
 
     /**
-     * Sets an argument from a string value.
-     * This method allows overwriting the value of an argument specified in the configuration.
-     *
-     * @param key The key of the argument to set
-     * @param value The value to set for the argument
-     * @throws IllegalStateException If the configuration has been finalized
-     * @throws IllegalArgumentException If the value conflicts with a previously retrieved value
-     */
-    public void setArgument(String key, String value) {
-        if (finalized) {
-            throw new IllegalStateException(ALREADY_FINALIZED_FOR_SERIALIZATION);
-        }
-        arguments.put(key, value);
-        String retrievedArgument = retrievedArguments.put(key, value);
-        if (retrievedArgument != null && !retrievedArgument.equals(value)) {
-            throw new IllegalArgumentException("Default argument for key " + key + " already set to "
-                    + retrievedArgument + " and cannot be changed to " + value);
-        }
-    }
-
-    /**
      * Retrieves an argument as an integer.
      *
      * @param key The key of the argument to retrieve
@@ -171,19 +165,6 @@ public final class ModuleConfiguration {
      */
     public int argumentAsInt(String key, int defaultValue) {
         return Integer.parseInt(argumentAsString(key, String.valueOf(defaultValue)));
-    }
-
-    /**
-     * Sets an argument from an integer value.
-     * This method allows overwriting the value of an argument specified in the configuration.
-     *
-     * @param key The key of the argument to set
-     * @param value The integer value to set for the argument
-     * @throws IllegalStateException If the configuration has been finalized
-     * @throws IllegalArgumentException If the value conflicts with a previously retrieved value
-     */
-    public void setArgument(String key, int value) {
-        setArgument(key, String.valueOf(value));
     }
 
     /**
@@ -269,6 +250,21 @@ public final class ModuleConfiguration {
                     + retrievedArgument + " and cannot be changed to " + value);
         }
         return value;
+    }
+
+    /**
+     * Creates a new ModuleConfiguration with the specified argument modified.
+     * This method creates a copy of the current configuration with one argument changed,
+     * without mutating the original configuration.
+     *
+     * @param key The key of the argument to modify
+     * @param value The new value for the argument
+     * @return A new ModuleConfiguration with the modified argument
+     */
+    public ModuleConfiguration with(String key, String value) {
+        Map<String, String> newArguments = new LinkedHashMap<>(this.arguments);
+        newArguments.put(key, value);
+        return new ModuleConfiguration(this.name, newArguments, this.retrievedArguments);
     }
 
     /**

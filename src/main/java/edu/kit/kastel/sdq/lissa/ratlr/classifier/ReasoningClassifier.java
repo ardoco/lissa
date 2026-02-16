@@ -36,7 +36,7 @@ public class ReasoningClassifier extends Classifier {
      */
     private static final String CLASSIFICATION_PROMPT_KEY = "prompt";
 
-    private final Cache cache;
+    private final Cache<ClassifierCacheKey> cache;
 
     /**
      * Provider for the language model used in classification.
@@ -96,7 +96,7 @@ public class ReasoningClassifier extends Classifier {
      */
     private ReasoningClassifier(
             int threads,
-            Cache cache,
+            Cache<ClassifierCacheKey> cache,
             ChatLanguageModelProvider provider,
             String prompt,
             boolean useOriginalArtifacts,
@@ -112,7 +112,7 @@ public class ReasoningClassifier extends Classifier {
     }
 
     @Override
-    public final Classifier copyOf() {
+    protected final Classifier copyOf() {
         return new ReasoningClassifier(
                 threads, cache, provider, prompt, useOriginalArtifacts, useSystemMessage, contextStore);
     }
@@ -200,9 +200,8 @@ public class ReasoningClassifier extends Classifier {
         messages.add(new UserMessage(request));
 
         String messageString = getRepresentation(messages);
-        ClassifierCacheKey cacheKey = ClassifierCacheKey.of(provider.cacheParameters(), messageString);
 
-        String cachedResponse = cache.get(cacheKey, String.class);
+        String cachedResponse = cache.get(messageString, String.class);
         if (cachedResponse != null) {
             return cachedResponse;
         } else {
@@ -213,7 +212,7 @@ public class ReasoningClassifier extends Classifier {
                     target.getIdentifier());
             ChatResponse response = llm.chat(messages);
             String responseText = response.aiMessage().text();
-            cache.put(cacheKey, responseText);
+            cache.put(messageString, responseText);
             return responseText;
         }
     }

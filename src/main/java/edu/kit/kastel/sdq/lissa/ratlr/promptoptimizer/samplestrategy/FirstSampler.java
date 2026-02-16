@@ -11,6 +11,7 @@ public class FirstSampler implements SampleStrategy {
 
     /**
      * Samples the first 'sampleSize' items from the provided list as is.
+     * If the sample size exceeds the number of available items, all items are returned.
      */
     @Override
     public <T extends Comparable<T>> List<T> sample(Collection<T> items, int sampleSize) {

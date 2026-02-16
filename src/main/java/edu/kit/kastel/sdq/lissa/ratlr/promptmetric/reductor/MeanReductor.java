@@ -8,10 +8,6 @@ import java.util.Collection;
  */
 public class MeanReductor implements Reductor {
 
-    public MeanReductor() {
-        // No specific initialization required
-    }
-
     /**
      * Reduces a collection of Double values by calculating their arithmetic mean.
      * @return The mean of the input values, or 0.0 if the collection is empty.

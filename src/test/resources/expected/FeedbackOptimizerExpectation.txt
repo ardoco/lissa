@@ -5,12 +5,9 @@ Question: Here are two parts of software development artifacts\.
             \{source\_type\}: '''\{source\_content\}'''
 
             \{target\_type\}: '''\{target\_content\}'''
-            Do these requirements demonstrate a direct relationship in terms of functionality, implementation, compliance with standards, or shared objectives? Specifically, assess whether the source requirement provides support, elaboration, or relevant context that enhances the understanding of the target requirement\. Consider if they align in terms of purpose, scope, or technical specifications\.
+            Are they related in terms of functionality, requirements, or specifications? Consider whether the target requirement supports, elaborates on, or contradicts the source requirement\. Pay special attention to whether the target requirement describes aspects of the same functionality, provides additional context that aligns with the source requirement, or specifies related structural or operational details that enhance the understanding of the source requirement\. Additionally, evaluate if the target requirement indicates a broader or more detailed implementation of the concepts introduced in the source requirement, particularly in terms of structural organization or access mechanisms\.
 
-            Focus on the following criteria:
-            1\. Does the source requirement describe a feature or functionality that directly supports or relates to the implementation or behavior described in the target requirement?
-            2\. Are there shared objectives or compliance with standards between the two requirements?
-            3\. Does the source requirement provide necessary context that clarifies or expands upon the target requirement?
+            Specifically, assess if the target requirement reinforces the notion of a single header file as stated in the source requirement, or if it introduces alternative structures or multiple entry points that may conflict with the source requirement's intent\.
 
             Answer with 'yes' or 'no'\.
 ```

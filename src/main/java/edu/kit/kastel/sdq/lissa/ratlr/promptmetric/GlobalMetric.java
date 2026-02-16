@@ -3,6 +3,7 @@ package edu.kit.kastel.sdq.lissa.ratlr.promptmetric;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -18,7 +19,6 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
 import edu.kit.kastel.sdq.lissa.ratlr.postprocessor.TraceLinkIdPostprocessor;
 import edu.kit.kastel.sdq.lissa.ratlr.resultaggregator.ResultAggregator;
-import edu.kit.kastel.sdq.lissa.ratlr.utils.Pair;
 
 /**
  * An abstract implementation of the Metric interface that provides a framework for evaluating classification tasks
@@ -58,9 +58,9 @@ public abstract class GlobalMetric implements Metric {
 
     /**
      * This method computes the metric for a single prompt against a list of classification tasks.
-     * It classifies the examples using the specified classifier and aggregates the results into accepted and rejected sets.
+     * It classifies the examples using the specified classifier and aggregates the results into a set of accepted trace links.
      * The final metric value is computed by reducing the classified results against the ground truth using the
-     * abstract {@link #reduce(Collection, Collection, Collection)} method.
+     * abstract {@link #reduce(Set, Set)} method.
      */
     @Override
     public Double getMetric(String prompt, List<ClassificationTask> examples) {
@@ -68,22 +68,19 @@ public abstract class GlobalMetric implements Metric {
             logger.debug("Computing metric for tasks: {}", examples);
         }
 
-        Pair<Set<TraceLink>, Set<TraceLink>> classifiedLinks = classify(prompt, examples);
+        Set<TraceLink> classifiedLinks = classify(prompt, examples);
 
         if (examples.size() > 1) {
-            logger.debug(
-                    "Results: {} accepted, {} rejected",
-                    classifiedLinks.first().size(),
-                    classifiedLinks.second().size());
+            logger.debug("Results: {} accepted", classifiedLinks.size());
         }
 
         Set<TraceLink> groundTruth = examples.stream()
                 .filter(ClassificationTask::label)
                 .map(task -> TraceLink.of(
                         task.source().getIdentifier(), task.target().getIdentifier()))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toCollection(LinkedHashSet::new));
 
-        Double score = reduce(classifiedLinks.first(), classifiedLinks.second(), groundTruth);
+        Double score = reduce(classifiedLinks, groundTruth);
 
         if (examples.size() > 1) {
             logger.debug("Score: {}", score);
@@ -93,31 +90,29 @@ public abstract class GlobalMetric implements Metric {
     }
 
     /**
-     * Reduces the given collections of items, rejected items, and ground truth into a single score.
+     * Reduces the given collections of classified items and ground truth into a single score.
      * The specific reduction strategy is defined in implementations.
      *
-     * @param items The collection of items considered as accepted.
-     * @param rejectedItems The collection of items considered as rejected.
+     * @param items The collection of classified items (accepted trace links).
      * @param groundTruth The collection of ground truth items for comparison.
      * @return A double representing the reduced score.
      * @param <T> The type of items being reduced.
      */
-    protected abstract <T> double reduce(Collection<T> items, Collection<T> rejectedItems, Collection<T> groundTruth);
+    protected abstract <T> double reduce(Set<T> items, Set<T> groundTruth);
 
     /**
-     * Classifies the given tasks using the specified prompt and aggregates the results into sets of accepted and rejected trace links.
+     * Classifies the given tasks using the specified prompt and aggregates the results into a set of accepted trace links.
      *
      * @param prompt The prompt to use for classification.
      * @param tasks The collection of classification tasks to be classified.
-     * @return A pair containing two sets of trace links: the first set contains accepted links, and the second set contains rejected links.
+     * @return A set of accepted trace links.
      */
-    private Pair<Set<TraceLink>, Set<TraceLink>> classify(String prompt, Collection<ClassificationTask> tasks) {
+    private Set<TraceLink> classify(String prompt, Collection<ClassificationTask> tasks) {
         if (tasks.size() > 1) {
             logger.debug("=== Starting classification for {} tasks ===", tasks.size());
         }
         classifier.setClassificationPrompt(prompt);
         List<ClassificationResult> acceptedTraceLinks = new ArrayList<>();
-        List<ClassificationResult> rejectedTraceLinks = new ArrayList<>();
 
         int taskIndex = 0;
         for (ClassificationTask task : tasks) {
@@ -138,23 +133,14 @@ public abstract class GlobalMetric implements Metric {
                             "  -> ACCEPTED with confidence: {}", result.get().confidence());
                 }
                 acceptedTraceLinks.add(result.get());
-            } else {
-                if (tasks.size() > 1) {
-                    logger.debug("  -> REJECTED (empty result)");
-                }
-                // TODO: Is there a constant for use instead of 0.0?
-                rejectedTraceLinks.add(new ClassificationResult(task.source(), task.target(), 0.0));
             }
         }
 
         if (tasks.size() > 1) {
-            logger.debug(
-                    "=== Classification summary: {} accepted, {} rejected ===",
-                    acceptedTraceLinks.size(),
-                    rejectedTraceLinks.size());
+            logger.debug("=== Classification summary: {} accepted ===", acceptedTraceLinks.size());
         }
 
-        return new Pair<>(aggregate(acceptedTraceLinks), aggregate(rejectedTraceLinks));
+        return aggregate(acceptedTraceLinks);
     }
 
     /**
@@ -181,7 +167,6 @@ public abstract class GlobalMetric implements Metric {
     /**
      * Default method to aggregate classification results into trace links.
      * Each classification result is converted into a trace link using the identifiers of the source and target elements.
-     * TODO: consider extracting into a aggregator implementation ???
      *
      * @param classificationResults The list of classification results to be aggregated.
      * @return A set of trace links derived from the classification results.

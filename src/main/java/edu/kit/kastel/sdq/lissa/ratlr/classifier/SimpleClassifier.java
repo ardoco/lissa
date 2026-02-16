@@ -47,7 +47,7 @@ public class SimpleClassifier extends Classifier {
     /**
      * The cache used for storing classification results.
      */
-    private final Cache cache;
+    private final Cache<ClassifierCacheKey> cache;
 
     /**
      * Provider for the language model used in classification.
@@ -88,7 +88,11 @@ public class SimpleClassifier extends Classifier {
      * @param template The template to use for classification requests
      */
     private SimpleClassifier(
-            int threads, Cache cache, ChatLanguageModelProvider provider, String template, ContextStore contextStore) {
+            int threads,
+            Cache<ClassifierCacheKey> cache,
+            ChatLanguageModelProvider provider,
+            String template,
+            ContextStore contextStore) {
         super(threads, contextStore);
         this.cache = cache;
         this.provider = provider;
@@ -103,7 +107,7 @@ public class SimpleClassifier extends Classifier {
      * @return A new simple classifier instance with the same configuration
      */
     @Override
-    public final Classifier copyOf() {
+    protected final Classifier copyOf() {
         return new SimpleClassifier(threads, cache, provider, template, contextStore);
     }
 
@@ -158,8 +162,7 @@ public class SimpleClassifier extends Classifier {
                 .replace("{target_type}", target.getType())
                 .replace("{target_content}", target.getContent());
 
-        ClassifierCacheKey cacheKey = ClassifierCacheKey.of(provider.cacheParameters(), request);
-        String cachedResponse = cache.get(cacheKey, String.class);
+        String cachedResponse = cache.get(request, String.class);
         if (cachedResponse != null) {
             return cachedResponse;
         } else {
@@ -169,7 +172,7 @@ public class SimpleClassifier extends Classifier {
                     source.getIdentifier(),
                     target.getIdentifier());
             String response = llm.chat(request);
-            cache.put(cacheKey, response);
+            cache.put(request, response);
             return response;
         }
     }

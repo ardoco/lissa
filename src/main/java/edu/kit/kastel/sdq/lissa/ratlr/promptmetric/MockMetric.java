@@ -1,15 +1,13 @@
 /* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.promptmetric;
 
-import static edu.kit.kastel.sdq.lissa.ratlr.promptmetric.MetricUtils.MINIMUM_SCORE;
-
 import java.util.Collections;
 import java.util.List;
 
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.ClassificationTask;
 
 /**
- * A mock implementation of the Metric interface that returns a constant score of {@value MetricUtils#MINIMUM_SCORE} for
+ * A mock implementation of the Metric interface that returns a constant score of {@value Metric#MINIMUM_SCORE} for
  * any input. This class is primarily used for testing and demonstration purposes.
  */
 public class MockMetric implements Metric {

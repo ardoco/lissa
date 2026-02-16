@@ -1,8 +1,9 @@
 /* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.promptmetric;
 
-import java.util.Collection;
+import java.util.Set;
 
+import edu.kit.kastel.mcse.ardoco.metrics.ClassificationMetricsCalculator;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.Classifier;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.postprocessor.TraceLinkIdPostprocessor;
@@ -44,35 +45,15 @@ public class FBetaMetric extends GlobalMetric {
      * Reduces the given collections of items, rejected items, and ground truth into a single F-beta score.
      */
     @Override
-    public <T> double reduce(Collection<T> items, Collection<T> rejectedItems, Collection<T> groundTruth) {
-        int truePositive = 0;
-        int falsePositive = 0;
-        int falseNegative = 0;
-        int trueNegative = 0;
+    public <T> double reduce(Set<T> items, Set<T> groundTruth) {
+        ClassificationMetricsCalculator cmc = ClassificationMetricsCalculator.getInstance();
+        var classification = cmc.calculateMetrics(items, groundTruth, null);
 
-        for (T item : items) {
-            if (groundTruth.contains(item)) {
-                truePositive++;
-            } else {
-                falsePositive++;
-            }
-        }
-        for (T item : rejectedItems) {
-            if (groundTruth.contains(item)) {
-                falseNegative++;
-            } else {
-                trueNegative++;
-            }
-        }
-
-        if (truePositive + trueNegative == 0) {
-            return 0.0;
-        }
-        if (falsePositive + falseNegative == 0) {
-            return 1.0;
-        }
-
-        return fBeta(truePositive, falsePositive, falseNegative, beta);
+        return fBeta(
+                classification.getTruePositives().size(),
+                classification.getFalsePositives().size(),
+                classification.getFalseNegatives().size(),
+                beta);
     }
 
     @Override
@@ -81,15 +62,30 @@ public class FBetaMetric extends GlobalMetric {
     }
 
     private static double recall(int truePositive, int falseNegative) {
-        return (double) truePositive / (truePositive + falseNegative);
+        int denominator = truePositive + falseNegative;
+        if (denominator == 0) {
+            return 0.0;
+        }
+        return (double) truePositive / denominator;
     }
 
     private static double precision(int truePositive, int falsePositive) {
-        return (double) truePositive / (truePositive + falsePositive);
+        int denominator = truePositive + falsePositive;
+        if (denominator == 0) {
+            return 0.0;
+        }
+        return (double) truePositive / denominator;
     }
 
     private static double fBeta(double precision, double recall, int beta) {
-        return ((1 + beta * beta) * precision * recall) / ((beta * beta * precision) + recall);
+        if (precision == 0.0 && recall == 0.0) {
+            return 0.0;
+        }
+        double denominator = (beta * beta * precision) + recall;
+        if (denominator == 0.0) {
+            return 0.0;
+        }
+        return ((1 + beta * beta) * precision * recall) / denominator;
     }
 
     private static double fBeta(int truePositive, int falsePositive, int falseNegative, int beta) {

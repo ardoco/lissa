@@ -1,4 +1,4 @@
-/* Licensed under MIT 2025-2026. */
+/* Licensed under MIT 2025. */
 package edu.kit.kastel.sdq.lissa.ratlr.cache;
 
 /**

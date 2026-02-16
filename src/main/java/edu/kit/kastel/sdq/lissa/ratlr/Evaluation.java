@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +17,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.kit.kastel.sdq.lissa.ratlr.artifactprovider.ArtifactProvider;
 import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.Classifier;
-import edu.kit.kastel.sdq.lissa.ratlr.configuration.Configuration;
+import edu.kit.kastel.sdq.lissa.ratlr.configuration.EvaluationConfiguration;
+import edu.kit.kastel.sdq.lissa.ratlr.configuration.EvaluationConfigurationBuilder;
+import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.elementstore.SourceElementStore;
 import edu.kit.kastel.sdq.lissa.ratlr.elementstore.TargetElementStore;
@@ -60,9 +63,9 @@ import edu.kit.kastel.sdq.lissa.ratlr.resultaggregator.ResultAggregator;
 public class Evaluation {
 
     private static final Logger logger = LoggerFactory.getLogger(Evaluation.class);
-    private final Path configFile;
+    private final @Nullable Path configFile;
 
-    private final Configuration configuration;
+    private final EvaluationConfiguration configuration;
 
     /** Provider for source artifacts */
     private ArtifactProvider sourceArtifactProvider;
@@ -109,7 +112,7 @@ public class Evaluation {
      */
     public Evaluation(Path configFile) throws IOException {
         this.configFile = Objects.requireNonNull(configFile);
-        configuration = new ObjectMapper().readValue(configFile.toFile(), Configuration.class);
+        configuration = new ObjectMapper().readValue(configFile.toFile(), EvaluationConfiguration.class);
         setup("");
     }
 
@@ -131,7 +134,7 @@ public class Evaluation {
      */
     public Evaluation(Path configFile, String prompt) throws IOException {
         this.configFile = Objects.requireNonNull(configFile);
-        configuration = new ObjectMapper().readValue(configFile.toFile(), Configuration.class);
+        configuration = new ObjectMapper().readValue(configFile.toFile(), EvaluationConfiguration.class);
         setup(prompt);
     }
 
@@ -145,9 +148,8 @@ public class Evaluation {
      * @param config The configuration object
      * @throws IOException If there are issues setting up the cache
      */
-    public Evaluation(Configuration config) throws IOException {
+    public Evaluation(EvaluationConfiguration config) throws IOException {
         this.configuration = config;
-        // TODO maybe dont?
         this.configFile = null;
         setup("");
     }
@@ -185,20 +187,24 @@ public class Evaluation {
         embeddingCreator = EmbeddingCreator.createEmbeddingCreator(configuration.embeddingCreator(), contextStore);
         sourceStore = new SourceElementStore(configuration.sourceStore());
         targetStore = new TargetElementStore(configuration.targetStore());
-        // TODO: careful, this is a hack to allow the optimization to overwrite the prompt and store it to the config
-        //  for serialization. Maybe you can utilize ModuleConfiguration.with() instead?
+
+        EvaluationConfiguration configToUse = configuration;
         if (!prompt.isEmpty()) {
-            configuration
+            assert configuration.classifier() != null;
+            ModuleConfiguration modifiedClassifier = configuration
                     .classifier()
-                    .setArgument(Classifier.createClassificationPromptKey(configuration.classifier()), prompt);
+                    .with(Classifier.getClassificationPromptConfigurationKey(configuration.classifier()), prompt);
+            configToUse = EvaluationConfigurationBuilder.builder(configuration)
+                    .classifier(modifiedClassifier)
+                    .build();
         }
-        classifier = configuration.createClassifier(contextStore);
-        aggregator = ResultAggregator.createResultAggregator(configuration.resultAggregator(), contextStore);
+        classifier = configToUse.createClassifier(contextStore);
+        aggregator = ResultAggregator.createResultAggregator(configToUse.resultAggregator(), contextStore);
 
         traceLinkIdPostProcessor = TraceLinkIdPostprocessor.createTraceLinkIdPostprocessor(
-                configuration.traceLinkIdPostprocessor(), contextStore);
+                configToUse.traceLinkIdPostprocessor(), contextStore);
 
-        configuration.serializeAndDestroyConfiguration();
+        configToUse.serializeAndDestroyConfiguration();
     }
 
     /**
@@ -228,10 +234,15 @@ public class Evaluation {
         traceLinks = traceLinkIdPostProcessor.postprocess(traceLinks);
 
         logger.info("Evaluating Results");
+        String configFileName;
+        if (configFile != null) {
+            configFileName = configFile.toFile().getName();
+        } else {
+            configFileName = "in_memory_configuration.json";
+        }
         Statistics.generateStatistics(
-                traceLinks, configFile.toFile(), configuration, getSourceArtifactCount(), getTargetArtifactCount());
-        Statistics.saveTraceLinks(traceLinks, configFile.toFile(), configuration);
-
+                traceLinks, configFileName, configuration, getSourceArtifactCount(), getTargetArtifactCount());
+        Statistics.saveTraceLinks(traceLinks, configFileName, configuration);
         CacheManager.getDefaultInstance().flush();
 
         return traceLinks;
@@ -288,7 +299,7 @@ public class Evaluation {
      *
      * @return The configuration object
      */
-    public Configuration getConfiguration() {
+    public EvaluationConfiguration getConfiguration() {
         return configuration;
     }
 

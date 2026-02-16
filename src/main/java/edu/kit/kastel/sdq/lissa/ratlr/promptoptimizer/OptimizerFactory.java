@@ -1,10 +1,11 @@
 /* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer;
 
+import static edu.kit.kastel.sdq.lissa.ratlr.configuration.Configuration.CONFIG_NAME_SEPARATOR;
+
 import java.util.Set;
 
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
-import edu.kit.kastel.sdq.lissa.ratlr.evaluator.Evaluator;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
 import edu.kit.kastel.sdq.lissa.ratlr.promptmetric.Metric;
 
@@ -14,11 +15,6 @@ import edu.kit.kastel.sdq.lissa.ratlr.promptmetric.Metric;
  * prompt optimizer implementations.
  */
 public final class OptimizerFactory {
-
-    /**
-     * Separator used in configuration names.
-     */
-    public static final String CONFIG_NAME_SEPARATOR = "_";
 
     private OptimizerFactory() {
         throw new IllegalAccessError("Factory class should not be instantiated.");
@@ -31,11 +27,10 @@ public final class OptimizerFactory {
      * @param configuration The configuration for the optimizer
      * @param goldStandard The gold standard trace links for evaluation
      * @param metric The metric used to evaluate the prompt performance
-     * @param evaluator The evaluator used to assess the optimization results
      * @return An instance of PromptOptimizer based on the configuration
      */
     public static PromptOptimizer createOptimizer(
-            ModuleConfiguration configuration, Set<TraceLink> goldStandard, Metric metric, Evaluator evaluator) {
+            ModuleConfiguration configuration, Set<TraceLink> goldStandard, Metric metric) {
         if (configuration == null) {
             return new MockOptimizer();
         }

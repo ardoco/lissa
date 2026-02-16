@@ -12,7 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.kit.kastel.sdq.lissa.ratlr.artifactprovider.ArtifactProvider;
 import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.Classifier;
-import edu.kit.kastel.sdq.lissa.ratlr.configuration.Configuration;
+import edu.kit.kastel.sdq.lissa.ratlr.configuration.EvaluationConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.elementstore.SourceElementStore;
 import edu.kit.kastel.sdq.lissa.ratlr.elementstore.TargetElementStore;
@@ -70,7 +70,7 @@ public class Main {
     public static void main(String[] args) throws IOException {
         var configFilePath = args.length == 0 ? "config.json" : args[0];
         var configFile = new File(configFilePath);
-        Configuration configuration = new ObjectMapper().readValue(configFile, Configuration.class);
+        EvaluationConfiguration configuration = new ObjectMapper().readValue(configFile, EvaluationConfiguration.class);
         CacheManager.setCacheDir(configuration.cacheDir());
 
         ContextStore contextStore = new ContextStore();
@@ -125,8 +125,8 @@ public class Main {
 
         logger.info("Evaluating Results");
         Statistics.generateStatistics(
-                traceLinks, configFile, configuration, sourceArtifacts.size(), targetArtifacts.size());
-        Statistics.saveTraceLinks(traceLinks, configFile, configuration);
+                traceLinks, configFile.getName(), configuration, sourceArtifacts.size(), targetArtifacts.size());
+        Statistics.saveTraceLinks(traceLinks, configFile.getName(), configuration);
 
         CacheManager.getDefaultInstance().flush();
     }

@@ -1,4 +1,4 @@
-/* Licensed under MIT 2025. */
+/* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.knowledge;
 
 import java.util.Map;
@@ -150,5 +150,16 @@ public final class Element extends Knowledge {
      */
     public boolean isCompare() {
         return compare;
+    }
+
+    @Override
+    public String toString() {
+        return "Element{" + "identifier='"
+                + getIdentifier() + '\'' + ", type='"
+                + getType() + '\'' + ", content='"
+                + getContent() + '\'' + ", granularity="
+                + granularity + ", parentId='"
+                + parentId + '\'' + ", compare="
+                + compare + '}';
     }
 }

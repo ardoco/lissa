@@ -1,4 +1,4 @@
-/* Licensed under MIT 2025. */
+/* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.cli.command;
 
 import java.io.IOException;
@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import edu.kit.kastel.sdq.lissa.ratlr.Evaluation;
 import edu.kit.kastel.sdq.lissa.ratlr.Statistics;
-import edu.kit.kastel.sdq.lissa.ratlr.configuration.Configuration;
+import edu.kit.kastel.sdq.lissa.ratlr.configuration.EvaluationConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.GoldStandardConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.KeyGenerator;
@@ -178,7 +178,7 @@ public class TransitiveTraceCommand implements Runnable {
                 traceLinks.add(traceLinksForRun);
             }
         } catch (IOException e) {
-            logger.warn("Configuration threw an exception: {}", e.getMessage());
+            logger.warn("EvaluationConfiguration threw an exception: {}", e.getMessage());
         }
     }
 
@@ -199,7 +199,7 @@ public class TransitiveTraceCommand implements Runnable {
             List<Evaluation> evaluations, @Nullable GoldStandardConfiguration goldStandardConfiguration) {
         List<String> evaluationConfigs = evaluations.stream()
                 .map(Evaluation::getConfiguration)
-                .map(Configuration::serializeAndDestroyConfiguration)
+                .map(EvaluationConfiguration::serializeAndDestroyConfiguration)
                 .collect(Collectors.toCollection(ArrayList::new));
 
         if (goldStandardConfiguration != null) {

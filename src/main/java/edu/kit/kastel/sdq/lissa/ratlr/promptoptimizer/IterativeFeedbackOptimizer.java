@@ -2,7 +2,7 @@
 package edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer;
 
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -22,6 +22,8 @@ import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.SamplerFact
  * This optimizer iteratively improves the prompt by analyzing misclassified trace links and adjusting the prompt accordingly.
  */
 public class IterativeFeedbackOptimizer extends IterativeOptimizer {
+
+    private static final String LOGGER_SEPATOR_LINE = "=".repeat(80);
 
     /**
      * The default template for the feedback prompt.
@@ -94,19 +96,12 @@ public class IterativeFeedbackOptimizer extends IterativeOptimizer {
         double promptScore;
         String modifiedPrompt = optimizationPrompt;
 
-        LOGGER.debug("=".repeat(80));
-        LOGGER.debug("Starting feedback optimization with training examples {}", examples);
+        LOGGER.debug(LOGGER_SEPATOR_LINE);
         LOGGER.debug("Maximum iterations: {}, Threshold score: {}", maximumIterations, thresholdScore);
         LOGGER.debug("Feedback size: {}", feedbackSize);
-        LOGGER.debug("=".repeat(80));
+        LOGGER.debug(LOGGER_SEPATOR_LINE);
 
         do {
-            LOGGER.debug("\n" + "=".repeat(80));
-            LOGGER.debug("ITERATION {}", i);
-            LOGGER.debug("=".repeat(80));
-            LOGGER.debug("Current Prompt:\n{}", modifiedPrompt);
-            LOGGER.debug("-".repeat(80));
-
             // Evaluate prompt and log individual classifications
             LOGGER.debug("Evaluating prompt on {} classification tasks...", examples.size());
             promptScore = this.metric.getMetric(modifiedPrompt, examples);
@@ -118,22 +113,21 @@ public class IterativeFeedbackOptimizer extends IterativeOptimizer {
                 Set<ClassificationTask> misclassified = getMisclassifiedTasks(modifiedPrompt, examples);
                 LOGGER.debug("Found {} misclassified tasks out of {} total", misclassified.size(), examples.size());
 
-                String feedbackPrompt = generateFeedbackPrompt(modifiedPrompt, examples);
+                String filledFeedbackPrompt = generateFeedbackPrompt(misclassified);
 
                 LOGGER.debug(
                         "Generated feedback prompt with {} examples", Math.min(feedbackSize, misclassified.size()));
-                LOGGER.debug("Feedback Prompt:\n{}", feedbackPrompt);
+                LOGGER.debug("Feedback Prompt:\n{}", filledFeedbackPrompt);
 
-                request = feedbackPrompt + request;
+                request = filledFeedbackPrompt + request;
             }
 
-            LOGGER.debug("-".repeat(80));
-            LOGGER.debug("Sending optimization request to LLM...");
             LOGGER.debug("Full Request:\n{}", request);
 
             modifiedPrompt = cachedSanitizedRequest(request, i);
 
             LOGGER.debug("Received and extracted new prompt:\n{}", modifiedPrompt);
+            LOGGER.debug(LOGGER_SEPATOR_LINE);
             modifiedPrompt = cachedSanitizedRequest(request);
             optimizedPrompts[i] = modifiedPrompt;
             i++;
@@ -151,14 +145,12 @@ public class IterativeFeedbackOptimizer extends IterativeOptimizer {
     /**
      * Fills the feedback prompt with examples of misclassified trace links using the FEEDBACK_EXAMPLE_BLOCK template.
      *
-     * @param prompt The prompt for which to generate feedback
-     * @param tasks  The classification tasks on which the prompt should be evaluated
+     * @param misclassifiedTasks The set of misclassified classification tasks to generate feedback from
      * @return a formatted feedback prompt containing examples of misclassified trace links
      */
-    private String generateFeedbackPrompt(String prompt, Collection<ClassificationTask> tasks) {
+    private String generateFeedbackPrompt(Set<ClassificationTask> misclassifiedTasks) {
         StringBuilder feedback = new StringBuilder();
 
-        Set<ClassificationTask> misclassifiedTasks = getMisclassifiedTasks(prompt, tasks);
         List<ClassificationTask> sampledTasks = sampleStrategy.sample(misclassifiedTasks, feedbackSize);
 
         LOGGER.debug("Generating feedback from {} sampled misclassified tasks:", sampledTasks.size());
@@ -187,7 +179,7 @@ public class IterativeFeedbackOptimizer extends IterativeOptimizer {
      * @return A set of misclassified classification tasks
      */
     private Set<ClassificationTask> getMisclassifiedTasks(String prompt, Collection<ClassificationTask> tasks) {
-        Set<ClassificationTask> misclassifiedTasks = new HashSet<>();
+        Set<ClassificationTask> misclassifiedTasks = new LinkedHashSet<>();
         LOGGER.debug("Checking {} tasks for misclassifications...", tasks.size());
         int taskNumber = 0;
         for (ClassificationTask task : tasks) {
