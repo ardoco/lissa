@@ -150,7 +150,11 @@ public class Evaluation {
         logger.info("Modifying configuration with new prompt for optimization: {}", prompt);
 
         ModuleConfiguration classifierConfig = loadedConfiguration.classifier();
-        assert classifierConfig != null;
+        if (classifierConfig == null) {
+            throw new IllegalArgumentException(
+                    "Prompt modification is only supported for configurations with a single 'classifier'. Configurations using multi-stage classifiers (e.g., 'classifiers') are not supported.");
+        }
+
         ModuleConfiguration modifiedClassifier = loadedConfiguration
                 .classifier()
                 .with(Classifier.getClassificationPromptConfigurationKey(classifierConfig), prompt);

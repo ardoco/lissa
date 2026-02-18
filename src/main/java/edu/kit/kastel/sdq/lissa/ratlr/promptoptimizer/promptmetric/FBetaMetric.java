@@ -49,32 +49,11 @@ public class FBetaMetric extends GlobalMetric {
         ClassificationMetricsCalculator cmc = ClassificationMetricsCalculator.getInstance();
         var classification = cmc.calculateMetrics(items, groundTruth, null);
 
-        if (beta == 1) {
-            return classification.getF1();
-        }
-
-        // Todo: ClassificationMetricsCalculator does not provide F-beta currently, this will be added in
-        //  https://github.com/ardoco/metrics/pull/45/
-        return fBeta(classification.getPrecision(), classification.getRecall(), beta);
+        return classification.fBeta(beta);
     }
 
     @Override
     public String getName() {
         return "F%s-Score".formatted(beta);
-    }
-
-    /**
-     * Todo: This implementation should be removed once the F-beta score is provided by the
-     *  ClassificationMetricsCalculator.
-     */
-    private static double fBeta(double precision, double recall, int beta) {
-        if (precision == 0.0 && recall == 0.0) {
-            return 0.0;
-        }
-        double denominator = (beta * beta * precision) + recall;
-        if (denominator == 0.0) {
-            return 0.0;
-        }
-        return ((1 + beta * beta) * precision * recall) / denominator;
     }
 }
