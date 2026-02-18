@@ -1,5 +1,5 @@
 /* Licensed under MIT 2025-2026. */
-package edu.kit.kastel.sdq.lissa.ratlr.evaluator;
+package edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.evaluator;
 
 import java.util.List;
 import java.util.Random;

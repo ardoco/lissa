@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.OptimizerConfiguration;
-import edu.kit.kastel.sdq.lissa.ratlr.evaluator.Evaluator;
+import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.evaluator.Evaluator;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.PromptOptimizer;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.Metric;
