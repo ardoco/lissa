@@ -50,7 +50,7 @@ public class AutomaticPromptOptimizer extends IterativeOptimizer {
 
     private static final Pattern SECTION_HEADER_NORMALIZATION_PATTERN =
             Pattern.compile("\\p{Punct}", Pattern.UNICODE_CHARACTER_CLASS);
-    private static final Logger LOGGER = LoggerFactory.getLogger(AutomaticPromptOptimizer.class);
+    private static final Logger logger = LoggerFactory.getLogger(AutomaticPromptOptimizer.class);
     // TODO add to config
     public static final int TODO_JUSTIFY_AND_NAME = 2;
 
@@ -97,19 +97,19 @@ public class AutomaticPromptOptimizer extends IterativeOptimizer {
         List<ClassificationTask> tasks = getClassificationTasks(sourceStore, targetStore, validTraceLinks);
         List<String> candidatePrompts = new ArrayList<>(Collections.singleton(optimizationPrompt));
         for (int round = 0; round < maximumIterations; round++) {
-            LOGGER.info("Starting apo iteration {}/{}", round + 1, maximumIterations);
+            logger.info("Starting apo iteration {}/{}", round + 1, maximumIterations);
             // expand candidates
             if (round > 0) {
                 List<ClassificationTask> reducedTasks = sampleStrategy.sample(tasks, config.minibatchSize());
                 candidatePrompts = expandCandidates(candidatePrompts, reducedTasks);
-                LOGGER.info("Expanded to {} candidates", candidatePrompts.size());
+                logger.info("Expanded to {} candidates", candidatePrompts.size());
             }
             // score candidates
             var candidatesAndScores = scoreAndFilterCandidates(candidatePrompts, tasks);
             candidatePrompts = candidatesAndScores.first();
             List<Double> scores = candidatesAndScores.second();
             // record candidates, estimated scores, and true scores
-            LOGGER.info("Scores: {}", scores);
+            logger.info("Scores: {}", scores);
             optimizedPrompts[round] = candidatePrompts.getFirst();
         }
         return optimizedPrompts;
