@@ -11,6 +11,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.elementstore.SourceElementStore;
 import edu.kit.kastel.sdq.lissa.ratlr.elementstore.TargetElementStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
+import edu.kit.kastel.sdq.lissa.ratlr.evaluator.Evaluator;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.Metric;
 
 /**
