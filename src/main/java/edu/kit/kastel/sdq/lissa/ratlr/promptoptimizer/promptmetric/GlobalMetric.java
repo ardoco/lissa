@@ -1,5 +1,5 @@
 /* Licensed under MIT 2025-2026. */
-package edu.kit.kastel.sdq.lissa.ratlr.promptmetric;
+package edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,14 +33,16 @@ public abstract class GlobalMetric implements Metric {
     private static final Logger logger = LoggerFactory.getLogger(GlobalMetric.class);
 
     private final Classifier classifier;
+
+    @Nullable
     private final ResultAggregator aggregator;
-    private final boolean usesCustomAggregator;
+
     private final TraceLinkIdPostprocessor postprocessor;
 
-    protected GlobalMetric(Classifier classifier, ResultAggregator aggregator, TraceLinkIdPostprocessor postprocessor) {
+    protected GlobalMetric(
+            Classifier classifier, @Nullable ResultAggregator aggregator, TraceLinkIdPostprocessor postprocessor) {
         this.classifier = classifier;
         this.aggregator = aggregator;
-        this.usesCustomAggregator = aggregator != null;
         this.postprocessor = postprocessor;
     }
 
@@ -64,29 +67,18 @@ public abstract class GlobalMetric implements Metric {
      */
     @Override
     public Double getMetric(String prompt, List<ClassificationTask> examples) {
-        if (examples.size() > 1) {
-            logger.debug("Computing metric for tasks: {}", examples);
+        if (examples.isEmpty()) {
+            return MINIMUM_SCORE;
         }
 
         Set<TraceLink> classifiedLinks = classify(prompt, examples);
-
-        if (examples.size() > 1) {
-            logger.debug("Results: {} accepted", classifiedLinks.size());
-        }
-
         Set<TraceLink> groundTruth = examples.stream()
                 .filter(ClassificationTask::label)
                 .map(task -> TraceLink.of(
                         task.source().getIdentifier(), task.target().getIdentifier()))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
-        Double score = reduce(classifiedLinks, groundTruth);
-
-        if (examples.size() > 1) {
-            logger.debug("Score: {}", score);
-        }
-
-        return score;
+        return reduce(classifiedLinks, groundTruth);
     }
 
     /**
@@ -150,7 +142,7 @@ public abstract class GlobalMetric implements Metric {
      * @return A set of trace links derived from the classification results.
      */
     private Set<TraceLink> aggregate(List<ClassificationResult> classificationResults) {
-        if (!usesCustomAggregator) {
+        if (aggregator == null) {
             return defaultAggregator(classificationResults);
         }
         List<Element> sourceElements = new ArrayList<>();

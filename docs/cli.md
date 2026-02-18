@@ -43,7 +43,7 @@ The optimization process:
 2. Executes the prompt optimizer with the specified optimization configuration
 3. Re-runs evaluation with the optimized prompt to measure improvement
 
-As only the optimized prompt is transfered from the optimization results to the evaluation, other configuration parameters (e.g., model, dataset) do not have to match between optimization and evaluation configurations.
+As only the optimized prompt is transferred from the optimization results to the evaluation, other configuration parameters (e.g., model, dataset) do not have to match between optimization and evaluation configurations.
 
 ### Examples
 

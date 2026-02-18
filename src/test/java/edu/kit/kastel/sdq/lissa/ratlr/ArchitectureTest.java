@@ -13,6 +13,8 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+
 import com.tngtech.archunit.base.DescribedPredicate;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaConstructorCall;
@@ -29,8 +31,8 @@ import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheParameter;
 import edu.kit.kastel.sdq.lissa.ratlr.cache.classifier.ClassifierCacheParameter;
 import edu.kit.kastel.sdq.lissa.ratlr.cache.embedding.EmbeddingCacheParameter;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.Classifier;
-import edu.kit.kastel.sdq.lissa.ratlr.promptmetric.Metric;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.PromptOptimizer;
+import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.Metric;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.Environment;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.Futures;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.KeyGenerator;
@@ -48,6 +50,15 @@ import edu.kit.kastel.sdq.lissa.ratlr.utils.KeyGenerator;
  */
 @AnalyzeClasses(packages = "edu.kit.kastel.sdq.lissa")
 class ArchitectureTest {
+
+    @ArchTest
+    static final ArchRule allLoggerShallBeCalledLogger = fields().that()
+            .haveRawType(Logger.class)
+            .should()
+            .haveName("logger")
+            .orShould()
+            .haveName("STATIC_LOGGER") // Exception for cases where multiple loggers are needed
+            .because("All loggers should be named 'logger' for consistency.");
 
     /**
      * Rule that enforces environment variable access restrictions.

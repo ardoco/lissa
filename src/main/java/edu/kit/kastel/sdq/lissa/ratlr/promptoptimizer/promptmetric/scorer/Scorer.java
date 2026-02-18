@@ -1,5 +1,5 @@
 /* Licensed under MIT 2025-2026. */
-package edu.kit.kastel.sdq.lissa.ratlr.promptmetric.scorer;
+package edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.scorer;
 
 import java.util.List;
 
@@ -51,4 +51,18 @@ public interface Scorer {
      * @return The name of the metric
      */
     String getName();
+
+    /**
+     * Creates a Scorer instance based on the provided configuration.
+     *
+     * @param name The name of the metric type to create.
+     * @return A Scorer instance as specified by the configuration.
+     * @throws IllegalStateException If the configuration name does not match any known metric types.
+     */
+    static Scorer createScorer(String name) {
+        return switch (name) {
+            case "binary" -> new BinaryScorer();
+            default -> throw new IllegalStateException("Unexpected value: " + name);
+        };
+    }
 }

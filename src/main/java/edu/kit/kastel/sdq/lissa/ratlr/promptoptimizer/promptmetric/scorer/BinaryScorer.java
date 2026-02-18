@@ -1,8 +1,8 @@
 /* Licensed under MIT 2025-2026. */
-package edu.kit.kastel.sdq.lissa.ratlr.promptmetric.scorer;
+package edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.scorer;
 
-import static edu.kit.kastel.sdq.lissa.ratlr.promptmetric.Metric.MAXIMUM_SCORE;
-import static edu.kit.kastel.sdq.lissa.ratlr.promptmetric.Metric.MINIMUM_SCORE;
+import static edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.Metric.MAXIMUM_SCORE;
+import static edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.Metric.MINIMUM_SCORE;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +54,7 @@ public class BinaryScorer implements Scorer {
         if (result == null) {
             return score(task);
         }
-        return task.label() == result.confidence() > MINIMUM_SCORE ? MAXIMUM_SCORE : MINIMUM_SCORE;
+        return task.label() == (result.confidence() > MINIMUM_SCORE) ? MAXIMUM_SCORE : MINIMUM_SCORE;
     }
 
     /**

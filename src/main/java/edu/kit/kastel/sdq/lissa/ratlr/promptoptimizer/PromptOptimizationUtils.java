@@ -19,7 +19,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.utils.Pair;
 
 public final class PromptOptimizationUtils {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PromptOptimizationUtils.class);
+    private static final Logger logger = LoggerFactory.getLogger(PromptOptimizationUtils.class);
     private static final Pattern REMOVE_LEADING_TRAILING_QUOTES = Pattern.compile("((^[\"']+)|([\"']+$))");
 
     private PromptOptimizationUtils() {
@@ -39,12 +39,12 @@ public final class PromptOptimizationUtils {
     public static String parseTaggedTextFirst(String text, String startTag, String endTag) {
         List<String> taggedTexts = parseTaggedText(text, startTag, endTag);
         if (taggedTexts.size() > 1) {
-            LOGGER.warn("Multiple tagged texts found, using the first one.");
+            logger.warn("Multiple tagged texts found, using the first one.");
         }
         if (taggedTexts.isEmpty()) {
-            LOGGER.warn("No tagged text found, returning the original text.");
+            logger.warn("No tagged text found, returning the original text.");
         }
-        return parseTaggedText(text, startTag, endTag).stream().findFirst().orElse(text);
+        return taggedTexts.stream().findFirst().orElse(text);
     }
 
     /**

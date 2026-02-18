@@ -1,5 +1,5 @@
 /* Licensed under MIT 2025-2026. */
-package edu.kit.kastel.sdq.lissa.ratlr.promptmetric;
+package edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric;
 
 import java.util.Collections;
 import java.util.List;

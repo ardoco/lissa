@@ -1,4 +1,4 @@
-/* Licensed under MIT 2025. */
+/* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.configuration;
 
 import java.io.IOException;
@@ -34,7 +34,9 @@ public record GoldStandardConfiguration(
          * This is useful when the gold standard file has columns in a different order
          * than expected by the system.
          */
-        @JsonProperty(value = "swap_columns", defaultValue = "false") boolean swapColumns) {
+        @JsonProperty(value = "swap_columns", defaultValue = "false")
+        boolean swapColumns)
+        implements Configuration {
 
     /**
      * Loads a gold standard configuration from a JSON file.

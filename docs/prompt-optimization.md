@@ -10,27 +10,27 @@ This also enables us to quantify the importance of well designed prompts in the 
 
 ### Prompt Metrics (`promptmetric` package)
 
-A [`Metric`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptmetric/Metric.java) is a numeric measure used to evaluate the quality of prompts during the optimization process.
+A [`Metric`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/promptmetric/Metric.java) is a numeric measure used to evaluate the quality of prompts during the optimization process.
 They are used to guide the optimization by providing feedback on how well a prompt performs in generating accurate traceability links.
 Currently, they are divided into two types of metrics.
-Global metrics evaluate the prompts performance across the entire test dataset.
+Global metrics evaluate the prompt's performance across the entire test dataset.
 Pointwise metrics scores the performance of prompts on individual data points and reduces the results into a single numeric performance value.
 If a pointwise metric is used, different scoring and reduction strategies can be configured and combined as desired.
 
-Custom metrics can be added either through implementation of the [`Global Metrics`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptmetric/GlobalMetric.java) abstract class or through implementing new scoring and reduction strategies for pointwise metrics.
+Custom metrics can be added either through implementation of the [`Global Metrics`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/promptmetric/GlobalMetric.java) abstract class or through implementing new scoring and reduction strategies for pointwise metrics.
 
 #### Available Metrics
 
-- **[`Global Metrics`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptmetric/GlobalMetric.java)**:
+- **[`Global Metrics`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/promptmetric/GlobalMetric.java)**:
   - **F_Beta-Score** (`fBeta` or `f1`)
-- **[`Pointwise Metrics`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptmetric/PointwiseMetric.java)** (`pointwise`):
+- **[`Pointwise Metrics`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/promptmetric/PointwiseMetric.java)** (`pointwise`):
   - Scoring Strategies:
     - Binary Scorer (Correct Classification / Incorrect Classification)
   - Reduction Strategies:
     - Mean
-- **[`Mock Metric`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptmetric/MockMetric.java)** (`mock`): Returns dummy values for testing purposes
+- **[`Mock Metric`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/promptmetric/MockMetric.java)** (`mock`): Returns dummy values for testing purposes
 
-### Optimizers (`optimizer` package)
+### Optimizers (`promptoptimizer` package)
 
 The [`Optimizer`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/PromptOptimizer.java) module handles prompt optimization requests.
 Different optimization strategies are implemented to improve prompts using various means.
@@ -103,5 +103,5 @@ The optimization process generally follows these steps:
 
 ### Result Files
 
-The prompt optimization results will be stored as `results-prompt-optimization-<config_filename>_iter<i>.md` just as regular evaluation results.
+The prompt optimization results will be stored as `results-prompt-optimization-<config_filename>.md` just as regular evaluation results.
 They include the full configuration used for optimization as well as the optimized prompt.

@@ -18,7 +18,7 @@ import dev.langchain4j.model.chat.ChatModel;
  */
 public final class ChatLanguageModelUtils {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ChatLanguageModelUtils.class);
+    private static final Logger logger = LoggerFactory.getLogger(ChatLanguageModelUtils.class);
 
     private ChatLanguageModelUtils() {
         throw new IllegalAccessError("Utility class");
@@ -44,21 +44,21 @@ public final class ChatLanguageModelUtils {
 
         List<String> responses = cache.get(cacheKey, List.class);
         if (responses == null || responses.size() < numberOfRequests) {
-            LOGGER.debug("CACHE MISS - Making {} new LLM request(s)", numberOfRequests);
+            logger.debug("CACHE MISS - Making {} new LLM request(s)", numberOfRequests);
             responses = new ArrayList<>();
-            LOGGER.info("Optimizing with {} requests", numberOfRequests);
+            logger.info("Optimizing with {} requests", numberOfRequests);
             for (int i = 1; i <= numberOfRequests; i++) {
-                LOGGER.debug("  Sending LLM request {}/{}", i, numberOfRequests);
+                logger.debug("  Sending LLM request {}/{}", i, numberOfRequests);
                 String response = llm.chat(request);
-                LOGGER.debug("  Received response {}/{} (length: {} chars)", i, numberOfRequests, response.length());
+                logger.debug("  Received response {}/{} (length: {} chars)", i, numberOfRequests, response.length());
                 responses.add(response);
             }
             cache.put(cacheKey, responses);
-            LOGGER.debug("Cached {} response(s) for future use", numberOfRequests);
+            logger.debug("Cached {} response(s) for future use", numberOfRequests);
         } else {
-            LOGGER.debug("CACHE HIT - Retrieved {} response(s) from cache", responses.size());
+            logger.debug("CACHE HIT - Retrieved {} response(s) from cache", responses.size());
         }
-        LOGGER.debug("Responses: {}", responses);
+        logger.debug("Responses: {}", responses);
         return responses;
     }
 

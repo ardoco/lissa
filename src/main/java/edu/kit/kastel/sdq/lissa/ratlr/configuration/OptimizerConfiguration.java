@@ -22,27 +22,24 @@ import io.soabase.recordbuilder.core.RecordBuilder;
  * @param promptOptimizer Configuration for the prompt optimizer.
  *                        This is used to optimize prompts for better classification results.
  * @param metric Configuration for the metric used in optimization to assign a score to a prompt for a set of examples
- * @param evaluator Configuration for the evaluator used in optimization
  */
 @RecordBuilder()
 public record OptimizerConfiguration(
         @JsonUnwrapped EvaluationConfiguration evaluationConfiguration,
         @JsonProperty("prompt_optimizer") ModuleConfiguration promptOptimizer,
-        @JsonProperty("metric") ModuleConfiguration metric,
-        @JsonProperty("evaluator") ModuleConfiguration evaluator)
-        implements OptimizerConfigurationBuilder.With, Configuration {
+        @JsonProperty("metric") ModuleConfiguration metric)
+        implements OptimizerConfigurationBuilder.With, SerializableConfiguration {
 
     @Override
     public String serializeAndDestroyConfiguration() {
         evaluationConfiguration.serializeAndDestroyConfiguration();
         promptOptimizer.finalizeForSerialization();
         metric.finalizeForSerialization();
-        evaluator.finalizeForSerialization();
 
         try {
             return new ObjectMapper()
                     .enable(SerializationFeature.INDENT_OUTPUT)
-                    .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                    .setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL)
                     .writeValueAsString(this);
         } catch (JsonProcessingException e) {
             throw new UncheckedIOException(e);
@@ -60,8 +57,7 @@ public record OptimizerConfiguration(
     public String toString() {
         return "Configuration{" + "evaluationConfiguration="
                 + evaluationConfiguration + ", metric="
-                + metric + ", evaluator="
-                + evaluator + ", promptOptimizer="
+                + metric + ", promptOptimizer="
                 + promptOptimizer + '}';
     }
 }

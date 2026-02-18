@@ -10,8 +10,8 @@ import org.junit.jupiter.api.Test;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.ClassificationResult;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.ClassificationTask;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
-import edu.kit.kastel.sdq.lissa.ratlr.promptmetric.reductor.MeanReductor;
-import edu.kit.kastel.sdq.lissa.ratlr.promptmetric.scorer.BinaryScorer;
+import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.reductor.MeanReductor;
+import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.scorer.BinaryScorer;
 
 /**
  * Tests for scorer and reductor implementations.

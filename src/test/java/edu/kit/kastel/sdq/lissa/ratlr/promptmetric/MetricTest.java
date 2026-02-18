@@ -18,6 +18,9 @@ import edu.kit.kastel.sdq.lissa.ratlr.classifier.MockClassifier;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
+import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.FBetaMetric;
+import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.Metric;
+import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.PointwiseMetric;
 
 /**
  * Tests for global metrics including FBetaMetric and MockMetric.

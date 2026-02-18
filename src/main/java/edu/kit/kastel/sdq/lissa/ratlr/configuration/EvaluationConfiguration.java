@@ -95,7 +95,7 @@ public record EvaluationConfiguration(
          * EvaluationConfiguration for the trace link ID postprocessor.
          */
         @JsonProperty("tracelinkid_postprocessor") @Nullable ModuleConfiguration traceLinkIdPostprocessor)
-        implements EvaluationConfigurationBuilder.With, Configuration {
+        implements EvaluationConfigurationBuilder.With, SerializableConfiguration {
 
     /**
      * Serializes this configuration to JSON and finalizes all module configurations.

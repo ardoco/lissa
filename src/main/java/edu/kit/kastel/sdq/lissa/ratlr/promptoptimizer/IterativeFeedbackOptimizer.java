@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.ClassificationTask;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
-import edu.kit.kastel.sdq.lissa.ratlr.promptmetric.Metric;
+import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.Metric;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.SampleStrategy;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.SamplerFactory;
 
@@ -23,7 +23,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.SamplerFact
  */
 public class IterativeFeedbackOptimizer extends IterativeOptimizer {
 
-    private static final String LOGGER_SEPATOR_LINE = "=".repeat(80);
+    private static final String LOGGER_SEPARATOR_LINE = "=".repeat(80);
 
     /**
      * The default template for the feedback prompt.
@@ -62,7 +62,7 @@ public class IterativeFeedbackOptimizer extends IterativeOptimizer {
     private static final int FEEDBACK_SIZE = 5;
 
     private static final String FEEDBACK_SIZE_CONFIGURATION_KEY = "feedback_size";
-    private static final Logger LOGGER = LoggerFactory.getLogger(IterativeFeedbackOptimizer.class);
+    private static final Logger logger = LoggerFactory.getLogger(IterativeFeedbackOptimizer.class);
 
     private final SampleStrategy sampleStrategy;
 
@@ -93,52 +93,46 @@ public class IterativeFeedbackOptimizer extends IterativeOptimizer {
         double[] promptScores = new double[maximumIterations];
         String[] optimizedPrompts = new String[maximumIterations];
         int i = 0;
-        double promptScore;
+        double promptScore = 0;
         String modifiedPrompt = optimizationPrompt;
 
-        LOGGER.debug(LOGGER_SEPATOR_LINE);
-        LOGGER.debug("Maximum iterations: {}, Threshold score: {}", maximumIterations, thresholdScore);
-        LOGGER.debug("Feedback size: {}", feedbackSize);
-        LOGGER.debug(LOGGER_SEPATOR_LINE);
+        logger.debug(LOGGER_SEPARATOR_LINE);
+        logger.debug("Maximum iterations: {}, Threshold score: {}", maximumIterations, thresholdScore);
+        logger.debug("Feedback size: {}", feedbackSize);
+        logger.debug(LOGGER_SEPARATOR_LINE);
 
-        do {
+        while (i < maximumIterations && promptScore < thresholdScore) {
             // Evaluate prompt and log individual classifications
-            LOGGER.debug("Evaluating prompt on {} classification tasks...", examples.size());
+            logger.debug("Evaluating prompt on {} classification tasks...", examples.size());
             promptScore = this.metric.getMetric(modifiedPrompt, examples);
-            LOGGER.debug("Iteration {}: {} = {}", i, this.metric.getName(), promptScore);
+            logger.debug("Iteration {}: {} = {}", i, this.metric.getName(), promptScore);
             promptScores[i] = promptScore;
 
             String request = generateOptimizationPrompt(modifiedPrompt);
             if (feedbackSize > 0) {
                 Set<ClassificationTask> misclassified = getMisclassifiedTasks(modifiedPrompt, examples);
-                LOGGER.debug("Found {} misclassified tasks out of {} total", misclassified.size(), examples.size());
+                logger.debug("Found {} misclassified tasks out of {} total", misclassified.size(), examples.size());
 
                 String filledFeedbackPrompt = generateFeedbackPrompt(misclassified);
 
-                LOGGER.debug(
+                logger.debug(
                         "Generated feedback prompt with {} examples", Math.min(feedbackSize, misclassified.size()));
-                LOGGER.debug("Feedback Prompt:\n{}", filledFeedbackPrompt);
+                logger.debug("Feedback Prompt:\n{}", filledFeedbackPrompt);
 
                 request = filledFeedbackPrompt + request;
             }
 
-            LOGGER.debug("Full Request:\n{}", request);
+            logger.debug("Full Request:\n{}", request);
 
             modifiedPrompt = cachedSanitizedRequest(request, i);
 
-            LOGGER.debug("Received and extracted new prompt:\n{}", modifiedPrompt);
-            LOGGER.debug(LOGGER_SEPATOR_LINE);
-            modifiedPrompt = cachedSanitizedRequest(request);
+            logger.debug("Received and extracted new prompt:\n{}", modifiedPrompt);
+            logger.debug(LOGGER_SEPARATOR_LINE);
             optimizedPrompts[i] = modifiedPrompt;
             i++;
-        } while (i < maximumIterations && promptScore < thresholdScore);
+        }
 
-        LOGGER.info("Iterations {}: {}s = {}", i, this.metric.getName(), promptScores);
-        LOGGER.debug("=".repeat(80));
-        LOGGER.debug("Optimization completed after {} iterations", i);
-        LOGGER.debug("Final score: {}", promptScore);
-        LOGGER.debug("Final Prompt:\n{}", modifiedPrompt);
-        LOGGER.debug("=".repeat(80));
+        logger.info("Iterations {}: {}s = {}", i, this.metric.getName(), promptScores);
         return optimizedPrompts;
     }
 
@@ -153,11 +147,11 @@ public class IterativeFeedbackOptimizer extends IterativeOptimizer {
 
         List<ClassificationTask> sampledTasks = sampleStrategy.sample(misclassifiedTasks, feedbackSize);
 
-        LOGGER.debug("Generating feedback from {} sampled misclassified tasks:", sampledTasks.size());
+        logger.debug("Generating feedback from {} sampled misclassified tasks:", sampledTasks.size());
 
         int exampleNumber = 1;
         for (ClassificationTask task : sampledTasks) {
-            LOGGER.debug(
+            logger.debug(
                     "  Example {}: Misclassified TraceLink ({} -> {}), Expected: {}",
                     exampleNumber,
                     task.source().getIdentifier(),
@@ -180,29 +174,28 @@ public class IterativeFeedbackOptimizer extends IterativeOptimizer {
      */
     private Set<ClassificationTask> getMisclassifiedTasks(String prompt, Collection<ClassificationTask> tasks) {
         Set<ClassificationTask> misclassifiedTasks = new LinkedHashSet<>();
-        LOGGER.debug("Checking {} tasks for misclassifications...", tasks.size());
+        logger.debug("Checking {} tasks for misclassifications...", tasks.size());
         int taskNumber = 0;
         for (ClassificationTask task : tasks) {
             taskNumber++;
             boolean isCorrect = isClassifiedCorrectly(prompt, task);
-            double taskScore = metric.getMetric(prompt, List.of(task));
 
-            LOGGER.debug(
+            logger.debug(
                     "  Task {}/{}: {} -> {} | Expected: {} | Score: {} | Correct: {}",
                     taskNumber,
                     tasks.size(),
                     task.source().getIdentifier(),
                     task.target().getIdentifier(),
                     task.label() ? "Yes" : "No",
-                    taskScore,
+                    metric.getMetric(prompt, List.of(task)),
                     isCorrect ? "YES" : "NO");
 
             if (!isCorrect) {
                 misclassifiedTasks.add(task);
-                LOGGER.debug("    ^-- MISCLASSIFIED: Added to feedback candidates");
+                logger.debug("    ^-- MISCLASSIFIED: Added to feedback candidates");
             }
         }
-        LOGGER.debug("Total misclassified: {}/{}", misclassifiedTasks.size(), tasks.size());
+        logger.debug("Total misclassified: {}/{}", misclassifiedTasks.size(), tasks.size());
         return misclassifiedTasks;
     }
 

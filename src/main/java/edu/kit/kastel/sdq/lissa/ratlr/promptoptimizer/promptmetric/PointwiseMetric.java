@@ -1,5 +1,5 @@
 /* Licensed under MIT 2025-2026. */
-package edu.kit.kastel.sdq.lissa.ratlr.promptmetric;
+package edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -10,10 +10,8 @@ import edu.kit.kastel.sdq.lissa.ratlr.classifier.ClassificationResult;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.ClassificationTask;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.Classifier;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
-import edu.kit.kastel.sdq.lissa.ratlr.promptmetric.reductor.Reductor;
-import edu.kit.kastel.sdq.lissa.ratlr.promptmetric.reductor.ReductorFactory;
-import edu.kit.kastel.sdq.lissa.ratlr.promptmetric.scorer.Scorer;
-import edu.kit.kastel.sdq.lissa.ratlr.promptmetric.scorer.ScorerFactory;
+import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.reductor.Reductor;
+import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.scorer.Scorer;
 
 /**
  * A pointwise metric that evaluates each classification task individually with a {@link Scorer} and then aggregates the
@@ -31,10 +29,9 @@ public class PointwiseMetric implements Metric {
     private final Classifier classifier;
 
     public PointwiseMetric(ModuleConfiguration configuration, Classifier classifier) {
-        this.scorer =
-                ScorerFactory.createScorer(configuration.argumentAsString(SCORER_CONFIGURATION_KEY, DEFAULT_SCORER));
-        this.reductor = ReductorFactory.createReductor(
-                configuration.argumentAsString(REDUCTOR_CONFIGURATION_KEY, DEFAULT_REDUCTOR));
+        this.scorer = Scorer.createScorer(configuration.argumentAsString(SCORER_CONFIGURATION_KEY, DEFAULT_SCORER));
+        this.reductor =
+                Reductor.createReductor(configuration.argumentAsString(REDUCTOR_CONFIGURATION_KEY, DEFAULT_REDUCTOR));
         this.classifier = classifier;
     }
 

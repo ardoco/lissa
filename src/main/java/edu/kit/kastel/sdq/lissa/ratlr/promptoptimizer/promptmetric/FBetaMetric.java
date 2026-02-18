@@ -1,5 +1,5 @@
 /* Licensed under MIT 2025-2026. */
-package edu.kit.kastel.sdq.lissa.ratlr.promptmetric;
+package edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric;
 
 import java.util.Set;
 
@@ -49,11 +49,13 @@ public class FBetaMetric extends GlobalMetric {
         ClassificationMetricsCalculator cmc = ClassificationMetricsCalculator.getInstance();
         var classification = cmc.calculateMetrics(items, groundTruth, null);
 
-        return fBeta(
-                classification.getTruePositives().size(),
-                classification.getFalsePositives().size(),
-                classification.getFalseNegatives().size(),
-                beta);
+        if (beta == 1) {
+            return classification.getF1();
+        }
+
+        // Todo: ClassificationMetricsCalculator does not provide F-beta currently, this will be added in
+        //  https://github.com/ardoco/metrics/pull/45/
+        return fBeta(classification.getPrecision(), classification.getRecall(), beta);
     }
 
     @Override
@@ -61,22 +63,10 @@ public class FBetaMetric extends GlobalMetric {
         return "F%s-Score".formatted(beta);
     }
 
-    private static double recall(int truePositive, int falseNegative) {
-        int denominator = truePositive + falseNegative;
-        if (denominator == 0) {
-            return 0.0;
-        }
-        return (double) truePositive / denominator;
-    }
-
-    private static double precision(int truePositive, int falsePositive) {
-        int denominator = truePositive + falsePositive;
-        if (denominator == 0) {
-            return 0.0;
-        }
-        return (double) truePositive / denominator;
-    }
-
+    /**
+     * Todo: This implementation should be removed once the F-beta score is provided by the
+     *  ClassificationMetricsCalculator.
+     */
     private static double fBeta(double precision, double recall, int beta) {
         if (precision == 0.0 && recall == 0.0) {
             return 0.0;
@@ -86,11 +76,5 @@ public class FBetaMetric extends GlobalMetric {
             return 0.0;
         }
         return ((1 + beta * beta) * precision * recall) / denominator;
-    }
-
-    private static double fBeta(int truePositive, int falsePositive, int falseNegative, int beta) {
-        double precision = precision(truePositive, falsePositive);
-        double recall = recall(truePositive, falseNegative);
-        return fBeta(precision, recall, beta);
     }
 }

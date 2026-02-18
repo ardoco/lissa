@@ -16,10 +16,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.OptimizerConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
-import edu.kit.kastel.sdq.lissa.ratlr.promptmetric.Metric;
-import edu.kit.kastel.sdq.lissa.ratlr.promptmetric.MetricFactory;
-import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.OptimizerFactory;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.PromptOptimizer;
+import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.Metric;
 
 /**
  * Represents a single prompt optimization run of the LiSSA framework.
@@ -31,7 +29,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.PromptOptimizer;
  */
 public class Optimization {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Optimization.class);
+    private static final Logger logger = LoggerFactory.getLogger(Optimization.class);
     private final Path configFile;
 
     private OptimizerConfiguration configuration;
@@ -81,13 +79,13 @@ public class Optimization {
         Set<TraceLink> goldStandard = getTraceLinksFromGoldStandard(
                 configuration.evaluationConfiguration().goldStandardConfiguration());
 
-        Metric metric = MetricFactory.createScorer(
+        Metric metric = Metric.createMetric(
                 configuration.metric(),
                 evaluationPipeline.getClassifier(),
                 evaluationPipeline.getAggregator(),
                 evaluationPipeline.getTraceLinkIdPostProcessor());
 
-        promptOptimizer = OptimizerFactory.createOptimizer(configuration.promptOptimizer(), goldStandard, metric);
+        promptOptimizer = PromptOptimizer.createOptimizer(configuration.promptOptimizer(), goldStandard, metric);
         configuration.serializeAndDestroyConfiguration();
     }
 
@@ -107,7 +105,7 @@ public class Optimization {
     public String[] run() {
         evaluationPipeline.initializeSourceAndTargetStores();
 
-        LOGGER.info("Optimizing Prompt");
+        logger.info("Optimizing Prompt");
 
         String[] results =
                 promptOptimizer.optimize(evaluationPipeline.getSourceStore(), evaluationPipeline.getTargetStore());
@@ -117,7 +115,7 @@ public class Optimization {
         for (int i = 0; i < results.length; i++) {
             Statistics.generateOptimizationStatistics(configFile.toFile(), configurationSummary, results[i], i + 1);
         }
-        LOGGER.info("Optimized prompt after {} steps: \n {}", results.length, results[results.length - 1]);
+        logger.info("Optimized prompt after {} steps: \n {}", results.length, results[results.length - 1]);
 
         CacheManager.getDefaultInstance().flush();
 
