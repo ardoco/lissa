@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.Metric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +28,6 @@ import edu.kit.kastel.sdq.lissa.ratlr.elementstore.TargetElementStore;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.evaluator.BruteForceEvaluator;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.evaluator.Evaluator;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
-import edu.kit.kastel.sdq.lissa.ratlr.promptmetric.Metric;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.FirstSampler;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.OrderedFirstSampler;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.SampleStrategy;
@@ -431,7 +431,7 @@ public class AutomaticPromptOptimizer extends IterativeOptimizer {
      */
     private List<String> cachedSanitizedPromptRequest(int n, String prompt) {
         prompt = String.join("\n", prompt.lines().map(String::stripLeading).toList());
-        List<String> responses = nCachedRequest(prompt, provider, llm, cache, n);
+        List<String> responses = nCachedRequest(prompt, llm, cache, n);
         List<String> newPrompts = new ArrayList<>();
         for (String result : responses) {
             newPrompts.addAll(parseTaggedText(result, START_TAG, END_TAG));

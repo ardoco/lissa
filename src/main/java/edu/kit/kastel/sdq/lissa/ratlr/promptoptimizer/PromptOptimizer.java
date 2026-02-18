@@ -38,6 +38,7 @@ public interface PromptOptimizer {
      * @param configuration The configuration for the optimizer
      * @param goldStandard The gold standard trace links for evaluation
      * @param metric The metric used to evaluate the prompt performance
+     * @param evaluator The evaluator used to assess the optimization results
      * @return An instance of PromptOptimizer based on the configuration
      */
     static PromptOptimizer createOptimizer(

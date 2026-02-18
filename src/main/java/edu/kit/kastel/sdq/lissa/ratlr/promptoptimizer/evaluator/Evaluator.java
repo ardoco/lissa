@@ -5,13 +5,12 @@ import java.util.List;
 import java.util.Random;
 import java.util.random.RandomGenerator;
 
+import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.Metric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.ClassificationTask;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
-import edu.kit.kastel.sdq.lissa.ratlr.promptmetric.Metric;
-
 /**
  * Abstract base class for evaluators in the LiSSA framework.
  * This class provides the foundation for implementing different evaluation strategies
