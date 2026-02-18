@@ -22,12 +22,14 @@ import io.soabase.recordbuilder.core.RecordBuilder;
  * @param promptOptimizer Configuration for the prompt optimizer.
  *                        This is used to optimize prompts for better classification results.
  * @param metric Configuration for the metric used in optimization to assign a score to a prompt for a set of examples
+ * @param evaluator Configuration for the evaluator used in optimization
  */
 @RecordBuilder()
 public record OptimizerConfiguration(
         @JsonUnwrapped EvaluationConfiguration evaluationConfiguration,
         @JsonProperty("prompt_optimizer") ModuleConfiguration promptOptimizer,
-        @JsonProperty("metric") ModuleConfiguration metric)
+        @JsonProperty("metric") ModuleConfiguration metric,
+        @JsonProperty("evaluator") ModuleConfiguration evaluator)
         implements OptimizerConfigurationBuilder.With, SerializableConfiguration {
 
     @Override
@@ -35,6 +37,7 @@ public record OptimizerConfiguration(
         evaluationConfiguration.serializeAndDestroyConfiguration();
         promptOptimizer.finalizeForSerialization();
         metric.finalizeForSerialization();
+        evaluator.finalizeForSerialization();
 
         try {
             return new ObjectMapper()
@@ -57,7 +60,8 @@ public record OptimizerConfiguration(
     public String toString() {
         return "Configuration{" + "evaluationConfiguration="
                 + evaluationConfiguration + ", metric="
-                + metric + ", promptOptimizer="
+                + metric + ", evaluator="
+                + evaluator + ", promptOptimizer="
                 + promptOptimizer + '}';
     }
 }
