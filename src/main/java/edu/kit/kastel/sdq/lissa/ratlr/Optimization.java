@@ -15,9 +15,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.OptimizerConfiguration;
-import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.evaluator.Evaluator;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.PromptOptimizer;
+import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.evaluator.Evaluator;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.Metric;
 
 /**
@@ -87,7 +87,8 @@ public class Optimization {
                 evaluationPipeline.getTraceLinkIdPostProcessor());
         Evaluator evaluator = Evaluator.createEvaluator(configuration.evaluator());
 
-        promptOptimizer = PromptOptimizer.createOptimizer(configuration.promptOptimizer(), goldStandard, metric, evaluator);
+        promptOptimizer =
+                PromptOptimizer.createOptimizer(configuration.promptOptimizer(), goldStandard, metric, evaluator);
         configuration.serializeAndDestroyConfiguration();
     }
 

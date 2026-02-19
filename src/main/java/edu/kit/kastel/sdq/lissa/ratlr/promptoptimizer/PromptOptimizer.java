@@ -42,7 +42,10 @@ public interface PromptOptimizer {
      * @return An instance of PromptOptimizer based on the configuration
      */
     static PromptOptimizer createOptimizer(
-            @Nullable ModuleConfiguration configuration, Set<TraceLink> goldStandard, Metric metric, Evaluator evaluator) {
+            @Nullable ModuleConfiguration configuration,
+            Set<TraceLink> goldStandard,
+            Metric metric,
+            Evaluator evaluator) {
         if (configuration == null) {
             return new MockOptimizer();
         }
