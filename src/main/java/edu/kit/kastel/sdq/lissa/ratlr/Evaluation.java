@@ -117,13 +117,14 @@ public class Evaluation {
     }
 
     /**
-     * Creates a new evaluation instance with the specified configuration file. Overwrites the prompt used for classification.
-     * This constructor is only to be used by the class {@link Optimization}, as the resulting configuration will
-     * not include the prompt.
+     * Creates a new evaluation instance with the specified configuration file. The classification prompt in the
+     * configuration will internally be overwritten with the provided {@code prompt}. The original configuration file is not
+     * modified. Results of the {@link #run()} method will also include the overwritten prompt instead of the original one.
      * This constructor:
      * <ol>
      *     <li>Validates the configuration file path</li>
      *     <li>Loads and initializes the configuration</li>
+     *     <li>Overwrites the classification prompt in the configuration with the provided prompt</li>
      *     <li>Sets up all required components for the pipeline, sharing a {@link ContextStore}</li>
      * </ol>
      *
