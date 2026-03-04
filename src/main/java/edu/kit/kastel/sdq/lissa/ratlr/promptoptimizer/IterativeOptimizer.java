@@ -110,7 +110,7 @@ public class IterativeOptimizer implements PromptOptimizer {
 
     protected static final String FEEDBACK_EXAMPLE_BLOCK_CONFIGURATION_KEY = "feedback_example_block";
 
-    protected static final String SAMPLER_CONFIGURATION_KEY = "sampler";
+    public static final String SAMPLER_CONFIGURATION_KEY = "sampler";
     protected static final int DEFAULT_SAMPLER_SEED = 42;
     protected static final String SAMPLER_SEED_CONFIGURATION_KEY = "sampler_seed";
 

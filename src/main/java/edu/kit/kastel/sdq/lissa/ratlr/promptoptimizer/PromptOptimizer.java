@@ -12,8 +12,8 @@ import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.elementstore.SourceElementStore;
 import edu.kit.kastel.sdq.lissa.ratlr.elementstore.TargetElementStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
-import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.evaluator.Evaluator;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.Metric;
+import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptselector.Selector;
 
 /**
  * Interface for prompt optimizers in the LiSSA framework.
@@ -40,14 +40,14 @@ public interface PromptOptimizer {
      * @param configuration The configuration for the optimizer
      * @param goldStandard The gold standard trace links for evaluation
      * @param metric The metric used to evaluate the prompt performance
-     * @param evaluator The evaluator used to assess the optimization results
+     * @param selector The selector used to assess the optimization results
      * @return An instance of PromptOptimizer based on the configuration
      */
     static PromptOptimizer createOptimizer(
             @Nullable ModuleConfiguration configuration,
             Set<TraceLink> goldStandard,
             Metric metric,
-            Evaluator evaluator) {
+            Selector selector) {
         if (configuration == null) {
             return new MockOptimizer();
         }
@@ -56,7 +56,7 @@ public interface PromptOptimizer {
             case "simple" -> new IterativeOptimizer(configuration, goldStandard, metric, 1);
             case "iterative" -> new IterativeOptimizer(configuration, goldStandard, metric);
             case "feedback" -> new IterativeFeedbackOptimizer(configuration, goldStandard, metric);
-            case "gradient" -> new AutomaticPromptOptimizer(configuration, goldStandard, metric, evaluator);
+            case "gradient" -> new AutomaticPromptOptimizer(configuration, goldStandard, metric, selector);
             default -> throw new IllegalStateException("Unexpected value: " + configuration.name());
         };
     }

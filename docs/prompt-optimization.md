@@ -8,6 +8,38 @@ This also enables us to quantify the importance of well designed prompts in the 
 
 ## Core Components
 
+### Overview of Prompt Optimization Subcomponents
+
+The table below provides a brief overview of the subcomponents used in the prompt optimization module.
+
+|       Component        |        **SampleStrategy**        |                  **Selector**                  |           **Metric**           |
+|------------------------|----------------------------------|------------------------------------------------|--------------------------------|
+| **Location**           | `promptoptimizer.samplestrategy` | `promptoptimizer.promptselector`               | `promptoptimizer.promptmetric` |
+| **Purpose**            | Select items from a collection   | Orchestrate prompt evaluation with budget      | Calculate performance scores   |
+| **Answers**            | "Which items to use?"            | "Which prompts to test when?"                  | "How good is this prompt?"     |
+| **Method**             | `sample(items, sampleSize)`      | `sampleAndEvaluate(prompts, examples, metric)` | `getMetric(prompts, examples)` |
+| **Algorithm Examples** | First/Ordered/Shuffled           | Simple/UCB Bandit                              | Pointwise/FBeta                |
+
+### Sample Strategies (`samplestrategy` package)
+
+A [`SampleStrategy`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/samplestrategy/SampleStrategy.java) determines how to select a subset of items from a collection.
+These strategies are used throughout the optimization process to sample classification tasks, prompts, or other collections when the full set would be too large or expensive to process.
+The key method `sample(items, sampleSize)` returns a list of selected items based on the strategy's selection logic.
+
+Custom sample strategies can be added by implementing the [`SampleStrategy`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/samplestrategy/SampleStrategy.java) interface and registering them in the [`SamplerFactory`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/samplestrategy/SamplerFactory.java).
+
+#### Available Sample Strategies
+
+- **[`First Sampler`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/samplestrategy/FirstSampler.java)** (`first`):
+  Selects the first n items from the collection without any modification.
+  Maintains the original order of items.
+- **[`Ordered First Sampler`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/samplestrategy/OrderedFirstSampler.java)** (`ordered`):
+  Sorts items before selecting the first n items.
+  Ensures deterministic sampling based on the natural ordering of items.
+- **[`Shuffled First Sampler`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/samplestrategy/ShuffledFirstSampler.java)** (`shuffled`):
+  Randomly shuffles items before selecting the first n items.
+  Provides random sampling with reproducibility through seeded random number generation.
+
 ### Prompt Metrics (`promptmetric` package)
 
 A [`Metric`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/promptmetric/Metric.java) is a numeric measure used to evaluate the quality of prompts during the optimization process.
@@ -29,6 +61,29 @@ Custom metrics can be added either through implementation of the [`Global Metric
   - Reduction Strategies:
     - Mean
 - **[`Mock Metric`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/promptmetric/MockMetric.java)** (`mock`): Returns dummy values for testing purposes
+
+### Selectors (`promptselector` package)
+
+A [`Selector`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/promptselector/Selector.java) orchestrates the evaluation of multiple prompts within a given evaluation budget.
+They determine which prompts to test and when, managing the trade-off between exploration (testing new prompts) and exploitation (focusing on promising prompts).
+Selectors use the `sampleAndEvaluate` method to coordinate prompt evaluation, calling the metric to score prompts against classification examples while respecting budget constraints.
+
+The evaluation budget is calculated as `samplesPerEval × evalRounds × evalPromptsPerRound`, controlling how many total evaluations can be performed.
+This budget management is crucial for expensive LLM-based evaluations.
+
+Custom selectors can be added by extending the [`Selector`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/promptselector/Selector.java) abstract class.
+
+#### Available Selectors
+
+- **[`Simple Selector`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/promptselector/SimpleSelector.java)** (`simple`):
+  Evaluates all provided prompts exhaustively against a subset of examples.
+  The sample size is determined by dividing the evaluation budget by the number of prompts.
+  Examples are shuffled randomly before selection to ensure diverse evaluation.
+- **[`Upper Confidence Bound Bandit Selector`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/promptselector/UpperConfidenceBoundBanditSelector.java)** (`ucb`):
+  Implements a multi-armed bandit approach using the UCB (Upper Confidence Bound) algorithm.
+  Balances exploration and exploitation by selecting prompts based on both their current performance and uncertainty.
+  More efficient than brute force when evaluating many prompts, as it focuses on promising candidates.
+- **[`Mock Selector`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/promptselector/MockSelector.java)** (`mock`): Returns dummy scores for testing purposes
 
 ### Optimizers (`promptoptimizer` package)
 

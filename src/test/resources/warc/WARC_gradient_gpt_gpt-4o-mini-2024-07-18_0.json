@@ -76,9 +76,7 @@
   "evaluator" : {
     "name" : "ucb",
     "args" : {
-      "samples_per_eval" : "16",
-      "eval_rounds" : "4",
-      "eval_prompts_per_round" : "1"
+      "samples_per_eval" : "16"
     }
   }
 }

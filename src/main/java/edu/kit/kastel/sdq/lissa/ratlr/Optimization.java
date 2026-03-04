@@ -18,8 +18,8 @@ import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.OptimizerConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.PromptOptimizer;
-import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.evaluator.Evaluator;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.Metric;
+import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptselector.Selector;
 
 /**
  * Represents a single prompt optimization run of the LiSSA framework.
@@ -70,7 +70,7 @@ public class Optimization {
      * <ol>
      *     <li>Loads the configuration from the specified file</li>
      *     <li>Initializes the evaluation pipeline</li>
-     *     <li>Creates the Metric, Evaluator and Optimizer</li>
+     *     <li>Creates the Metric, Selector and Optimizer</li>
      * </ol>
      *
      * @throws IOException If there are issues reading the configuration
@@ -86,10 +86,10 @@ public class Optimization {
                 evaluationPipeline.getClassifier(),
                 evaluationPipeline.getAggregator(),
                 evaluationPipeline.getTraceLinkIdPostProcessor());
-        Evaluator evaluator = Evaluator.createEvaluator(configuration.evaluator());
+        Selector selector = Selector.createSelector(configuration.evaluator());
 
         promptOptimizer =
-                PromptOptimizer.createOptimizer(configuration.promptOptimizer(), goldStandard, metric, evaluator);
+                PromptOptimizer.createOptimizer(configuration.promptOptimizer(), goldStandard, metric, selector);
         configuration.serializeAndDestroyConfiguration();
     }
 

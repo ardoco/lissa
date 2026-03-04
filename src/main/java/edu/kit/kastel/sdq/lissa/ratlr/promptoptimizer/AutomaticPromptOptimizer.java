@@ -9,6 +9,7 @@ import static edu.kit.kastel.sdq.lissa.ratlr.utils.ChatLanguageModelUtils.nCache
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -25,9 +26,9 @@ import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.elementstore.SourceElementStore;
 import edu.kit.kastel.sdq.lissa.ratlr.elementstore.TargetElementStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
-import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.evaluator.BruteForceEvaluator;
-import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.evaluator.Evaluator;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.Metric;
+import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptselector.Selector;
+import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptselector.SimpleSelector;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.FirstSampler;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.OrderedFirstSampler;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.SampleStrategy;
@@ -55,23 +56,23 @@ public class AutomaticPromptOptimizer extends IterativeOptimizer {
     public static final int TODO_JUSTIFY_AND_NAME = 2;
 
     private final GradientOptimizerConfig config;
-    private final Evaluator evaluator;
+    private final Selector selector;
     // TODO Unify
-    private final Evaluator bruteForceEvaluator;
+    private final Selector bruteForceSelector;
     private final SampleStrategy sampleStrategy;
     // TODO Unify
     private final SampleStrategy orderedSampleStrategy;
     private final SampleStrategy firstSampleStrategy;
 
     public AutomaticPromptOptimizer(
-            ModuleConfiguration configuration, Set<TraceLink> goldStandard, Metric metric, Evaluator evaluator) {
+            ModuleConfiguration configuration, Set<TraceLink> goldStandard, Metric metric, Selector selector) {
         super(configuration, goldStandard, metric);
         this.config = new GradientOptimizerConfig(configuration);
-        this.evaluator = evaluator;
+        this.selector = selector;
         this.sampleStrategy = config.sampleStrategy();
         this.orderedSampleStrategy = new OrderedFirstSampler();
         this.firstSampleStrategy = new FirstSampler();
-        this.bruteForceEvaluator = new BruteForceEvaluator(new ModuleConfiguration("", Collections.emptyMap()));
+        this.bruteForceSelector = new SimpleSelector(new ModuleConfiguration("", Collections.emptyMap()));
     }
 
     /**
@@ -85,7 +86,7 @@ public class AutomaticPromptOptimizer extends IterativeOptimizer {
      *     <li>Expanding candidates using textual gradients derived from error analysis</li>
      *     <li>Generating synonyms for prompts to explore variations</li>
      * </ul>
-     * The scoring of candidates is performed using the provided evaluator and metric.
+     * The scoring of candidates is performed using the provided selector and metric.
      *
      * @param sourceStore The source element store
      * @param targetStore The target element store
@@ -144,7 +145,7 @@ public class AutomaticPromptOptimizer extends IterativeOptimizer {
     }
 
     /**
-     * Score a list of prompts using the provided evaluator and metric.
+     * Score a list of prompts using the provided selector and metric.
      * If there is only one prompt, it is assigned a perfect score of 1.0.
      *
      * @param prompts The list of prompts to score
@@ -155,7 +156,7 @@ public class AutomaticPromptOptimizer extends IterativeOptimizer {
         if (prompts.size() == 1) {
             return List.of(1.0);
         }
-        return evaluator.sampleAndEvaluate(prompts, tasks, metric);
+        return selector.selectAndEvaluate(prompts, tasks, metric);
     }
 
     /**
@@ -308,7 +309,7 @@ public class AutomaticPromptOptimizer extends IterativeOptimizer {
         List<String> sampledPromptCandidates =
                 firstSampleStrategy.sample(promptCandidates, config.maxExpansionFactor() * TODO_JUSTIFY_AND_NAME);
         List<Double> errorScores =
-                bruteForceEvaluator.sampleAndEvaluate(sampledPromptCandidates, misclassifiedTasks, metric);
+                bruteForceSelector.selectAndEvaluate(sampledPromptCandidates, misclassifiedTasks, metric);
 
         // Create index-score pairs and sort by score to get top candidates
         List<Pair<Integer, Double>> indexedScores = new ArrayList<>();
@@ -316,7 +317,7 @@ public class AutomaticPromptOptimizer extends IterativeOptimizer {
             indexedScores.add(new Pair<>(i, errorScores.get(i)));
         }
         // Sort by score ascending
-        indexedScores.sort((a, b) -> Double.compare(a.second(), b.second()));
+        indexedScores.sort(Comparator.comparingDouble(Pair::second));
         return indexedScores.stream()
                 .skip(Math.max(0, indexedScores.size() - config.maxExpansionFactor()))
                 .map(pair -> sampledPromptCandidates.get(pair.first()))
