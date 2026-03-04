@@ -1,6 +1,7 @@
 /* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -89,9 +90,9 @@ public class IterativeFeedbackOptimizer extends IterativeOptimizer {
     }
 
     @Override
-    protected String[] optimizeIntern(List<ClassificationTask> examples) {
+    protected List<String> optimizeIntern(List<ClassificationTask> examples) {
         double[] promptScores = new double[maximumIterations];
-        String[] optimizedPrompts = new String[maximumIterations];
+        List<String> optimizedPrompts = new ArrayList<>();
         int i = 0;
         double promptScore = 0;
         String modifiedPrompt = optimizationPrompt;
@@ -128,7 +129,7 @@ public class IterativeFeedbackOptimizer extends IterativeOptimizer {
 
             logger.debug("Received and extracted new prompt:\n{}", modifiedPrompt);
             logger.debug(LOGGER_SEPARATOR_LINE);
-            optimizedPrompts[i] = modifiedPrompt;
+            optimizedPrompts.add(modifiedPrompt);
             i++;
         }
 

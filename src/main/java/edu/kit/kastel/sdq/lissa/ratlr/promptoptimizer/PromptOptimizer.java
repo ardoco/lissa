@@ -3,6 +3,7 @@ package edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer;
 
 import static edu.kit.kastel.sdq.lissa.ratlr.configuration.Configuration.CONFIG_NAME_SEPARATOR;
 
+import java.util.List;
 import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
@@ -27,9 +28,10 @@ public interface PromptOptimizer {
      *
      * @param sourceStore The store containing source elements of the domain/dataset the prompt is optimized for
      * @param targetStore The store containing target elements of the domain/dataset the prompt is optimized for
-     * @return A string representing the optimized prompt
+     * @return A list of Strings representing the optimized prompts. The last entry in the list is the final
+     * optimized prompt, while the preceding entries represent intermediate prompts generated during the optimization process.
      */
-    String[] optimize(SourceElementStore sourceStore, TargetElementStore targetStore);
+    List<String> optimize(SourceElementStore sourceStore, TargetElementStore targetStore);
 
     /**
      * Factory method to create an instance of PromptOptimizer based on the provided configuration.

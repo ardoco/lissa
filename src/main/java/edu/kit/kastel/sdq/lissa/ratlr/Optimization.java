@@ -5,6 +5,7 @@ import static edu.kit.kastel.sdq.lissa.ratlr.Statistics.getTraceLinksFromGoldSta
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -103,22 +104,23 @@ public class Optimization {
      *     <li>Flushes the cache to persist changes</li>
      * </ol>
      *
-     * @return The optimized prompt as a String
+     * @return An list of prompts representing the optimization state at each iteration,
+     *         where the last element is the final optimized prompt
      */
-    public String[] run() {
+    public List<String> run() {
         evaluationPipeline.initializeSourceAndTargetStores();
 
         logger.info("Optimizing Prompt");
 
-        String[] results =
+        List<String> results =
                 promptOptimizer.optimize(evaluationPipeline.getSourceStore(), evaluationPipeline.getTargetStore());
 
         String configurationSummary = configuration.serializeAndDestroyConfiguration();
 
-        for (int i = 0; i < results.length; i++) {
-            Statistics.generateOptimizationStatistics(configFile.toFile(), configurationSummary, results[i], i + 1);
+        for (int i = 0; i < results.size(); i++) {
+            Statistics.generateOptimizationStatistics(configFile.toFile(), configurationSummary, results.get(i), i + 1);
         }
-        logger.info("Optimized prompt after {} steps: \n {}", results.length, results[results.length - 1]);
+        logger.info("Optimized prompt after {} steps: \n {}", results.size(), results.getLast());
 
         CacheManager.getDefaultInstance().flush();
 

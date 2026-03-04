@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -95,8 +96,8 @@ OPENAI_API_KEY=sk-DUMMY
         Assertions.assertTrue(
                 config.exists(), "The configuration file should exist at %s".formatted(config.getAbsolutePath()));
         Optimization optimization = new Optimization(config.toPath());
-        String[] optimizedPrompts = optimization.run();
-        String optimizedPrompt = optimizedPrompts[optimizedPrompts.length - 1];
+        List<String> optimizedPrompts = optimization.run();
+        String optimizedPrompt = optimizedPrompts.getLast();
         String escapedOptimizedPrompt = escapeMarkdown(optimizedPrompt);
 
         Assertions.assertEquals(

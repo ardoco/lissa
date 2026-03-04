@@ -8,6 +8,7 @@ import static edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.PromptOptimizationU
 import static edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.PromptOptimizationUtils.sanitizePrompt;
 import static edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.Metric.MAXIMUM_SCORE;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -190,7 +191,7 @@ public class IterativeOptimizer implements PromptOptimizer {
     }
 
     @Override
-    public String[] optimize(SourceElementStore sourceStore, TargetElementStore targetStore) {
+    public List<String> optimize(SourceElementStore sourceStore, TargetElementStore targetStore) {
         var sourceElements = sourceStore.getAllElements(false);
         if (sourceElements.isEmpty()) {
             throw new IllegalArgumentException(
@@ -221,11 +222,11 @@ public class IterativeOptimizer implements PromptOptimizer {
      * reached.
      *
      * @param examples The classification tasks used to evaluate the prompts performance
-     * @return The optimized prompt after the iterative process
+     * @return A list of prompts representing the optimization state at each iteration, where the last element is the final optimized prompt
      */
-    protected String[] optimizeIntern(List<ClassificationTask> examples) {
+    protected List<String> optimizeIntern(List<ClassificationTask> examples) {
         double[] promptScores = new double[maximumIterations];
-        String[] optimizedPrompts = new String[maximumIterations];
+        List<String> optimizedPrompts = new ArrayList<>();
         int i = 0;
         double promptScore = 0;
         String modifiedPrompt = optimizationPrompt;
@@ -235,7 +236,7 @@ public class IterativeOptimizer implements PromptOptimizer {
             logger.debug("Iteration {}: {} = {}", i, metric.getName(), promptScore);
             promptScores[i] = promptScore;
             modifiedPrompt = cachedSanitizedRequest(generateOptimizationPrompt(modifiedPrompt));
-            optimizedPrompts[i] = modifiedPrompt;
+            optimizedPrompts.add(modifiedPrompt);
             i++;
         }
         logger.info("Iterations {}: {} = {}", i, metric.getName(), promptScores);
