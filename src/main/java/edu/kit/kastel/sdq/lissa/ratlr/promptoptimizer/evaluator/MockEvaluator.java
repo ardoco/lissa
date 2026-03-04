@@ -8,8 +8,16 @@ import edu.kit.kastel.sdq.lissa.ratlr.classifier.ClassificationTask;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.Metric;
 
+/**
+ * A mock evaluator that returns a fixed score for all prompts, regardless of the input.
+ * This is useful for testing and debugging the optimization pipeline without relying on actual evaluation logic.
+ */
 public class MockEvaluator extends Evaluator {
 
+    /**
+     * Creates a new mock evaluator instance with a default configuration.
+     * The configuration is not used in this evaluator, as it returns fixed scores.
+     */
     public MockEvaluator() {
         super(new ModuleConfiguration("", Collections.emptyMap()));
     }

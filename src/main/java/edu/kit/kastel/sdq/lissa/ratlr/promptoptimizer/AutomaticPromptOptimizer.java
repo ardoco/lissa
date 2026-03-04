@@ -200,13 +200,13 @@ public class AutomaticPromptOptimizer extends IterativeOptimizer {
      * @return A formatted string containing sampled error examples
      */
     private String sampleErrorString(List<EvaluationResult<Boolean>> evaluationResults) {
-        List<Integer> errorIDxs = new ArrayList<>();
-        for (EvaluationResult<Boolean> result : evaluationResults) {
-            if (result.isIncorrect()) {
-                errorIDxs.add(evaluationResults.indexOf(result));
+        List<Integer> errorIdxs = new ArrayList<>();
+        for (int i = 0; i < evaluationResults.size(); i++) {
+            if (evaluationResults.get(i).isIncorrect()) {
+                errorIdxs.add(i);
             }
         }
-        List<Integer> sampleIdxs = orderedSampleStrategy.sample(errorIDxs, config.numberOfErrors());
+        List<Integer> sampleIdxs = orderedSampleStrategy.sample(errorIdxs, config.numberOfErrors());
         StringBuilder errorString = new StringBuilder();
         for (int i : sampleIdxs) {
             errorString.append("## Example ").append(i + 1).append(System.lineSeparator());
@@ -217,12 +217,6 @@ public class AutomaticPromptOptimizer extends IterativeOptimizer {
         return errorString.toString();
     }
 
-    /**
-     * Generate an error string for a given evaluation result using the feedback example block template.
-     *
-     * @param evaluationResult The evaluation result to generate the error string for
-     * @return A formatted error string
-     */
     private String generateErrorString(EvaluationResult<Boolean> evaluationResult) {
         return config.feedbackExampleBlock()
                 .formatted(
@@ -304,25 +298,28 @@ public class AutomaticPromptOptimizer extends IterativeOptimizer {
         if (promptCandidates.size() <= config.maxExpansionFactor()) {
             return promptCandidates;
         }
-        List<ClassificationTask> missclassifiedTasks = new ArrayList<>();
+        List<ClassificationTask> misclassifiedTasks = new ArrayList<>();
         for (EvaluationResult<Boolean> result : evaluation) {
             if (result.isIncorrect()) {
-                missclassifiedTasks.add(new ClassificationTask(result.source(), result.target(), result.groundTruth()));
+                misclassifiedTasks.add(new ClassificationTask(result.source(), result.target(), result.groundTruth()));
             }
         }
-        missclassifiedTasks = firstSampleStrategy.sample(missclassifiedTasks, config.maxErrorExamples());
+        misclassifiedTasks = firstSampleStrategy.sample(misclassifiedTasks, config.maxErrorExamples());
         List<String> sampledPromptCandidates =
                 firstSampleStrategy.sample(promptCandidates, config.maxExpansionFactor() * TODO_JUSTIFY_AND_NAME);
         List<Double> errorScores =
-                bruteForceEvaluator.sampleAndEvaluate(sampledPromptCandidates, missclassifiedTasks, metric);
-        List<Integer> sortedIdxs = errorScores.stream()
-                .sorted()
-                .mapToInt(errorScores::indexOf)
-                .boxed()
-                .toList();
-        return sortedIdxs.stream()
-                .skip(Math.max(0, sortedIdxs.size() - config.maxExpansionFactor()))
-                .map(sampledPromptCandidates::get)
+                bruteForceEvaluator.sampleAndEvaluate(sampledPromptCandidates, misclassifiedTasks, metric);
+
+        // Create index-score pairs and sort by score to get top candidates
+        List<Pair<Integer, Double>> indexedScores = new ArrayList<>();
+        for (int i = 0; i < errorScores.size(); i++) {
+            indexedScores.add(new Pair<>(i, errorScores.get(i)));
+        }
+        // Sort by score ascending
+        indexedScores.sort((a, b) -> Double.compare(a.second(), b.second()));
+        return indexedScores.stream()
+                .skip(Math.max(0, indexedScores.size() - config.maxExpansionFactor()))
+                .map(pair -> sampledPromptCandidates.get(pair.first()))
                 .toList();
     }
 
@@ -470,7 +467,9 @@ public class AutomaticPromptOptimizer extends IterativeOptimizer {
                 currentSection.append(line).append(System.lineSeparator());
             }
         }
-        if (sections.isEmpty()) {
+        if (!sections.isEmpty()) {
+            sections.put(currentHeader, currentSection.toString().trim());
+        } else {
             sections.put(TASK_SECTION, prompt);
         }
         return sections;

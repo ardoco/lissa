@@ -10,6 +10,37 @@ import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.SampleStrategy;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.SamplerFactory;
 
+/**
+ * Configuration class for the gradient-based prompt optimizer.
+ * This class encapsulates all configuration parameters required for the optimization process,
+ * including prompt templates, sampling strategies, and evaluation settings.
+ *
+ * @param numberOfGradients The total number of gradient steps to perform during optimization
+ * @param maxErrorExamples The maximum number of misclassified examples to consider when filtering candidate prompts
+ * @param numberOfErrors The number of misclassified examples to use for generating feedback in each iteration
+ * @param numberOfGradientsPerError The number of gradient steps to perform for each misclassified example
+ * @param stepsPerGradient The number of optimization steps to perform for each generated prompt
+ * @param mcSamplesPerStep The number of Monte Carlo samples to use for evaluating each candidate prompt during
+ *                         optimization
+ * @param maxExpansionFactor The maximum expansion factor for the number of candidate prompts generated in each
+ *                           iteration (relative to the number of misclassified examples)
+ * @param rejectOnErrors Whether to reject candidate prompts that still misclassify examples after optimization steps
+ * @param evaluationBudget The total number of examples to use for evaluating candidate prompts during optimization
+ *                         (used to limit the number of evaluations and control runtime)
+ * @param minibatchSize The size of the minibatches to use when evaluating candidate prompts on the misclassified
+ *                      examples (used to control memory usage and evaluation time)
+ * @param beamSize The beam size to use when selecting the best candidate prompts during optimization
+ * @param gradientPrompt The prompt template used for generating feedback on misclassified examples during the gradient
+ *                       optimization process
+ * @param transformationPrompt todo The prompt template used for generating candidate prompt transformations based on
+ *                            the feedback from the gradient optimization process
+ * @param synonymPrompt The prompt template used for generating synonym variations of the current prompt, to introduce
+ *                      additional diversity in the candidate prompts during optimization
+ * @param feedbackExampleBlock The template used for formatting misclassified examples and their feedback when
+ *                             generating candidate prompts
+ * @param sampleStrategy The sampling strategy to use when selecting examples for evaluation during the optimization
+ *                       process
+ **/
 public record GradientOptimizerConfig(
         int numberOfGradients,
         int maxErrorExamples,
