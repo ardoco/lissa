@@ -47,7 +47,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.SamplerFact
  * @param candidateFilterSampler The sampling strategy to use when filtering candidate prompts
  * @param errorEvaluationSelector The selector to use when evaluating filtered candidate prompts on error examples
  **/
-public record GradientOptimizerConfig(
+public record ProTeGiOptimizerConfig(
         int numberOfGradients,
         int maximumErrorExamples,
         int numberOfErrors,
@@ -140,7 +140,7 @@ public record GradientOptimizerConfig(
     private static final String DEFAULT_FILTER_SAMPLER = SamplerFactory.FIRST_SAMPLER;
     private static final String DEFAULT_FILTER_SELECTOR = "simple";
 
-    public GradientOptimizerConfig(ModuleConfiguration configuration, Selector candidateEvaluationSelector) {
+    public ProTeGiOptimizerConfig(ModuleConfiguration configuration, Selector candidateEvaluationSelector) {
         this(
                 configuration.argumentAsInt("number_of_gradients", DEFAULT_NUMBER_OF_GRADIENTS),
                 configuration.argumentAsInt("max_error_examples", DEFAULT_MAX_ERROR_EXAMPLES),

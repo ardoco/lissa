@@ -38,7 +38,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.utils.Pair;
  * @author Daniel Schwab
  *
  */
-public class AutomaticPromptOptimizer extends IterativeOptimizer {
+public class ProTeGiOptimizer extends IterativeOptimizer {
 
     private static final String START_TAG = "<START>";
     private static final String END_TAG = "<END>";
@@ -47,14 +47,14 @@ public class AutomaticPromptOptimizer extends IterativeOptimizer {
 
     private static final Pattern SECTION_HEADER_NORMALIZATION_PATTERN =
             Pattern.compile("\\p{Punct}", Pattern.UNICODE_CHARACTER_CLASS);
-    private static final Logger logger = LoggerFactory.getLogger(AutomaticPromptOptimizer.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProTeGiOptimizer.class);
 
-    private final GradientOptimizerConfig config;
+    private final ProTeGiOptimizerConfig config;
 
-    public AutomaticPromptOptimizer(
+    public ProTeGiOptimizer(
             ModuleConfiguration configuration, Set<TraceLink> goldStandard, Metric metric, Selector selector) {
         super(configuration, goldStandard, metric);
-        this.config = new GradientOptimizerConfig(configuration, selector);
+        this.config = new ProTeGiOptimizerConfig(configuration, selector);
     }
 
     /**
@@ -101,7 +101,7 @@ public class AutomaticPromptOptimizer extends IterativeOptimizer {
 
     /**
      * Score a list of prompts using the {@link #scorePrompts(List, List)} function and limit them to the
-     * {@link GradientOptimizerConfig#beamSize()} size according to their scores in descending order.
+     * {@link ProTeGiOptimizerConfig#beamSize()} size according to their scores in descending order.
      *
      * @return A pair of (filtered prompts, their scores)
      */
@@ -276,7 +276,7 @@ public class AutomaticPromptOptimizer extends IterativeOptimizer {
      *
      * @param promptCandidates The list of candidate prompts to filter
      * @param evaluation The evaluation results used to identify misclassified examples
-     * @return A filtered list of candidate prompts limited to {@link GradientOptimizerConfig#maximumExpansionFactor()}
+     * @return A filtered list of candidate prompts limited to {@link ProTeGiOptimizerConfig#maximumExpansionFactor()}
      */
     private List<String> filterCandidatePrompts(
             List<String> promptCandidates, List<EvaluationResult<Boolean>> evaluation) {

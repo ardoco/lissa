@@ -111,6 +111,16 @@ Custom optimizers can be added by implementing the [`Prompt Optimizer`](../src/m
   In each iteration, it queries the model with an additional feedback text on the current prompt.
   The optimizer carries the optimized prompt to the next iteration naively.
   Trace links that were incorrectly classified in previous iterations are highlighted in the feedback text to guide the model towards better performance.
+- **[`ProTeGi Optimizer`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/ProTeGiOptimizer.java)** (`protegi`):
+  An advanced optimizer based on textual gradient descent for large language models, following the approach by Pryzant et al. (2023).
+  Uses textual gradients derived from error analysis to systematically refine prompts.
+  Each iteration expands candidate prompts by:
+  - Generating textual gradients that explain why errors occurred
+  - Creating prompt transformations based on these gradients
+  - Generating synonym variations to explore the prompt space
+
+  Candidates are evaluated using the configured selector and metric, with the top-performing prompts (beam size) selected for the next iteration.
+
 - **[`Mock Optimizer`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/MockOptimizer.java)** (`mock`): Returns dummy optimized prompts for testing purposes
 
 ## Configuration

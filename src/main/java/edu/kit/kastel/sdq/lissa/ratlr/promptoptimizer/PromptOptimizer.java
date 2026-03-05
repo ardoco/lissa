@@ -57,7 +57,7 @@ public interface PromptOptimizer {
             case "simple" -> new IterativeOptimizer(configuration, goldStandard, metric, 1);
             case "iterative" -> new IterativeOptimizer(configuration, goldStandard, metric);
             case "feedback" -> new IterativeFeedbackOptimizer(configuration, goldStandard, metric);
-            case "gradient" -> new AutomaticPromptOptimizer(configuration, goldStandard, metric, selector);
+            case "gradient", "protegi" -> new ProTeGiOptimizer(configuration, goldStandard, metric, selector);
             default -> throw new IllegalStateException("Unexpected value: " + configuration.name());
         };
     }
