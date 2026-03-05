@@ -115,6 +115,11 @@ public class Optimization {
         List<String> results =
                 promptOptimizer.optimize(evaluationPipeline.getSourceStore(), evaluationPipeline.getTargetStore());
 
+        if (results.isEmpty()) {
+            logger.warn("No optimized prompt was generated. Make sure maximum_iterations is set to greater than zero.");
+            return results;
+        }
+
         String configurationSummary = configuration.serializeAndDestroyConfiguration();
 
         for (int i = 0; i < results.size(); i++) {

@@ -49,12 +49,12 @@ public class UpperConfidenceBoundBandits {
     /**
      * Update the counts and scores for the chosen arms.
      * @param chosen An array of indices of the chosen arms.
-     * @param scores An array of scores corresponding to the chosen arms.
+     * @param newScores An array of scores corresponding to the chosen arms.
      */
-    public void update(int[] chosen, double[] scores) {
+    public void update(int[] chosen, double[] newScores) {
         for (int i = 0; i < chosen.length; i++) {
             int index = chosen[i];
-            double score = scores[i];
+            double score = newScores[i];
             this.counts[index] += this.numberOfSamples;
             this.scores[index] += score * this.numberOfSamples;
         }
@@ -84,31 +84,28 @@ public class UpperConfidenceBoundBandits {
      * @return A list of indices of the chosen arms.
      */
     public List<Integer> choose(int n, int iteration) {
-        // If all counts are 0, choose randomly.
+        // If all counts are 0, choose randomly without duplicates.
         if (Arrays.equals(counts, new double[counts.length])) {
-            return random.ints(0, numberOfArms).limit(n).boxed().toList();
+            return random.ints(0, numberOfArms)
+                    .distinct()
+                    .limit(Math.min(n, numberOfArms))
+                    .boxed()
+                    .toList();
         }
 
-        double[] scores = new double[numberOfArms];
+        double[] explorationScore = new double[numberOfArms];
         double[] currentScores = getScores();
         for (int i = 0; i < numberOfArms; i++) {
             // Add epsilon to avoid division by zero in the exploration term
             double count = counts[i] + EPSILON;
-            scores[i] = currentScores[i] + mode.computeExplorationTerm(explorationConstant, iteration, count);
+            explorationScore[i] = currentScores[i] + mode.computeExplorationTerm(explorationConstant, iteration, count);
         }
-        return Arrays.stream(scores)
+
+        // Sort indices directly by their exploration scores in descending order
+        return java.util.stream.IntStream.range(0, numberOfArms)
                 .boxed()
-                // sort in descending order
-                .sorted((a, b) -> Double.compare(b, a))
+                .sorted((i, j) -> Double.compare(explorationScore[j], explorationScore[i]))
                 .limit(n)
-                .map(score -> {
-                    for (int i = 0; i < scores.length; i++) {
-                        if (scores[i] == score) {
-                            return i;
-                        }
-                    }
-                    throw new IllegalStateException("Score not found: " + score + "\n This should never happen");
-                })
                 .toList();
     }
 

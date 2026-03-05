@@ -29,7 +29,8 @@ public interface PromptOptimizer {
      * @param sourceStore The store containing source elements of the domain/dataset the prompt is optimized for
      * @param targetStore The store containing target elements of the domain/dataset the prompt is optimized for
      * @return A list of Strings representing the optimized prompts. The last entry in the list is the final
-     * optimized prompt, while the preceding entries represent intermediate prompts generated during the optimization process.
+     * optimized prompt, while the preceding entries represent intermediate prompts generated during the optimization
+     * process. If no optimization is performed (i.e. config maximum_iterations = 0), the list is empty.
      */
     List<String> optimize(SourceElementStore sourceStore, TargetElementStore targetStore);
 

@@ -251,7 +251,7 @@ public class AutomaticPromptOptimizer extends IterativeOptimizer {
      * This includes the following steps:
      * <ul>
      *     <li>Evaluate the prompt on all tasks to identify misclassifications</li>
-     *     <li>Generate textual gradients based on the errors found</li
+     *     <li>Generate textual gradients based on the errors found</li>
      *     <li>Apply the gradients to create new prompt variations</li>
      *     <li>Generate synonyms for the task section of the prompt to explore variations</li>
      *     <li>Combine the new task sections with the original prompt to form new candidate prompts</li>
@@ -270,8 +270,8 @@ public class AutomaticPromptOptimizer extends IterativeOptimizer {
         List<EvaluationResult<Boolean>> evaluation = evaluatePrompt(classificationTasks, originalPrompt);
 
         Collection<String> taskVariations = applyGradient(taskSection, evaluation);
-        taskVariations.addAll(generateSynonyms(taskVariations, config.mcSamplesPerStep()));
-        taskVariations.addAll(generateSynonyms(taskSection, config.mcSamplesPerStep()));
+        taskVariations.addAll(generateSynonyms(taskVariations, config.monteCarloSamplesPerStep()));
+        taskVariations.addAll(generateSynonyms(taskSection, config.monteCarloSamplesPerStep()));
 
         List<String> promptCandidates = new ArrayList<>();
         for (String section : taskVariations) {
@@ -282,7 +282,7 @@ public class AutomaticPromptOptimizer extends IterativeOptimizer {
         if (config.rejectOnErrors()) {
             return filterCandidatePrompts(promptCandidates, evaluation);
         }
-        return sampleStrategy.sample(promptCandidates, config.maxExpansionFactor());
+        return sampleStrategy.sample(promptCandidates, config.maximumExpansionFactor());
     }
 
     /**
@@ -292,11 +292,11 @@ public class AutomaticPromptOptimizer extends IterativeOptimizer {
      *
      * @param promptCandidates The list of candidate prompts to filter
      * @param evaluation The evaluation results used to identify misclassified examples
-     * @return A filtered list of candidate prompts limited to {@link GradientOptimizerConfig#maxExpansionFactor()}
+     * @return A filtered list of candidate prompts limited to {@link GradientOptimizerConfig#maximumExpansionFactor()}
      */
     private List<String> filterCandidatePrompts(
             List<String> promptCandidates, List<EvaluationResult<Boolean>> evaluation) {
-        if (promptCandidates.size() <= config.maxExpansionFactor()) {
+        if (promptCandidates.size() <= config.maximumExpansionFactor()) {
             return promptCandidates;
         }
         List<ClassificationTask> misclassifiedTasks = new ArrayList<>();
@@ -305,9 +305,9 @@ public class AutomaticPromptOptimizer extends IterativeOptimizer {
                 misclassifiedTasks.add(new ClassificationTask(result.source(), result.target(), result.groundTruth()));
             }
         }
-        misclassifiedTasks = firstSampleStrategy.sample(misclassifiedTasks, config.maxErrorExamples());
+        misclassifiedTasks = firstSampleStrategy.sample(misclassifiedTasks, config.maximumErrorExamples());
         List<String> sampledPromptCandidates =
-                firstSampleStrategy.sample(promptCandidates, config.maxExpansionFactor() * TODO_JUSTIFY_AND_NAME);
+                firstSampleStrategy.sample(promptCandidates, config.maximumExpansionFactor() * TODO_JUSTIFY_AND_NAME);
         List<Double> errorScores =
                 bruteForceSelector.selectAndEvaluate(sampledPromptCandidates, misclassifiedTasks, metric);
 
@@ -319,7 +319,7 @@ public class AutomaticPromptOptimizer extends IterativeOptimizer {
         // Sort by score ascending
         indexedScores.sort(Comparator.comparingDouble(Pair::second));
         return indexedScores.stream()
-                .skip(Math.max(0, indexedScores.size() - config.maxExpansionFactor()))
+                .skip(Math.max(0, indexedScores.size() - config.maximumExpansionFactor()))
                 .map(pair -> sampledPromptCandidates.get(pair.first()))
                 .toList();
     }

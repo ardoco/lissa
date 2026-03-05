@@ -19,7 +19,9 @@ public class MockSelector implements Selector {
      * Creates a new mock evaluator instance with a default configuration.
      * The configuration is not used in this evaluator, as it returns fixed scores.
      */
-    public MockSelector() {}
+    public MockSelector() {
+        // No specific initialization required
+    }
 
     /**
      * Dummy implementation that returns a fixed score of 1.0 for all prompts, regardless of the input classification tasks or metric.

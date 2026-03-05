@@ -15,7 +15,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.SamplerFact
 
 /**
  * A selector that performs a simple evaluation of all provided prompts.
- * All prompts are selected evenly for evaluation with the same deterministicly random subset of classification tasks.
+ * All prompts are selected evenly for evaluation with the same deterministically random subset of classification tasks.
  */
 public class SimpleSelector implements Selector {
 

@@ -51,7 +51,10 @@ public class IterativeOptimizer implements PromptOptimizer {
      */
     private static final int DEFAULT_MAXIMUM_ITERATIONS = 5;
 
-    private static final String MAXIMUM_ITERATIONS_CONFIGURATION_KEY = "maximum_iterations";
+    /**
+     * Configuration key for the maximum number of iterations in the optimization process.
+     */
+    public static final String MAXIMUM_ITERATIONS_CONFIGURATION_KEY = "maximum_iterations";
 
     /**
      * The placeholder used in the optimization prompt to insert the prompt which should be optimized.
