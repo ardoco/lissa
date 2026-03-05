@@ -27,10 +27,15 @@ import io.soabase.recordbuilder.core.RecordBuilder;
 @RecordBuilder()
 public record OptimizerConfiguration(
         @JsonUnwrapped EvaluationConfiguration evaluationConfiguration,
-        @JsonProperty("prompt_optimizer") ModuleConfiguration promptOptimizer,
+        @JsonProperty(PROMPT_OPTIMIZER_FIELD) ModuleConfiguration promptOptimizer,
         @JsonProperty("metric") ModuleConfiguration metric,
         @JsonProperty("evaluator") ModuleConfiguration evaluator)
         implements OptimizerConfigurationBuilder.With, SerializableConfiguration {
+
+    /**
+     * JSON field name for the prompt_optimizer configuration section.
+     */
+    public static final String PROMPT_OPTIMIZER_FIELD = "prompt_optimizer";
 
     @Override
     public String serializeAndDestroyConfiguration() {

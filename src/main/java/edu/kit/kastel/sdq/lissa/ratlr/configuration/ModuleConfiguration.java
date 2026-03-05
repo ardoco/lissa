@@ -25,6 +25,11 @@ public final class ModuleConfiguration implements Configuration {
             "Configuration already finalized for serialization";
 
     /**
+     * JSON field name for the module arguments.
+     */
+    public static final String ARGS_FIELD = "args";
+
+    /**
      * The name of the module.
      */
     @JsonProperty("name")
@@ -33,7 +38,7 @@ public final class ModuleConfiguration implements Configuration {
     /**
      * The arguments for the module, stored as key-value pairs.
      */
-    @JsonProperty("args")
+    @JsonProperty(ARGS_FIELD)
     private final Map<String, String> arguments;
 
     /**

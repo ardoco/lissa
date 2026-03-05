@@ -1,6 +1,10 @@
 /* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr;
 
+import static edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration.ARGS_FIELD;
+import static edu.kit.kastel.sdq.lissa.ratlr.configuration.OptimizerConfiguration.PROMPT_OPTIMIZER_FIELD;
+import static edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.IterativeOptimizer.MAXIMUM_ITERATIONS_CONFIGURATION_KEY;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -13,6 +17,11 @@ import java.util.stream.Collectors;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import edu.kit.kastel.mcse.ardoco.metrics.ClassificationMetricsCalculator;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.EvaluationConfiguration;
@@ -279,12 +288,26 @@ public final class Statistics {
      *
      * @param jsonConfig The original JSON configuration string
      * @param iterationCount The new iteration count to set
-     * @return The modified JSON configuration string
+     * @return The modified JSON configuration string with pretty printing
      */
     private static String modifyMaxIterationsInJson(String jsonConfig, int iterationCount) {
-        // Use regex to replace the maximum_iterations value
-        return jsonConfig.replaceAll(
-                "\"maximum_iterations\"\\s*:\\s*\"?\\d+\"?", "\"maximum_iterations\" : \"" + iterationCount + "\"");
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(jsonConfig);
+
+            // Navigate to prompt_optimizer.args.maximum_iterations
+            JsonNode promptOptimizer = root.path(PROMPT_OPTIMIZER_FIELD);
+            if (promptOptimizer.isObject()) {
+                JsonNode args = promptOptimizer.path(ARGS_FIELD);
+                if (args instanceof ObjectNode argsNode) {
+                    argsNode.put(MAXIMUM_ITERATIONS_CONFIGURATION_KEY, String.valueOf(iterationCount));
+                }
+            }
+
+            return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(root);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Invalid JSON configuration", e);
+        }
     }
 
     /**
