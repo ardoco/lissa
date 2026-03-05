@@ -28,10 +28,6 @@ import edu.kit.kastel.sdq.lissa.ratlr.elementstore.TargetElementStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.Metric;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptselector.Selector;
-import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptselector.SimpleSelector;
-import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.FirstSampler;
-import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.OrderedFirstSampler;
-import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.SampleStrategy;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.Pair;
 
 /**
@@ -52,27 +48,13 @@ public class AutomaticPromptOptimizer extends IterativeOptimizer {
     private static final Pattern SECTION_HEADER_NORMALIZATION_PATTERN =
             Pattern.compile("\\p{Punct}", Pattern.UNICODE_CHARACTER_CLASS);
     private static final Logger logger = LoggerFactory.getLogger(AutomaticPromptOptimizer.class);
-    // TODO add to config
-    public static final int TODO_JUSTIFY_AND_NAME = 2;
 
     private final GradientOptimizerConfig config;
-    private final Selector selector;
-    // TODO Unify
-    private final Selector bruteForceSelector;
-    private final SampleStrategy sampleStrategy;
-    // TODO Unify
-    private final SampleStrategy orderedSampleStrategy;
-    private final SampleStrategy firstSampleStrategy;
 
     public AutomaticPromptOptimizer(
             ModuleConfiguration configuration, Set<TraceLink> goldStandard, Metric metric, Selector selector) {
         super(configuration, goldStandard, metric);
-        this.config = new GradientOptimizerConfig(configuration);
-        this.selector = selector;
-        this.sampleStrategy = config.sampleStrategy();
-        this.orderedSampleStrategy = new OrderedFirstSampler();
-        this.firstSampleStrategy = new FirstSampler();
-        this.bruteForceSelector = new SimpleSelector(new ModuleConfiguration("", Collections.emptyMap()));
+        this.config = new GradientOptimizerConfig(configuration, selector);
     }
 
     /**
@@ -101,7 +83,8 @@ public class AutomaticPromptOptimizer extends IterativeOptimizer {
             logger.info("Starting apo iteration {}/{}", round + 1, maximumIterations);
             // expand candidates
             if (round > 0) {
-                List<ClassificationTask> reducedTasks = sampleStrategy.sample(tasks, config.minibatchSize());
+                List<ClassificationTask> reducedTasks =
+                        config.minibatchSampler().sample(tasks, config.minibatchSize());
                 candidatePrompts = expandCandidates(candidatePrompts, reducedTasks);
                 logger.info("Expanded to {} candidates", candidatePrompts.size());
             }
@@ -156,7 +139,7 @@ public class AutomaticPromptOptimizer extends IterativeOptimizer {
         if (prompts.size() == 1) {
             return List.of(1.0);
         }
-        return selector.selectAndEvaluate(prompts, tasks, metric);
+        return config.candidateEvaluationSelector().selectAndEvaluate(prompts, tasks, metric);
     }
 
     /**
@@ -207,7 +190,7 @@ public class AutomaticPromptOptimizer extends IterativeOptimizer {
                 errorIdxs.add(i);
             }
         }
-        List<Integer> sampleIdxs = orderedSampleStrategy.sample(errorIdxs, config.numberOfErrors());
+        List<Integer> sampleIdxs = config.errorSampler().sample(errorIdxs, config.numberOfErrors());
         StringBuilder errorString = new StringBuilder();
         for (int i : sampleIdxs) {
             errorString.append("## Example ").append(i + 1).append(System.lineSeparator());
@@ -282,13 +265,14 @@ public class AutomaticPromptOptimizer extends IterativeOptimizer {
         if (config.rejectOnErrors()) {
             return filterCandidatePrompts(promptCandidates, evaluation);
         }
-        return sampleStrategy.sample(promptCandidates, config.maximumExpansionFactor());
+        return config.minibatchSampler().sample(promptCandidates, config.maximumExpansionFactor());
     }
 
     /**
      * Filter a list of candidate prompts to limit the total number based on configuration settings.
      * This method evaluates each candidate prompt on the misclassified examples from the provided evaluation results
      * and selects the top candidates that best address the errors.
+     * Oversamples by the configured factor before filtering to reduce evaluation cost.
      *
      * @param promptCandidates The list of candidate prompts to filter
      * @param evaluation The evaluation results used to identify misclassified examples
@@ -305,11 +289,11 @@ public class AutomaticPromptOptimizer extends IterativeOptimizer {
                 misclassifiedTasks.add(new ClassificationTask(result.source(), result.target(), result.groundTruth()));
             }
         }
-        misclassifiedTasks = firstSampleStrategy.sample(misclassifiedTasks, config.maximumErrorExamples());
-        List<String> sampledPromptCandidates =
-                firstSampleStrategy.sample(promptCandidates, config.maximumExpansionFactor() * TODO_JUSTIFY_AND_NAME);
+        misclassifiedTasks = config.candidateFilterSampler().sample(misclassifiedTasks, config.maximumErrorExamples());
+        List<String> sampledPromptCandidates = config.candidateFilterSampler()
+                .sample(promptCandidates, config.maximumExpansionFactor() * config.candidateOversamplingFactor());
         List<Double> errorScores =
-                bruteForceSelector.selectAndEvaluate(sampledPromptCandidates, misclassifiedTasks, metric);
+                config.errorEvaluationSelector().selectAndEvaluate(sampledPromptCandidates, misclassifiedTasks, metric);
 
         // Create index-score pairs and sort by score to get top candidates
         List<Pair<Integer, Double>> indexedScores = new ArrayList<>();

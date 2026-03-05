@@ -7,6 +7,7 @@ import static edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.IterativeOptimizer.
 import java.util.Random;
 
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
+import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptselector.Selector;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.SampleStrategy;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.SamplerFactory;
 
@@ -30,6 +31,8 @@ import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.SamplerFact
  * @param minibatchSize The size of the minibatches to use when evaluating candidate prompts on the misclassified
  *                      examples (used to control memory usage and evaluation time) (default: {@value DEFAULT_MINIBATCH_SIZE})
  * @param beamSize The beam size to use when selecting the best candidate prompts during optimization (default: {@value DEFAULT_BEAM_SIZE})
+ * @param candidateOversamplingFactor Oversampling factor for candidate filtering. Samples this many times the expansion factor
+ *                                    before evaluating on errors to reduce evaluation cost (default: {@value DEFAULT_CANDIDATE_OVERSAMPLING_FACTOR})
  * @param gradientPrompt The prompt template used for generating feedback on misclassified examples during the gradient
  *                       optimization process
  * @param transformationPrompt The prompt template used for generating candidate prompt transformations based on
@@ -38,8 +41,11 @@ import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.SamplerFact
  *                      additional diversity in the candidate prompts during optimization
  * @param feedbackExampleBlock The template used for formatting misclassified examples and their feedback when
  *                             generating candidate prompts
- * @param sampleStrategy The sampling strategy to use when selecting examples for evaluation during the optimization
- *                       process
+ * @param candidateEvaluationSelector The selector to use for evaluating candidate prompts on full task sets
+ * @param minibatchSampler The sampling strategy to use for minibatch selection during candidate expansion rounds
+ * @param errorSampler The sampling strategy to use when sampling error examples for gradient generation
+ * @param candidateFilterSampler The sampling strategy to use when filtering candidate prompts
+ * @param errorEvaluationSelector The selector to use when evaluating filtered candidate prompts on error examples
  **/
 public record GradientOptimizerConfig(
         int numberOfGradients,
@@ -53,11 +59,16 @@ public record GradientOptimizerConfig(
         int evaluationBudget,
         int minibatchSize,
         int beamSize,
+        int candidateOversamplingFactor,
         String gradientPrompt,
         String transformationPrompt,
         String synonymPrompt,
         String feedbackExampleBlock,
-        SampleStrategy sampleStrategy) {
+        SampleStrategy minibatchSampler,
+        SampleStrategy errorSampler,
+        SampleStrategy candidateFilterSampler,
+        Selector candidateEvaluationSelector,
+        Selector errorEvaluationSelector) {
 
     // Default prompts from the original implementation
 
@@ -121,11 +132,15 @@ public record GradientOptimizerConfig(
     private static final int DEFAULT_EVAL_PROMPTS_PER_ROUND = 8;
     private static final int DEFAULT_MINIBATCH_SIZE = 64;
     private static final int DEFAULT_BEAM_SIZE = 4;
+    private static final int DEFAULT_CANDIDATE_OVERSAMPLING_FACTOR = 2;
     private static final int DEFAULT_SEED = 133742243;
 
     private static final String DEFAULT_SAMPLER = SamplerFactory.SHUFFLED_SAMPLER;
+    private static final String DEFAULT_ERROR_SAMPLER = SamplerFactory.ORDERED_SAMPLER;
+    private static final String DEFAULT_FILTER_SAMPLER = SamplerFactory.FIRST_SAMPLER;
+    private static final String DEFAULT_FILTER_SELECTOR = "simple";
 
-    public GradientOptimizerConfig(ModuleConfiguration configuration) {
+    public GradientOptimizerConfig(ModuleConfiguration configuration, Selector candidateEvaluationSelector) {
         this(
                 configuration.argumentAsInt("number_of_gradients", DEFAULT_NUMBER_OF_GRADIENTS),
                 configuration.argumentAsInt("max_error_examples", DEFAULT_MAX_ERROR_EXAMPLES),
@@ -140,6 +155,7 @@ public record GradientOptimizerConfig(
                         * configuration.argumentAsInt("eval_prompts_per_round", DEFAULT_EVAL_PROMPTS_PER_ROUND),
                 configuration.argumentAsInt("minibatch_size", DEFAULT_MINIBATCH_SIZE),
                 configuration.argumentAsInt("beam_size", DEFAULT_BEAM_SIZE),
+                configuration.argumentAsInt("candidate_oversampling_factor", DEFAULT_CANDIDATE_OVERSAMPLING_FACTOR),
                 configuration.argumentAsString("gradient_prompt", DEFAULT_GRADIENT_PROMPT),
                 configuration.argumentAsString("transformation_prompt", DEFAULT_TRANSFORMATION_PROMPT),
                 configuration.argumentAsString("synonym_prompt", DEFAULT_SYNONYM_PROMPT),
@@ -147,6 +163,16 @@ public record GradientOptimizerConfig(
                         FEEDBACK_EXAMPLE_BLOCK_CONFIGURATION_KEY, DEFAULT_FEEDBACK_EXAMPLE_BLOCK),
                 SamplerFactory.createSampler(
                         configuration.argumentAsString(SAMPLER_CONFIGURATION_KEY, DEFAULT_SAMPLER),
-                        new Random(configuration.argumentAsInt("seed", DEFAULT_SEED))));
+                        new Random(configuration.argumentAsInt("seed", DEFAULT_SEED))),
+                SamplerFactory.createSampler(
+                        configuration.argumentAsString("error_sampler", DEFAULT_ERROR_SAMPLER),
+                        new Random(configuration.argumentAsInt("seed", DEFAULT_SEED))),
+                SamplerFactory.createSampler(
+                        configuration.argumentAsString("filter_sampler", DEFAULT_FILTER_SAMPLER),
+                        new Random(configuration.argumentAsInt("seed", DEFAULT_SEED))),
+                candidateEvaluationSelector,
+                Selector.createSelector(new ModuleConfiguration(
+                        configuration.argumentAsString("filter_selector", DEFAULT_FILTER_SELECTOR),
+                        java.util.Collections.emptyMap())));
     }
 }
