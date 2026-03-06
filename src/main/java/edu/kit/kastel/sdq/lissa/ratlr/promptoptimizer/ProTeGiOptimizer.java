@@ -433,7 +433,7 @@ public class ProTeGiOptimizer extends IterativeOptimizer {
         Map<String, String> sections = new HashMap<>();
         String currentHeader = "";
         StringBuilder currentSection = new StringBuilder();
-        for (String line : prompt.split(System.lineSeparator())) {
+        for (String line : prompt.lines().toList()) {
             line = line.strip();
             if (line.startsWith(SECTION_HEADER_PREFIX)) {
                 // save previous section
