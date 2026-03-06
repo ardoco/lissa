@@ -1,8 +1,6 @@
 /* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr;
 
-import static edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.IterativeOptimizer.MAXIMUM_ITERATIONS_CONFIGURATION_KEY;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -19,10 +17,7 @@ import org.slf4j.LoggerFactory;
 import edu.kit.kastel.mcse.ardoco.metrics.ClassificationMetricsCalculator;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.EvaluationConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.GoldStandardConfiguration;
-import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.OptimizerConfiguration;
-import edu.kit.kastel.sdq.lissa.ratlr.configuration.OptimizerConfigurationBuilder;
-import edu.kit.kastel.sdq.lissa.ratlr.configuration.SerializableConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
 
 /**
@@ -254,45 +249,6 @@ public final class Statistics {
                 configuration.getConfigurationIdentifierForFile(configFile.getName()),
                 configuration.serializeAndDestroyConfiguration(),
                 prompt);
-    }
-
-    /**
-     * Generates statistics for prompt optimization with a specific iteration count.
-     * This method modifies the maximum_iterations field in the serialized configuration JSON
-     * to reflect the actual iteration number.
-     *
-     * @param configFile Configuration file used for the optimization
-     * @param configuration The configuration used for the optimization
-     * @param prompt Optimized prompt generated during the optimization
-     * @param iterationCount The actual iteration count to set in the configuration
-     * @throws UncheckedIOException If there are issues writing the statistics file
-     */
-    public static void generateOptimizationStatistics(
-            File configFile, OptimizerConfiguration configuration, String prompt, int iterationCount)
-            throws UncheckedIOException {
-        // Modify the maximum_iterations field to reflect the actual iteration count
-        SerializableConfiguration modifiedConfig = modifyMaxIterationsInJson(configuration, iterationCount);
-        String modifiedConfigSummary = modifiedConfig.serializeAndDestroyConfiguration();
-
-        // Generate a unique identifier for this iteration
-        String configurationIdentifier = configFile.getName() + "_iter" + iterationCount;
-
-        generateOptimizationStatistics(configurationIdentifier, modifiedConfigSummary, prompt);
-    }
-
-    /**
-     * Modifies the maximum_iterations field in a optimizer configuration to the desired iteration count.
-     *
-     * @param config The original configuration
-     * @param iterationCount The new iteration count to set
-     * @return The modified configuration with the updated maximum_iterations value
-     */
-    private static OptimizerConfiguration modifyMaxIterationsInJson(OptimizerConfiguration config, int iterationCount) {
-        ModuleConfiguration modifiedOptimizer =
-                config.promptOptimizer().with(MAXIMUM_ITERATIONS_CONFIGURATION_KEY, String.valueOf(iterationCount));
-        return OptimizerConfigurationBuilder.builder(config)
-                .promptOptimizer(modifiedOptimizer)
-                .build();
     }
 
     /**

@@ -78,17 +78,16 @@ public class OptimizeCommand implements Runnable {
 
         for (Path optimizationConfig : configsToOptimize) {
             List<String> optimizedPrompts = runOptimizations(optimizationConfig);
-            for (String optimizedPrompt : optimizedPrompts) {
-                if (optimizedPrompt.isEmpty()) {
-                    logger.warn(
-                            "Skipping evaluation for optimization config '{}' as no optimized prompt was generated. "
-                                    + "This probably happened as the mock optimizer was used.",
-                            optimizationConfig);
-                    continue;
-                }
-                for (Path evaluationConfig : configsToEvaluate) {
-                    runEvaluation(evaluationConfig, optimizedPrompt);
-                }
+            if (optimizedPrompts.isEmpty()) {
+                logger.warn(
+                        "Skipping evaluation for optimization config '{}' as no optimized prompt was generated. "
+                                + "This probably happened as the mock optimizer was used.",
+                        optimizationConfig);
+                continue;
+            }
+            String optimizedPrompt = optimizedPrompts.getLast();
+            for (Path evaluationConfig : configsToEvaluate) {
+                runEvaluation(evaluationConfig, optimizedPrompt);
             }
         }
     }

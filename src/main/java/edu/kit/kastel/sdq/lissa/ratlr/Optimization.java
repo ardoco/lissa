@@ -99,12 +99,11 @@ public class Optimization {
      * <ol>
      *     <li>Sets up the source and target stores</li>
      *     <li>Optimizes the prompt using the configured optimizer</li>
-     *     <li>Generates and saves optimization statistics for each intermediate prompt</li>
      *     <li>Generates and saves optimization statistics for the final prompt</li>
      *     <li>Flushes the cache to persist changes</li>
      * </ol>
      *
-     * @return An list of prompts representing the optimization state at each iteration,
+     * @return A list of prompts representing the optimization state at each iteration,
      *         where the last element is the final optimized prompt
      */
     public List<String> run() {
@@ -120,11 +119,8 @@ public class Optimization {
             return results;
         }
 
-        String configurationSummary = configuration.serializeAndDestroyConfiguration();
+        Statistics.generateOptimizationStatistics(configFile.toFile(), configuration, results.getLast());
 
-        for (int i = 0; i < results.size(); i++) {
-            Statistics.generateOptimizationStatistics(configFile.toFile(), configuration, results.get(i), i + 1);
-        }
         logger.info("Optimized prompt after {} steps: \n {}", results.size(), results.getLast());
 
         CacheManager.getDefaultInstance().flush();
