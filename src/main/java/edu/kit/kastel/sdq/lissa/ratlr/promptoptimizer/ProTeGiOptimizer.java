@@ -186,7 +186,7 @@ public class ProTeGiOptimizer extends IterativeOptimizer {
     private String sampleErrorString(List<EvaluationResult<Boolean>> evaluationResults) {
         List<Integer> errorIdxs = new ArrayList<>();
         for (int i = 0; i < evaluationResults.size(); i++) {
-            if (evaluationResults.get(i).isIncorrect()) {
+            if (evaluationResults.get(i).isWrong()) {
                 errorIdxs.add(i);
             }
         }
@@ -285,7 +285,7 @@ public class ProTeGiOptimizer extends IterativeOptimizer {
         }
         List<ClassificationTask> misclassifiedTasks = new ArrayList<>();
         for (EvaluationResult<Boolean> result : evaluation) {
-            if (result.isIncorrect()) {
+            if (result.isWrong()) {
                 misclassifiedTasks.add(new ClassificationTask(result.source(), result.target(), result.groundTruth()));
             }
         }
@@ -425,9 +425,11 @@ public class ProTeGiOptimizer extends IterativeOptimizer {
      * Parses a sectioned prompt into a map of section headers to their corresponding content.
      * Sections are identified by lines starting with "# " as in the Markdown syntax.
      * If no sections are found, the entire prompt is treated as a single {@value TASK_SECTION} section.
+     * If the prompt is sectioned, it must contain a section with the header {@value TASK_SECTION}.
      *
      * @param prompt The sectioned prompt string
      * @return A map where keys are section headers (in lowercase, without punctuation) and values are the section content
+     * @throws IllegalArgumentException If the prompt is sectioned but does not contain a {@value TASK_SECTION} section
      */
     private static Map<String, String> parseSectionedPrompt(String prompt) {
         Map<String, String> sections = new HashMap<>();
@@ -457,6 +459,11 @@ public class ProTeGiOptimizer extends IterativeOptimizer {
         } else {
             sections.put(TASK_SECTION, prompt);
         }
+
+        if (!sections.containsKey(TASK_SECTION)) {
+            throw new IllegalArgumentException("Error, " + TASK_SECTION + " not found in sectioned prompt.");
+        }
+
         return sections;
     }
 }
