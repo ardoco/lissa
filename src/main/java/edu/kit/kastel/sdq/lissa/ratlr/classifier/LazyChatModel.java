@@ -27,7 +27,7 @@ public final class LazyChatModel implements ChatModel {
 
     private final Supplier<ChatModel> delegateSupplier;
 
-    private @Nullable ChatModel delegate;
+    private volatile @Nullable ChatModel delegate;
 
     /**
      * Creates a new LazyChatModel with the specified supplier for the delegate.
