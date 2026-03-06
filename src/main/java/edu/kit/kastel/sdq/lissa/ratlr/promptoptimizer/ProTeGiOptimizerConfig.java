@@ -9,7 +9,6 @@ import java.util.Random;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptselector.Selector;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.SampleStrategy;
-import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.SamplerFactory;
 
 /**
  * Configuration class for the gradient-based prompt optimizer.
@@ -135,9 +134,9 @@ public record ProTeGiOptimizerConfig(
     private static final int DEFAULT_CANDIDATE_OVERSAMPLING_FACTOR = 2;
     private static final int DEFAULT_SEED = 133742243;
 
-    private static final String DEFAULT_SAMPLER = SamplerFactory.SHUFFLED_SAMPLER;
-    private static final String DEFAULT_ERROR_SAMPLER = SamplerFactory.ORDERED_SAMPLER;
-    private static final String DEFAULT_FILTER_SAMPLER = SamplerFactory.FIRST_SAMPLER;
+    private static final String DEFAULT_SAMPLER = SampleStrategy.SHUFFLED_SAMPLER;
+    private static final String DEFAULT_ERROR_SAMPLER = SampleStrategy.ORDERED_SAMPLER;
+    private static final String DEFAULT_FILTER_SAMPLER = SampleStrategy.FIRST_SAMPLER;
     private static final String DEFAULT_FILTER_SELECTOR = "simple";
 
     public ProTeGiOptimizerConfig(ModuleConfiguration configuration, Selector candidateEvaluationSelector) {
@@ -161,13 +160,13 @@ public record ProTeGiOptimizerConfig(
                 configuration.argumentAsString("synonym_prompt", DEFAULT_SYNONYM_PROMPT),
                 configuration.argumentAsString(
                         FEEDBACK_EXAMPLE_BLOCK_CONFIGURATION_KEY, DEFAULT_FEEDBACK_EXAMPLE_BLOCK),
-                SamplerFactory.createSampler(
+                SampleStrategy.createSampler(
                         configuration.argumentAsString(SAMPLER_CONFIGURATION_KEY, DEFAULT_SAMPLER),
                         new Random(configuration.argumentAsInt("seed", DEFAULT_SEED))),
-                SamplerFactory.createSampler(
+                SampleStrategy.createSampler(
                         configuration.argumentAsString("error_sampler", DEFAULT_ERROR_SAMPLER),
                         new Random(configuration.argumentAsInt("seed", DEFAULT_SEED))),
-                SamplerFactory.createSampler(
+                SampleStrategy.createSampler(
                         configuration.argumentAsString("filter_sampler", DEFAULT_FILTER_SAMPLER),
                         new Random(configuration.argumentAsInt("seed", DEFAULT_SEED))),
                 candidateEvaluationSelector,

@@ -2,7 +2,7 @@
 package edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptselector;
 
 import static edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.IterativeOptimizer.SAMPLER_CONFIGURATION_KEY;
-import static edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.SamplerFactory.FIRST_SAMPLER;
+import static edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.SampleStrategy.FIRST_SAMPLER;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,7 +13,6 @@ import edu.kit.kastel.sdq.lissa.ratlr.classifier.ClassificationTask;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.Metric;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.SampleStrategy;
-import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.SamplerFactory;
 
 /**
  * A selector that uses the Upper Confidence Bound (UCB) algorithm to select prompts
@@ -73,7 +72,7 @@ public class UpperConfidenceBoundBanditSelector implements Selector {
         this.mode = configuration.argumentAsString("mode", UpperConfidenceBoundBandits.Mode.UCB.getModeName());
 
         this.seed = configuration.argumentAsInt("seed", DEFAULT_SEED);
-        this.sampleStrategy = SamplerFactory.createSampler(
+        this.sampleStrategy = SampleStrategy.createSampler(
                 configuration.argumentAsString(SAMPLER_CONFIGURATION_KEY, FIRST_SAMPLER), new Random(this.seed));
     }
 

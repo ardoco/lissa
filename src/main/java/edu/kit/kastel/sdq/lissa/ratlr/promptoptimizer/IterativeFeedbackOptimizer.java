@@ -16,7 +16,6 @@ import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.Metric;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.SampleStrategy;
-import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.SamplerFactory;
 
 /**
  * An optimizer that uses iterative feedback to refine the prompt based on classification results.
@@ -54,7 +53,7 @@ public class IterativeFeedbackOptimizer extends IterativeOptimizer {
             Classification result: {classification}
             """;
 
-    private static final String DEFAULT_SAMPLER = SamplerFactory.ORDERED_SAMPLER;
+    private static final String DEFAULT_SAMPLER = SampleStrategy.ORDERED_SAMPLER;
 
     /**
      * The default number of feedback examples to include in the prompt.
@@ -86,7 +85,7 @@ public class IterativeFeedbackOptimizer extends IterativeOptimizer {
                 FEEDBACK_EXAMPLE_BLOCK_CONFIGURATION_KEY, DEFAULT_FEEDBACK_EXAMPLE_BLOCK);
         String samplerName = configuration.argumentAsString(SAMPLER_CONFIGURATION_KEY, DEFAULT_SAMPLER);
         int randomSeed = configuration.argumentAsInt(SAMPLER_SEED_CONFIGURATION_KEY, DEFAULT_SAMPLER_SEED);
-        this.sampleStrategy = SamplerFactory.createSampler(samplerName, new Random(randomSeed));
+        this.sampleStrategy = SampleStrategy.createSampler(samplerName, new Random(randomSeed));
     }
 
     @Override

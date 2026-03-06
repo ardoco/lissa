@@ -2,7 +2,7 @@
 package edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptselector;
 
 import static edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.IterativeOptimizer.SAMPLER_CONFIGURATION_KEY;
-import static edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.SamplerFactory.SHUFFLED_SAMPLER;
+import static edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.SampleStrategy.SHUFFLED_SAMPLER;
 
 import java.util.List;
 import java.util.Random;
@@ -11,7 +11,6 @@ import edu.kit.kastel.sdq.lissa.ratlr.classifier.ClassificationTask;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.Metric;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.SampleStrategy;
-import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.SamplerFactory;
 
 /**
  * A selector that performs a simple evaluation of all provided prompts.
@@ -35,7 +34,7 @@ public class SimpleSelector implements Selector {
         int evalRounds = configuration.argumentAsInt("eval_rounds", EVALUATION_ROUNDS);
         int evalPromptsPerRound = configuration.argumentAsInt("eval_prompts_per_round", EVALUATION_PROMPTS_PER_ROUND);
         this.evaluationBudget = samplesPerEval * evalRounds * evalPromptsPerRound;
-        this.sampleStrategy = SamplerFactory.createSampler(
+        this.sampleStrategy = SampleStrategy.createSampler(
                 configuration.argumentAsString(SAMPLER_CONFIGURATION_KEY, SHUFFLED_SAMPLER),
                 new Random(configuration.argumentAsInt("seed", DEFAULT_SEED)));
     }
