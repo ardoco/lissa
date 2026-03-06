@@ -53,6 +53,7 @@ public class UpperConfidenceBoundBanditSelector implements Selector {
     private final int samplesPerEvaluation;
     private final int rounds;
     private final int numberOfPromptsPerRound;
+    private final int seed;
     private final double explorationConstant;
     private final String mode;
     private final SampleStrategy sampleStrategy;
@@ -71,9 +72,9 @@ public class UpperConfidenceBoundBanditSelector implements Selector {
         this.explorationConstant = configuration.argumentAsDouble("c", DEFAULT_EXPLORATION_CONSTANT);
         this.mode = configuration.argumentAsString("mode", UpperConfidenceBoundBandits.Mode.UCB.getModeName());
 
+        this.seed = configuration.argumentAsInt("seed", DEFAULT_SEED);
         this.sampleStrategy = SamplerFactory.createSampler(
-                configuration.argumentAsString(SAMPLER_CONFIGURATION_KEY, FIRST_SAMPLER),
-                new Random(configuration.argumentAsInt("seed", DEFAULT_SEED)));
+                configuration.argumentAsString(SAMPLER_CONFIGURATION_KEY, FIRST_SAMPLER), new Random(this.seed));
     }
 
     /**
@@ -84,7 +85,7 @@ public class UpperConfidenceBoundBanditSelector implements Selector {
     @Override
     public List<Double> selectAndEvaluate(List<String> prompts, List<ClassificationTask> examples, Metric metric) {
         UpperConfidenceBoundBandits banditAlgo = new UpperConfidenceBoundBandits(
-                prompts.size(), this.samplesPerEvaluation, this.explorationConstant, this.mode);
+                prompts.size(), this.samplesPerEvaluation, this.explorationConstant, this.mode, new Random(this.seed));
         for (int round = 1; round <= this.rounds; round++) {
             // Sample the prompts
             List<Integer> sampledPromptIdentifiers = banditAlgo.choose(numberOfPromptsPerRound, round);

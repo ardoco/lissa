@@ -97,6 +97,10 @@ OPENAI_API_KEY=sk-DUMMY
                 config.exists(), "The configuration file should exist at %s".formatted(config.getAbsolutePath()));
         Optimization optimization = new Optimization(config.toPath());
         List<String> optimizedPrompts = optimization.run();
+        Assertions.assertFalse(
+                optimizedPrompts.isEmpty(),
+                "The optimizer returned no prompts; as maximum_iterations > 0 and that the optimizer produces at least"
+                        + " one prompt.");
         String optimizedPrompt = optimizedPrompts.getLast();
         String escapedOptimizedPrompt = escapeMarkdown(optimizedPrompt);
 
@@ -105,5 +109,61 @@ OPENAI_API_KEY=sk-DUMMY
                 escapedOptimizedPrompt.lines().map(String::strip).toList(),
                 "The optimized prompt does not match every line (regardless of line terminators or leading/trailing "
                         + "spaces) of the expected prompt.");
+    }
+
+    /**
+     * Provides test cases for default configuration smoke tests.
+     * These tests ensure that default configurations execute without throwing errors.
+     * Expected prompts can be added later by creating corresponding expectation files.
+     *
+     * @return A stream of arguments for the parameterized tests.
+     */
+    private static Stream<Arguments> provideDefaultConfigTestCases() {
+        return Stream.of(
+                Arguments.of(
+                        "example-configs/gradient-optimizer-config.json",
+                        null // No expected output yet - test only ensures execution without errors
+                        ),
+                Arguments.of(
+                        "example-configs/optimizer-config.json",
+                        null // No expected output yet - test only ensures execution without errors
+                        ));
+    }
+
+    /**
+     * Tests the end-to-end functionality of default optimizer configurations.
+     * This test ensures that default configurations execute without throwing errors.
+     * If an expected prompt is provided (not null), it also validates the output matches expectations.
+     * This design allows for gradual addition of expected outputs as needed.
+     *
+     * @param configPath     The path to the configuration file for the optimization run.
+     * @param expectedPrompt The expected optimized prompt (optional - can be null for smoke testing only).
+     */
+    @ParameterizedTest
+    @MethodSource("provideDefaultConfigTestCases")
+    void testDefaultConfigExecutesWithoutErrors(String configPath, String expectedPrompt) throws Exception {
+        File config = new File(configPath);
+        Assertions.assertTrue(
+                config.exists(), "The configuration file should exist at %s".formatted(config.getAbsolutePath()));
+
+        Optimization optimization = new Optimization(config.toPath());
+        List<String> optimizedPrompts = optimization.run();
+
+        Assertions.assertFalse(
+                optimizedPrompts.isEmpty(),
+                "The optimizer returned no prompts; as maximum_iterations > 0 and that the optimizer produces at least"
+                        + " one prompt.");
+
+        // If expected prompt is provided, validate the output
+        if (expectedPrompt != null) {
+            String optimizedPrompt = optimizedPrompts.getLast();
+            String escapedOptimizedPrompt = escapeMarkdown(optimizedPrompt);
+
+            Assertions.assertEquals(
+                    expectedPrompt.lines().map(String::strip).toList(),
+                    escapedOptimizedPrompt.lines().map(String::strip).toList(),
+                    "The optimized prompt does not match every line (regardless of line terminators or leading/trailing "
+                            + "spaces) of the expected prompt.");
+        }
     }
 }

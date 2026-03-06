@@ -68,7 +68,7 @@
     "name" : "mock",
     "args" : {}
   },
-  "evaluator" : {
+  "selector" : {
     "name" : "mock",
     "args" : {}
   }

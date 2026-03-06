@@ -68,10 +68,10 @@ A [`Selector`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/p
 They determine which prompts to test and when, managing the trade-off between exploration (testing new prompts) and exploitation (focusing on promising prompts).
 Selectors use the `sampleAndEvaluate` method to coordinate prompt evaluation, calling the metric to score prompts against classification examples while respecting budget constraints.
 
-The evaluation budget is calculated as `samplesPerEval × evalRounds × evalPromptsPerRound`, controlling how many total evaluations can be performed.
+The exact evaluation budget parameters are selector-specific, controlling how many total evaluations can be performed.
 This budget management is crucial for expensive LLM-based evaluations.
 
-Custom selectors can be added by extending the [`Selector`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/promptselector/Selector.java) abstract class.
+Custom selectors can be added by implementing the [`Selector`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/promptselector/Selector.java) interface.
 
 #### Available Selectors
 

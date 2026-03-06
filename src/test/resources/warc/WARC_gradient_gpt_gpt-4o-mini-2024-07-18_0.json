@@ -73,7 +73,7 @@
     "name" : "pointwise",
     "args" : {}
   },
-  "evaluator" : {
+  "selector" : {
     "name" : "ucb",
     "args" : {
       "samples_per_eval" : "16"

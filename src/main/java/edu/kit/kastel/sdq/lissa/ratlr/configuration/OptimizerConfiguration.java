@@ -3,6 +3,7 @@ package edu.kit.kastel.sdq.lissa.ratlr.configuration;
 
 import java.io.UncheckedIOException;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
@@ -22,14 +23,14 @@ import io.soabase.recordbuilder.core.RecordBuilder;
  * @param promptOptimizer Configuration for the prompt optimizer.
  *                        This is used to optimize prompts for better classification results.
  * @param metric Configuration for the metric used in optimization to assign a score to a prompt for a set of examples
- * @param evaluator Configuration for the evaluator used in optimization
+ * @param selector Configuration for the selector used in optimization
  */
 @RecordBuilder()
 public record OptimizerConfiguration(
         @JsonUnwrapped EvaluationConfiguration evaluationConfiguration,
         @JsonProperty(PROMPT_OPTIMIZER_FIELD) ModuleConfiguration promptOptimizer,
         @JsonProperty("metric") ModuleConfiguration metric,
-        @JsonProperty("evaluator") ModuleConfiguration evaluator)
+        @JsonProperty("selector") @JsonAlias("evaluator") ModuleConfiguration selector)
         implements OptimizerConfigurationBuilder.With, SerializableConfiguration {
 
     /**
@@ -42,7 +43,7 @@ public record OptimizerConfiguration(
         evaluationConfiguration.serializeAndDestroyConfiguration();
         promptOptimizer.finalizeForSerialization();
         metric.finalizeForSerialization();
-        evaluator.finalizeForSerialization();
+        selector.finalizeForSerialization();
 
         try {
             return new ObjectMapper()
@@ -65,8 +66,8 @@ public record OptimizerConfiguration(
     public String toString() {
         return "Configuration{" + "evaluationConfiguration="
                 + evaluationConfiguration + ", metric="
-                + metric + ", evaluator="
-                + evaluator + ", promptOptimizer="
+                + metric + ", selector="
+                + selector + ", promptOptimizer="
                 + promptOptimizer + '}';
     }
 }

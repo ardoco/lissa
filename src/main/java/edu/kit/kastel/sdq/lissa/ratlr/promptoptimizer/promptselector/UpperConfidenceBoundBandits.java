@@ -1,8 +1,6 @@
 /* Licensed under MIT 2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptselector;
 
-import static edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptselector.Selector.DEFAULT_SEED;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -36,14 +34,15 @@ public class UpperConfidenceBoundBandits {
     private final double[] scores;
     private final Random random;
 
-    public UpperConfidenceBoundBandits(int numberOfArms, int numberOfSamples, double explorationConstant, String mode) {
+    public UpperConfidenceBoundBandits(
+            int numberOfArms, int numberOfSamples, double explorationConstant, String mode, Random random) {
         this.explorationConstant = explorationConstant;
         this.mode = Mode.fromString(mode);
         this.numberOfArms = numberOfArms;
         this.numberOfSamples = numberOfSamples;
         this.counts = new double[numberOfArms];
         this.scores = new double[numberOfArms];
-        this.random = new Random(DEFAULT_SEED);
+        this.random = random;
     }
 
     /**

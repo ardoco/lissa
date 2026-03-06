@@ -18,6 +18,6 @@ public class MockOptimizer implements PromptOptimizer {
 
     @Override
     public List<String> optimize(SourceElementStore sourceStore, TargetElementStore targetStore) {
-        return List.of("");
+        return List.of();
     }
 }

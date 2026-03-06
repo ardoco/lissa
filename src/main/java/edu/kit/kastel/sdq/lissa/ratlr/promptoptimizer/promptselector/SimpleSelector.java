@@ -26,9 +26,9 @@ public class SimpleSelector implements Selector {
     private final SampleStrategy sampleStrategy;
 
     /**
-     * Creates a new brute-force evaluator instance with the given configuration.
+     * Creates a new brute-force selector instance with the given configuration.
      *
-     * @param configuration The configuration for the evaluator.
+     * @param configuration The configuration for the selector.
      */
     public SimpleSelector(ModuleConfiguration configuration) {
         int samplesPerEval = configuration.argumentAsInt(SAMPLES_PER_EVALUATION_CONFIGURATION_KEY, SAMPLES_PER_EVAL);

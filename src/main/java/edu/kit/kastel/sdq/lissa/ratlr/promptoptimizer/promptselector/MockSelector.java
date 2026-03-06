@@ -10,14 +10,14 @@ import edu.kit.kastel.sdq.lissa.ratlr.classifier.ClassificationTask;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.Metric;
 
 /**
- * A mock evaluator that returns a fixed score for all prompts, regardless of the input.
+ * A mock selector that returns a fixed score for all prompts, regardless of the input.
  * This is useful for testing and debugging the optimization pipeline without relying on actual evaluation logic.
  */
 public class MockSelector implements Selector {
 
     /**
-     * Creates a new mock evaluator instance with a default configuration.
-     * The configuration is not used in this evaluator, as it returns fixed scores.
+     * Creates a new mock selector instance with a default configuration.
+     * The configuration is not used in this selector, as it returns fixed scores.
      */
     public MockSelector() {
         // No specific initialization required

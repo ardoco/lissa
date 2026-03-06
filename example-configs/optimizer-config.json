@@ -69,5 +69,9 @@
   "tracelinkid_postprocessor" : {
     "name" : "identity",
     "args" : {}
+  },
+  "selector" : {
+    "name" : "mock",
+    "args" : {}
   }
 }
