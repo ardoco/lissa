@@ -3,7 +3,6 @@ package edu.kit.kastel.sdq.lissa.ratlr.configuration;
 
 import java.io.UncheckedIOException;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
@@ -28,15 +27,10 @@ import io.soabase.recordbuilder.core.RecordBuilder;
 @RecordBuilder()
 public record OptimizerConfiguration(
         @JsonUnwrapped EvaluationConfiguration evaluationConfiguration,
-        @JsonProperty(PROMPT_OPTIMIZER_FIELD) ModuleConfiguration promptOptimizer,
+        @JsonProperty("prompt_optimizer") ModuleConfiguration promptOptimizer,
         @JsonProperty("metric") ModuleConfiguration metric,
-        @JsonProperty("selector") @JsonAlias("evaluator") ModuleConfiguration selector)
+        @JsonProperty("selector") ModuleConfiguration selector)
         implements OptimizerConfigurationBuilder.With, SerializableConfiguration {
-
-    /**
-     * JSON field name for the prompt_optimizer configuration section.
-     */
-    public static final String PROMPT_OPTIMIZER_FIELD = "prompt_optimizer";
 
     @Override
     public String serializeAndDestroyConfiguration() {

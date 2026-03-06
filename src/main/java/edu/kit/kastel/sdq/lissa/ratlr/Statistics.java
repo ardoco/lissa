@@ -1,8 +1,6 @@
 /* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr;
 
-import static edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration.ARGS_FIELD;
-import static edu.kit.kastel.sdq.lissa.ratlr.configuration.OptimizerConfiguration.PROMPT_OPTIMIZER_FIELD;
 import static edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.IterativeOptimizer.MAXIMUM_ITERATIONS_CONFIGURATION_KEY;
 
 import java.io.File;
@@ -18,15 +16,13 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import edu.kit.kastel.mcse.ardoco.metrics.ClassificationMetricsCalculator;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.EvaluationConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.GoldStandardConfiguration;
+import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.OptimizerConfiguration;
+import edu.kit.kastel.sdq.lissa.ratlr.configuration.OptimizerConfigurationBuilder;
+import edu.kit.kastel.sdq.lissa.ratlr.configuration.SerializableConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
 
 /**
@@ -266,48 +262,37 @@ public final class Statistics {
      * to reflect the actual iteration number.
      *
      * @param configFile Configuration file used for the optimization
-     * @param configurationSummary Already serialized configuration JSON
+     * @param configuration The configuration used for the optimization
      * @param prompt Optimized prompt generated during the optimization
      * @param iterationCount The actual iteration count to set in the configuration
      * @throws UncheckedIOException If there are issues writing the statistics file
      */
     public static void generateOptimizationStatistics(
-            File configFile, String configurationSummary, String prompt, int iterationCount)
+            File configFile, OptimizerConfiguration configuration, String prompt, int iterationCount)
             throws UncheckedIOException {
-        // Modify the maximum_iterations in the serialized JSON
-        String modifiedConfig = modifyMaxIterationsInJson(configurationSummary, iterationCount);
+        // Modify the maximum_iterations field to reflect the actual iteration count
+        SerializableConfiguration modifiedConfig = modifyMaxIterationsInJson(configuration, iterationCount);
+        String modifiedConfigSummary = modifiedConfig.serializeAndDestroyConfiguration();
 
         // Generate a unique identifier for this iteration
         String configurationIdentifier = configFile.getName() + "_iter" + iterationCount;
 
-        generateOptimizationStatistics(configurationIdentifier, modifiedConfig, prompt);
+        generateOptimizationStatistics(configurationIdentifier, modifiedConfigSummary, prompt);
     }
 
     /**
-     * Modifies the maximum_iterations field in a JSON configuration string.
+     * Modifies the maximum_iterations field in a optimizer configuration to the desired iteration count.
      *
-     * @param jsonConfig The original JSON configuration string
+     * @param config The original configuration
      * @param iterationCount The new iteration count to set
-     * @return The modified JSON configuration string with pretty printing
+     * @return The modified configuration with the updated maximum_iterations value
      */
-    private static String modifyMaxIterationsInJson(String jsonConfig, int iterationCount) {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode root = mapper.readTree(jsonConfig);
-
-            // Navigate to prompt_optimizer.args.maximum_iterations
-            JsonNode promptOptimizer = root.path(PROMPT_OPTIMIZER_FIELD);
-            if (promptOptimizer.isObject()) {
-                JsonNode args = promptOptimizer.path(ARGS_FIELD);
-                if (args instanceof ObjectNode argsNode) {
-                    argsNode.put(MAXIMUM_ITERATIONS_CONFIGURATION_KEY, String.valueOf(iterationCount));
-                }
-            }
-
-            return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(root);
-        } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException("Invalid JSON configuration", e);
-        }
+    private static OptimizerConfiguration modifyMaxIterationsInJson(OptimizerConfiguration config, int iterationCount) {
+        ModuleConfiguration modifiedOptimizer =
+                config.promptOptimizer().with(MAXIMUM_ITERATIONS_CONFIGURATION_KEY, String.valueOf(iterationCount));
+        return OptimizerConfigurationBuilder.builder(config)
+                .promptOptimizer(modifiedOptimizer)
+                .build();
     }
 
     /**

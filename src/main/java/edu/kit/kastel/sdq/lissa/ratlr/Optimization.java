@@ -123,7 +123,7 @@ public class Optimization {
         String configurationSummary = configuration.serializeAndDestroyConfiguration();
 
         for (int i = 0; i < results.size(); i++) {
-            Statistics.generateOptimizationStatistics(configFile.toFile(), configurationSummary, results.get(i), i + 1);
+            Statistics.generateOptimizationStatistics(configFile.toFile(), configuration, results.get(i), i + 1);
         }
         logger.info("Optimized prompt after {} steps: \n {}", results.size(), results.getLast());
 
