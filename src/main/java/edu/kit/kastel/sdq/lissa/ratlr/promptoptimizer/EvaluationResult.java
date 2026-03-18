@@ -1,6 +1,8 @@
 /* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer;
 
+import java.util.Objects;
+
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 
 /**
@@ -18,11 +20,11 @@ public record EvaluationResult<T>(Element source, Element target, T groundTruth,
     }
 
     /**
-     * Checks if the classification does not match the ground truth.
-     * @return false if the classification is equal to the ground truth, true otherwise
+     * Checks if the classification does match the ground truth.
+     * @return true if the classification is equal to the ground truth, false otherwise
      */
-    public boolean isIncorrect() {
-        return !groundTruth.equals(classification);
+    public boolean isCorrect() {
+        return Objects.equals(groundTruth, classification);
     }
 
     @Override

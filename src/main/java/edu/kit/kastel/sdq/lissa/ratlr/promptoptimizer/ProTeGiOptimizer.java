@@ -186,7 +186,7 @@ public class ProTeGiOptimizer extends IterativeOptimizer {
     private String sampleErrorString(List<EvaluationResult<Boolean>> evaluationResults) {
         List<Integer> errorIdxs = new ArrayList<>();
         for (int i = 0; i < evaluationResults.size(); i++) {
-            if (evaluationResults.get(i).isIncorrect()) {
+            if (!evaluationResults.get(i).isCorrect()) {
                 errorIdxs.add(i);
             }
         }
@@ -285,7 +285,7 @@ public class ProTeGiOptimizer extends IterativeOptimizer {
         }
         List<ClassificationTask> misclassifiedTasks = new ArrayList<>();
         for (EvaluationResult<Boolean> result : evaluation) {
-            if (result.isIncorrect()) {
+            if (!result.isCorrect()) {
                 misclassifiedTasks.add(new ClassificationTask(result.source(), result.target(), result.groundTruth()));
             }
         }
