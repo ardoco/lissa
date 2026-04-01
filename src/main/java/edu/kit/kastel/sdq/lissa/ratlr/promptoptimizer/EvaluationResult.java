@@ -1,7 +1,11 @@
 /* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer;
 
+import java.util.Objects;
+
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
+
+import java.util.Objects;
 
 /**
  * Holds the result of a single evaluation instance.
@@ -22,7 +26,7 @@ public record EvaluationResult<T>(Element source, Element target, T groundTruth,
      * @return false if the classification is equal to the ground truth, true otherwise
      */
     public boolean isWrong() {
-        return !groundTruth.equals(classification);
+        return !Objects.equals(groundTruth, classification);
     }
 
     @Override
