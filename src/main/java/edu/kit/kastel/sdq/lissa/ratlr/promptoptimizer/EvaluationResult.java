@@ -5,8 +5,6 @@ import java.util.Objects;
 
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 
-import java.util.Objects;
-
 /**
  * Holds the result of a single evaluation instance.
  * @param source the source element
