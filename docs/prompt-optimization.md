@@ -17,7 +17,7 @@ The table below provides a brief overview of the subcomponents used in the promp
 | **Location**           | `promptoptimizer.samplestrategy` | `promptoptimizer.promptselector`               | `promptoptimizer.promptmetric` |
 | **Purpose**            | Select items from a collection   | Orchestrate prompt evaluation with budget      | Calculate performance scores   |
 | **Answers**            | "Which items to use?"            | "Which prompts to test when?"                  | "How good is this prompt?"     |
-| **Method**             | `sample(items, sampleSize)`      | `sampleAndEvaluate(prompts, examples, metric)` | `getMetric(prompts, examples)` |
+| **Method**             | `sample(items, sampleSize)`      | `selectAndEvaluate(prompts, examples, metric)` | `getMetric(prompts, examples)` |
 | **Algorithm Examples** | First/Ordered/Shuffled           | Simple/UCB Bandit                              | Pointwise/FBeta                |
 
 ### Sample Strategies (`samplestrategy` package)
@@ -26,7 +26,7 @@ A [`SampleStrategy`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptim
 These strategies are used throughout the optimization process to sample classification tasks, prompts, or other collections when the full set would be too large or expensive to process.
 The key method `sample(items, sampleSize)` returns a list of selected items based on the strategy's selection logic.
 
-Custom sample strategies can be added by implementing the [`SampleStrategy`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/samplestrategy/SampleStrategy.java) interface and registering them in the [`SamplerFactory`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/samplestrategy/SamplerFactory.java).
+Custom sample strategies can be added by implementing the [`SampleStrategy`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/samplestrategy/SampleStrategy.java) interface and integrating them via the static factory method `SampleStrategy.createSampler(...)` defined there.
 
 #### Available Sample Strategies
 
@@ -66,7 +66,7 @@ Custom metrics can be added either through implementation of the [`Global Metric
 
 A [`Selector`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/promptselector/Selector.java) orchestrates the evaluation of multiple prompts within a given evaluation budget.
 They determine which prompts to test and when, managing the trade-off between exploration (testing new prompts) and exploitation (focusing on promising prompts).
-Selectors use the `sampleAndEvaluate` method to coordinate prompt evaluation, calling the metric to score prompts against classification examples while respecting budget constraints.
+Selectors use the `selectAndEvaluate` method to coordinate prompt evaluation, calling the metric to score prompts against classification examples while respecting budget constraints.
 
 The exact evaluation budget parameters are selector-specific, controlling how many total evaluations can be performed.
 This budget management is crucial for expensive LLM-based evaluations.

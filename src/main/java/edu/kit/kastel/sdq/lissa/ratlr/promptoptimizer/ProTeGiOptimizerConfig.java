@@ -25,8 +25,6 @@ import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.SampleStrat
  * @param maximumExpansionFactor The maximum expansion factor for the number of candidate prompts generated in each
  *                           iteration (relative to the number of misclassified examples) (default: {@value DEFAULT_MAX_EXPANSION_FACTOR})
  * @param rejectOnErrors Whether to reject candidate prompts that still misclassify examples after optimization steps (default: {@value DEFAULT_REJECT_ON_ERRORS})
- * @param evaluationBudget The total number of examples to use for evaluating candidate prompts during optimization
- *                         (used to limit the number of evaluations and control runtime) (default: 2048, calculated as {@value DEFAULT_SAMPLES_PER_EVAL} * {@value DEFAULT_EVAL_ROUNDS} * {@value DEFAULT_EVAL_PROMPTS_PER_ROUND})
  * @param minibatchSize The size of the minibatches to use when evaluating candidate prompts on the misclassified
  *                      examples (used to control memory usage and evaluation time) (default: {@value DEFAULT_MINIBATCH_SIZE})
  * @param beamSize The beam size to use when selecting the best candidate prompts during optimization (default: {@value DEFAULT_BEAM_SIZE})
@@ -55,7 +53,6 @@ public record ProTeGiOptimizerConfig(
         int monteCarloSamplesPerStep,
         int maximumExpansionFactor,
         boolean rejectOnErrors,
-        int evaluationBudget,
         int minibatchSize,
         int beamSize,
         int candidateOversamplingFactor,
@@ -68,6 +65,91 @@ public record ProTeGiOptimizerConfig(
         SampleStrategy candidateFilterSampler,
         Selector candidateEvaluationSelector,
         Selector errorEvaluationSelector) {
+
+    /**
+     * Compact constructor that validates all configuration parameters to ensure the optimizer operates correctly.
+     * <p>
+     * Validation guarantees:
+     * <ul>
+     *     <li>beamSize &gt;= 1: Required to ensure at least one candidate prompt is selected after scoring/filtering</li>
+     *     <li>numberOfGradients &gt;= 1: Required to generate at least one gradient for prompt improvement</li>
+     *     <li>numberOfErrors &gt;= 1: Required to sample at least one error for gradient generation</li>
+     *     <li>numberOfGradientsPerError &gt;= 1: Required to generate gradient feedback for each error</li>
+     *     <li>stepsPerGradient &gt;= 1: Required to generate at least one prompt variation per gradient</li>
+     *     <li>monteCarloSamplesPerStep &gt;= 1: Required to generate at least one Monte Carlo sample per step</li>
+     *     <li>maximumExpansionFactor &gt;= 1: Required to ensure at least one candidate prompt in expansion</li>
+     *     <li>minibatchSize &gt;= 1: Required to ensure at least one task per minibatch during sampling</li>
+     *     <li>maximumErrorExamples &gt;= 1: Required to ensure at least one error example for filtering</li>
+     *     <li>candidateOversamplingFactor &gt;= 1: Required to ensure positive oversampling during candidate filtering</li>
+     *     <li>Prompt templates must not be empty</li>
+     *
+     * </ul>
+     *
+     * @throws IllegalArgumentException if any configuration value violates the above constraints
+     */
+    public ProTeGiOptimizerConfig {
+        if (beamSize < 1) {
+            throw new IllegalArgumentException("Invalid configuration: beamSize must be >= 1, but got " + beamSize
+                    + ". This parameter ensures at least one candidate prompt is selected after scoring/filtering.");
+        }
+        if (numberOfGradients < 1) {
+            throw new IllegalArgumentException(
+                    "Invalid configuration: numberOfGradients must be >= 1, but got " + numberOfGradients
+                            + ". This parameter ensures at least one gradient is generated for prompt improvement.");
+        }
+        if (numberOfErrors < 1) {
+            throw new IllegalArgumentException(
+                    "Invalid configuration: numberOfErrors must be >= 1, but got " + numberOfErrors
+                            + ". This parameter ensures at least one error is sampled for gradient generation.");
+        }
+        if (numberOfGradientsPerError < 1) {
+            throw new IllegalArgumentException("Invalid configuration: numberOfGradientsPerError must be >= 1, but got "
+                    + numberOfGradientsPerError
+                    + ". This parameter ensures gradient feedback is generated for each error.");
+        }
+        if (stepsPerGradient < 1) {
+            throw new IllegalArgumentException(
+                    "Invalid configuration: stepsPerGradient must be >= 1, but got " + stepsPerGradient
+                            + ". This parameter ensures at least one prompt variation is generated per gradient.");
+        }
+        if (monteCarloSamplesPerStep < 1) {
+            throw new IllegalArgumentException(
+                    "Invalid configuration: monteCarloSamplesPerStep must be >= 1, but got " + monteCarloSamplesPerStep
+                            + ". This parameter ensures at least one Monte Carlo sample is generated per step.");
+        }
+        if (maximumExpansionFactor < 1) {
+            throw new IllegalArgumentException(
+                    "Invalid configuration: maximumExpansionFactor must be >= 1, but got " + maximumExpansionFactor
+                            + ". This parameter ensures at least one candidate prompt is generated in expansion.");
+        }
+        if (minibatchSize < 1) {
+            throw new IllegalArgumentException("Invalid configuration: minibatchSize must be >= 1, but got "
+                    + minibatchSize + ". This parameter ensures at least one task per minibatch during sampling.");
+        }
+        if (maximumErrorExamples < 1) {
+            throw new IllegalArgumentException(
+                    "Invalid configuration: maximumErrorExamples must be >= 1, but got " + maximumErrorExamples
+                            + ". This parameter ensures at least one error example is considered when filtering.");
+        }
+        if (candidateOversamplingFactor < 1) {
+            throw new IllegalArgumentException(
+                    "Invalid configuration: candidateOversamplingFactor must be >= 1, but got "
+                            + candidateOversamplingFactor
+                            + ". This parameter ensures positive oversampling during candidate filtering.");
+        }
+        if (gradientPrompt.isBlank()) {
+            throw new IllegalArgumentException("Invalid configuration: gradientPrompt must not be null or empty");
+        }
+        if (transformationPrompt.isBlank()) {
+            throw new IllegalArgumentException("Invalid configuration: transformationPrompt must not be null or empty");
+        }
+        if (synonymPrompt.isBlank()) {
+            throw new IllegalArgumentException("Invalid configuration: synonymPrompt must not be null or empty");
+        }
+        if (feedbackExampleBlock.isBlank()) {
+            throw new IllegalArgumentException("Invalid configuration: feedbackExampleBlock must not be null or empty");
+        }
+    }
 
     // Default prompts from the original implementation
 
@@ -126,9 +208,6 @@ public record ProTeGiOptimizerConfig(
     private static final int DEFAULT_MC_SAMPLES_PER_STEP = 2;
     private static final int DEFAULT_MAX_EXPANSION_FACTOR = 8;
     private static final boolean DEFAULT_REJECT_ON_ERRORS = true;
-    private static final int DEFAULT_SAMPLES_PER_EVAL = 32;
-    private static final int DEFAULT_EVAL_ROUNDS = 8;
-    private static final int DEFAULT_EVAL_PROMPTS_PER_ROUND = 8;
     private static final int DEFAULT_MINIBATCH_SIZE = 64;
     private static final int DEFAULT_BEAM_SIZE = 4;
     private static final int DEFAULT_CANDIDATE_OVERSAMPLING_FACTOR = 2;
@@ -149,9 +228,6 @@ public record ProTeGiOptimizerConfig(
                 configuration.argumentAsInt("mc_samples_per_step", DEFAULT_MC_SAMPLES_PER_STEP),
                 configuration.argumentAsInt("max_expansion_factor", DEFAULT_MAX_EXPANSION_FACTOR),
                 configuration.argumentAsBoolean("reject_on_errors", DEFAULT_REJECT_ON_ERRORS),
-                configuration.argumentAsInt("samples_per_eval", DEFAULT_SAMPLES_PER_EVAL)
-                        * configuration.argumentAsInt("eval_rounds", DEFAULT_EVAL_ROUNDS)
-                        * configuration.argumentAsInt("eval_prompts_per_round", DEFAULT_EVAL_PROMPTS_PER_ROUND),
                 configuration.argumentAsInt("minibatch_size", DEFAULT_MINIBATCH_SIZE),
                 configuration.argumentAsInt("beam_size", DEFAULT_BEAM_SIZE),
                 configuration.argumentAsInt("candidate_oversampling_factor", DEFAULT_CANDIDATE_OVERSAMPLING_FACTOR),

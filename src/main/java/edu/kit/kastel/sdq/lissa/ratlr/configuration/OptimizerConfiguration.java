@@ -3,6 +3,8 @@ package edu.kit.kastel.sdq.lissa.ratlr.configuration;
 
 import java.io.UncheckedIOException;
 
+import org.jspecify.annotations.Nullable;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
@@ -29,7 +31,7 @@ public record OptimizerConfiguration(
         @JsonUnwrapped EvaluationConfiguration evaluationConfiguration,
         @JsonProperty("prompt_optimizer") ModuleConfiguration promptOptimizer,
         @JsonProperty("metric") ModuleConfiguration metric,
-        @JsonProperty("selector") ModuleConfiguration selector)
+        @JsonProperty("selector") @Nullable ModuleConfiguration selector)
         implements OptimizerConfigurationBuilder.With, SerializableConfiguration {
 
     @Override
@@ -37,7 +39,9 @@ public record OptimizerConfiguration(
         evaluationConfiguration.serializeAndDestroyConfiguration();
         promptOptimizer.finalizeForSerialization();
         metric.finalizeForSerialization();
-        selector.finalizeForSerialization();
+        if (selector != null) {
+            selector.finalizeForSerialization();
+        }
 
         try {
             return new ObjectMapper()

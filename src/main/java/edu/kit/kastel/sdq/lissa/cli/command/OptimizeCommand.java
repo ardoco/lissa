@@ -81,7 +81,8 @@ public class OptimizeCommand implements Runnable {
             if (optimizedPrompts.isEmpty()) {
                 logger.warn(
                         "Skipping evaluation for optimization config '{}' as no optimized prompt was generated. "
-                                + "This probably happened as the mock optimizer was used.",
+                                + "This can happen when the optimizer terminates early (e.g., due to configuration such "
+                                + "as zero iterations) or when a mock optimizer is used.",
                         optimizationConfig);
                 continue;
             }

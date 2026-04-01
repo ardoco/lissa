@@ -6,8 +6,6 @@ import static edu.kit.kastel.sdq.lissa.ratlr.configuration.Configuration.CONFIG_
 import java.util.List;
 import java.util.Set;
 
-import org.jspecify.annotations.Nullable;
-
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.elementstore.SourceElementStore;
 import edu.kit.kastel.sdq.lissa.ratlr.elementstore.TargetElementStore;
@@ -29,7 +27,7 @@ public interface PromptOptimizer {
      * @param sourceStore The store containing source elements of the domain/dataset the prompt is optimized for
      * @param targetStore The store containing target elements of the domain/dataset the prompt is optimized for
      * @return A list of Strings representing the optimized prompts. The last entry in the list is the final
-     * optimized prompt, while the preceding entries represent intermediate prompts generated during the optimization
+     * optimized prompt, while the preceding entries represent intermediate prompts during the optimization
      * process. If no optimization is performed (i.e. config maximum_iterations = 0), the list is empty.
      */
     List<String> optimize(SourceElementStore sourceStore, TargetElementStore targetStore);
@@ -45,13 +43,7 @@ public interface PromptOptimizer {
      * @return An instance of PromptOptimizer based on the configuration
      */
     static PromptOptimizer createOptimizer(
-            @Nullable ModuleConfiguration configuration,
-            Set<TraceLink> goldStandard,
-            Metric metric,
-            Selector selector) {
-        if (configuration == null) {
-            return new MockOptimizer();
-        }
+            ModuleConfiguration configuration, Set<TraceLink> goldStandard, Metric metric, Selector selector) {
         return switch (configuration.name().split(CONFIG_NAME_SEPARATOR)[0]) {
             case "mock" -> new MockOptimizer();
             case "simple" -> new IterativeOptimizer(configuration, goldStandard, metric, 1);
