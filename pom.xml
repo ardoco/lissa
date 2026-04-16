@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.fuchss</groupId>
     <artifactId>maven-parent</artifactId>
-    <version>0.22.7</version>
+    <version>0.22.8</version>
   </parent>
 
   <groupId>io.github.ardoco</groupId>
@@ -29,7 +29,7 @@
       <dependency>
         <groupId>dev.langchain4j</groupId>
         <artifactId>langchain4j-bom</artifactId>
-        <version>1.12.2</version>
+        <version>1.13.0</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -131,7 +131,7 @@
     <dependency>
       <groupId>redis.clients</groupId>
       <artifactId>jedis</artifactId>
-      <version>7.3.0</version>
+      <version>7.4.1</version>
     </dependency>
   </dependencies>
   <repositories>
