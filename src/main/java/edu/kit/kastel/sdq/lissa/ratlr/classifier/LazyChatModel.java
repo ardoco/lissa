@@ -12,6 +12,7 @@ import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.model.ModelProvider;
 import dev.langchain4j.model.chat.Capability;
 import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.chat.ChatRequestOptions;
 import dev.langchain4j.model.chat.listener.ChatModelListener;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.request.ChatRequestParameters;
@@ -53,6 +54,11 @@ public final class LazyChatModel implements ChatModel {
     @Override
     public ChatResponse chat(ChatRequest chatRequest) {
         return delegate().chat(chatRequest);
+    }
+
+    @Override
+    public ChatResponse chat(ChatRequest chatRequest, ChatRequestOptions options) {
+        return delegate().chat(chatRequest, options);
     }
 
     @Override
