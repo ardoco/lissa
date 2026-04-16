@@ -81,12 +81,10 @@ public interface Metric {
             case "pointwise" -> new PointwiseMetric(configuration, classifier);
             case "fBeta", "f1" -> {
                 if (aggregator == null) {
-                    throw new IllegalArgumentException(
-                            "Aggregator must not be null for fBeta/f1 metrics");
+                    throw new IllegalArgumentException("Aggregator must not be null for fBeta/f1 metrics");
                 }
                 if (postprocessor == null) {
-                    throw new IllegalArgumentException(
-                            "Postprocessor must not be null for fBeta/f1 metrics");
+                    throw new IllegalArgumentException("Postprocessor must not be null for fBeta/f1 metrics");
                 }
                 yield new FBetaMetric(configuration, classifier, aggregator, postprocessor);
             }
