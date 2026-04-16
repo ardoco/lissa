@@ -5,9 +5,16 @@ Question: Here are two parts of software development artifacts\.
             \{source\_type\}: '''\{source\_content\}'''
 
             \{target\_type\}: '''\{target\_content\}'''
-            Are they related in terms of functionality, requirements, or specifications? Consider whether the target requirement supports, elaborates on, or contradicts the source requirement\. Pay special attention to whether the target requirement describes aspects of the same functionality, provides additional context that aligns with the source requirement, or specifies related structural or operational details that enhance the understanding of the source requirement\. Additionally, evaluate if the target requirement indicates a broader or more detailed implementation of the concepts introduced in the source requirement, particularly in terms of structural organization or access mechanisms\.
 
-            Specifically, assess if the target requirement reinforces the notion of a single header file as stated in the source requirement, or if it introduces alternative structures or multiple entry points that may conflict with the source requirement's intent\.
+            Analyze the relationship between these requirements\. Focus on whether the source requirement's functionality, constraints, or specifications are explicitly supported, referenced, or implied by the target requirement\.
+
+            Pay particular attention to aspects such as encapsulation, adherence to implementation standards, memory management, and overall alignment of functionalities\.
+
+            Consider whether the target requirement directly supports, complements, or extends the source requirement\. Look for specific keywords or phrases that indicate a direct relationship or shared objectives\.
+
+            Additionally, evaluate if the target requirement introduces new functionalities or constraints that are relevant to the source requirement\.
+
+            Are they related?
 
             Answer with 'yes' or 'no'\.
 ```
