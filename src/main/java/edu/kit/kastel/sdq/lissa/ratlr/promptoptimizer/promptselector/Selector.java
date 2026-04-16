@@ -52,11 +52,7 @@ public interface Selector {
      * @throws IllegalStateException If the configuration name does not match any known selector types.
      */
     static Selector createSelector(@Nullable ModuleConfiguration configuration) {
-        if (configuration == null) {
-            return new MockSelector();
-        }
         return switch (configuration.name()) {
-            case "mock" -> new MockSelector();
             case "simple", "bruteforce" -> new SimpleSelector(configuration);
             case "ucb" -> new UpperConfidenceBoundBanditSelector(configuration);
             default -> throw new IllegalStateException("Unexpected value: " + configuration.name());
