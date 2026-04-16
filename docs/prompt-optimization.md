@@ -86,8 +86,6 @@ Custom selectors can be added by implementing the [`Selector`](../src/main/java/
   Balances exploration and exploitation by selecting prompts based on both their current performance and uncertainty.
   More efficient than simple selection when evaluating many prompts, as it focuses on promising candidates.
 
-- **[`Mock Selector`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/promptselector/MockSelector.java)** (`mock`): Returns dummy scores for testing purposes
-
 ### Optimizers (`promptoptimizer` package)
 
 The [`Optimizer`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/PromptOptimizer.java) module handles prompt optimization requests.

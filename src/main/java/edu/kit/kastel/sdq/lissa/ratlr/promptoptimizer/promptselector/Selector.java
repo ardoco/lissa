@@ -43,7 +43,6 @@ public interface Selector {
     /**
      * Factory method to create a selector based on the provided configuration.
      * The name field indicates the type of selector to create.
-     * If the configuration is null, a MockSelector is returned by default.
      *
      * @param configuration The configuration specifying the type of selector to create.
      * @return An instance of a concrete selector implementation.
