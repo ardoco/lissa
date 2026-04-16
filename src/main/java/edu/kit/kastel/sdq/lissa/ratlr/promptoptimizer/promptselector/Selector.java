@@ -3,8 +3,6 @@ package edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptselector;
 
 import java.util.List;
 
-import org.jspecify.annotations.Nullable;
-
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.ClassificationTask;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.Metric;
@@ -51,7 +49,7 @@ public interface Selector {
      * @return An instance of a concrete selector implementation.
      * @throws IllegalStateException If the configuration name does not match any known selector types.
      */
-    static Selector createSelector(@Nullable ModuleConfiguration configuration) {
+    static Selector createSelector(ModuleConfiguration configuration) {
         return switch (configuration.name()) {
             case "simple", "bruteforce" -> new SimpleSelector(configuration);
             case "ucb" -> new UpperConfidenceBoundBanditSelector(configuration);
