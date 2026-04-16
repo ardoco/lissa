@@ -16,15 +16,16 @@ The table below provides a brief overview of the subcomponents used in the promp
 |------------------------|----------------------------------|------------------------------------------------|--------------------------------|
 | **Location**           | `promptoptimizer.samplestrategy` | `promptoptimizer.promptselector`               | `promptoptimizer.promptmetric` |
 | **Purpose**            | Select items from a collection   | Orchestrate prompt evaluation with budget      | Calculate performance scores   |
-| **Answers**            | "Which items to use?"            | "Which prompts to test when?"                  | "How good is this prompt?"     |
+| **Answers**            | "Which generic items to use?"    | "Which prompts to test when?"                  | "How good is this prompt?"     |
 | **Method**             | `sample(items, sampleSize)`      | `selectAndEvaluate(prompts, examples, metric)` | `getMetric(prompts, examples)` |
 | **Algorithm Examples** | First/Ordered/Shuffled           | Simple/UCB Bandit                              | Pointwise/FBeta                |
 
 ### Sample Strategies (`samplestrategy` package)
 
 A [`SampleStrategy`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/samplestrategy/SampleStrategy.java) determines how to select a subset of items from a collection.
-These strategies are used throughout the optimization process to sample classification tasks, prompts, or other collections when the full set would be too large or expensive to process.
+These strategies are used throughout the optimization process to sample items when the full set would be too large or expensive to process.
 The key method `sample(items, sampleSize)` returns a list of selected items based on the strategy's selection logic.
+In practice items may be classification examples, candidate prompts, or simple identifiers depending on the context in which the sampler is used.
 
 Custom sample strategies can be added by implementing the [`SampleStrategy`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/samplestrategy/SampleStrategy.java) interface and integrating them via the static factory method `SampleStrategy.createSampler(...)` defined there.
 
@@ -76,13 +77,15 @@ Custom selectors can be added by implementing the [`Selector`](../src/main/java/
 #### Available Selectors
 
 - **[`Simple Selector`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/promptselector/SimpleSelector.java)** (`simple`):
-  Evaluates all provided prompts exhaustively against a subset of examples.
+  Evaluates all provided candidate prompts against a subset of examples.
   The sample size is determined by dividing the evaluation budget by the number of prompts.
   Examples are shuffled randomly before selection to ensure diverse evaluation.
+
 - **[`Upper Confidence Bound Bandit Selector`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/promptselector/UpperConfidenceBoundBanditSelector.java)** (`ucb`):
   Implements a multi-armed bandit approach using the UCB (Upper Confidence Bound) algorithm.
   Balances exploration and exploitation by selecting prompts based on both their current performance and uncertainty.
-  More efficient than brute force when evaluating many prompts, as it focuses on promising candidates.
+  More efficient than simple selection when evaluating many prompts, as it focuses on promising candidates.
+
 - **[`Mock Selector`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/promptselector/MockSelector.java)** (`mock`): Returns dummy scores for testing purposes
 
 ### Optimizers (`promptoptimizer` package)
@@ -114,12 +117,17 @@ Custom optimizers can be added by implementing the [`Prompt Optimizer`](../src/m
 - **[`ProTeGi Optimizer`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/ProTeGiOptimizer.java)** (`protegi`):
   An advanced optimizer based on textual gradient descent for large language models, following the approach by Pryzant et al. (2023).
   Uses textual gradients derived from error analysis to systematically refine prompts.
-  Each iteration expands candidate prompts by:
-  - Generating textual gradients that explain why errors occurred
-  - Creating prompt transformations based on these gradients
-  - Generating synonym variations to explore the prompt space
+  In each iteration:
+  1. **Candidate Expansion**: Generates multiple candidate prompt variations
+     - Analyzes why the current prompt misclassifies examples (textual gradients)
+     - Creates transformations based on these error patterns
+     - Generates synonym variations to explore the prompt space
+  2. **Candidate Evaluation**: Uses the configured selector and metric to evaluate all candidate prompts
+     - Selector decides which candidate prompts to test and on how many examples (budget-aware)
+     - Metric scores each candidate prompt's performance
+  3. **Best Selection**: Selects the top-performing candidate prompts (beam size) for the next iteration
 
-  Candidates are evaluated using the configured selector and metric, with the top-performing prompts (beam size) selected for the next iteration.
+  Example flow: Current prompt gets accuracy 70% → generates 20 candidates → evaluates them with limited budget → selects top 4 for next iteration
 
 - **[`Mock Optimizer`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/MockOptimizer.java)** (`mock`): Returns dummy optimized prompts for testing purposes
 
