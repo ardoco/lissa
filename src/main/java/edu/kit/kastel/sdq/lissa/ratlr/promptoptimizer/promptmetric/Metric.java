@@ -62,7 +62,6 @@ public interface Metric {
     /**
      * Factory method to create a metric based on the provided configuration.
      * The name field indicates the type of metric to create.
-     * If the configuration is null, a MockMetric is returned by default.
      *
      * @param configuration The configuration specifying the type of metric to create.
      * @param classifier The classifier to be used by the metric.
