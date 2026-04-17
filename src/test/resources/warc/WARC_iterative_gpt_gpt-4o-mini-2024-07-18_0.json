@@ -65,7 +65,7 @@
     }
   },
   "metric" : {
-    "name" : "mock",
+    "name" : "pointwise",
     "args" : {}
   }
 }

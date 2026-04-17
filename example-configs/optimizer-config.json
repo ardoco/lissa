@@ -46,7 +46,7 @@
     }
   },
   "metric" : {
-    "name" : "mock",
+    "name" : "pointwise",
     "args" : {}
   },
   "prompt_optimizer": {

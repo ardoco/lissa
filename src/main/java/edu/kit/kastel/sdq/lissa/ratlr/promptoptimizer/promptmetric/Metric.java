@@ -62,25 +62,31 @@ public interface Metric {
     /**
      * Factory method to create a metric based on the provided configuration.
      * The name field indicates the type of metric to create.
-     * If the configuration is null, a MockMetric is returned by default.
      *
      * @param configuration The configuration specifying the type of metric to create.
      * @param classifier The classifier to be used by the metric.
+     * @param aggregator The result aggregator to be used by the metric (nullable, required for fBeta metrics).
+     * @param postprocessor The postprocessor to be used by the metric (nullable, required for fBeta metrics).
      * @return An instance of a concrete metric implementation.
+     * @throws IllegalArgumentException If aggregator or postprocessor is null when creating fBeta metrics.
      * @throws IllegalStateException If the configuration name does not match any known metric types.
      */
     static Metric createMetric(
-            @Nullable ModuleConfiguration configuration,
+            ModuleConfiguration configuration,
             Classifier classifier,
-            ResultAggregator aggregator,
-            TraceLinkIdPostprocessor postprocessor) {
-        if (configuration == null) {
-            return new MockMetric();
-        }
+            @Nullable ResultAggregator aggregator,
+            @Nullable TraceLinkIdPostprocessor postprocessor) {
         return switch (configuration.name()) {
-            case "mock" -> new MockMetric();
             case "pointwise" -> new PointwiseMetric(configuration, classifier);
-            case "fBeta", "f1" -> new FBetaMetric(configuration, classifier, aggregator, postprocessor);
+            case "fBeta", "f1" -> {
+                if (aggregator == null) {
+                    throw new IllegalArgumentException("Aggregator must not be null for fBeta/f1 metrics");
+                }
+                if (postprocessor == null) {
+                    throw new IllegalArgumentException("Postprocessor must not be null for fBeta/f1 metrics");
+                }
+                yield new FBetaMetric(configuration, classifier, aggregator, postprocessor);
+            }
             default -> throw new IllegalStateException("Unexpected value: " + configuration.name());
         };
     }
