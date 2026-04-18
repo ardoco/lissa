@@ -198,7 +198,7 @@ public class Evaluation {
      * @throws IOException If there are issues reading the configuration
      */
     private void setup() throws IOException {
-        CacheManager.setCacheDir(configuration.cacheDir());
+        configuration.initializeCache();
 
         ContextStore contextStore = new ContextStore();
 

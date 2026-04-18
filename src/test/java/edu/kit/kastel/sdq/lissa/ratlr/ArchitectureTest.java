@@ -27,6 +27,7 @@ import com.tngtech.archunit.lang.ConditionEvents;
 
 import edu.kit.kastel.sdq.lissa.cli.command.OptimizeCommand;
 import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheKey;
+import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager;
 import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheParameter;
 import edu.kit.kastel.sdq.lissa.ratlr.cache.classifier.ClassifierCacheParameter;
 import edu.kit.kastel.sdq.lissa.ratlr.cache.embedding.EmbeddingCacheParameter;
@@ -317,4 +318,19 @@ class ArchitectureTest {
                     }
                 }
             });
+
+    /**
+     * Rule that enforces that CacheManager.resetDefaultInstance() is only called from the CacheTest class.
+     * <p>
+     * The resetDefaultInstance() method should only be used to reset the singleton state between tests.
+     * It must never be called from production code or other test classes.
+     */
+    @ArchTest
+    static final ArchRule cacheManagerResetOnlyInTests = noClasses()
+            .that()
+            .haveNameNotMatching(".*Test*")
+            .should()
+            .callMethod(CacheManager.class, "resetDefaultInstance")
+            .because(
+                    "CacheManager.resetDefaultInstance() is only intended for testing purposes in CacheTest and must not be used elsewhere");
 }

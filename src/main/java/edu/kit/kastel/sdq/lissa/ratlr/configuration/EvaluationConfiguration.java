@@ -1,6 +1,7 @@
 /* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.configuration;
 
+import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.List;
 
@@ -12,6 +13,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.Classifier;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 
@@ -26,13 +28,14 @@ import io.soabase.recordbuilder.core.RecordBuilder;
  * The configuration is used to instantiate pipeline components, each of which can access shared context
  * via a {@link edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore} passed to their factory methods.
  * </p>
+ * @param cacheDir Directory for caching intermediate results. Either this or {@link #cache} must be set, but not both.
+ * @param cache Configuration for the caching of LLM calls. Either this or {@link #cacheDir} must be set, but not both.
  */
 @RecordBuilder()
 public record EvaluationConfiguration(
-        /**
-         * Directory for caching intermediate results.
-         */
-        @JsonProperty("cache_dir") String cacheDir,
+        @JsonProperty("cache_dir") @Nullable String cacheDir,
+
+        @JsonProperty("cache") @Nullable ModuleConfiguration cache,
 
         /**
          * EvaluationConfiguration for gold standard evaluation.
@@ -179,5 +182,17 @@ public record EvaluationConfiguration(
         return classifier != null
                 ? Classifier.createClassifier(classifier, contextStore)
                 : Classifier.createMultiStageClassifier(classifiers, contextStore);
+    }
+
+    public void initializeCache() throws IOException {
+        if ((cacheDir == null) == (cache == null)) {
+            throw new IllegalStateException("Either 'cache_dir' or 'cache' must be set, but not both.");
+        }
+
+        if (cacheDir != null) {
+            CacheManager.setCacheDir(cacheDir);
+        } else {
+            CacheManager.setCacheDir(cache);
+        }
     }
 }

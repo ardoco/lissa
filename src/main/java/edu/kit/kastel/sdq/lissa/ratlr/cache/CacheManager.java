@@ -9,6 +9,8 @@ import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
 
+import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
+
 /**
  * Manages caching operations in the LiSSA framework.
  * This class provides a centralized way to create and access caches for different purposes,
@@ -28,6 +30,11 @@ public final class CacheManager {
     private static final CacheReplacementStrategy DEFAULT_CONFLICT_RESOLUTION =
             CacheReplacementStrategy.REPLACE_LOCAL_VALUE;
 
+    /**
+     * The configuration key for specifying the cache directory in a ModuleConfiguration.
+     */
+    public static final String CACHE_DIR_CONFIGURATION_KEY = "cache_dir";
+
     private static @Nullable CacheManager defaultInstanceManager;
     private final Path directoryOfCaches;
     private final Map<String, RedisCache<?>> caches = new HashMap<>();
@@ -39,8 +46,18 @@ public final class CacheManager {
      * @param directory The path to the cache directory, or null to use the default directory
      * @throws IOException If the cache directory cannot be created
      */
+    @Deprecated(forRemoval = false)
     public static synchronized void setCacheDir(@Nullable String directory) throws IOException {
-        defaultInstanceManager = new CacheManager(Path.of(directory == null ? DEFAULT_CACHE_DIRECTORY : directory));
+        if (directory == null) {
+            directory = DEFAULT_CACHE_DIRECTORY;
+        }
+        ModuleConfiguration config = new ModuleConfiguration("cache", Map.of(CACHE_DIR_CONFIGURATION_KEY, directory));
+        setCacheDir(config);
+    }
+
+    public static synchronized void setCacheDir(ModuleConfiguration configuration) throws IOException {
+        String cacheDir = configuration.argumentAsString(CACHE_DIR_CONFIGURATION_KEY, DEFAULT_CACHE_DIRECTORY);
+        defaultInstanceManager = new CacheManager(Path.of(cacheDir));
     }
 
     /**
@@ -69,6 +86,19 @@ public final class CacheManager {
     public static CacheManager getDefaultInstance() {
         if (defaultInstanceManager == null) throw new IllegalStateException("Cache directory not set");
         return defaultInstanceManager;
+    }
+
+    /**
+     * Resets the default cache manager instance.
+     * This method is intended for testing purposes only to allow clean state between tests.
+     * After calling this method, {@link #setCacheDir(String)} or {@link #setCacheDir(ModuleConfiguration)}
+     * must be called again before using the default instance.
+     */
+    static synchronized void resetDefaultInstance() {
+        if (defaultInstanceManager != null) {
+            defaultInstanceManager.flush();
+        }
+        defaultInstanceManager = null;
     }
 
     /**
