@@ -238,6 +238,30 @@ public final class ModuleConfiguration implements Configuration {
     }
 
     /**
+     * Retrieves an argument as an enum value by name, using a default value if not found.
+     * The argument value must match one of the enum constant names (case-insensitive).
+     *
+     * @param <E> The enum type
+     * @param key The key of the argument to retrieve
+     * @param enumClass The class of the enum type
+     * @param defaultValue The default enum value to use if the argument is not found
+     * @return The enum value corresponding to the argument, or the default value
+     * @throws IllegalStateException If the configuration has been finalized
+     * @throws IllegalArgumentException If the argument value doesn't match any enum constant
+     */
+    public <E extends Enum<E>> E argumentAsEnum(String key, E defaultValue, Class<E> enumClass) {
+        String value = argumentAsString(key, defaultValue.name());
+        try {
+            return Enum.valueOf(enumClass, value.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(
+                    "Argument with key " + key + " has value '" + value + "' which is not a valid "
+                            + enumClass.getSimpleName() + " enum constant",
+                    e);
+        }
+    }
+
+    /**
      * Creates a new ModuleConfiguration with the specified argument modified.
      * This method creates a copy of the current configuration with one argument changed,
      * without mutating the original configuration.

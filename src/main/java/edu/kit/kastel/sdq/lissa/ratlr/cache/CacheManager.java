@@ -36,6 +36,7 @@ public final class CacheManager {
 
     private static @Nullable CacheManager defaultInstanceManager;
     private final Path directoryOfCaches;
+    private final CacheReplacementStrategy conflictResolution;
     private final Map<String, RedisCache<?>> caches = new HashMap<>();
 
     /**
@@ -50,29 +51,34 @@ public final class CacheManager {
         if (directory == null) {
             directory = DEFAULT_CACHE_DIRECTORY;
         }
+
         ModuleConfiguration config = new ModuleConfiguration("cache", Map.of(CACHE_DIR_CONFIGURATION_KEY, directory));
         setCacheDir(config);
     }
 
     public static synchronized void setCacheDir(ModuleConfiguration configuration) throws IOException {
         String cacheDir = configuration.argumentAsString(CACHE_DIR_CONFIGURATION_KEY, DEFAULT_CACHE_DIRECTORY);
-        defaultInstanceManager = new CacheManager(Path.of(cacheDir));
+        CacheReplacementStrategy conflictResolution = configuration.argumentAsEnum(
+                "conflict_resolution", DEFAULT_CONFLICT_RESOLUTION, CacheReplacementStrategy.class);
+        defaultInstanceManager = new CacheManager(Path.of(cacheDir), conflictResolution);
     }
 
     /**
-     * Creates a new cache manager instance using the specified cache directory.
+     * Creates a new cache manager instance using the specified cache directory and conflict resolution strategy.
      * The directory will be created if it doesn't exist.
      *
      * @param cacheDir The path to the cache directory
+     * @param conflictResolution The strategy for resolving conflicts between caches
      * @throws IOException If the cache directory cannot be created
      * @throws IllegalArgumentException If the path exists but is not a directory
      */
-    public CacheManager(Path cacheDir) throws IOException {
+    public CacheManager(Path cacheDir, CacheReplacementStrategy conflictResolution) throws IOException {
         if (!Files.exists(cacheDir)) Files.createDirectories(cacheDir);
         if (!Files.isDirectory(cacheDir)) {
             throw new IllegalArgumentException("path is not a directory: " + cacheDir);
         }
         this.directoryOfCaches = cacheDir;
+        this.conflictResolution = conflictResolution;
     }
 
     /**
@@ -139,7 +145,7 @@ public final class CacheManager {
         }
 
         LocalCache<K> localCache = new LocalCache<>(directoryOfCaches + "/" + name + ".json", parameters);
-        RedisCache<K> cache = new RedisCache<>(parameters, localCache, DEFAULT_CONFLICT_RESOLUTION);
+        RedisCache<K> cache = new RedisCache<>(parameters, localCache, conflictResolution);
         caches.put(name, cache);
         return cache;
     }
