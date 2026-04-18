@@ -1,4 +1,4 @@
-/* Licensed under MIT 2025. */
+/* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.utils;
 
 /**
@@ -6,5 +6,7 @@ package edu.kit.kastel.sdq.lissa.ratlr.utils;
  *
  * @param <F> The type of the first value in the pair
  * @param <S> The type of the second value in the pair
+ * @param first The first value of the pair
+ * @param second The second value of the pair
  */
 public record Pair<F, S>(F first, S second) {}
