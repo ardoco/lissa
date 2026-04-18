@@ -3,6 +3,9 @@ package edu.kit.kastel.sdq.lissa.ratlr.cache;
 
 import org.jspecify.annotations.Nullable;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * Interface for cache implementations in the LiSSA framework.
  * This interface defines the contract for caching mechanisms that store and retrieve
@@ -85,4 +88,31 @@ public interface Cache<K extends CacheKey> {
      * @return The cache parameters
      */
     CacheParameter<K> getCacheParameter();
+
+    /**
+     * Converts a JSON string to an object of the specified type.
+     * If the target type is String, the JSON string is returned as is.
+     *
+     * @param <T> The type to convert to
+     * @param jsonData The JSON string to convert
+     * @param clazz The class of the target type
+     * @param mapper The ObjectMapper instance to use for deserialization
+     * @return The converted object, or null if jsonData is null
+     * @throws IllegalArgumentException If the JSON cannot be deserialized to the target type
+     */
+    @SuppressWarnings("unchecked")
+    static <T> @Nullable T convert(@Nullable String jsonData, Class<T> clazz, ObjectMapper mapper) {
+        if (jsonData == null) {
+            return null;
+        }
+        if (clazz == String.class) {
+            return (T) jsonData;
+        }
+
+        try {
+            return mapper.readValue(jsonData, clazz);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Could not deserialize object", e);
+        }
+    }
 }

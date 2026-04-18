@@ -10,6 +10,7 @@ import java.util.*;
 
 import org.jspecify.annotations.Nullable;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -18,8 +19,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * This class provides a thread-safe implementation of a cache that persists its contents
  * to a JSON file. It includes automatic flushing of changes when a certain threshold
  * of modifications is reached.
+ *
+ * @param <K> The type of cache key used in this cache
  */
-class LocalCache<K extends CacheKey> {
+class LocalCache<K extends CacheKey> implements Cache<K> {
     private final ObjectMapper mapper;
 
     /**
@@ -47,6 +50,7 @@ class LocalCache<K extends CacheKey> {
      * or a new file will be created.
      *
      * @param cacheFile The path to the cache file
+     * @param cacheParameter The cache parameter configuration
      */
     LocalCache(String cacheFile, CacheParameter<K> cacheParameter) {
         this.cacheParameter = cacheParameter;
@@ -114,15 +118,11 @@ class LocalCache<K extends CacheKey> {
         }
     }
 
-    /**
-     * Retrieves a value from the cache.
-     *
-     * @param key The cache key to look up
-     * @return The cached value, or null if not found
-     */
-    public synchronized @Nullable String get(String key) {
+    @Override
+    public synchronized <T> @Nullable T get(String key, Class<T> clazz) {
         K cacheKey = cacheParameter.createCacheKey(key);
-        return cache.get(cacheKey.localKey());
+        String jsonData = cache.get(cacheKey.localKey());
+        return Cache.convert(jsonData, clazz, mapper);
     }
 
     /**
@@ -132,19 +132,14 @@ class LocalCache<K extends CacheKey> {
      * @return The cached value, or null if not found
      * @deprecated This method exposes internal cache key handling and should not be used in general code.
      */
+    @Override
     @Deprecated(forRemoval = false)
-    public synchronized @Nullable String getViaInternalKey(K key) {
-        return cache.get(key.localKey());
+    public synchronized <T> @Nullable T getViaInternalKey(K key, Class<T> clazz) {
+        String jsonData = cache.get(key.localKey());
+        return Cache.convert(jsonData, clazz, mapper);
     }
 
-    /**
-     * Stores a value in the cache.
-     * If the value is different from the existing value (if any), the dirty counter is incremented.
-     * If the dirty counter exceeds the maximum threshold, the cache is automatically flushed to disk.
-     *
-     * @param key The cache key to store the value under
-     * @param value The value to store
-     */
+    @Override
     public synchronized void put(String key, String value) {
         K cacheKey = cacheParameter.createCacheKey(key);
         String old = cache.put(cacheKey.localKey(), value);
@@ -166,16 +161,45 @@ class LocalCache<K extends CacheKey> {
      * @param value The value to store
      * @deprecated This method exposes internal cache key handling and should not be used in general code.
      */
+    @Override
     @Deprecated(forRemoval = false)
-    public synchronized void putViaInternalKey(K cacheKey, String value) {
-        String old = cache.put(cacheKey.localKey(), value);
-        if (old == null || !old.equals(value)) {
-            dirty++;
-        }
+    public synchronized <T> void putViaInternalKey(K cacheKey, T value) {
+        try {
+            String jsonValue = mapper.writeValueAsString(Objects.requireNonNull(value));
+            String old = cache.put(cacheKey.localKey(), jsonValue);
+            if (old == null || !old.equals(jsonValue)) {
+                dirty++;
+            }
 
-        if (dirty > MAX_DIRTY) {
-            write();
+            if (dirty > MAX_DIRTY) {
+                write();
+            }
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Could not serialize object", e);
         }
+    }
+
+    @Override
+    public synchronized <T> void put(String key, T value) {
+        try {
+            String jsonValue = mapper.writeValueAsString(Objects.requireNonNull(value));
+            K cacheKey = cacheParameter.createCacheKey(key);
+            String old = cache.put(cacheKey.localKey(), jsonValue);
+            if (old == null || !old.equals(jsonValue)) {
+                dirty++;
+            }
+
+            if (dirty > MAX_DIRTY) {
+                write();
+            }
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Could not serialize object", e);
+        }
+    }
+
+    @Override
+    public void flush() {
+        write();
     }
 
     /**
@@ -184,11 +208,13 @@ class LocalCache<K extends CacheKey> {
      * @param key The cache key to look up
      * @return true if this map contains a mapping for the specified key
      */
+    @Override
     public boolean containsKey(String key) {
         K cacheKey = cacheParameter.createCacheKey(key);
         return cache.containsKey(cacheKey.localKey());
     }
 
+    @Override
     public CacheParameter<K> getCacheParameter() {
         return this.cacheParameter;
     }

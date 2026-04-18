@@ -1,11 +1,8 @@
 /* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.cache;
 
-import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import redis.clients.jedis.UnifiedJedis;
 
 /**
  * Defines strategies for handling cache value replacement when conflicts occur between Redis and local cache.
@@ -18,40 +15,51 @@ public enum CacheReplacementStrategy {
      */
     NONE {
         @Override
-        public String resolve(
-                String key, String redisValue, String localValue, LocalCache localCache, @Nullable UnifiedJedis jedis) {
-            logger.info("Cache inconsistency detected for key {}, keeping both values (returning Redis value)", key);
-            return redisValue;
+        public <K extends CacheKey> String resolve(
+                String key, String firstValue, Cache<K> firstCache, String secondValue, Cache<K> secondCache) {
+            logger.info("Cache inconsistency detected for key {}, keeping both values (returning first value)", key);
+            return firstValue;
         }
     },
 
-    /**
-     * Replaces the local cache value with the Redis value when a conflict is detected.
-     * This strategy gives precedence to the Redis cache as the source of truth.
-     */
-    REPLACE_LOCAL_VALUE {
+    ERROR {
         @Override
-        public String resolve(
-                String key, String redisValue, String localValue, LocalCache localCache, @Nullable UnifiedJedis jedis) {
-            logger.info("Cache inconsistency detected for key {}, using Redis value and replacing local one", key);
-            localCache.put(key, redisValue);
-            return redisValue;
+        public <K extends CacheKey> String resolve(
+                String key, String firstValue, Cache<K> firstCache, String secondValue, Cache<K> secondCache) {
+            logger.error(
+                    "Cache inconsistency detected for key {}, values: {} (first cache), {} (second cache)",
+                    key,
+                    firstValue,
+                    secondValue);
+            throw new IllegalStateException("Cache inconsistency detected for key " + key);
         }
     },
 
-    /**
-     * Replaces the Redis cache value with the local cache value when a conflict is detected.
-     * This strategy gives precedence to the local cache as the source of truth.
-     */
-    REPLACE_REDIS_VALUE {
+    OVERWRITE_FIRST {
         @Override
-        public String resolve(
-                String key, String redisValue, String localValue, LocalCache localCache, @Nullable UnifiedJedis jedis) {
-            logger.info("Cache inconsistency detected for key {}, using local value and replacing Redis one", key);
-            if (jedis != null) {
-                jedis.hset(key, "data", localValue);
-            }
-            return localValue;
+        public <K extends CacheKey> String resolve(
+                String key, String firstValue, Cache<K> firstCache, String secondValue, Cache<K> secondCache) {
+            logger.warn(
+                    "Cache inconsistency detected for key {}, overwriting first cache value with second cache value: {} -> {}",
+                    key,
+                    firstValue,
+                    secondValue);
+            firstCache.put(key, secondValue);
+            return secondValue;
+        }
+    },
+
+    OVERWRITE_SECOND {
+        @Override
+        public <K extends CacheKey> String resolve(
+                String key, String firstValue, Cache<K> firstCache, String secondValue, Cache<K> secondCache) {
+            logger.warn(
+                    "Cache inconsistency detected for key {}, overwriting second cache value with first cache value: {} -> {}",
+                    key,
+                    secondValue,
+                    firstValue);
+            secondCache.put(key, firstValue);
+            return firstValue;
         }
     };
 
@@ -60,14 +68,15 @@ public enum CacheReplacementStrategy {
     /**
      * Resolves a conflict between Redis and local cache values by applying the appropriate replacement strategy.
      *
+     * @param <K> The type of cache key used in both caches
      * @param key The cache key where the conflict occurred
-     * @param redisValue The value from Redis
-     * @param localValue The value from the local cache
-     * @param localCache The local cache instance
-     * @param jedis The Redis client instance (may be null)
+     * @param firstValue The value of the first cache
+     * @param firstCache The first cache where the value was found
+     * @param secondValue The value of the second cache
+     * @param secondCache The second cache where the value was found
      *
      * @return The resolved cache value to be used
      */
-    public abstract String resolve(
-            String key, String redisValue, String localValue, LocalCache localCache, @Nullable UnifiedJedis jedis);
+    public abstract <K extends CacheKey> String resolve(
+            String key, String firstValue, Cache<K> firstCache, String secondValue, Cache<K> secondCache);
 }

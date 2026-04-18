@@ -27,8 +27,7 @@ public final class CacheManager {
      * The default strategy for handling cache conflicts between local and Redis caches.
      * Redis values take precedence over local cache values in case of conflicts.
      */
-    private static final CacheReplacementStrategy DEFAULT_CONFLICT_RESOLUTION =
-            CacheReplacementStrategy.REPLACE_LOCAL_VALUE;
+    private static final CacheReplacementStrategy DEFAULT_CONFLICT_RESOLUTION = CacheReplacementStrategy.ERROR;
 
     /**
      * The configuration key for specifying the cache directory in a ModuleConfiguration.

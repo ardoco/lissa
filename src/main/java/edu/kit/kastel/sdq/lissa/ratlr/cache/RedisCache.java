@@ -128,9 +128,9 @@ class RedisCache<K extends CacheKey> implements Cache<K> {
         K cacheKey = cacheParameter.createCacheKey(key);
         String jsonData = jedis == null ? null : jedis.hget(cacheKey.toJsonKey(), "data");
         if (localCache == null) {
-            return convert(jsonData, clazz);
+            return Cache.convert(jsonData, clazz, mapper);
         }
-        String localData = localCache.get(key);
+        String localData = localCache.get(key, String.class);
         // Value is in redis cache but not in local cache
         if (localData == null && jsonData != null) {
             localCache.put(key, jsonData);
@@ -142,11 +142,11 @@ class RedisCache<K extends CacheKey> implements Cache<K> {
         String valueToReturn;
         if (jsonData != null && localData != null && !jsonData.equals(localData)) {
             // Value is in both caches, but they differ - apply conflict resolution strategy
-            valueToReturn = conflictResolution.resolve(key, jsonData, localData, localCache, jedis);
+            valueToReturn = conflictResolution.resolve(key, jsonData, localCache, localData, this);
         } else {
             valueToReturn = jsonData != null ? jsonData : localData;
         }
-        return convert(valueToReturn, clazz);
+        return Cache.convert(valueToReturn, clazz, mapper);
     }
 
     @Override
@@ -154,9 +154,9 @@ class RedisCache<K extends CacheKey> implements Cache<K> {
     public synchronized <T> @Nullable T getViaInternalKey(K cacheKey, Class<T> clazz) {
         String jsonData = jedis == null ? null : jedis.hget(cacheKey.toJsonKey(), "data");
         if (localCache == null) {
-            return convert(jsonData, clazz);
+            return Cache.convert(jsonData, clazz, mapper);
         }
-        String localData = localCache.getViaInternalKey(cacheKey);
+        String localData = localCache.getViaInternalKey(cacheKey, String.class);
         // Value is in redis cache but not in local cache
         if (localData == null && jsonData != null) {
             localCache.putViaInternalKey(cacheKey, jsonData);
@@ -168,37 +168,11 @@ class RedisCache<K extends CacheKey> implements Cache<K> {
         String valueToReturn;
         // Value is in both caches, but they differ
         if (jsonData != null && localData != null && !jsonData.equals(localData)) {
-            valueToReturn = conflictResolution.resolve(cacheKey.toJsonKey(), jsonData, localData, localCache, jedis);
+            valueToReturn = conflictResolution.resolve(cacheKey.toJsonKey(), localData, localCache, jsonData, this);
         } else {
             valueToReturn = jsonData != null ? jsonData : localData;
         }
-        return convert(valueToReturn, clazz);
-    }
-
-    /**
-     * Converts a JSON string to an object of the specified type.
-     * If the target type is String, the JSON string is returned as is.
-     *
-     * @param <T> The type to convert to
-     * @param jsonData The JSON string to convert
-     * @param clazz The class of the target type
-     * @return The converted object, or null if jsonData is null
-     * @throws IllegalArgumentException If the JSON cannot be deserialized to the target type
-     */
-    @SuppressWarnings("unchecked")
-    private <T> @Nullable T convert(@Nullable String jsonData, Class<T> clazz) {
-        if (jsonData == null) {
-            return null;
-        }
-        if (clazz == String.class) {
-            return (T) jsonData;
-        }
-
-        try {
-            return mapper.readValue(jsonData, clazz);
-        } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException("Could not deserialize object", e);
-        }
+        return Cache.convert(valueToReturn, clazz, mapper);
     }
 
     /**
