@@ -9,7 +9,11 @@ import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
+
+import redis.clients.jedis.exceptions.JedisConnectionException;
 
 /**
  * Manages caching operations in the LiSSA framework.
@@ -37,7 +41,7 @@ public final class CacheManager {
     private static @Nullable CacheManager defaultInstanceManager;
     private final Path directoryOfCaches;
     private final CacheReplacementStrategy conflictResolution;
-    private final Map<String, RedisCache<?>> caches = new HashMap<>();
+    private final Map<String, Cache<?>> caches = new HashMap<>();
 
     /**
      * Sets the cache directory for the default cache manager instance.
@@ -144,10 +148,18 @@ public final class CacheManager {
             return cached;
         }
 
+        ObjectMapper mapper = new ObjectMapper();
         LocalCache<K> localCache = new LocalCache<>(directoryOfCaches + "/" + name + ".json", parameters);
-        RedisCache<K> cache = new RedisCache<>(parameters, localCache, conflictResolution);
-        caches.put(name, cache);
-        return cache;
+        try {
+            RedisCache<K> redisCache = new RedisCache<>(parameters, mapper);
+            HierarchicalCache<K> cache =
+                    new HierarchicalCache<>(parameters, redisCache, localCache, conflictResolution);
+            caches.put(name, cache);
+            return cache;
+        } catch (JedisConnectionException e) {
+            caches.put(name, localCache);
+            return localCache;
+        }
     }
 
     /**
