@@ -15,13 +15,16 @@ LiSSA implements a sophisticated caching system to improve performance and ensur
      - [`ClassifierCacheParameter`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/classifier/ClassifierCacheParameter.java): Configuration for classifier caches (model name, seed, temperature)
      - [`EmbeddingCacheParameter`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/embedding/EmbeddingCacheParameter.java): Configuration for embedding caches (model name)
 2. **Cache Implementations**
+   - [`Hierarchical Cache`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/HierarchicalCache.java): Two cache levels with a synchronization mechanism
+     - Changes are applied to both levels
+     - Reads use a Conflict Resolution Strategy to ensure consistent results
+     - If a cache entry is missing in one level during a read, it is also written to the other level
    - [`LocalCache`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/LocalCache.java): File-based cache implementation that stores data in JSON format
      - Implements dirty tracking to optimize writes
      - Automatically saves changes on shutdown
      - Supports atomic writes using temporary files
-   - [`RedisCache`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/RedisCache.java): Redis-based cache implementation with fallback to local cache
+   - [`RedisCache`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/RedisCache.java): Redis-based cache implementation
      - Uses Redis for high-performance caching
-     - Falls back to local cache if Redis is unavailable
      - Supports both string and object serialization
 3. **Cache Management**
    - [`CacheManager`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/CacheManager.java): Central manager for cache instances
