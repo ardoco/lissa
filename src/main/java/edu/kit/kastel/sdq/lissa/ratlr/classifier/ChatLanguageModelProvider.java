@@ -261,7 +261,7 @@ public class ChatLanguageModelProvider {
      * @return A configured DeepSeek chat model instance
      * @throws IllegalStateException If required environment variables are not set
      */
-    private static LazyChatModel createDeepSeekChatModel(String model, int seed, double temperature) {
+    private static ChatModel createDeepSeekChatModel(String model, int seed, double temperature) {
         String deepseekApiKey = Environment.getenv("DEEPSEEK_API_KEY");
         if (deepseekApiKey == null) {
             throw new IllegalStateException("DEEPSEEK_API_KEY environment variable not set");
