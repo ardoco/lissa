@@ -26,74 +26,37 @@ import io.soabase.recordbuilder.core.RecordBuilder;
  * The configuration is used to instantiate pipeline components, each of which can access shared context
  * via a {@link edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore} passed to their factory methods.
  * </p>
+ *
+ * @param cacheDir Directory for caching intermediate results.
+ * @param goldStandardConfiguration Configuration for gold standard evaluation.
+ * @param sourceArtifactProvider Configuration for the source artifact provider.
+ * @param targetArtifactProvider Configuration for the target artifact provider.
+ * @param sourcePreprocessor Configuration for the source artifact preprocessor.
+ * @param targetPreprocessor Configuration for the target artifact preprocessor.
+ * @param embeddingCreator Configuration for the embedding creator.
+ * @param sourceStore Configuration for the source element store.
+ * @param targetStore Configuration for the target element store.
+ * @param classifier Configuration for a single classifier.
+ *                  Either this or {@link #classifiers} must be set, but not both.
+ * @param classifiers Configuration for a multi-stage classifier pipeline.
+ *                   Either this or {@link #classifier} must be set, but not both.
+ * @param resultAggregator Configuration for the result aggregator.
+ * @param traceLinkIdPostprocessor Configuration for the trace link ID postprocessor.
  */
 @RecordBuilder()
 public record EvaluationConfiguration(
-        /**
-         * Directory for caching intermediate results.
-         */
         @JsonProperty("cache_dir") String cacheDir,
-
-        /**
-         * EvaluationConfiguration for gold standard evaluation.
-         */
         @JsonProperty("gold_standard_configuration") GoldStandardConfiguration goldStandardConfiguration,
-
-        /**
-         * EvaluationConfiguration for the source artifact provider.
-         */
         @JsonProperty("source_artifact_provider") ModuleConfiguration sourceArtifactProvider,
-
-        /**
-         * EvaluationConfiguration for the target artifact provider.
-         */
         @JsonProperty("target_artifact_provider") ModuleConfiguration targetArtifactProvider,
-
-        /**
-         * EvaluationConfiguration for the source artifact preprocessor.
-         */
         @JsonProperty("source_preprocessor") ModuleConfiguration sourcePreprocessor,
-
-        /**
-         * EvaluationConfiguration for the target artifact preprocessor.
-         */
         @JsonProperty("target_preprocessor") ModuleConfiguration targetPreprocessor,
-
-        /**
-         * EvaluationConfiguration for the embedding creator.
-         */
         @JsonProperty("embedding_creator") ModuleConfiguration embeddingCreator,
-
-        /**
-         * EvaluationConfiguration for the source element store.
-         */
         @JsonProperty("source_store") ModuleConfiguration sourceStore,
-
-        /**
-         * EvaluationConfiguration for the target element store.
-         */
         @JsonProperty("target_store") ModuleConfiguration targetStore,
-
-        /**
-         * EvaluationConfiguration for a single classifier.
-         * Either this or {@link #classifiers} must be set, but not both.
-         */
         @JsonProperty("classifier") @Nullable ModuleConfiguration classifier,
-
-        /**
-         * EvaluationConfiguration for a multi-stage classifier pipeline.
-         * Either this or {@link #classifier} must be set, but not both.
-         */
         @JsonProperty("classifiers") @Nullable List<List<ModuleConfiguration>> classifiers,
-
-        /**
-         * EvaluationConfiguration for the result aggregator.
-         */
         @JsonProperty("result_aggregator") ModuleConfiguration resultAggregator,
-
-        /**
-         * EvaluationConfiguration for the trace link ID postprocessor.
-         */
         @JsonProperty("tracelinkid_postprocessor") @Nullable ModuleConfiguration traceLinkIdPostprocessor)
         implements EvaluationConfigurationBuilder.With, SerializableConfiguration {
 
