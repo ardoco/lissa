@@ -16,7 +16,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 public record EvaluationResult<T>(Element source, Element target, T groundTruth, T classification) {
 
     public String getTextualRepresentation() {
-        return String.format("Source: %s, Target: %s,", source.getContent(), target.getContent());
+        return String.format("Source: %s, Target: %s", source.getContent(), target.getContent());
     }
 
     /**

@@ -1,14 +1,17 @@
 
 ```
-Question: We have two software development artifacts that may or may not be related in terms of their purpose and functionality\.
+Question: We have two software development artifacts that may or may not be related\.
 
-Source Artifact: '''\{source\_content\}'''
-This artifact specifies a non\-functional requirement \(NFR\) that outlines the expected performance and portability of a software tool\.
+Source Artifact \(\{source\_type\}\): '''\{source\_content\}'''
 
-Target Artifact: '''\{target\_content\}'''
-This artifact describes the functional requirements and capabilities of the software tool, detailing how it will be used by end users\.
+Target Artifact \(\{target\_type\}\): '''\{target\_content\}'''
 
-Considering the definitions and purposes of these artifacts, do they relate to each other in the context of software development?
+To determine if these artifacts are related, please analyze the following criteria in detail:
+1\. \*\*Aspect of Development\*\*: Do both artifacts address the same aspect of the software development process \(e\.g\., requirements, design, implementation, testing\)?
+2\. \*\*Dependency or Reference\*\*: Is there a direct dependency or reference between the two artifacts, such as one artifact relying on the other for its implementation or functionality?
+3\. \*\*Common Goals\*\*: Do both artifacts contribute to the same overall goal or functionality within the project, such as enhancing user experience, improving performance, or ensuring compliance with standards?
 
-Please answer with 'yes' or 'no'\.
+Please provide a clear rationale for your answer\. Based on this analysis, are these artifacts related?
+
+Answer with 'yes' or 'no'\.
 ```
