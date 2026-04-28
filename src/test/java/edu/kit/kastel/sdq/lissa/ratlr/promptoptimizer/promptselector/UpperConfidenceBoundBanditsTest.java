@@ -233,9 +233,17 @@ class UpperConfidenceBoundBanditsTest {
     void shouldThrowExceptionForInvalidMode() {
         Assertions.assertThrows(
                 IllegalArgumentException.class,
-                () -> new UpperConfidenceBoundBandits(
-                        NUM_ARMS, NUM_SAMPLES, EXPLORATION_CONSTANT, "invalid-mode", new Random(FIXED_SEED)),
+                () -> createBanditWithInvalidMode(),
                 "Should throw IllegalArgumentException for unknown mode");
+    }
+
+    /**
+     * Helper method to create a bandit with an invalid mode.
+     * Used to isolate the exception-throwing invocation for assertThrows.
+     */
+    private void createBanditWithInvalidMode() {
+        new UpperConfidenceBoundBandits(
+                NUM_ARMS, NUM_SAMPLES, EXPLORATION_CONSTANT, "invalid-mode", new Random(FIXED_SEED));
     }
 
     /**
