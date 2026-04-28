@@ -42,7 +42,7 @@
   "target_store" : {
     "name" : "cosine_similarity",
     "args" : {
-      "max_results" : "4"
+      "max_results" : 4
     }
   },
   "metric" : {
@@ -52,7 +52,7 @@
   "selector" : {
     "name" : "ucb",
     "args" : {
-      "samples_per_eval" : "16"
+      "samples_per_eval" : 16
     }
   },
   "prompt_optimizer": {
@@ -61,7 +61,7 @@
       "prompt": "Question: Here are two parts of software development artifacts.\n\n            {source_type}: '''{source_content}'''\n\n            {target_type}: '''{target_content}'''\n            Are they related?\n\n            Answer with 'yes' or 'no'.",
       "model": "gpt-4o-mini-2024-07-18",
       "maximum_iterations": 3,
-      "minibatch_size" : "20"
+      "minibatch_size" : 20
     }
   },
   "classifier" : {

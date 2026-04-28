@@ -25,15 +25,13 @@ public class SimpleSelector implements Selector {
     private final SampleStrategy sampleStrategy;
 
     /**
-     * Creates a new brute-force selector instance with the given configuration.
+     * Creates a new simple selector instance with the given configuration.
      *
      * @param configuration The configuration for the selector.
      */
     public SimpleSelector(ModuleConfiguration configuration) {
-        int samplesPerEval = configuration.argumentAsInt(SAMPLES_PER_EVALUATION_CONFIGURATION_KEY, SAMPLES_PER_EVAL);
-        int evalRounds = configuration.argumentAsInt("eval_rounds", EVALUATION_ROUNDS);
-        int evalPromptsPerRound = configuration.argumentAsInt("eval_prompts_per_round", EVALUATION_PROMPTS_PER_ROUND);
-        this.evaluationBudget = samplesPerEval * evalRounds * evalPromptsPerRound;
+        this.evaluationBudget = configuration.argumentAsInt(
+                "evaluation_budget", SAMPLES_PER_EVAL * EVALUATION_ROUNDS * EVALUATION_PROMPTS_PER_ROUND);
         this.sampleStrategy = SampleStrategy.createSampler(
                 configuration.argumentAsString(SAMPLER_CONFIGURATION_KEY, SHUFFLED_SAMPLER),
                 new Random(configuration.argumentAsInt("seed", DEFAULT_SEED)));

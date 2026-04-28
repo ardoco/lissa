@@ -119,15 +119,14 @@ public class Optimization {
 
         if (results.isEmpty()) {
             logger.warn("No optimized prompt was generated. Make sure maximum_iterations is set to greater than zero.");
+            CacheManager.getDefaultInstance().flush();
             return results;
         }
 
         Statistics.generateOptimizationStatistics(configFile.toFile(), configuration, results.getLast());
 
         logger.info("Optimized prompt after {} steps: \n {}", results.size(), results.getLast());
-
         CacheManager.getDefaultInstance().flush();
-
         return results;
     }
 }

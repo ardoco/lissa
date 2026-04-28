@@ -63,8 +63,7 @@ public class UpperConfidenceBoundBanditSelector implements Selector {
      * @param configuration The configuration for the selector.
      */
     public UpperConfidenceBoundBanditSelector(ModuleConfiguration configuration) {
-        this.samplesPerEvaluation =
-                configuration.argumentAsInt(SAMPLES_PER_EVALUATION_CONFIGURATION_KEY, SAMPLES_PER_EVAL);
+        this.samplesPerEvaluation = configuration.argumentAsInt("samples_per_eval", SAMPLES_PER_EVAL);
         this.rounds = configuration.argumentAsInt("rounds", DEFAULT_ROUNDS);
         this.numberOfPromptsPerRound =
                 configuration.argumentAsInt("num_prompts_per_round", DEFAULT_NUMBER_OF_PROMPTS_PER_ROUND);

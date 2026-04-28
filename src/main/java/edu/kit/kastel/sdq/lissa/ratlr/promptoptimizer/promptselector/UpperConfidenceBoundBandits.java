@@ -26,12 +26,19 @@ public class UpperConfidenceBoundBandits {
      */
     private static final double EPSILON = 1e-3;
 
+    /** The exploration constant (c) that controls the balance between exploration and exploitation in the UCB formula. */
     private final double explorationConstant;
+    /** The mode of the UCB algorithm to use (e.g., "ucb" or "ucb-e"). This determines how the exploration term is computed. */
     private final Mode mode;
+    /** The total number of arms (prompts) being evaluated. */
     private final int numberOfArms;
+    /** The number of samples used for updating the scores of the arms. This controls how much weight new scores have in the overall score. */
     private final int numberOfSamples;
+    /** An array that keeps track of the total number of samples (or pulls) for each arm. This is used to compute the average score and the exploration term. */
     private final double[] counts;
+    /** An array that accumulates the total scores for each arm. The average score for an arm is computed as scores[i] / counts[i]. */
     private final double[] scores;
+    /** Random instance used for random arm selection when all counts are zero. This ensures reproducibility when the random seed is set. */
     private final Random random;
 
     public UpperConfidenceBoundBandits(
@@ -47,10 +54,17 @@ public class UpperConfidenceBoundBandits {
 
     /**
      * Update the counts and scores for the chosen arms.
+     * Both input arrays must have the same length, where each index
+     * corresponds to a chosen arm and its new score. The indices in the chosen array must  be valid arm indices (0 to
+     * numberOfArms - 1).
      * @param chosen An array of indices of the chosen arms.
      * @param newScores An array of scores corresponding to the chosen arms.
+     * @throws IllegalArgumentException if the length of chosen arms and new scores do not match
      */
     public void update(int[] chosen, double[] newScores) {
+        if (chosen.length != newScores.length) {
+            throw new IllegalArgumentException("Length of chosen arms and new scores must be the same.");
+        }
         for (int i = 0; i < chosen.length; i++) {
             int index = chosen[i];
             double score = newScores[i];
@@ -80,7 +94,7 @@ public class UpperConfidenceBoundBandits {
      * @param n The maximum number of arms to choose. If there are fewer arms than n, all arms will be chosen.
      * @param iteration The current round number. Used in the UCB formula to determine the level of exploration versus
      *          exploitation. Higher values of {@code iteration} increase the exploration term.
-     * @return A list of indices of the chosen arms.
+     * @return A list of indices of the chosen arms in descending order.
      */
     public List<Integer> choose(int n, int iteration) {
         // If all counts are 0, choose randomly without duplicates.

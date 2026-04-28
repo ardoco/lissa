@@ -107,39 +107,34 @@ public class ProTeGiOptimizer extends IterativeOptimizer {
      */
     private Pair<List<String>, List<Double>> scoreAndFilterCandidates(
             List<String> prompts, List<ClassificationTask> tasks) {
-        List<Double> scores = scorePrompts(prompts, tasks);
-        List<Pair<Double, String>> scorePromptPairs = new ArrayList<>();
-        for (int i = 0; i < scores.size(); i++) {
-            scorePromptPairs.add(new Pair<>(scores.get(i), prompts.get(i)));
-        }
+        List<Pair<Double, String>> scoredPrompts = scorePrompts(prompts, tasks);
         // sort by score descending and select top beam size
-        scorePromptPairs = scorePromptPairs.stream()
+        scoredPrompts = scoredPrompts.stream()
                 .sorted((a, b) -> Double.compare(b.first(), a.first()))
                 .toList();
-        List<String> candidatePrompts = scorePromptPairs.stream()
+        List<String> candidatePrompts = scoredPrompts.stream()
                 .map(Pair::second)
                 .limit(config.beamSize())
                 .toList();
-        scores = scorePromptPairs.stream()
-                .map(Pair::first)
-                .limit(config.beamSize())
-                .toList();
+        List<Double> scores =
+                scoredPrompts.stream().map(Pair::first).limit(config.beamSize()).toList();
         return new Pair<>(candidatePrompts, scores);
     }
 
     /**
-     * Score a list of prompts using the provided selector and metric.
-     * If there is only one prompt, it is assigned a perfect score of 1.0.
+     * Score a list of scored prompts using the provided selector and metric.
      *
      * @param prompts The list of prompts to score
      * @param tasks The classification tasks to use for scoring
-     * @return A list of scores corresponding to each prompt
+     * @return A list of pairs of the score with the corresponding prompt
      */
-    private List<Double> scorePrompts(List<String> prompts, List<ClassificationTask> tasks) {
-        if (prompts.size() == 1) {
-            return List.of(1.0);
+    private List<Pair<Double, String>> scorePrompts(List<String> prompts, List<ClassificationTask> tasks) {
+        List<Double> scores = config.candidateEvaluationSelector().selectAndEvaluate(prompts, tasks, metric);
+        List<Pair<Double, String>> scorePromptPairs = new ArrayList<>();
+        for (int i = 0; i < scores.size(); i++) {
+            scorePromptPairs.add(new Pair<>(scores.get(i), prompts.get(i)));
         }
-        return config.candidateEvaluationSelector().selectAndEvaluate(prompts, tasks, metric);
+        return scorePromptPairs;
     }
 
     /**
@@ -273,6 +268,9 @@ public class ProTeGiOptimizer extends IterativeOptimizer {
      * This method evaluates each candidate prompt on the misclassified examples from the provided evaluation results
      * and selects the top candidates that best address the errors.
      * Oversamples by the configured factor before filtering to reduce evaluation cost.
+     * <p>
+     * If no misclassified examples are found in the evaluation, this method returns a deterministic
+     * sample of candidates.
      *
      * @param promptCandidates The list of candidate prompts to filter
      * @param evaluation The evaluation results used to identify misclassified examples
@@ -289,6 +287,11 @@ public class ProTeGiOptimizer extends IterativeOptimizer {
                 misclassifiedTasks.add(new ClassificationTask(result.source(), result.target(), result.groundTruth()));
             }
         }
+
+        if (misclassifiedTasks.isEmpty()) {
+            return config.candidateFilterSampler().sample(promptCandidates, config.maximumExpansionFactor());
+        }
+
         misclassifiedTasks = config.candidateFilterSampler().sample(misclassifiedTasks, config.maximumErrorExamples());
         List<String> sampledPromptCandidates = config.candidateFilterSampler()
                 .sample(promptCandidates, config.maximumExpansionFactor() * config.candidateOversamplingFactor());

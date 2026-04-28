@@ -28,8 +28,6 @@ public interface Selector {
      */
     int SAMPLES_PER_EVAL = 32;
 
-    String SAMPLES_PER_EVALUATION_CONFIGURATION_KEY = "samples_per_eval";
-
     /**
      * Evaluates a list of prompts using the provided classification tasks and metric.
      *
