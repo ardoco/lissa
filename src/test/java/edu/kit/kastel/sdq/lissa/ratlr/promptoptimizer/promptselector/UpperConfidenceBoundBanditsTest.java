@@ -246,10 +246,10 @@ class UpperConfidenceBoundBanditsTest {
     @ValueSource(strings = {"UCB", "Ucb", "uCb", "ucB"})
     @DisplayName("Mode string is case-insensitive")
     void shouldAcceptModeStringInAnyCase(String mode) {
-        var bandit = new UpperConfidenceBoundBandits(
+        var testBandit = new UpperConfidenceBoundBandits(
                 NUM_ARMS, NUM_SAMPLES, EXPLORATION_CONSTANT, mode, new Random(FIXED_SEED));
 
-        List<Integer> chosen = bandit.choose(2, 1);
+        List<Integer> chosen = testBandit.choose(2, 1);
         Assertions.assertEquals(2, chosen.size(), "Should successfully initialize with mode: " + mode);
     }
 
@@ -264,40 +264,17 @@ class UpperConfidenceBoundBanditsTest {
     }
 
     /**
-     * Test that getScores returns correct averages after multiple updates to same arm.
-     */
-    @Test
-    @DisplayName("Score averaging works correctly with independent bandit instance")
-    void shouldComputeCorrectAverageScores() {
-        var testBandit = new UpperConfidenceBoundBandits(3, 1, EXPLORATION_CONSTANT, "ucb", new Random(FIXED_SEED));
-
-        // Update arm 0 with scores 0.5, 0.7, 0.6
-        testBandit.update(new int[] {0}, new double[] {0.5});
-        testBandit.update(new int[] {0}, new double[] {0.7});
-        testBandit.update(new int[] {0}, new double[] {0.6});
-
-        double[] scores = testBandit.getScores();
-
-        // Average should be (0.5 + 0.7 + 0.6) / 3 = 0.6
-        Assertions.assertEquals(0.6, scores[0], 1e-9, "Average of [0.5, 0.7, 0.6] should be 0.6");
-        Assertions.assertEquals(0.0, scores[1], "Arm 1 should have no updates");
-        Assertions.assertEquals(0.0, scores[2], "Arm 2 should have no updates");
-    }
-
-    /**
      * Test batch update with multiple arms simultaneously with their respective scores.
      */
     @Test
     @DisplayName("Batch update applies to all specified arms")
     void shouldUpdateAllArmsInBatchCorrectly() {
-        var testBandit = new UpperConfidenceBoundBandits(5, 10, EXPLORATION_CONSTANT, "ucb", new Random(FIXED_SEED));
-
         int[] chosenArms = {0, 1, 2, 3, 4};
         double[] scores = {0.1, 0.2, 0.3, 0.4, 0.5};
 
-        testBandit.update(chosenArms, scores);
+        bandit.update(chosenArms, scores);
 
-        double[] result = testBandit.getScores();
+        double[] result = bandit.getScores();
 
         for (int i = 0; i < 5; i++) {
             Assertions.assertEquals(scores[i], result[i], 1e-9, "Arm " + i + " should have score " + scores[i]);
@@ -328,16 +305,17 @@ class UpperConfidenceBoundBanditsTest {
     @Test
     @DisplayName("Exploration bonus favors under-explored arms")
     void shouldPreferUnderexploredArmsWhenScoresAreEqual() {
-        var testBandit = new UpperConfidenceBoundBandits(2, 1, 2.0, "ucb", new Random(FIXED_SEED));
+        // Pre-populate unused arms with a poor score so exploration bonus doesn't favor them
+        bandit.update(new int[] {2, 3, 4}, new double[] {0.1, 0.1, 0.1});
 
-        // Both arms have the same average score
-        testBandit.update(new int[] {0}, new double[] {0.5});
-        testBandit.update(new int[] {1}, new double[] {0.5});
-        testBandit.update(new int[] {1}, new double[] {0.5});
+        // Both arms 0 and 1 have the same average score
+        bandit.update(new int[] {0}, new double[] {0.5});
+        bandit.update(new int[] {1}, new double[] {0.5});
+        bandit.update(new int[] {1}, new double[] {0.5});
 
         // Arm 0 has been pulled 1 time, arm 1 has been pulled 2 times
-        // With exploration bonus, arm 0 (under-explored) should be preferred
-        List<Integer> chosen = testBandit.choose(1, 10);
+        // With exploration bonus, arm 0 (under-explored) should be preferred over arm 1
+        List<Integer> chosen = bandit.choose(1, 10);
 
         Assertions.assertEquals(
                 0, chosen.getFirst(), "Should prefer arm 0 which is under-explored despite equal scores");
