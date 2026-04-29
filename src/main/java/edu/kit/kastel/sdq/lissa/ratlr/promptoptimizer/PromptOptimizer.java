@@ -3,6 +3,7 @@ package edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer;
 
 import static edu.kit.kastel.sdq.lissa.ratlr.configuration.Configuration.CONFIG_NAME_SEPARATOR;
 
+import java.util.List;
 import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
@@ -12,6 +13,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.elementstore.SourceElementStore;
 import edu.kit.kastel.sdq.lissa.ratlr.elementstore.TargetElementStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.Metric;
+import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptselector.Selector;
 
 /**
  * Interface for prompt optimizers in the LiSSA framework.
@@ -26,9 +28,11 @@ public interface PromptOptimizer {
      *
      * @param sourceStore The store containing source elements of the domain/dataset the prompt is optimized for
      * @param targetStore The store containing target elements of the domain/dataset the prompt is optimized for
-     * @return A string representing the optimized prompt
+     * @return A list of Strings representing the optimized prompts. The last entry in the list is the final
+     * optimized prompt, while the preceding entries represent intermediate prompts during the optimization
+     * process. If no optimization is performed (i.e. config maximum_iterations = 0), the list is empty.
      */
-    String optimize(SourceElementStore sourceStore, TargetElementStore targetStore);
+    List<String> optimize(SourceElementStore sourceStore, TargetElementStore targetStore);
 
     /**
      * Factory method to create an instance of PromptOptimizer based on the provided configuration.
@@ -37,18 +41,25 @@ public interface PromptOptimizer {
      * @param configuration The configuration for the optimizer
      * @param goldStandard The gold standard trace links for evaluation
      * @param metric The metric used to evaluate the prompt performance
+     * @param selector The selector used to assess the optimization results (nullable, only required for {@link ProTeGiOptimizer})
      * @return An instance of PromptOptimizer based on the configuration
      */
     static PromptOptimizer createOptimizer(
-            @Nullable ModuleConfiguration configuration, Set<TraceLink> goldStandard, Metric metric) {
-        if (configuration == null) {
-            return new MockOptimizer();
-        }
+            ModuleConfiguration configuration,
+            Set<TraceLink> goldStandard,
+            Metric metric,
+            @Nullable Selector selector) {
         return switch (configuration.name().split(CONFIG_NAME_SEPARATOR)[0]) {
             case "mock" -> new MockOptimizer();
             case "simple" -> new IterativeOptimizer(configuration, goldStandard, metric, 1);
             case "iterative" -> new IterativeOptimizer(configuration, goldStandard, metric);
             case "feedback" -> new IterativeFeedbackOptimizer(configuration, goldStandard, metric);
+            case "gradient", "protegi" -> {
+                if (selector == null) {
+                    throw new IllegalArgumentException("Selector must not be null for ProTeGi optimizers");
+                }
+                yield new ProTeGiOptimizer(configuration, goldStandard, metric, selector);
+            }
             default -> throw new IllegalStateException("Unexpected value: " + configuration.name());
         };
     }

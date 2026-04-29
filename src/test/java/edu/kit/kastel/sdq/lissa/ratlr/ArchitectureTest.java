@@ -18,12 +18,14 @@ import org.slf4j.Logger;
 import com.tngtech.archunit.base.DescribedPredicate;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaConstructorCall;
+import com.tngtech.archunit.core.domain.JavaMethod;
 import com.tngtech.archunit.core.domain.JavaModifier;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchCondition;
 import com.tngtech.archunit.lang.ArchRule;
 import com.tngtech.archunit.lang.ConditionEvents;
+import com.tngtech.archunit.lang.SimpleConditionEvent;
 
 import edu.kit.kastel.sdq.lissa.cli.command.OptimizeCommand;
 import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheKey;
@@ -31,11 +33,14 @@ import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheParameter;
 import edu.kit.kastel.sdq.lissa.ratlr.cache.classifier.ClassifierCacheParameter;
 import edu.kit.kastel.sdq.lissa.ratlr.cache.embedding.EmbeddingCacheParameter;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.Classifier;
+import edu.kit.kastel.sdq.lissa.ratlr.classifier.LazyChatModel;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.PromptOptimizer;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.Metric;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.Environment;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.Futures;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.KeyGenerator;
+
+import dev.langchain4j.model.chat.ChatModel;
 
 /**
  * Architecture tests for the LiSSA framework using ArchUnit.
@@ -313,6 +318,40 @@ class ArchitectureTest {
                                     "Method %s.parameters() does not access field '%s'",
                                     javaClass.getSimpleName(), fieldName);
                             events.add(violated(javaClass, message));
+                        }
+                    }
+                }
+            });
+
+    /**
+     * Rule that enforces that LazyChatModel must override all methods declared in ChatModel, including default methods.
+     * <p>
+     * This ensures that LazyChatModel provides its own implementation for all ChatModel methods, preventing accidental
+     * usage of default implementations that may not be suitable for the lazy loading behavior of LazyChatModel.
+     */
+    @ArchTest
+    static final ArchRule lazyChatModelMustOverrideAllChatModelMethods = classes()
+            .that()
+            .haveFullyQualifiedName(LazyChatModel.class.getName())
+            .should()
+            .implement(ChatModel.class)
+            .andShould(new ArchCondition<>("override all methods declared in ChatModel (including default methods)") {
+                @Override
+                public void check(JavaClass clazz, ConditionEvents events) {
+                    JavaClass chatModel = clazz.getRawInterfaces().stream()
+                            .filter(i -> i.getName().equals(ChatModel.class.getName()))
+                            .findFirst()
+                            .orElseThrow();
+
+                    for (JavaMethod interfaceMethod : chatModel.getMethods()) {
+                        boolean overridden = clazz.getMethods().stream()
+                                .filter(m -> m.getOwner().equals(clazz)) // only methods declared in this class
+                                .anyMatch(m -> m.getName().equals(interfaceMethod.getName())
+                                        && m.getRawParameterTypes().equals(interfaceMethod.getRawParameterTypes()));
+
+                        if (!overridden) {
+                            events.add(SimpleConditionEvent.violated(
+                                    clazz, "Does not override method: " + interfaceMethod.getFullName()));
                         }
                     }
                 }

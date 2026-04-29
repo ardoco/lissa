@@ -174,7 +174,7 @@ public class ChatLanguageModelProvider {
      * @param temperature The temperature setting for the model
      * @return A configured Ollama chat model instance
      */
-    private static OllamaChatModel createOllamaChatModel(String model, int seed, double temperature) {
+    private static ChatModel createOllamaChatModel(String model, int seed, double temperature) {
         String host = Environment.getenv("OLLAMA_HOST");
         String user = Environment.getenv("OLLAMA_USER");
         String password = Environment.getenv("OLLAMA_PASSWORD");
@@ -183,20 +183,22 @@ public class ChatLanguageModelProvider {
             throw new IllegalStateException("OLLAMA_HOST environment variable not set");
         }
 
-        var ollama = OllamaChatModel.builder()
-                .baseUrl(host)
-                .modelName(model)
-                .timeout(Duration.ofMinutes(10))
-                .temperature(temperature)
-                .seed(seed);
-        if (user != null && password != null && !user.isEmpty() && !password.isEmpty()) {
-            ollama.customHeaders(Map.of(
-                    "Authorization",
-                    "Basic "
-                            + Base64.getEncoder()
-                                    .encodeToString((user + ":" + password).getBytes(StandardCharsets.UTF_8))));
-        }
-        return ollama.build();
+        return new LazyChatModel(() -> {
+            var ollama = OllamaChatModel.builder()
+                    .baseUrl(host)
+                    .modelName(model)
+                    .timeout(Duration.ofMinutes(10))
+                    .temperature(temperature)
+                    .seed(seed);
+            if (user != null && password != null && !user.isEmpty() && !password.isEmpty()) {
+                ollama.customHeaders(Map.of(
+                        "Authorization",
+                        "Basic "
+                                + Base64.getEncoder()
+                                        .encodeToString((user + ":" + password).getBytes(StandardCharsets.UTF_8))));
+            }
+            return ollama.build();
+        });
     }
 
     /**
@@ -209,19 +211,20 @@ public class ChatLanguageModelProvider {
      * @return A configured OpenAI chat model instance
      * @throws IllegalStateException If required environment variables are not set
      */
-    private static OpenAiChatModel createOpenAiChatModel(String model, int seed, double temperature) {
+    private static ChatModel createOpenAiChatModel(String model, int seed, double temperature) {
         String openAiOrganizationId = Environment.getenv("OPENAI_ORGANIZATION_ID");
         String openAiApiKey = Environment.getenv("OPENAI_API_KEY");
         if (openAiOrganizationId == null || openAiApiKey == null) {
             throw new IllegalStateException("OPENAI_ORGANIZATION_ID or OPENAI_API_KEY environment variable not set");
         }
-        return new OpenAiChatModel.OpenAiChatModelBuilder()
+
+        return new LazyChatModel(() -> new OpenAiChatModel.OpenAiChatModelBuilder()
                 .modelName(model)
                 .organizationId(openAiOrganizationId)
                 .apiKey(openAiApiKey)
                 .temperature(temperature)
                 .seed(seed)
-                .build();
+                .build());
     }
 
     /**
@@ -234,18 +237,18 @@ public class ChatLanguageModelProvider {
      * @return A configured Blablador chat model instance
      * @throws IllegalStateException If required environment variables are not set
      */
-    private static OpenAiChatModel createBlabladorChatModel(String model, int seed, double temperature) {
+    private static ChatModel createBlabladorChatModel(String model, int seed, double temperature) {
         String blabladorApiKey = Environment.getenv("BLABLADOR_API_KEY");
         if (blabladorApiKey == null) {
             throw new IllegalStateException("BLABLADOR_API_KEY environment variable not set");
         }
-        return new OpenAiChatModel.OpenAiChatModelBuilder()
+        return new LazyChatModel(() -> new OpenAiChatModel.OpenAiChatModelBuilder()
                 .baseUrl("https://api.helmholtz-blablador.fz-juelich.de/v1")
                 .modelName(model)
                 .apiKey(blabladorApiKey)
                 .temperature(temperature)
                 .seed(seed)
-                .build();
+                .build());
     }
 
     /**
@@ -258,18 +261,18 @@ public class ChatLanguageModelProvider {
      * @return A configured DeepSeek chat model instance
      * @throws IllegalStateException If required environment variables are not set
      */
-    private static OpenAiChatModel createDeepSeekChatModel(String model, int seed, double temperature) {
+    private static ChatModel createDeepSeekChatModel(String model, int seed, double temperature) {
         String deepseekApiKey = Environment.getenv("DEEPSEEK_API_KEY");
         if (deepseekApiKey == null) {
             throw new IllegalStateException("DEEPSEEK_API_KEY environment variable not set");
         }
-        return new OpenAiChatModel.OpenAiChatModelBuilder()
+        return new LazyChatModel(() -> new OpenAiChatModel.OpenAiChatModelBuilder()
                 .baseUrl("https://api.deepseek.com/v1")
                 .modelName(model)
                 .apiKey(deepseekApiKey)
                 .temperature(temperature)
                 .seed(seed)
-                .build();
+                .build());
     }
 
     /**
@@ -289,14 +292,14 @@ public class ChatLanguageModelProvider {
             throw new IllegalStateException("OPENWEBUI_URL or OPENWEBUI_API_KEY environment variable not set");
         }
 
-        return new OpenAiChatModel.OpenAiChatModelBuilder()
+        return new LazyChatModel(() -> new OpenAiChatModel.OpenAiChatModelBuilder()
                 .baseUrl(openwebuiUrl)
                 .modelName(model)
                 .apiKey(openwebuiApiKey)
                 .temperature(temperature)
                 .seed(seed)
                 .timeout(Duration.ofMinutes(10))
-                .build();
+                .build());
     }
 
     /**

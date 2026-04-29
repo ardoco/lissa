@@ -1,6 +1,8 @@
 /* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer;
 
+import java.util.List;
+
 import edu.kit.kastel.sdq.lissa.ratlr.elementstore.SourceElementStore;
 import edu.kit.kastel.sdq.lissa.ratlr.elementstore.TargetElementStore;
 
@@ -15,7 +17,7 @@ public class MockOptimizer implements PromptOptimizer {
     }
 
     @Override
-    public String optimize(SourceElementStore sourceStore, TargetElementStore targetStore) {
-        return "";
+    public List<String> optimize(SourceElementStore sourceStore, TargetElementStore targetStore) {
+        return List.of();
     }
 }

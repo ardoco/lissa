@@ -1,24 +1,24 @@
 
 {
-  "cache_dir": "./src/test/resources/warc/cache/optimizerTests/feedback",
+  "cache_dir": "./cache/WARC",
 
   "gold_standard_configuration": {
-    "path": "./src/test/resources/warc/answer.csv",
+    "path": "./datasets/req2req/WARC/answer.csv",
     "hasHeader": "true"
   },
 
-  "source_artifact_provider": {
-    "name": "text",
-    "args": {
-      "artifact_type": "requirement",
-      "path": "./src/test/resources/warc/high"
+  "source_artifact_provider" : {
+    "name" : "text",
+    "args" : {
+      "artifact_type" : "requirement",
+      "path" : "./datasets/req2req/WARC/high"
     }
   },
-  "target_artifact_provider": {
-    "name": "text",
-    "args": {
-      "artifact_type": "requirement",
-      "path": "./src/test/resources/warc/low"
+  "target_artifact_provider" : {
+    "name" : "text",
+    "args" : {
+      "artifact_type" : "requirement",
+      "path" : "./datasets/req2req/WARC/low"
     }
   },
   "source_preprocessor" : {
@@ -37,26 +37,39 @@
   },
   "source_store" : {
     "name" : "custom",
-    "args" : { }
+    "args" : {}
   },
   "target_store" : {
     "name" : "cosine_similarity",
     "args" : {
-      "max_results" : "4"
+      "max_results" : 4
+    }
+  },
+  "metric" : {
+    "name" : "pointwise",
+    "args" : {}
+  },
+  "selector" : {
+    "name" : "ucb",
+    "args" : {
+      "samples_per_eval" : 16
     }
   },
   "prompt_optimizer": {
-    "name" : "feedback_openai",
+    "name" : "gradient_openai",
     "args" : {
       "prompt": "Question: Here are two parts of software development artifacts.\n\n            {source_type}: '''{source_content}'''\n\n            {target_type}: '''{target_content}'''\n            Are they related?\n\n            Answer with 'yes' or 'no'.",
       "model": "gpt-4o-mini-2024-07-18",
-      "maximum_iterations": 5,
-      "feedback_size": 3
+      "maximum_iterations": 3,
+      "minibatch_size" : 20
     }
   },
   "classifier" : {
-    "name" : "mock",
-    "args" : {}
+    "name" : "simple_openai",
+    "args" : {
+      "model": "gpt-4o-mini-2024-07-18",
+      "temperature": 0.0
+    }
   },
   "result_aggregator" : {
     "name" : "any_connection",
@@ -64,10 +77,6 @@
   },
   "tracelinkid_postprocessor" : {
     "name" : "identity",
-    "args" : {}
-  },
-  "metric" : {
-    "name" : "mock",
     "args" : {}
   }
 }

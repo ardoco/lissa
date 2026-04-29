@@ -1,6 +1,6 @@
 
 {
-  "cache_dir" : "./src/test/resources/warc/cache/optimizerTests/simple",
+  "cache_dir" : "./src/test/resources/warc/cache/optimizerTests/gradient",
 
   "gold_standard_configuration" : {
     "path" : "./src/test/resources/warc/answer.csv",
@@ -42,19 +42,23 @@
   "target_store" : {
     "name" : "cosine_similarity",
     "args" : {
-      "max_results" : "4"
+      "max_results" : 4
     }
   },
   "prompt_optimizer" : {
-    "name" : "simple_openai",
+    "name" : "gradient_openai",
     "args" : {
       "prompt" : "Question: Here are two parts of software development artifacts.\n\n            {source_type}: '''{source_content}'''\n\n            {target_type}: '''{target_content}'''\n            Are they related?\n\n            Answer with 'yes' or 'no'.",
-      "model" : "gpt-4o-mini-2024-07-18"
+      "model" : "gpt-4o-mini-2024-07-18",
+      "maximum_iterations" : 3,
+      "minibatch_size" : 20
     }
   },
   "classifier" : {
-    "name" : "mock",
-    "args" : {
+    "name": "simple_openai",
+    "args": {
+      "model": "gpt-4o-mini-2024-07-18",
+      "temperature": 0.0
     }
   },
   "result_aggregator" : {
@@ -66,7 +70,13 @@
     "args" : {}
   },
   "metric" : {
-    "name" : "mock",
+    "name" : "pointwise",
     "args" : {}
+  },
+  "selector" : {
+    "name" : "ucb",
+    "args" : {
+      "samples_per_eval" : 16
+    }
   }
 }
