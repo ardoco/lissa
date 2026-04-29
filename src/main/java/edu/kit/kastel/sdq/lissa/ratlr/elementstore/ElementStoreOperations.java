@@ -1,4 +1,4 @@
-/* Licensed under MIT 2025. */
+/* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.elementstore;
 
 import java.util.ArrayList;
@@ -20,6 +20,7 @@ public final class ElementStoreOperations {
      * Retrieves a subset of this source store to be used as training data for optimization.
      * The training data consists of the first size elements from the source store.
      *
+     * @param sourceElementStore The source element store
      * @param size The number of elements to include in the training source store
      * @return A new ElementStore containing only the training data elements
      */
@@ -32,7 +33,8 @@ public final class ElementStoreOperations {
      * Retrieves a subset of this target store that corresponds to the source store.
      * This method finds all elements in this target store that are similar to the elements in the source store.
      *
-     * @param sourceStore The training source element store
+     * @param targetElementStore The target element store
+     * @param sourceStore The source element store
      * @return A new ElementStore containing only the target elements that correspond to the source elements
      */
     public static TargetElementStore reduceTargetElementStore(

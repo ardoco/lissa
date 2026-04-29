@@ -1,4 +1,4 @@
-/* Licensed under MIT 2025. */
+/* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.context;
 
 import java.util.SortedMap;
@@ -41,6 +41,7 @@ public class ContextStore {
     /**
      * Retrieves a context by ID and type.
      *
+     * @param <C> the type of the context to retrieve
      * @param id the context ID
      * @param contextType the expected type of the context
      * @return the context instance if found and of the correct type, or null if not found

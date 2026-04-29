@@ -1,4 +1,4 @@
-/* Licensed under MIT 2025. */
+/* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.elementstore.strategy;
 
 import java.util.ArrayList;
@@ -23,6 +23,13 @@ public class CosineSimilarity implements RetrievalStrategy {
 
     private final int maxResults;
 
+    /**
+     * Constructs a CosineSimilarity retrieval strategy with the specified configuration.
+     * The configuration may specify the maximum number of results to return using the "max_results" argument.
+     * The value must be a positive integer or the special value {@value #MAX_RESULTS_INFINITY_ARGUMENT} to indicate no limit.
+     *
+     * @param configuration The configuration for the retrieval strategy
+     */
     public CosineSimilarity(ModuleConfiguration configuration) {
         final String maxResultsKey = "max_results";
         boolean isInfinity = configuration.hasArgument(maxResultsKey)
