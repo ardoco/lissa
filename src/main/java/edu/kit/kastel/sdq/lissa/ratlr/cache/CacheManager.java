@@ -4,14 +4,19 @@ package edu.kit.kastel.sdq.lissa.ratlr.cache;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
+import edu.kit.kastel.sdq.lissa.ratlr.utils.Environment;
 
 import redis.clients.jedis.exceptions.JedisConnectionException;
 
@@ -28,8 +33,12 @@ public final class CacheManager {
     public static final String DEFAULT_CACHE_DIRECTORY = "cache";
 
     /**
+     * The default cache hierarchy: LOCAL only.
+     */
+    private static final String DEFAULT_CACHE_HIERARCHY = "LOCAL";
+
+    /**
      * The default strategy for handling cache conflicts between local and Redis caches.
-     * Redis values take precedence over local cache values in case of conflicts.
      */
     private static final CacheReplacementStrategy DEFAULT_CONFLICT_RESOLUTION = CacheReplacementStrategy.ERROR;
 
@@ -42,6 +51,8 @@ public final class CacheManager {
     private final Path directoryOfCaches;
     private final CacheReplacementStrategy conflictResolution;
     private final Map<String, Cache<?>> caches = new HashMap<>();
+
+    private static final Logger logger = LoggerFactory.getLogger(CacheManager.class);
 
     /**
      * Sets the cache directory for the default cache manager instance.
@@ -62,9 +73,35 @@ public final class CacheManager {
 
     public static synchronized void setCacheDir(ModuleConfiguration configuration) throws IOException {
         String cacheDir = configuration.argumentAsString(CACHE_DIR_CONFIGURATION_KEY, DEFAULT_CACHE_DIRECTORY);
-        CacheReplacementStrategy conflictResolution = configuration.argumentAsEnum(
-                "conflict_resolution", DEFAULT_CONFLICT_RESOLUTION, CacheReplacementStrategy.class);
+        CacheReplacementStrategy conflictResolution = readConflictResolutionStrategy();
         defaultInstanceManager = new CacheManager(Path.of(cacheDir), conflictResolution);
+    }
+
+    /**
+     * Reads the cache conflict resolution strategy from environment variables.
+     * This method:
+     * <ol>
+     *     <li>First checks the environment variable CACHE_CONFLICT_RESOLUTION</li>
+     *     <li>If not found, uses the default strategy ({@link #DEFAULT_CONFLICT_RESOLUTION})</li>
+     * </ol>
+     *
+     * @return The cache conflict resolution strategy
+     * @throws IllegalArgumentException If the environment variable value is set but invalid
+     */
+    private static CacheReplacementStrategy readConflictResolutionStrategy() {
+        String strategyValue = Environment.getenv("CACHE_CONFLICT_RESOLUTION");
+        if (strategyValue == null) {
+            return DEFAULT_CONFLICT_RESOLUTION;
+        }
+
+        try {
+            return CacheReplacementStrategy.valueOf(strategyValue.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(
+                    "Invalid CACHE_CONFLICT_RESOLUTION value: " + strategyValue + ". See "
+                            + CacheReplacementStrategy.class + " for valid options.",
+                    e);
+        }
     }
 
     /**
@@ -148,18 +185,81 @@ public final class CacheManager {
             return cached;
         }
 
-        ObjectMapper mapper = new ObjectMapper();
-        LocalCache<K> localCache = new LocalCache<>(directoryOfCaches + "/" + name + ".json", parameters);
-        try {
-            RedisCache<K> redisCache = new RedisCache<>(parameters, mapper);
-            HierarchicalCache<K> cache =
-                    new HierarchicalCache<>(parameters, redisCache, localCache, conflictResolution);
-            caches.put(name, cache);
-            return cache;
-        } catch (JedisConnectionException e) {
-            caches.put(name, localCache);
-            return localCache;
+        Cache<K> cache = buildCacheHierarchy(name, parameters);
+        caches.put(name, cache);
+        return cache;
+    }
+
+    /**
+     * Builds a cache hierarchy based on the configured cache types.
+     * The hierarchy is read from the CACHE_HIERARCHY environment variable.
+     * Caches are layered in the order specified: the first cache is the primary layer,
+     * the second is the secondary layer, etc.
+     * If only one cache type is specified, it is returned directly without layering.
+     *
+     * @param <K> The type of cache key
+     * @param cacheName The name of the cache
+     * @param parameters The cache parameters
+     * @return The configured cache instance
+     */
+    private <K extends CacheKey> Cache<K> buildCacheHierarchy(String cacheName, CacheParameter<K> parameters) {
+        String hierarchyConfig = Environment.getenv("CACHE_HIERARCHY");
+        if (hierarchyConfig == null) {
+            hierarchyConfig = DEFAULT_CACHE_HIERARCHY;
         }
+
+        List<String> cacheTypes = parseCacheHierarchy(hierarchyConfig);
+        ObjectMapper mapper = new ObjectMapper();
+        String cacheFilePath = directoryOfCaches + "/" + cacheName + ".json";
+
+        // Create cache instances for each type, skipping those that fail to initialize
+        List<Cache<K>> createdCaches = new ArrayList<>();
+        for (String cacheType : cacheTypes) {
+            try {
+                Cache<K> cache = Cache.createByType(cacheType, parameters, cacheFilePath, mapper);
+                createdCaches.add(cache);
+                logger.debug("Created cache type: {}", cacheType);
+            } catch (JedisConnectionException e) {
+                logger.warn(
+                        "Failed to initialize cache type '{}': {}. Skipping this cache layer.",
+                        cacheType,
+                        e.getMessage());
+            }
+        }
+
+        if (createdCaches.isEmpty()) {
+            return new LocalCache<>(cacheFilePath, parameters);
+        }
+
+        Cache<K> layeredCache = createdCaches.getFirst();
+        for (int i = 1; i < createdCaches.size(); i++) {
+            layeredCache = new HierarchicalCache<>(parameters, layeredCache, createdCaches.get(i), conflictResolution);
+        }
+        return layeredCache;
+    }
+
+    /**
+     * Parses the cache hierarchy configuration string into a list of cache types.
+     * The input should be a comma-separated list of cache types (case-insensitive).
+     * Example: "LOCAL,REDIS" or "local,redis,my_cache"
+     *
+     * @param hierarchyConfig The hierarchy configuration string
+     * @return A list of cache types in order
+     * @throws IllegalArgumentException If the configuration is empty or invalid
+     */
+    // TODO: Support 'REDIS, LOCAL'
+    private List<String> parseCacheHierarchy(String hierarchyConfig) {
+        String[] types = hierarchyConfig.split(",");
+        List<String> cacheTypes = new ArrayList<>();
+
+        for (String type : types) {
+            String trimmed = type.trim();
+            if (trimmed.isEmpty()) {
+                throw new IllegalArgumentException("Cache hierarchy contains empty cache type");
+            }
+            cacheTypes.add(trimmed.toLowerCase());
+        }
+        return cacheTypes;
     }
 
     /**

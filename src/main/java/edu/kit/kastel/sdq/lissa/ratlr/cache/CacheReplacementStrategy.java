@@ -1,21 +1,27 @@
 /* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.cache;
 
+import java.util.Objects;
+
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Defines strategies for handling cache value replacement when conflicts occur between Redis and local cache.
+ * Defines strategies for handling cache value replacement when conflicts occur between cache layers.
  * A conflict occurs when the same key exists in both caches but with different values.
  */
 public enum CacheReplacementStrategy {
     /**
      * Does not replace conflicting values - leaves both cache values as they are.
-     * The Redis value will be returned when reading.
+     * The primary value will be returned when reading.
      */
     NONE,
 
+    /**
+     * Does not replace conflicting values - leaves both cache values as they are.
+     * If a conflict is detected an exception will be thrown.
+     */
     ERROR {
         /**
          * Throws an exception when a conflict is detected between the two caches.
@@ -23,70 +29,48 @@ public enum CacheReplacementStrategy {
         @Override
         public <K extends CacheKey, T> @Nullable T resolve(
                 String key,
-                @Nullable T firstValue,
-                Cache<K> firstCache,
-                @Nullable T secondValue,
-                Cache<K> secondCache) {
-            super.resolve(key, firstValue, firstCache, secondValue, secondCache);
-            if (firstValue == secondValue) {
-                return firstValue;
+                @Nullable T primaryValue,
+                Cache<K> primaryCache,
+                @Nullable T secondaryValue,
+                Cache<K> secondaryCache) {
+            super.resolve(key, primaryValue, primaryCache, secondaryValue, secondaryCache);
+            if (primaryValue == null || Objects.deepEquals(primaryValue, secondaryValue)) {
+                return primaryValue;
             }
             logger.error(
-                    "Cache inconsistency detected for key {}, values: {} (first cache), {} (second cache)",
+                    "Cache inconsistency detected for key {}, values: {} (primary cache), {} (secondary cache)",
                     key,
-                    firstValue,
-                    secondValue);
+                    primaryValue,
+                    secondaryValue);
             throw new IllegalStateException("Cache inconsistency detected for key " + key);
         }
     },
 
-    OVERWRITE_FIRST {
+    /**
+     * Replaces the conflicting value in the secondary cache with the value from the primary cache.
+     */
+    OVERWRITE_SECONDARY {
         /**
-         * Overwrites the first cache value with the second cache value in case of a conflict, and returns the second cache value.
+         * Overwrites the secondary cache value with the primary cache value in case of a conflict, and returns the primary cache value.
          */
         @Override
         public <K extends CacheKey, T> @Nullable T resolve(
                 String key,
-                @Nullable T firstValue,
-                Cache<K> firstCache,
-                @Nullable T secondValue,
-                Cache<K> secondCache) {
-            super.resolve(key, firstValue, firstCache, secondValue, secondCache);
-            if (firstValue == secondValue) {
-                return firstValue;
+                @Nullable T primaryValue,
+                Cache<K> primaryCache,
+                @Nullable T secondaryValue,
+                Cache<K> secondaryCache) {
+            super.resolve(key, primaryValue, primaryCache, secondaryValue, secondaryCache);
+            if (primaryValue == null || Objects.deepEquals(primaryValue, secondaryValue)) {
+                return primaryValue;
             }
             logger.warn(
-                    "Cache inconsistency detected for key {}, overwriting first cache value with second cache value: {} -> {}",
+                    "Cache inconsistency detected for key {}, overwriting secondary cache value with primary cache value: {} -> {}",
                     key,
-                    firstValue,
-                    secondValue);
-            firstCache.put(key, secondValue);
-            return secondValue;
-        }
-    },
-
-    OVERWRITE_SECOND {
-        /**
-         * Overwrites the second cache value with the first cache value in case of a conflict, and returns the first cache value.
-         */
-        @Override
-        public <K extends CacheKey, T> @Nullable T resolve(
-                String key,
-                @Nullable T firstValue,
-                Cache<K> firstCache,
-                @Nullable T secondValue,
-                Cache<K> secondCache) {
-            super.resolve(key, firstValue, firstCache, secondValue, secondCache);
-            if (firstValue == secondValue) {
-                return firstValue;
-            }
-            logger.warn(
-                    "Cache inconsistency detected for key {}, overwriting second cache value with first cache value: {} -> {}",
-                    key,
-                    secondValue,
-                    firstValue);
-            secondCache.put(key, firstValue);
-            return firstValue;
+                    secondaryValue,
+                    primaryValue);
+            secondaryCache.put(key, primaryValue);
+            return primaryValue;
         }
     };
 
@@ -96,26 +80,30 @@ public enum CacheReplacementStrategy {
      * Resolves a conflict between two caches by applying the appropriate replacement strategy.
      * If a value is null in one cache but not the other, it will be copied to the cache where it is missing.
      * <p>
-     * The default implementation does not perform any replacement and simply returns the first value.
+     * The default implementation does not perform any replacement and simply returns the primary value.
      *
      * @param <K> The type of cache key used in both caches
      * @param <T> The type of the cache values
      * @param key The cache key where the conflict occurred
-     * @param firstValue The value of the first cache
-     * @param firstCache The first cache where the value was found
-     * @param secondValue The value of the second cache
-     * @param secondCache The second cache where the value was found
+     * @param primaryValue The value of the primary cache
+     * @param primaryCache The primary cache where the value was found
+     * @param secondaryValue The value of the secondary cache
+     * @param secondaryCache The secondary cache where the value was found
      *
      * @return The resolved cache value to be used (may be null)
      */
     public <K extends CacheKey, T> @Nullable T resolve(
-            String key, @Nullable T firstValue, Cache<K> firstCache, @Nullable T secondValue, Cache<K> secondCache) {
-        if (firstValue == null && secondValue != null) {
-            firstCache.put(key, secondValue);
+            String key,
+            @Nullable T primaryValue,
+            Cache<K> primaryCache,
+            @Nullable T secondaryValue,
+            Cache<K> secondaryCache) {
+        if (primaryValue == null && secondaryValue != null) {
+            primaryCache.put(key, secondaryValue);
         }
-        if (firstValue != null && secondValue == null) {
-            secondCache.put(key, firstValue);
+        if (primaryValue != null && secondaryValue == null) {
+            secondaryCache.put(key, primaryValue);
         }
-        return firstValue;
+        return primaryValue;
     }
 }

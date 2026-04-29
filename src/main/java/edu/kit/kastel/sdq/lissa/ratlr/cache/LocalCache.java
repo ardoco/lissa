@@ -23,6 +23,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @param <K> The type of cache key used in this cache
  */
 class LocalCache<K extends CacheKey> implements Cache<K> {
+
+    public static final String LOCAL_CACHE_NAME = "local";
+
     private final ObjectMapper mapper;
 
     /**

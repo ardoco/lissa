@@ -1,6 +1,8 @@
 /* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.cache;
 
+import static edu.kit.kastel.sdq.lissa.ratlr.cache.LocalCache.LOCAL_CACHE_NAME;
+
 import org.jspecify.annotations.Nullable;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -114,5 +116,33 @@ public interface Cache<K extends CacheKey> {
         } catch (JsonProcessingException e) {
             throw new IllegalArgumentException("Could not deserialize object", e);
         }
+    }
+
+    /**
+     * Factory method to create a cache instance by type name.
+     * Supported types:
+     * <ul>
+     *     <li>"local" - LocalCache for file-based storage</li>
+     *     <li>"redis" - RedisCache for Redis-based storage</li>
+     *     <li>"hierarchical" - HierarchicalCache for multi-layer caching (requires primary and secondary cache)</li>
+     * </ul>
+     *
+     * @param <K> The type of cache key
+     * @param type The cache type name (case-insensitive)
+     * @param cacheDir The directory for local cache storage
+     * @param parameters The cache parameters
+     * @param mapper The ObjectMapper for JSON operations
+     * @return A cache instance of the specified type
+     * @throws IllegalArgumentException If the type is not recognized or the cache cannot be created
+     */
+    static <K extends CacheKey> Cache<K> createByType(
+            String type, CacheParameter<K> parameters, @Nullable String cacheDir, @Nullable ObjectMapper mapper) {
+        return switch (type) {
+            case LOCAL_CACHE_NAME -> new LocalCache<>(cacheDir, parameters);
+            case "redis" -> new RedisCache<>(parameters, mapper);
+            default ->
+                throw new IllegalArgumentException(
+                        "Unknown cache type: " + type + ". Supported types: local, redis, hierarchical");
+        };
     }
 }
