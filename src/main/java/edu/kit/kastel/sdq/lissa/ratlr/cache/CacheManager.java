@@ -234,15 +234,14 @@ public final class CacheManager {
     /**
      * Parses the cache hierarchy configuration string into a list of cache types.
      * The input should be a comma-separated list of cache types (case-insensitive).
-     * Example: "LOCAL,REDIS" or "local,redis,my_cache"
+     * Supports quoted strings to handle spaces: e.g., 'REDIS, LOCAL' or "LOCAL, REDIS".
      *
      * @param hierarchyConfig The hierarchy configuration string
      * @return A list of cache types in order
      * @throws IllegalArgumentException If the configuration is empty or invalid
      */
-    // TODO: Support quotes (and spaces) like 'REDIS, LOCAL'
     private static List<String> parseCacheHierarchy(String hierarchyConfig) {
-        String[] types = hierarchyConfig.split(",");
+        String[] types = hierarchyConfig.replace("'", "").replace('"', ' ').split(",");
         List<String> cacheTypes = new ArrayList<>();
 
         for (String type : types) {
