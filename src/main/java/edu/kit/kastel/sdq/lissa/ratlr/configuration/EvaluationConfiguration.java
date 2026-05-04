@@ -1,7 +1,6 @@
 /* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.configuration;
 
-import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.List;
 
@@ -13,7 +12,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.Classifier;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 
@@ -29,8 +27,7 @@ import io.soabase.recordbuilder.core.RecordBuilder;
  * via a {@link edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore} passed to their factory methods.
  * </p>
  *
- * @param cacheDir Directory for caching intermediate results. Either this or {@link #cache} must be set, but not both.
- * @param cache Configuration for the caching of LLM calls. Either this or {@link #cacheDir} must be set, but not both.
+ * @param cacheDir Directory for caching intermediate results.
  * @param goldStandardConfiguration Configuration for gold standard evaluation.
  * @param sourceArtifactProvider Configuration for the source artifact provider.
  * @param targetArtifactProvider Configuration for the target artifact provider.
@@ -48,8 +45,7 @@ import io.soabase.recordbuilder.core.RecordBuilder;
  */
 @RecordBuilder()
 public record EvaluationConfiguration(
-        @JsonProperty("cache_dir") @Nullable String cacheDir,
-        @JsonProperty("cache") @Nullable ModuleConfiguration cache,
+        @JsonProperty("cache_dir") String cacheDir,
         @JsonProperty("gold_standard_configuration") GoldStandardConfiguration goldStandardConfiguration,
         @JsonProperty("source_artifact_provider") ModuleConfiguration sourceArtifactProvider,
         @JsonProperty("target_artifact_provider") ModuleConfiguration targetArtifactProvider,
@@ -146,17 +142,5 @@ public record EvaluationConfiguration(
         return classifier != null
                 ? Classifier.createClassifier(classifier, contextStore)
                 : Classifier.createMultiStageClassifier(classifiers, contextStore);
-    }
-
-    public void initializeCache() throws IOException {
-        if ((cacheDir == null) == (cache == null)) {
-            throw new IllegalStateException("Either 'cache_dir' or 'cache' must be set, but not both.");
-        }
-
-        if (cacheDir != null) {
-            CacheManager.setCacheDir(cacheDir);
-        } else {
-            CacheManager.setCacheDir(cache);
-        }
     }
 }

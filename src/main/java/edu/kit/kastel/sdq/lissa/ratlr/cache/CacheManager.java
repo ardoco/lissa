@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.Environment;
 
 import redis.clients.jedis.exceptions.JedisConnectionException;
@@ -42,14 +41,10 @@ public final class CacheManager {
      */
     private static final CacheReplacementStrategy DEFAULT_CONFLICT_RESOLUTION = CacheReplacementStrategy.ERROR;
 
-    /**
-     * The configuration key for specifying the cache directory in a ModuleConfiguration.
-     */
-    public static final String CACHE_DIR_CONFIGURATION_KEY = "cache_dir";
-
     private static @Nullable CacheManager defaultInstanceManager;
     private final Path directoryOfCaches;
     private final CacheReplacementStrategy conflictResolution;
+    private final List<String> hierarchyConfig;
     private final Map<String, Cache<?>> caches = new HashMap<>();
 
     private static final Logger logger = LoggerFactory.getLogger(CacheManager.class);
@@ -61,20 +56,25 @@ public final class CacheManager {
      * @param directory The path to the cache directory, or null to use the default directory
      * @throws IOException If the cache directory cannot be created
      */
-    @Deprecated(forRemoval = false)
     public static synchronized void setCacheDir(@Nullable String directory) throws IOException {
-        if (directory == null) {
-            directory = DEFAULT_CACHE_DIRECTORY;
-        }
-
-        ModuleConfiguration config = new ModuleConfiguration("cache", Map.of(CACHE_DIR_CONFIGURATION_KEY, directory));
-        setCacheDir(config);
+        defaultInstanceManager = new CacheManager(
+                Path.of(directory == null ? DEFAULT_CACHE_DIRECTORY : directory), readConflictResolutionStrategy());
     }
 
-    public static synchronized void setCacheDir(ModuleConfiguration configuration) throws IOException {
-        String cacheDir = configuration.argumentAsString(CACHE_DIR_CONFIGURATION_KEY, DEFAULT_CACHE_DIRECTORY);
-        CacheReplacementStrategy conflictResolution = readConflictResolutionStrategy();
-        defaultInstanceManager = new CacheManager(Path.of(cacheDir), conflictResolution);
+    /**
+     * Sets the cache directory and hierarchy configuration for the default cache manager instance.
+     * This method must be called before using the default instance.
+     *
+     * @param directory The path to the cache directory, or null to use the default directory
+     * @param hierarchyConfig The cache hierarchy configuration strings (e.g., {"LOCAL","REDIS"})
+     * @throws IOException If the cache directory cannot be created
+     */
+    public static synchronized void setCacheDir(@Nullable String directory, List<String> hierarchyConfig)
+            throws IOException {
+        defaultInstanceManager = new CacheManager(
+                Path.of(directory == null ? DEFAULT_CACHE_DIRECTORY : directory),
+                CacheReplacementStrategy.NONE,
+                hierarchyConfig);
     }
 
     /**
@@ -120,6 +120,23 @@ public final class CacheManager {
         }
         this.directoryOfCaches = cacheDir;
         this.conflictResolution = conflictResolution;
+        String hierarchyConfig = Environment.getenv("CACHE_HIERARCHY");
+        if (hierarchyConfig == null) {
+            hierarchyConfig = DEFAULT_CACHE_HIERARCHY;
+        }
+        this.hierarchyConfig = parseCacheHierarchy(hierarchyConfig);
+    }
+
+    public CacheManager(Path cacheDir, CacheReplacementStrategy conflictResolution, List<String> hierarchyConfig)
+            throws IOException {
+        if (!Files.exists(cacheDir)) Files.createDirectories(cacheDir);
+        if (!Files.isDirectory(cacheDir)) {
+            throw new IllegalArgumentException("path is not a directory: " + cacheDir);
+        }
+
+        this.directoryOfCaches = cacheDir;
+        this.conflictResolution = conflictResolution;
+        this.hierarchyConfig = hierarchyConfig;
     }
 
     /**
@@ -137,7 +154,7 @@ public final class CacheManager {
     /**
      * Resets the default cache manager instance.
      * This method is intended for testing purposes only to allow clean state between tests.
-     * After calling this method, {@link #setCacheDir(String)} or {@link #setCacheDir(ModuleConfiguration)}
+     * After calling this method, {@link #setCacheDir(String)}
      * must be called again before using the default instance.
      */
     static synchronized void resetDefaultInstance() {
@@ -203,18 +220,11 @@ public final class CacheManager {
      * @return The configured cache instance
      */
     private <K extends CacheKey> Cache<K> buildCacheHierarchy(String cacheName, CacheParameter<K> parameters) {
-        String hierarchyConfig = Environment.getenv("CACHE_HIERARCHY");
-        if (hierarchyConfig == null) {
-            hierarchyConfig = DEFAULT_CACHE_HIERARCHY;
-        }
-
-        List<String> cacheTypes = parseCacheHierarchy(hierarchyConfig);
         ObjectMapper mapper = new ObjectMapper();
         String cacheFilePath = directoryOfCaches + "/" + cacheName + ".json";
-
         // Create cache instances for each type, skipping those that fail to initialize
         List<Cache<K>> createdCaches = new ArrayList<>();
-        for (String cacheType : cacheTypes) {
+        for (String cacheType : hierarchyConfig) {
             try {
                 Cache<K> cache = Cache.createByType(cacheType, parameters, cacheFilePath, mapper);
                 createdCaches.add(cache);
@@ -247,8 +257,8 @@ public final class CacheManager {
      * @return A list of cache types in order
      * @throws IllegalArgumentException If the configuration is empty or invalid
      */
-    // TODO: Support 'REDIS, LOCAL'
-    private List<String> parseCacheHierarchy(String hierarchyConfig) {
+    // TODO: Support quotes (and spaces) like 'REDIS, LOCAL'
+    private static List<String> parseCacheHierarchy(String hierarchyConfig) {
         String[] types = hierarchyConfig.split(",");
         List<String> cacheTypes = new ArrayList<>();
 
