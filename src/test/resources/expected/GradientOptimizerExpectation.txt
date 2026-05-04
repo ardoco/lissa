@@ -1,0 +1,17 @@
+
+```
+Question: We have two software development artifacts that may or may not be related\.
+
+Source Artifact \(\{source\_type\}\): '''\{source\_content\}'''
+
+Target Artifact \(\{target\_type\}\): '''\{target\_content\}'''
+
+To determine if these artifacts are related, please analyze the following criteria in detail:
+1\. \*\*Aspect of Development\*\*: Do both artifacts address the same aspect of the software development process \(e\.g\., requirements, design, implementation, testing\)?
+2\. \*\*Dependency or Reference\*\*: Is there a direct dependency or reference between the two artifacts, such as one artifact relying on the other for its implementation or functionality?
+3\. \*\*Common Goals\*\*: Do both artifacts contribute to the same overall goal or functionality within the project, such as enhancing user experience, improving performance, or ensuring compliance with standards?
+
+Please provide a clear rationale for your answer\. Based on this analysis, are these artifacts related?
+
+Answer with 'yes' or 'no'\.
+```

@@ -1,6 +1,7 @@
 /* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -15,7 +16,6 @@ import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.Metric;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.SampleStrategy;
-import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.samplestrategy.SamplerFactory;
 
 /**
  * An optimizer that uses iterative feedback to refine the prompt based on classification results.
@@ -53,7 +53,7 @@ public class IterativeFeedbackOptimizer extends IterativeOptimizer {
             Classification result: {classification}
             """;
 
-    private static final String DEFAULT_SAMPLER = SamplerFactory.ORDERED_SAMPLER;
+    private static final String DEFAULT_SAMPLER = SampleStrategy.ORDERED_SAMPLER;
 
     /**
      * The default number of feedback examples to include in the prompt.
@@ -85,12 +85,13 @@ public class IterativeFeedbackOptimizer extends IterativeOptimizer {
                 FEEDBACK_EXAMPLE_BLOCK_CONFIGURATION_KEY, DEFAULT_FEEDBACK_EXAMPLE_BLOCK);
         String samplerName = configuration.argumentAsString(SAMPLER_CONFIGURATION_KEY, DEFAULT_SAMPLER);
         int randomSeed = configuration.argumentAsInt(SAMPLER_SEED_CONFIGURATION_KEY, DEFAULT_SAMPLER_SEED);
-        this.sampleStrategy = SamplerFactory.createSampler(samplerName, new Random(randomSeed));
+        this.sampleStrategy = SampleStrategy.createSampler(samplerName, new Random(randomSeed));
     }
 
     @Override
-    protected String optimizeIntern(List<ClassificationTask> examples) {
+    protected List<String> optimizeIntern(List<ClassificationTask> examples) {
         double[] promptScores = new double[maximumIterations];
+        List<String> optimizedPrompts = new ArrayList<>();
         int i = 0;
         double promptScore = 0;
         String modifiedPrompt = optimizationPrompt;
@@ -127,11 +128,12 @@ public class IterativeFeedbackOptimizer extends IterativeOptimizer {
 
             logger.debug("Received and extracted new prompt:\n{}", modifiedPrompt);
             logger.debug(LOGGER_SEPARATOR_LINE);
+            optimizedPrompts.add(modifiedPrompt);
             i++;
         }
 
         logger.info("Iterations {}: {}s = {}", i, this.metric.getName(), promptScores);
-        return modifiedPrompt;
+        return optimizedPrompts;
     }
 
     /**

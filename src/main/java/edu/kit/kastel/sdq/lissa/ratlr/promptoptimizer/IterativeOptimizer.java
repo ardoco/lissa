@@ -8,6 +8,7 @@ import static edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.PromptOptimizationU
 import static edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.PromptOptimizationUtils.sanitizePrompt;
 import static edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.Metric.MAXIMUM_SCORE;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -50,7 +51,10 @@ public class IterativeOptimizer implements PromptOptimizer {
      */
     private static final int DEFAULT_MAXIMUM_ITERATIONS = 5;
 
-    private static final String MAXIMUM_ITERATIONS_CONFIGURATION_KEY = "maximum_iterations";
+    /**
+     * Configuration key for the maximum number of iterations in the optimization process.
+     */
+    public static final String MAXIMUM_ITERATIONS_CONFIGURATION_KEY = "maximum_iterations";
 
     /**
      * The placeholder used in the optimization prompt to insert the prompt which should be optimized.
@@ -109,7 +113,7 @@ public class IterativeOptimizer implements PromptOptimizer {
 
     protected static final String FEEDBACK_EXAMPLE_BLOCK_CONFIGURATION_KEY = "feedback_example_block";
 
-    protected static final String SAMPLER_CONFIGURATION_KEY = "sampler";
+    public static final String SAMPLER_CONFIGURATION_KEY = "sampler";
     protected static final int DEFAULT_SAMPLER_SEED = 42;
     protected static final String SAMPLER_SEED_CONFIGURATION_KEY = "sampler_seed";
 
@@ -190,7 +194,7 @@ public class IterativeOptimizer implements PromptOptimizer {
     }
 
     @Override
-    public String optimize(SourceElementStore sourceStore, TargetElementStore targetStore) {
+    public List<String> optimize(SourceElementStore sourceStore, TargetElementStore targetStore) {
         var sourceElements = sourceStore.getAllElements(false);
         if (sourceElements.isEmpty()) {
             throw new IllegalArgumentException(
@@ -221,10 +225,11 @@ public class IterativeOptimizer implements PromptOptimizer {
      * reached.
      *
      * @param examples The classification tasks used to evaluate the prompts performance
-     * @return The optimized prompt after the iterative process
+     * @return A list of prompts representing the optimization state at each iteration, where the last element is the final optimized prompt
      */
-    protected String optimizeIntern(List<ClassificationTask> examples) {
+    protected List<String> optimizeIntern(List<ClassificationTask> examples) {
         double[] promptScores = new double[maximumIterations];
+        List<String> optimizedPrompts = new ArrayList<>();
         int i = 0;
         double promptScore = 0;
         String modifiedPrompt = optimizationPrompt;
@@ -234,10 +239,11 @@ public class IterativeOptimizer implements PromptOptimizer {
             logger.debug("Iteration {}: {} = {}", i, metric.getName(), promptScore);
             promptScores[i] = promptScore;
             modifiedPrompt = cachedSanitizedRequest(generateOptimizationPrompt(modifiedPrompt));
+            optimizedPrompts.add(modifiedPrompt);
             i++;
         }
         logger.info("Iterations {}: {} = {}", i, metric.getName(), promptScores);
-        return modifiedPrompt;
+        return optimizedPrompts;
     }
 
     /**

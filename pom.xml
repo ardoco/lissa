@@ -29,7 +29,7 @@
       <dependency>
         <groupId>dev.langchain4j</groupId>
         <artifactId>langchain4j-bom</artifactId>
-        <version>1.13.0</version>
+        <version>1.13.1</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -54,7 +54,7 @@
     <dependency>
       <groupId>com.tngtech.archunit</groupId>
       <artifactId>archunit-junit5</artifactId>
-      <version>1.4.1</version>
+      <version>1.4.2</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -131,7 +131,7 @@
     <dependency>
       <groupId>redis.clients</groupId>
       <artifactId>jedis</artifactId>
-      <version>7.4.1</version>
+      <version>7.5.0</version>
     </dependency>
   </dependencies>
   <repositories>

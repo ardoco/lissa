@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -75,7 +76,10 @@ OPENAI_API_KEY=sk-DUMMY
                         Files.readString(Path.of("src/test/resources/expected/IterativeOptimizerExpectation.txt"))),
                 Arguments.of(
                         "src/test/resources/warc/WARC_feedback_gpt_gpt-4o-mini-2024-07-18_0_mi5_fs3.json",
-                        Files.readString(Path.of("src/test/resources/expected/FeedbackOptimizerExpectation.txt"))));
+                        Files.readString(Path.of("src/test/resources/expected/FeedbackOptimizerExpectation.txt"))),
+                Arguments.of(
+                        "src/test/resources/warc/WARC_gradient_gpt_gpt-4o-mini-2024-07-18_0.json",
+                        Files.readString(Path.of("src/test/resources/expected/GradientOptimizerExpectation.txt"))));
     }
 
     /**
@@ -92,7 +96,12 @@ OPENAI_API_KEY=sk-DUMMY
         Assertions.assertTrue(
                 config.exists(), "The configuration file should exist at %s".formatted(config.getAbsolutePath()));
         Optimization optimization = new Optimization(config.toPath());
-        String optimizedPrompt = optimization.run();
+        List<String> optimizedPrompts = optimization.run();
+        Assertions.assertFalse(
+                optimizedPrompts.isEmpty(),
+                "The optimizer returned no prompts; as maximum_iterations > 0 and that the optimizer produces at least"
+                        + " one prompt.");
+        String optimizedPrompt = optimizedPrompts.getLast();
         String escapedOptimizedPrompt = escapeMarkdown(optimizedPrompt);
 
         Assertions.assertEquals(

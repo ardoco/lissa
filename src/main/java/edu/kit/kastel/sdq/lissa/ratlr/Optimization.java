@@ -5,6 +5,7 @@ import static edu.kit.kastel.sdq.lissa.ratlr.Statistics.getTraceLinksFromGoldSta
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -18,6 +19,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.configuration.OptimizerConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.PromptOptimizer;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.Metric;
+import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptselector.Selector;
 
 /**
  * Represents a single prompt optimization run of the LiSSA framework.
@@ -68,7 +70,7 @@ public class Optimization {
      * <ol>
      *     <li>Loads the configuration from the specified file</li>
      *     <li>Initializes the evaluation pipeline</li>
-     *     <li>Creates the Metric, Evaluator and Optimizer</li>
+     *     <li>Creates the Metric, Selector and Optimizer</li>
      * </ol>
      *
      * @throws IOException If there are issues reading the configuration
@@ -84,8 +86,13 @@ public class Optimization {
                 evaluationPipeline.getClassifier(),
                 evaluationPipeline.getAggregator(),
                 evaluationPipeline.getTraceLinkIdPostProcessor());
+        Selector selector = null;
+        if (configuration.selector() != null) {
+            selector = Selector.createSelector(configuration.selector());
+        }
 
-        promptOptimizer = PromptOptimizer.createOptimizer(configuration.promptOptimizer(), goldStandard, metric);
+        promptOptimizer =
+                PromptOptimizer.createOptimizer(configuration.promptOptimizer(), goldStandard, metric, selector);
         configuration.serializeAndDestroyConfiguration();
     }
 
@@ -95,24 +102,31 @@ public class Optimization {
      * <ol>
      *     <li>Sets up the source and target stores</li>
      *     <li>Optimizes the prompt using the configured optimizer</li>
-     *     <li>Generates and saves optimization statistics</li>
+     *     <li>Generates and saves optimization statistics for the final prompt</li>
      *     <li>Flushes the cache to persist changes</li>
      * </ol>
      *
-     * @return The optimized prompt as a String
+     * @return A list of prompts representing the optimization state at each iteration,
+     *         where the last element is the final optimized prompt
      */
-    public String run() {
+    public List<String> run() {
         evaluationPipeline.initializeSourceAndTargetStores();
 
         logger.info("Optimizing Prompt");
-        String result =
+
+        List<String> results =
                 promptOptimizer.optimize(evaluationPipeline.getSourceStore(), evaluationPipeline.getTargetStore());
-        logger.info("Optimized Prompt: {}", result);
 
-        Statistics.generateOptimizationStatistics(configFile.toFile(), configuration, result);
+        if (results.isEmpty()) {
+            logger.warn("No optimized prompt was generated. Make sure maximum_iterations is set to greater than zero.");
+            CacheManager.getDefaultInstance().flush();
+            return results;
+        }
 
+        Statistics.generateOptimizationStatistics(configFile.toFile(), configuration, results.getLast());
+
+        logger.info("Optimized prompt after {} steps: \n {}", results.size(), results.getLast());
         CacheManager.getDefaultInstance().flush();
-
-        return result;
+        return results;
     }
 }
