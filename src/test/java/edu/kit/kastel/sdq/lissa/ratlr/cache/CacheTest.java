@@ -107,6 +107,7 @@ class CacheTest {
         public String name = "";
         public int value;
 
+        @SuppressWarnings("unused")
         TestObject() {
             // For Jackson deserialization
         }
@@ -127,6 +128,7 @@ class CacheTest {
             this.localKeyValue = KeyGenerator.generateKey(content);
         }
 
+        @SuppressWarnings("unused")
         static TestCacheKey of(CacheParameter<TestCacheKey> cacheParameter, String content) {
             return new TestCacheKey(content);
         }

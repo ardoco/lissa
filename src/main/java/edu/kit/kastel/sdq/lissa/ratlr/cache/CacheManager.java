@@ -120,11 +120,11 @@ public final class CacheManager {
         }
         this.directoryOfCaches = cacheDir;
         this.conflictResolution = conflictResolution;
-        String hierarchyConfig = Environment.getenv("CACHE_HIERARCHY");
-        if (hierarchyConfig == null) {
-            hierarchyConfig = DEFAULT_CACHE_HIERARCHY;
+        String hierarchyString = Environment.getenv("CACHE_HIERARCHY");
+        if (hierarchyString == null) {
+            hierarchyString = DEFAULT_CACHE_HIERARCHY;
         }
-        this.hierarchyConfig = parseCacheHierarchy(hierarchyConfig);
+        this.hierarchyConfig = parseCacheHierarchy(hierarchyString);
     }
 
     public CacheManager(Path cacheDir, CacheReplacementStrategy conflictResolution, List<String> hierarchyConfig)
@@ -221,7 +221,7 @@ public final class CacheManager {
      */
     private <K extends CacheKey> Cache<K> buildCacheHierarchy(String cacheName, CacheParameter<K> parameters) {
         ObjectMapper mapper = new ObjectMapper();
-        String cacheFilePath = directoryOfCaches + "/" + cacheName + ".json";
+        String cacheFilePath = directoryOfCaches.resolve(cacheName + ".json").toString();
         // Create cache instances for each type, skipping those that fail to initialize
         List<Cache<K>> createdCaches = new ArrayList<>();
         for (String cacheType : hierarchyConfig) {
