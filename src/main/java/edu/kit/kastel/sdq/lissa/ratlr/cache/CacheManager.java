@@ -57,24 +57,7 @@ public final class CacheManager {
      * @throws IOException If the cache directory cannot be created
      */
     public static synchronized void setCacheDir(@Nullable String directory) throws IOException {
-        defaultInstanceManager = new CacheManager(
-                Path.of(directory == null ? DEFAULT_CACHE_DIRECTORY : directory), readConflictResolutionStrategy());
-    }
-
-    /**
-     * Sets the cache directory and hierarchy configuration for the default cache manager instance.
-     * This method must be called before using the default instance.
-     *
-     * @param directory The path to the cache directory, or null to use the default directory
-     * @param hierarchyConfig The cache hierarchy configuration strings (e.g., {"LOCAL","REDIS"})
-     * @throws IOException If the cache directory cannot be created
-     */
-    public static synchronized void setCacheDir(@Nullable String directory, List<String> hierarchyConfig)
-            throws IOException {
-        defaultInstanceManager = new CacheManager(
-                Path.of(directory == null ? DEFAULT_CACHE_DIRECTORY : directory),
-                CacheReplacementStrategy.NONE,
-                hierarchyConfig);
+        defaultInstanceManager = new CacheManager(Path.of(directory == null ? DEFAULT_CACHE_DIRECTORY : directory));
     }
 
     /**
@@ -105,26 +88,28 @@ public final class CacheManager {
     }
 
     /**
-     * Creates a new cache manager instance using the specified cache directory and conflict resolution strategy.
+     * Reads the cache hierarchy configuration from environment variables or uses the default if it's not set.
+     *
+     * @return The cache hierarchy configuration string
+     */
+    private static String readHierarchyString() {
+        String hierarchyString = Environment.getenv("CACHE_HIERARCHY");
+        if (hierarchyString == null) {
+            return DEFAULT_CACHE_HIERARCHY;
+        }
+        return hierarchyString;
+    }
+
+    /**
+     * Creates a new cache manager instance using the specified cache directory.
      * The directory will be created if it doesn't exist.
      *
      * @param cacheDir The path to the cache directory
-     * @param conflictResolution The strategy for resolving conflicts between caches
      * @throws IOException If the cache directory cannot be created
      * @throws IllegalArgumentException If the path exists but is not a directory
      */
-    public CacheManager(Path cacheDir, CacheReplacementStrategy conflictResolution) throws IOException {
-        if (!Files.exists(cacheDir)) Files.createDirectories(cacheDir);
-        if (!Files.isDirectory(cacheDir)) {
-            throw new IllegalArgumentException("path is not a directory: " + cacheDir);
-        }
-        this.directoryOfCaches = cacheDir;
-        this.conflictResolution = conflictResolution;
-        String hierarchyString = Environment.getenv("CACHE_HIERARCHY");
-        if (hierarchyString == null) {
-            hierarchyString = DEFAULT_CACHE_HIERARCHY;
-        }
-        this.hierarchyConfig = parseCacheHierarchy(hierarchyString);
+    public CacheManager(Path cacheDir) throws IOException {
+        this(cacheDir, readConflictResolutionStrategy(), parseCacheHierarchy(readHierarchyString()));
     }
 
     public CacheManager(Path cacheDir, CacheReplacementStrategy conflictResolution, List<String> hierarchyConfig)
@@ -149,19 +134,6 @@ public final class CacheManager {
     public static CacheManager getDefaultInstance() {
         if (defaultInstanceManager == null) throw new IllegalStateException("Cache directory not set");
         return defaultInstanceManager;
-    }
-
-    /**
-     * Resets the default cache manager instance.
-     * This method is intended for testing purposes only to allow clean state between tests.
-     * After calling this method, {@link #setCacheDir(String)}
-     * must be called again before using the default instance.
-     */
-    static synchronized void resetDefaultInstance() {
-        if (defaultInstanceManager != null) {
-            defaultInstanceManager.flush();
-        }
-        defaultInstanceManager = null;
     }
 
     /**
@@ -280,5 +252,18 @@ public final class CacheManager {
         for (Cache<?> cache : caches.values()) {
             cache.flush();
         }
+    }
+
+    /**
+     * Resets the default cache manager instance.
+     * This method is intended for testing purposes only to allow clean state between tests.
+     * After calling this method, {@link #setCacheDir(String)}
+     * must be called again before using the default instance.
+     */
+    static synchronized void resetDefaultInstance() {
+        if (defaultInstanceManager != null) {
+            defaultInstanceManager.flush();
+        }
+        defaultInstanceManager = null;
     }
 }
