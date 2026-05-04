@@ -49,7 +49,7 @@ public enum CacheReplacementStrategy {
     /**
      * Replaces the conflicting value in the secondary cache with the value from the primary cache.
      */
-    OVERWRITE_SECONDARY {
+    OVERWRITE {
         /**
          * Overwrites the secondary cache value with the primary cache value in case of a conflict, and returns the primary cache value.
          */

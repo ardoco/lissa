@@ -39,11 +39,11 @@ public final class CacheManager {
     /**
      * The default strategy for handling cache conflicts between local and Redis caches.
      */
-    private static final CacheReplacementStrategy DEFAULT_CONFLICT_RESOLUTION = CacheReplacementStrategy.ERROR;
+    private static final CacheReplacementStrategy DEFAULT_REPLACEMENT_STRATEGY = CacheReplacementStrategy.ERROR;
 
     private static @Nullable CacheManager defaultInstanceManager;
     private final Path directoryOfCaches;
-    private final CacheReplacementStrategy conflictResolution;
+    private final CacheReplacementStrategy replacementStrategy;
     private final List<String> hierarchyConfig;
     private final Map<String, Cache<?>> caches = new HashMap<>();
 
@@ -61,27 +61,27 @@ public final class CacheManager {
     }
 
     /**
-     * Reads the cache conflict resolution strategy from environment variables.
+     * Reads the cache replacement strategy from environment variables.
      * This method:
      * <ol>
-     *     <li>First checks the environment variable CACHE_CONFLICT_RESOLUTION</li>
-     *     <li>If not found, uses the default strategy ({@link #DEFAULT_CONFLICT_RESOLUTION})</li>
+     *     <li>First checks the environment variable CACHE_REPLACEMENT_STRATEGY</li>
+     *     <li>If not found, uses the default strategy ({@link #DEFAULT_REPLACEMENT_STRATEGY})</li>
      * </ol>
      *
-     * @return The cache conflict resolution strategy
+     * @return The cache replacement strategy
      * @throws IllegalArgumentException If the environment variable value is set but invalid
      */
-    private static CacheReplacementStrategy readConflictResolutionStrategy() {
-        String strategyValue = Environment.getenv("CACHE_CONFLICT_RESOLUTION");
+    private static CacheReplacementStrategy readCacheReplacementStrategy() {
+        String strategyValue = Environment.getenv("CACHE_REPLACEMENT_STRATEGY");
         if (strategyValue == null) {
-            return DEFAULT_CONFLICT_RESOLUTION;
+            return DEFAULT_REPLACEMENT_STRATEGY;
         }
 
         try {
             return CacheReplacementStrategy.valueOf(strategyValue.toUpperCase());
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException(
-                    "Invalid CACHE_CONFLICT_RESOLUTION value: " + strategyValue + ". See "
+                    "Invalid CACHE_REPLACEMENT_STRATEGY value: " + strategyValue + ". See "
                             + CacheReplacementStrategy.class + " for valid options.",
                     e);
         }
@@ -109,10 +109,21 @@ public final class CacheManager {
      * @throws IllegalArgumentException If the path exists but is not a directory
      */
     public CacheManager(Path cacheDir) throws IOException {
-        this(cacheDir, readConflictResolutionStrategy(), parseCacheHierarchy(readHierarchyString()));
+        this(cacheDir, readCacheReplacementStrategy(), parseCacheHierarchy(readHierarchyString()));
     }
 
-    public CacheManager(Path cacheDir, CacheReplacementStrategy conflictResolution, List<String> hierarchyConfig)
+    /**
+     * Creates a new cache manager instance with the specified cache directory, replacement strategy, and cache
+     * hierarchy configuration.
+     * The directory will be created if it doesn't exist.
+     *
+     * @param cacheDir The path to the cache directory
+     * @param replacementStrategy The strategy for handling conflicts between cache layers
+     * @param hierarchyConfig The list of cache types in the hierarchy order
+     * @throws IOException If the cache directory cannot be created
+     * @throws IllegalArgumentException If the path exists but is not a directory
+     */
+    public CacheManager(Path cacheDir, CacheReplacementStrategy replacementStrategy, List<String> hierarchyConfig)
             throws IOException {
         if (!Files.exists(cacheDir)) Files.createDirectories(cacheDir);
         if (!Files.isDirectory(cacheDir)) {
@@ -120,7 +131,7 @@ public final class CacheManager {
         }
 
         this.directoryOfCaches = cacheDir;
-        this.conflictResolution = conflictResolution;
+        this.replacementStrategy = replacementStrategy;
         this.hierarchyConfig = hierarchyConfig;
     }
 
@@ -215,7 +226,7 @@ public final class CacheManager {
 
         Cache<K> layeredCache = createdCaches.getFirst();
         for (int i = 1; i < createdCaches.size(); i++) {
-            layeredCache = new HierarchicalCache<>(parameters, layeredCache, createdCaches.get(i), conflictResolution);
+            layeredCache = new HierarchicalCache<>(parameters, layeredCache, createdCaches.get(i), replacementStrategy);
         }
         return layeredCache;
     }

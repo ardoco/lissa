@@ -62,6 +62,16 @@ Parameters are used to:
 2. Create cache keys from content (via `createCacheKey()` method)
 3. Validate cache consistency when retrieving existing caches
 
+### Cache Replacement Strategies
+
+When using hierarchical caches with multiple layers (e.g., Redis and local cache), the system detects and resolves conflicts between layers:
+
+- **NONE**: Does not replace conflicting values; leaves both cache layers as they are. Primary value is returned on read.
+- **ERROR** (default): Throws an exception if a cache conflict is detected, ensuring data consistency by failing fast.
+- **OVERWRITE**: Automatically overwrites the secondary cache value with the primary cache value when a conflict is detected, and logs a warning.
+
+The replacement strategy for cache conflicts is configured via the `CACHE_REPLACEMENT_STRATEGY` environment variable.
+
 ### Cache API
 
 The `Cache` interface provides two API levels:
@@ -84,7 +94,20 @@ The `Cache` interface provides two API levels:
      "cache_dir": "./cache/path"  // Directory for cache storage
    }
    ```
-2. **Redis Setup**
+2. **Environment Variables**
+
+   The caching system supports the following environment variables:
+   - **CACHE_HIERARCHY**: Comma-separated list of cache types in order (e.g., "LOCAL,REDIS")
+   - Default: "LOCAL"
+   - Supported values: "LOCAL", "REDIS"
+   - **CACHE_REPLACEMENT_STRATEGY**: Strategy for handling conflicts between cache layers
+   - Default: "ERROR"
+   - Supported values: "NONE", "ERROR", "OVERWRITE"
+   - **REDIS_URL**: Redis connection URL for RedisCache
+   - Default: "redis://localhost:6379"
+   - Example: "redis://redis-server:6379"
+
+3. **Redis Setup**
    To use Redis for caching, you need to set up a Redis server. Here's a recommended Docker Compose configuration:
 
    ```yaml
@@ -104,10 +127,13 @@ The `Cache` interface provides two API levels:
 
    To use Redis with LiSSA:
    1. Start the Redis server using Docker Compose
-   2. The system will automatically use Redis if available
-   3. If Redis is unavailable, it will fall back to local file-based caching (useful for replication packages)
+   2. Set environment variables if needed:
+   - `CACHE_HIERARCHY=REDIS,LOCAL` to use Redis with local fallback
+   - `REDIS_URL=redis://your-redis-host:6379` if not using the default
+   3. The system will automatically use Redis if available
+   4. If Redis is unavailable, it will fall back to local file-based caching (useful for replication packages)
 
-3. **Best Practices**
+4. **Best Practices**
 
    - Use the cache directory specified in the configuration
    - Clear the cache directory if you encounter issues
