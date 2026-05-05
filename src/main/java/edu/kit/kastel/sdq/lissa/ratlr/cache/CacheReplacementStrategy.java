@@ -48,6 +48,7 @@ public enum CacheReplacementStrategy {
          * Throws an exception when a conflict is detected between the two caches.
          */
         @Override
+        @Deprecated(forRemoval = false)
         <K extends CacheKey, T> @Nullable T resolveViaInternalKey(
                 K key,
                 @Nullable T primaryValue,
@@ -96,6 +97,7 @@ public enum CacheReplacementStrategy {
          * Overwrites the secondary cache value with the primary cache value in case of a conflict, and returns the primary cache value.
          */
         @Override
+        @Deprecated(forRemoval = false)
         <K extends CacheKey, T> @Nullable T resolveViaInternalKey(
                 K key,
                 @Nullable T primaryValue,
@@ -165,8 +167,9 @@ public enum CacheReplacementStrategy {
      * @param secondaryCache The secondary cache where the value was found
      *
      * @return The resolved cache value to be used (may be null)
+     * @deprecated This method exposes internal cache key handling and should not be used in general code.
      */
-    @Deprecated
+    @Deprecated(forRemoval = false)
     <K extends CacheKey, T> @Nullable T resolveViaInternalKey(
             K key,
             @Nullable T primaryValue,
