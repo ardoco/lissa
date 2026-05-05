@@ -34,7 +34,7 @@ import io.github.cdimascio.dotenv.Dotenv;
 public final class Environment {
     private static final Logger logger = LoggerFactory.getLogger(Environment.class);
     /** The loaded .env configuration, or null if no .env file exists */
-    private static @Nullable Dotenv DOTENV = load();
+    private static @Nullable Dotenv dotenv = load();
 
     private Environment() {
         throw new IllegalAccessError("Utility class");
@@ -53,7 +53,7 @@ public final class Environment {
      * @return The value of the environment variable, or null if not found
      */
     public static @Nullable String getenv(String key) {
-        String dotenvValue = DOTENV == null ? null : DOTENV.get(key);
+        String dotenvValue = dotenv == null ? null : dotenv.get(key);
         if (dotenvValue != null) return dotenvValue;
         return System.getenv(key);
     }
@@ -93,8 +93,8 @@ public final class Environment {
      * @return The loaded Dotenv configuration, or null if no .env file exists
      */
     private static synchronized @Nullable Dotenv load() {
-        if (DOTENV != null) {
-            return DOTENV;
+        if (dotenv != null) {
+            return dotenv;
         }
 
         if (Files.exists(Path.of(".env"))) {
@@ -117,14 +117,12 @@ public final class Environment {
      * The method is synchronized to ensure thread safety when updating the configuration.
      *
      * @param path The path to the new .env file
-     * @return The updated Dotenv configuration, or null if no .env file exists at the given path
      */
-    public static synchronized @Nullable Dotenv overwrite(Path path) {
+    public static synchronized void overwrite(Path path) {
         if (Files.exists(path)) {
-            DOTENV = Dotenv.configure().filename(path.toString()).load();
+            dotenv = Dotenv.configure().filename(path.toString()).load();
         } else {
             logger.warn("No .env file found at '{}', using system environment variables", path);
         }
-        return DOTENV;
     }
 }

@@ -25,6 +25,8 @@ public enum CacheReplacementStrategy {
     ERROR {
         /**
          * Throws an exception when a conflict is detected between the two caches.
+         *
+         * @deprecated This method exposes internal cache key handling and should not be used in general code.
          */
         @Override
         public <K extends CacheKey, T> @Nullable T resolve(
@@ -95,6 +97,8 @@ public enum CacheReplacementStrategy {
 
         /**
          * Overwrites the secondary cache value with the primary cache value in case of a conflict, and returns the primary cache value.
+         *
+         * @deprecated This method exposes internal cache key handling and should not be used in general code.
          */
         @Override
         @Deprecated(forRemoval = false)
