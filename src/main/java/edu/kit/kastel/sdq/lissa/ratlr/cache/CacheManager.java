@@ -34,12 +34,14 @@ public final class CacheManager {
     /**
      * The default cache hierarchy: LOCAL only.
      */
-    private static final String DEFAULT_CACHE_HIERARCHY = "LOCAL";
+    // TODO: TO fail fast remove Redis from the default hierarchy and throw an error if Redis is configured but not
+    // available
+    private static final String DEFAULT_CACHE_HIERARCHY = "REDIS, LOCAL";
 
     /**
      * The default strategy for handling cache conflicts between local and Redis caches.
      */
-    private static final CacheReplacementStrategy DEFAULT_REPLACEMENT_STRATEGY = CacheReplacementStrategy.ERROR;
+    private static final CacheReplacementStrategy DEFAULT_REPLACEMENT_STRATEGY = CacheReplacementStrategy.NONE;
 
     private static @Nullable CacheManager defaultInstanceManager;
     private final Path directoryOfCaches;
