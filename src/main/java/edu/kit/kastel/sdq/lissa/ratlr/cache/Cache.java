@@ -124,7 +124,6 @@ public interface Cache<K extends CacheKey> {
      * <ul>
      *     <li>"local" - LocalCache for file-based storage</li>
      *     <li>"redis" - RedisCache for Redis-based storage</li>
-     *     <li>"hierarchical" - HierarchicalCache for multi-layer caching (requires primary and secondary cache)</li>
      * </ul>
      *
      * @param <K> The type of cache key

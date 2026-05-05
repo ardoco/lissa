@@ -359,7 +359,7 @@ class ArchitectureTest {
             });
 
     /**
-     * Rule that enforces that CacheManager.resetDefaultInstance() is only called from the CacheTest class.
+     * Rule that enforces that CacheManager.resetDefaultInstance() is only called from Test classes.
      * <p>
      * The resetDefaultInstance() method should only be used to reset the singleton state between tests.
      * It must never be called from production code or other test classes.
