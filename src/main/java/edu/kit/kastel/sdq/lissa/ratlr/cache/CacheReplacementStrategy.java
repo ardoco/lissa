@@ -33,16 +33,36 @@ public enum CacheReplacementStrategy {
                 Cache<K> primaryCache,
                 @Nullable T secondaryValue,
                 Cache<K> secondaryCache) {
-            super.resolve(key, primaryValue, primaryCache, secondaryValue, secondaryCache);
-            if (primaryValue == null || Objects.deepEquals(primaryValue, secondaryValue)) {
-                return primaryValue;
+            if (primaryValue != null && secondaryValue != null && !Objects.deepEquals(primaryValue, secondaryValue)) {
+                logger.error(
+                        "Cache inconsistency detected for key {}, values: {} (primary cache), {} (secondary cache)",
+                        key,
+                        primaryValue,
+                        secondaryValue);
+                throw new IllegalStateException("Cache inconsistency detected for key " + key);
             }
-            logger.error(
-                    "Cache inconsistency detected for key {}, values: {} (primary cache), {} (secondary cache)",
-                    key,
-                    primaryValue,
-                    secondaryValue);
-            throw new IllegalStateException("Cache inconsistency detected for key " + key);
+            return super.resolve(key, primaryValue, primaryCache, secondaryValue, secondaryCache);
+        }
+
+        /**
+         * Throws an exception when a conflict is detected between the two caches.
+         */
+        @Override
+        <K extends CacheKey, T> @Nullable T resolveViaInternalKey(
+                K key,
+                @Nullable T primaryValue,
+                Cache<K> primaryCache,
+                @Nullable T secondaryValue,
+                Cache<K> secondaryCache) {
+            if (primaryValue != null && secondaryValue != null && !Objects.deepEquals(primaryValue, secondaryValue)) {
+                logger.error(
+                        "Cache inconsistency detected for key {}, values: {} (primary cache), {} (secondary cache)",
+                        key,
+                        primaryValue,
+                        secondaryValue);
+                throw new IllegalStateException("Cache inconsistency detected for key " + key);
+            }
+            return super.resolveViaInternalKey(key, primaryValue, primaryCache, secondaryValue, secondaryCache);
         }
     },
 
@@ -60,17 +80,38 @@ public enum CacheReplacementStrategy {
                 Cache<K> primaryCache,
                 @Nullable T secondaryValue,
                 Cache<K> secondaryCache) {
-            super.resolve(key, primaryValue, primaryCache, secondaryValue, secondaryCache);
-            if (primaryValue == null || Objects.deepEquals(primaryValue, secondaryValue)) {
+            if (primaryValue != null && secondaryValue != null && !Objects.deepEquals(primaryValue, secondaryValue)) {
+                logger.warn(
+                        "Cache inconsistency detected for key {}, overwriting secondary cache value with primary cache value: {} -> {}",
+                        key,
+                        secondaryValue,
+                        primaryValue);
+                secondaryCache.put(key, primaryValue);
                 return primaryValue;
             }
-            logger.warn(
-                    "Cache inconsistency detected for key {}, overwriting secondary cache value with primary cache value: {} -> {}",
-                    key,
-                    secondaryValue,
-                    primaryValue);
-            secondaryCache.put(key, primaryValue);
-            return primaryValue;
+            return super.resolve(key, primaryValue, primaryCache, secondaryValue, secondaryCache);
+        }
+
+        /**
+         * Overwrites the secondary cache value with the primary cache value in case of a conflict, and returns the primary cache value.
+         */
+        @Override
+        <K extends CacheKey, T> @Nullable T resolveViaInternalKey(
+                K key,
+                @Nullable T primaryValue,
+                Cache<K> primaryCache,
+                @Nullable T secondaryValue,
+                Cache<K> secondaryCache) {
+            if (primaryValue != null && secondaryValue != null && !Objects.deepEquals(primaryValue, secondaryValue)) {
+                logger.warn(
+                        "Cache inconsistency detected for key {}, overwriting secondary cache value with primary cache value: {} -> {}",
+                        key,
+                        secondaryValue,
+                        primaryValue);
+                secondaryCache.putViaInternalKey(key, primaryValue);
+                return primaryValue;
+            }
+            return super.resolveViaInternalKey(key, primaryValue, primaryCache, secondaryValue, secondaryCache);
         }
     };
 
@@ -100,9 +141,44 @@ public enum CacheReplacementStrategy {
             Cache<K> secondaryCache) {
         if (primaryValue == null && secondaryValue != null) {
             primaryCache.put(key, secondaryValue);
+            return secondaryValue;
         }
         if (primaryValue != null && secondaryValue == null) {
             secondaryCache.put(key, primaryValue);
+            return primaryValue;
+        }
+        return primaryValue;
+    }
+
+    /**
+     * Resolves a conflict between two caches by applying the appropriate replacement strategy.
+     * If a value is null in one cache but not the other, it will be copied to the cache where it is missing.
+     * <p>
+     * The default implementation does not perform any replacement and simply returns the primary value.
+     *
+     * @param <K> The type of cache key used in both caches
+     * @param <T> The type of the cache values
+     * @param key The cache key where the conflict occurred
+     * @param primaryValue The value of the primary cache
+     * @param primaryCache The primary cache where the value was found
+     * @param secondaryValue The value of the secondary cache
+     * @param secondaryCache The secondary cache where the value was found
+     *
+     * @return The resolved cache value to be used (may be null)
+     */
+    @Deprecated
+    <K extends CacheKey, T> @Nullable T resolveViaInternalKey(
+            K key,
+            @Nullable T primaryValue,
+            Cache<K> primaryCache,
+            @Nullable T secondaryValue,
+            Cache<K> secondaryCache) {
+        if (primaryValue == null && secondaryValue != null) {
+            primaryCache.putViaInternalKey(key, secondaryValue);
+            return secondaryValue;
+        }
+        if (primaryValue != null && secondaryValue == null) {
+            secondaryCache.putViaInternalKey(key, primaryValue);
         }
         return primaryValue;
     }

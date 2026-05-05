@@ -66,7 +66,8 @@ class HierarchicalCache<K extends CacheKey> implements Cache<K> {
     public synchronized <T> @Nullable T getViaInternalKey(K key, Class<T> clazz) {
         T primaryValue = primaryCache.getViaInternalKey(key, clazz);
         T secondaryValue = secondaryCache.getViaInternalKey(key, clazz);
-        return conflictResolution.resolve(key.toJsonKey(), primaryValue, primaryCache, secondaryValue, secondaryCache);
+        return conflictResolution.resolveViaInternalKey(
+                key, primaryValue, primaryCache, secondaryValue, secondaryCache);
     }
 
     @Override
