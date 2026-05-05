@@ -5,7 +5,6 @@ import static edu.kit.kastel.sdq.lissa.ratlr.Statistics.escapeMarkdown;
 import static edu.kit.kastel.sdq.lissa.ratlr.Statistics.getTraceLinksFromGoldStandard;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -13,7 +12,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -23,20 +22,13 @@ import edu.kit.kastel.mcse.ardoco.metrics.ClassificationMetricsCalculator;
 import edu.kit.kastel.sdq.lissa.ratlr.Evaluation;
 import edu.kit.kastel.sdq.lissa.ratlr.Optimization;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
+import edu.kit.kastel.sdq.lissa.ratlr.utils.Environment;
 
 class Requirement2RequirementE2ETest {
 
-    @BeforeEach
-    void setUp() throws IOException {
-        File envFile = new File(".env");
-        if (!envFile.exists() && System.getenv("CI") != null) {
-            Files.writeString(envFile.toPath(), """
-OLLAMA_EMBEDDING_HOST=http://localhost:11434
-OLLAMA_HOST=http://localhost:11434
-OPENAI_ORGANIZATION_ID=DUMMY
-OPENAI_API_KEY=sk-DUMMY
-""");
-        }
+    @BeforeAll
+    static void init() {
+        Environment.overwrite(Path.of("src/test/resources/.env-test"));
     }
 
     @Test

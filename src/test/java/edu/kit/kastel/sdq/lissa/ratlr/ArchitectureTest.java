@@ -372,4 +372,19 @@ class ArchitectureTest {
             .callMethod(CacheManager.class, "resetDefaultInstance")
             .because(
                     "CacheManager.resetDefaultInstance() is only intended for testing purposes in CacheTest and must not be used elsewhere");
+
+    /**
+     * Rule that enforces that Environment.overwrite() is only called from test classes.
+     * <p>
+     * The overwrite() method is intended for testing purposes to override environment variables.
+     * For production usage the regular .env file shall be used.
+     */
+    @ArchTest
+    static final ArchRule environmentOverwriteOnlyInTests = noClasses()
+            .that()
+            .haveNameNotMatching(".*Test*")
+            .should()
+            .callMethod(Environment.class, "overwrite", Path.class)
+            .because(
+                    "Environment.overwrite() is only intended for testing purposes and may not be used elsewhere. Use the regular .env instead.");
 }
