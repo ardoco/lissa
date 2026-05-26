@@ -137,18 +137,8 @@ public interface Cache<K extends CacheKey> {
     static <K extends CacheKey> Cache<K> createByType(
             String type, CacheParameter<K> parameters, @Nullable String cacheDir, @Nullable ObjectMapper mapper) {
         return switch (type) {
-            case LOCAL_CACHE_NAME -> {
-                if (cacheDir == null) {
-                    throw new IllegalArgumentException("Cache directory must be provided for local cache");
-                }
-                yield new LocalCache<>(cacheDir, parameters);
-            }
-            case "redis" -> {
-                if (mapper == null) {
-                    throw new IllegalArgumentException("ObjectMapper must be provided for Redis cache");
-                }
-                yield new RedisCache<>(parameters, mapper);
-            }
+            case LOCAL_CACHE_NAME -> new LocalCache<>(cacheDir, parameters);
+            case "redis" -> new RedisCache<>(parameters, mapper);
             default ->
                 throw new IllegalArgumentException("Unknown cache type: " + type + ". Supported types: local, redis");
         };

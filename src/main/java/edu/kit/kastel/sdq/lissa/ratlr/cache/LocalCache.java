@@ -56,8 +56,8 @@ class LocalCache<K extends CacheKey> implements Cache<K> {
      * @param cacheParameter The cache parameter configuration
      */
     LocalCache(String cacheFile, CacheParameter<K> cacheParameter) {
-        this.cacheParameter = cacheParameter;
-        this.cacheFile = new File(cacheFile);
+        this.cacheParameter = Objects.requireNonNull(cacheParameter);
+        this.cacheFile = new File(Objects.requireNonNull(cacheFile));
         mapper = new ObjectMapper();
         createLocalStore();
     }
