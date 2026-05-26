@@ -10,7 +10,7 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * The cache hierarchy operates as follows:
  * 1. Attempts to retrieve/store values in the primary cache
- * 2. Falls back to secondary cache if primary is unavailable
+ * 2. Falls back to secondary cache if missing in the primary
  * 3. Automatically synchronizes values between layers when needed
  * 4. Applies conflict resolution strategy when values differ between layers
  *

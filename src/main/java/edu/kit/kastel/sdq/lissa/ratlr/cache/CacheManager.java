@@ -223,6 +223,7 @@ public final class CacheManager {
         }
 
         if (createdCaches.isEmpty()) {
+            // TODO throw error if Redis is configured but unavailable
             return new LocalCache<>(cacheFilePath, parameters);
         }
 
