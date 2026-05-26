@@ -21,6 +21,6 @@ OPENAI_API_KEY=
 #   LOCAL - only local file-based cache
 #   LOCAL,REDIS - local cache as primary, Redis as secondary fallback
 #   REDIS,LOCAL - Redis as primary, local cache as secondary fallback
-# Valid cache types: LOCAL, REDIS
+# Valid cache types: LOCAL, REDIS, REST_REDIS
 #CACHE_HIERARCHY=REDIS,LOCAL
 

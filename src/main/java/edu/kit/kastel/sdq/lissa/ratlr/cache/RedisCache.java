@@ -12,7 +12,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.Environment;
 
 import redis.clients.jedis.RedisClient;
-import redis.clients.jedis.UnifiedJedis;
 
 /**
  * Implements a Redis-based cache for storing and retrieving values. For multi-layer caching with
@@ -30,7 +29,7 @@ class RedisCache<K extends CacheKey> implements Cache<K> {
     /**
      * Redis client instance.
      */
-    private UnifiedJedis jedis;
+    private UnifiedRedisClient jedis;
 
     /**
      * Creates a new Redis cache instance.
@@ -47,6 +46,12 @@ class RedisCache<K extends CacheKey> implements Cache<K> {
         if (jedis == null) {
             throw new IllegalArgumentException("Could not connect to Redis");
         }
+    }
+
+    protected RedisCache(CacheParameter<K> cacheParameter, ObjectMapper mapper, UnifiedRedisClient jedis) {
+        this.cacheParameter = Objects.requireNonNull(cacheParameter);
+        this.mapper = Objects.requireNonNull(mapper);
+        this.jedis = Objects.requireNonNull(jedis);
     }
 
     @Override
@@ -69,7 +74,7 @@ class RedisCache<K extends CacheKey> implements Cache<K> {
         if (Environment.getenv("REDIS_URL") != null) {
             redisUrl = Environment.getenv("REDIS_URL");
         }
-        jedis = RedisClient.create(redisUrl);
+        jedis = new RedisAdapter(RedisClient.create(redisUrl));
         // Check if connection is working
         jedis.ping();
     }

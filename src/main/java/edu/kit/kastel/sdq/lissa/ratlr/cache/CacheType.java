@@ -4,4 +4,5 @@ package edu.kit.kastel.sdq.lissa.ratlr.cache;
 public enum CacheType {
     LOCAL,
     REDIS,
+    REST_REDIS
 }

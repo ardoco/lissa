@@ -122,6 +122,7 @@ public interface Cache<K extends CacheKey> {
      * <ul>
      *     <li>"local" - LocalCache for file-based storage</li>
      *     <li>"redis" - RedisCache for Redis-based storage</li>
+     *     <li>"rest_redis" - RestRedisCache for REST-based Redis storage</li>
      * </ul>
      *
      * @param <K>        The type of cache key
@@ -137,6 +138,7 @@ public interface Cache<K extends CacheKey> {
         return switch (type) {
             case LOCAL -> new LocalCache<>(cacheDir, parameters);
             case REDIS -> new RedisCache<>(parameters, mapper);
+            case REST_REDIS -> new RestRedisCache<>(parameters, mapper);
         };
     }
 }
