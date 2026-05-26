@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 public enum CacheReplacementStrategy {
     /**
      * Does not replace conflicting values - leaves both cache values as they are.
+     * If any value is null while the other is present the missing value is backfilled.
      * The primary value will be returned when reading.
      */
     NONE,
