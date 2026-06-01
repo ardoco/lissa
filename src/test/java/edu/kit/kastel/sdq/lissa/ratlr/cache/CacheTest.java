@@ -9,11 +9,13 @@ import java.nio.file.Path;
 
 import org.jspecify.annotations.NullMarked;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import edu.kit.kastel.sdq.lissa.ratlr.utils.Environment;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.KeyGenerator;
 
 /**
@@ -25,6 +27,11 @@ import edu.kit.kastel.sdq.lissa.ratlr.utils.KeyGenerator;
 class CacheTest {
     @TempDir
     private Path tempCacheDir;
+
+    @BeforeAll
+    static void init() {
+        Environment.overwrite(Path.of("src/test/resources/.env-test"));
+    }
 
     @BeforeEach
     void setup() throws IOException {

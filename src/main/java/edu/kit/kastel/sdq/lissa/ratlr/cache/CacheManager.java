@@ -5,9 +5,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
@@ -16,8 +18,6 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.kit.kastel.sdq.lissa.ratlr.utils.Environment;
-
-import redis.clients.jedis.exceptions.JedisConnectionException;
 
 /**
  * Manages caching operations in the LiSSA framework.
@@ -34,9 +34,7 @@ public final class CacheManager {
     /**
      * The default cache hierarchy: LOCAL only.
      */
-    // TODO: TO fail fast remove Redis from the default hierarchy and throw an error if Redis is configured but not
-    // available
-    private static final String DEFAULT_CACHE_HIERARCHY = "REDIS, LOCAL";
+    private static final String DEFAULT_CACHE_HIERARCHY = "LOCAL";
 
     /**
      * The default strategy for handling cache conflicts between local and Redis caches.
@@ -46,7 +44,7 @@ public final class CacheManager {
     private static @Nullable CacheManager defaultInstanceManager;
     private final Path directoryOfCaches;
     private final CacheReplacementStrategy replacementStrategy;
-    private final List<String> hierarchyConfig;
+    private final List<CacheType> hierarchyConfig;
     private final Map<String, Cache<?>> caches = new HashMap<>();
 
     private static final Logger logger = LoggerFactory.getLogger(CacheManager.class);
@@ -80,11 +78,11 @@ public final class CacheManager {
         }
 
         try {
-            return CacheReplacementStrategy.valueOf(strategyValue.toUpperCase());
+            return CacheReplacementStrategy.valueOf(strategyValue.trim().toUpperCase());
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException(
-                    "Invalid CACHE_REPLACEMENT_STRATEGY value: " + strategyValue + ". See "
-                            + CacheReplacementStrategy.class + " for valid options.",
+                    "Invalid CACHE_REPLACEMENT_STRATEGY value: " + strategyValue + ".\n"
+                            + Arrays.toString(CacheReplacementStrategy.values()) + " are valid options.",
                     e);
         }
     }
@@ -121,19 +119,22 @@ public final class CacheManager {
      *
      * @param cacheDir The path to the cache directory
      * @param replacementStrategy The strategy for handling conflicts between cache layers
-     * @param hierarchyConfig The list of cache types in the hierarchy order
+     * @param hierarchyConfig Non-empty list of cache types in the hierarchy order.
      * @throws IOException If the cache directory cannot be created
      * @throws IllegalArgumentException If the path exists but is not a directory
      */
-    public CacheManager(Path cacheDir, CacheReplacementStrategy replacementStrategy, List<String> hierarchyConfig)
+    public CacheManager(Path cacheDir, CacheReplacementStrategy replacementStrategy, List<CacheType> hierarchyConfig)
             throws IOException {
         if (!Files.exists(cacheDir)) Files.createDirectories(cacheDir);
         if (!Files.isDirectory(cacheDir)) {
             throw new IllegalArgumentException("path is not a directory: " + cacheDir);
         }
 
-        this.directoryOfCaches = cacheDir;
-        this.replacementStrategy = replacementStrategy;
+        this.directoryOfCaches = Objects.requireNonNull(cacheDir);
+        this.replacementStrategy = Objects.requireNonNull(replacementStrategy);
+        if (hierarchyConfig.isEmpty()) {
+            throw new IllegalArgumentException("Cache hierarchy configuration must contain at least one cache type");
+        }
         this.hierarchyConfig = hierarchyConfig;
     }
 
@@ -209,22 +210,10 @@ public final class CacheManager {
         String cacheFilePath = directoryOfCaches.resolve(cacheName + ".json").toString();
         // Create cache instances for each type, skipping those that fail to initialize
         List<Cache<K>> createdCaches = new ArrayList<>();
-        for (String cacheType : hierarchyConfig) {
-            try {
-                Cache<K> cache = Cache.createByType(CacheType.valueOf(cacheType), parameters, cacheFilePath, mapper);
-                createdCaches.add(cache);
-                logger.debug("Created cache type: {}", cacheType);
-            } catch (JedisConnectionException e) {
-                logger.warn(
-                        "Failed to initialize cache type '{}': {}. Skipping this cache layer.",
-                        cacheType,
-                        e.getMessage());
-            }
-        }
-
-        if (createdCaches.isEmpty()) {
-            // TODO throw error if Redis is configured but unavailable
-            return new LocalCache<>(cacheFilePath, parameters);
+        for (CacheType cacheType : hierarchyConfig) {
+            Cache<K> cache = Cache.createByType(cacheType, parameters, cacheFilePath, mapper);
+            createdCaches.add(cache);
+            logger.debug("Created cache type: {}", cacheType);
         }
 
         Cache<K> layeredCache = createdCaches.getFirst();
@@ -243,16 +232,23 @@ public final class CacheManager {
      * @return A list of cache types in order
      * @throws IllegalArgumentException If the configuration is empty or invalid
      */
-    private static List<String> parseCacheHierarchy(String hierarchyConfig) {
+    private static List<CacheType> parseCacheHierarchy(String hierarchyConfig) {
         String[] types = hierarchyConfig.replace("'", "").replace('"', ' ').split(",");
-        List<String> cacheTypes = new ArrayList<>();
+        List<CacheType> cacheTypes = new ArrayList<>();
 
         for (String type : types) {
             String trimmed = type.trim();
             if (trimmed.isEmpty()) {
                 throw new IllegalArgumentException("Cache hierarchy contains empty cache type");
             }
-            cacheTypes.add(trimmed.toUpperCase());
+            try {
+                cacheTypes.add(CacheType.valueOf(trimmed.toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException(
+                        "Invalid CACHE_HIERARCHY value: " + trimmed + ".\n" + Arrays.toString(CacheType.values())
+                                + " are valid options.",
+                        e);
+            }
         }
         return cacheTypes;
     }

@@ -5,14 +5,13 @@ import java.time.Instant;
 import java.util.*;
 
 import org.jspecify.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.kit.kastel.sdq.lissa.ratlr.utils.Environment;
 
+import redis.clients.jedis.RedisClient;
 import redis.clients.jedis.UnifiedJedis;
 
 /**
@@ -24,7 +23,6 @@ import redis.clients.jedis.UnifiedJedis;
  * @param <K> The type of cache key used in this cache
  */
 class RedisCache<K extends CacheKey> implements Cache<K> {
-    private static final Logger logger = LoggerFactory.getLogger(RedisCache.class);
 
     private final CacheParameter<K> cacheParameter;
     private final ObjectMapper mapper;
@@ -71,7 +69,7 @@ class RedisCache<K extends CacheKey> implements Cache<K> {
         if (Environment.getenv("REDIS_URL") != null) {
             redisUrl = Environment.getenv("REDIS_URL");
         }
-        jedis = new UnifiedJedis(redisUrl);
+        jedis = RedisClient.create(redisUrl);
         // Check if connection is working
         jedis.ping();
     }
@@ -93,7 +91,7 @@ class RedisCache<K extends CacheKey> implements Cache<K> {
 
     @Override
     @SuppressWarnings("deprecation")
-    public <T> @Nullable T getViaInternalKey(K cacheKey, Class<T> clazz) {
+    public synchronized <T> @Nullable T getViaInternalKey(K cacheKey, Class<T> clazz) {
         String jsonData = jedis.hget(cacheKey.toJsonKey(), "data");
         return Cache.convert(jsonData, clazz, mapper);
     }

@@ -1,6 +1,8 @@
 /* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.cache;
 
+import java.util.Objects;
+
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -39,8 +41,8 @@ class HierarchicalCache<K extends CacheKey> implements Cache<K> {
      * Creates a new hierarchical cache instance.
      *
      * @param cacheParameter The cache parameter configuration
-     * @param primaryCache The primary cache (e.g., Redis), or null if not available
-     * @param secondaryCache The secondary cache (e.g., local file), or null if not available
+     * @param primaryCache The primary cache (e.g., Redis)
+     * @param secondaryCache The secondary cache (e.g., local file)
      * @param conflictResolution Strategy for resolving conflicts between cache layers
      */
     HierarchicalCache(
@@ -48,10 +50,10 @@ class HierarchicalCache<K extends CacheKey> implements Cache<K> {
             Cache<K> primaryCache,
             Cache<K> secondaryCache,
             CacheReplacementStrategy conflictResolution) {
-        this.cacheParameter = cacheParameter;
-        this.primaryCache = primaryCache;
-        this.secondaryCache = secondaryCache;
-        this.conflictResolution = conflictResolution;
+        this.cacheParameter = Objects.requireNonNull(cacheParameter);
+        this.primaryCache = Objects.requireNonNull(primaryCache);
+        this.secondaryCache = Objects.requireNonNull(secondaryCache);
+        this.conflictResolution = Objects.requireNonNull(conflictResolution);
     }
 
     @Override
