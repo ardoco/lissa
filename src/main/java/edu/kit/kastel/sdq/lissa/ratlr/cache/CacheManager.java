@@ -211,7 +211,7 @@ public final class CacheManager {
         List<Cache<K>> createdCaches = new ArrayList<>();
         for (String cacheType : hierarchyConfig) {
             try {
-                Cache<K> cache = Cache.createByType(cacheType, parameters, cacheFilePath, mapper);
+                Cache<K> cache = Cache.createByType(CacheType.valueOf(cacheType), parameters, cacheFilePath, mapper);
                 createdCaches.add(cache);
                 logger.debug("Created cache type: {}", cacheType);
             } catch (JedisConnectionException e) {
@@ -252,7 +252,7 @@ public final class CacheManager {
             if (trimmed.isEmpty()) {
                 throw new IllegalArgumentException("Cache hierarchy contains empty cache type");
             }
-            cacheTypes.add(trimmed.toLowerCase());
+            cacheTypes.add(trimmed.toUpperCase());
         }
         return cacheTypes;
     }
