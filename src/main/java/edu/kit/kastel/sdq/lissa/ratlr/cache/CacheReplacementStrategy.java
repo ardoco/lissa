@@ -90,7 +90,7 @@ public enum CacheReplacementStrategy {
                         key,
                         secondaryValue,
                         primaryValue);
-                putValue(secondaryCache, key, primaryValue);
+                secondaryCache.put(key, primaryValue);
                 return primaryValue;
             }
             return super.resolve(key, primaryValue, primaryCache, secondaryValue, secondaryCache);
@@ -115,7 +115,7 @@ public enum CacheReplacementStrategy {
                         key,
                         secondaryValue,
                         primaryValue);
-                putValueViaInternalKey(secondaryCache, key, primaryValue);
+                secondaryCache.putViaInternalKey(key, primaryValue);
                 return primaryValue;
             }
             return super.resolveViaInternalKey(key, primaryValue, primaryCache, secondaryValue, secondaryCache);
@@ -123,45 +123,6 @@ public enum CacheReplacementStrategy {
     };
 
     private static final Logger logger = LoggerFactory.getLogger(CacheReplacementStrategy.class);
-
-    /**
-     * Helper method to put a value in the cache, handling String values specially
-     * to avoid double-serialization.
-     * String values are stored using the String-specific overload to prevent
-     * JSON serialization that would add quotes around the value.
-     *
-     * @param <K> The type of cache key
-     * @param <T> The type of the value
-     * @param cache The cache to put the value into
-     * @param key The cache key (as a String)
-     * @param value The value to put
-     */
-    private static <K extends CacheKey, T> void putValue(Cache<K> cache, String key, T value) {
-        if (value instanceof String stringValue) {
-            cache.put(key, stringValue);
-        } else {
-            cache.put(key, value);
-        }
-    }
-
-    /**
-     * Helper method to put a value in the cache using internal key handling,
-     * handling String values specially to avoid double-serialization.
-     *
-     * @param <K> The type of cache key
-     * @param <T> The type of the value
-     * @param cache The cache to put the value into
-     * @param key The internal cache key
-     * @param value The value to put
-     */
-    @Deprecated(forRemoval = false)
-    private static <K extends CacheKey, T> void putValueViaInternalKey(Cache<K> cache, K key, T value) {
-        if (value instanceof String stringValue) {
-            cache.put(String.valueOf(key), stringValue);
-        } else {
-            cache.putViaInternalKey(key, value);
-        }
-    }
 
     /**
      * Resolves a conflict between two caches by applying the appropriate replacement strategy.
@@ -186,11 +147,11 @@ public enum CacheReplacementStrategy {
             @Nullable T secondaryValue,
             Cache<K> secondaryCache) {
         if (primaryValue == null && secondaryValue != null) {
-            putValue(primaryCache, key, secondaryValue);
+            primaryCache.put(key, secondaryValue);
             return secondaryValue;
         }
         if (primaryValue != null && secondaryValue == null) {
-            putValue(secondaryCache, key, primaryValue);
+            secondaryCache.put(key, primaryValue);
             return primaryValue;
         }
         return primaryValue;
@@ -221,11 +182,11 @@ public enum CacheReplacementStrategy {
             @Nullable T secondaryValue,
             Cache<K> secondaryCache) {
         if (primaryValue == null && secondaryValue != null) {
-            putValueViaInternalKey(primaryCache, key, secondaryValue);
+            primaryCache.putViaInternalKey(key, secondaryValue);
             return secondaryValue;
         }
         if (primaryValue != null && secondaryValue == null) {
-            putValueViaInternalKey(secondaryCache, key, primaryValue);
+            secondaryCache.putViaInternalKey(key, primaryValue);
         }
         return primaryValue;
     }

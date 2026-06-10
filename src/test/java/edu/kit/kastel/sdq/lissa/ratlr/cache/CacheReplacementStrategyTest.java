@@ -56,6 +56,8 @@ class CacheReplacementStrategyTest {
         // Given both caches have identical values
         primaryCache.put(TEST_KEY, TEST_VALUE);
         secondaryCache.put(TEST_KEY, TEST_VALUE);
+        assertEquals(TEST_VALUE, primaryCache.get(TEST_KEY, String.class));
+        assertEquals(TEST_VALUE, secondaryCache.get(TEST_KEY, String.class));
 
         CacheReplacementStrategy strategy = CacheReplacementStrategy.NONE;
         String primaryValue = primaryCache.get(TEST_KEY, String.class);
@@ -76,6 +78,8 @@ class CacheReplacementStrategyTest {
         // Given primary and secondary have different values
         primaryCache.put(TEST_KEY, TEST_VALUE);
         secondaryCache.put(TEST_KEY, CONFLICTING_VALUE);
+        assertEquals(TEST_VALUE, primaryCache.get(TEST_KEY, String.class));
+        assertEquals(CONFLICTING_VALUE, secondaryCache.get(TEST_KEY, String.class));
 
         CacheReplacementStrategy strategy = CacheReplacementStrategy.NONE;
         String primaryValue = primaryCache.get(TEST_KEY, String.class);
@@ -95,6 +99,8 @@ class CacheReplacementStrategyTest {
     void testNoneStrategyNullPrimary() {
         // Given primary is null but secondary has a value
         secondaryCache.put(TEST_KEY, TEST_VALUE);
+        assertNull(primaryCache.get(TEST_KEY, String.class));
+        assertEquals(TEST_VALUE, secondaryCache.get(TEST_KEY, String.class));
 
         CacheReplacementStrategy strategy = CacheReplacementStrategy.NONE;
         String primaryValue = primaryCache.get(TEST_KEY, String.class);
@@ -118,6 +124,8 @@ class CacheReplacementStrategyTest {
 
         primaryCache.put(TEST_KEY, obj1);
         secondaryCache.put(TEST_KEY, obj2);
+        assertEquals(obj1, primaryCache.get(TEST_KEY, TestObject.class));
+        assertEquals(obj2, secondaryCache.get(TEST_KEY, TestObject.class));
 
         CacheReplacementStrategy strategy = CacheReplacementStrategy.NONE;
         TestObject primaryValue = primaryCache.get(TEST_KEY, TestObject.class);
@@ -139,6 +147,8 @@ class CacheReplacementStrategyTest {
         // Given primary and secondary have conflicting string values
         primaryCache.put(TEST_KEY, TEST_VALUE);
         secondaryCache.put(TEST_KEY, CONFLICTING_VALUE);
+        assertEquals(TEST_VALUE, primaryCache.get(TEST_KEY, String.class));
+        assertEquals(CONFLICTING_VALUE, secondaryCache.get(TEST_KEY, String.class));
 
         CacheReplacementStrategy strategy = CacheReplacementStrategy.ERROR;
         String primaryValue = primaryCache.get(TEST_KEY, String.class);
@@ -156,6 +166,8 @@ class CacheReplacementStrategyTest {
     void testErrorStrategyNullTolerance() {
         // Given primary has a value but secondary is null
         primaryCache.put(TEST_KEY, TEST_VALUE);
+        assertEquals(TEST_VALUE, primaryCache.get(TEST_KEY, String.class));
+        assertNull(secondaryCache.get(TEST_KEY, String.class));
 
         CacheReplacementStrategy strategy = CacheReplacementStrategy.ERROR;
         String primaryValue = primaryCache.get(TEST_KEY, String.class);
@@ -177,6 +189,8 @@ class CacheReplacementStrategyTest {
 
         primaryCache.put(TEST_KEY, obj1);
         secondaryCache.put(TEST_KEY, obj2);
+        assertEquals(obj1, primaryCache.get(TEST_KEY, TestObject.class));
+        assertEquals(obj2, secondaryCache.get(TEST_KEY, TestObject.class));
 
         CacheReplacementStrategy strategy = CacheReplacementStrategy.ERROR;
         TestObject primaryValue = primaryCache.get(TEST_KEY, TestObject.class);
@@ -199,6 +213,8 @@ class CacheReplacementStrategyTest {
 
         primaryCache.put(TEST_KEY, TEST_OBJECT);
         secondaryCache.put(TEST_KEY, secondary);
+        assertEquals(TEST_OBJECT, primaryCache.get(TEST_KEY, TestObject.class));
+        assertEquals(secondary, secondaryCache.get(TEST_KEY, TestObject.class));
 
         CacheReplacementStrategy strategy = CacheReplacementStrategy.OVERWRITE;
         TestObject primaryValue = primaryCache.get(TEST_KEY, TestObject.class);
@@ -218,6 +234,8 @@ class CacheReplacementStrategyTest {
         // Given both caches have the same value
         primaryCache.put(TEST_KEY, TEST_OBJECT);
         secondaryCache.put(TEST_KEY, TEST_OBJECT);
+        assertEquals(TEST_OBJECT, primaryCache.get(TEST_KEY, TestObject.class));
+        assertEquals(TEST_OBJECT, secondaryCache.get(TEST_KEY, TestObject.class));
 
         CacheReplacementStrategy strategy = CacheReplacementStrategy.OVERWRITE;
         TestObject primaryValue = primaryCache.get(TEST_KEY, TestObject.class);
@@ -235,6 +253,8 @@ class CacheReplacementStrategyTest {
     void testOverwriteStrategyNoOverwriteWhenSecondaryNull() {
         // Given primary has value but secondary is empty
         primaryCache.put(TEST_KEY, TEST_OBJECT);
+        assertEquals(TEST_OBJECT, primaryCache.get(TEST_KEY, TestObject.class));
+        assertNull(secondaryCache.get(TEST_KEY, TestObject.class));
 
         CacheReplacementStrategy strategy = CacheReplacementStrategy.OVERWRITE;
         TestObject primaryValue = primaryCache.get(TEST_KEY, TestObject.class);
@@ -253,6 +273,8 @@ class CacheReplacementStrategyTest {
     void testOverwriteStrategyNullPrimary() {
         // Given secondary has value but primary is empty
         secondaryCache.put(TEST_KEY, TEST_OBJECT);
+        assertNull(primaryCache.get(TEST_KEY, TestObject.class));
+        assertEquals(TEST_OBJECT, secondaryCache.get(TEST_KEY, TestObject.class));
 
         CacheReplacementStrategy strategy = CacheReplacementStrategy.OVERWRITE;
         TestObject primaryValue = primaryCache.get(TEST_KEY, TestObject.class);
@@ -266,6 +288,74 @@ class CacheReplacementStrategyTest {
         assertEquals(TEST_OBJECT, primaryCache.get(TEST_KEY, TestObject.class));
     }
 
+    // ==================== ViaInternalKey Strategy Tests ====================
+
+    @Test
+    @DisplayName("NONE strategy via internal key: string backfill to primary when secondary has value")
+    void testNoneStrategyViaInternalKeyStringBackfillPrimary() {
+        // Given secondary has a string value but primary is null
+        secondaryCache.putViaInternalKey(cacheKeyInstance, TEST_VALUE);
+        assertNull(primaryCache.getViaInternalKey(cacheKeyInstance, String.class));
+        assertEquals(TEST_VALUE, secondaryCache.getViaInternalKey(cacheKeyInstance, String.class));
+
+        CacheReplacementStrategy strategy = CacheReplacementStrategy.NONE;
+        String primaryValue = primaryCache.getViaInternalKey(cacheKeyInstance, String.class);
+        String secondaryValue = secondaryCache.getViaInternalKey(cacheKeyInstance, String.class);
+
+        // When resolving via internal key
+        String result = strategy.resolveViaInternalKey(
+                cacheKeyInstance, primaryValue, primaryCache, secondaryValue, secondaryCache);
+
+        // Then the secondary value is backfilled to primary using internal key
+        assertEquals(TEST_VALUE, result);
+        // Verify it was stored under the internal key, not the string representation of the key
+        assertEquals(TEST_VALUE, primaryCache.getViaInternalKey(cacheKeyInstance, String.class));
+        assertEquals(TEST_VALUE, secondaryCache.getViaInternalKey(cacheKeyInstance, String.class));
+    }
+
+    @Test
+    @DisplayName("OVERWRITE strategy via internal key: string overwrite of secondary cache")
+    void testOverwriteStrategyViaInternalKeyStringConflict() {
+        // Given both caches have different string values
+        primaryCache.putViaInternalKey(cacheKeyInstance, TEST_VALUE);
+        secondaryCache.putViaInternalKey(cacheKeyInstance, CONFLICTING_VALUE);
+        assertEquals(TEST_VALUE, primaryCache.getViaInternalKey(cacheKeyInstance, String.class));
+        assertEquals(CONFLICTING_VALUE, secondaryCache.getViaInternalKey(cacheKeyInstance, String.class));
+
+        CacheReplacementStrategy strategy = CacheReplacementStrategy.OVERWRITE;
+        String primaryValue = primaryCache.getViaInternalKey(cacheKeyInstance, String.class);
+        String secondaryValue = secondaryCache.getViaInternalKey(cacheKeyInstance, String.class);
+
+        // When resolving via internal key
+        String result = strategy.resolveViaInternalKey(
+                cacheKeyInstance, primaryValue, primaryCache, secondaryValue, secondaryCache);
+
+        // Then primary value overwrites secondary via internal key
+        assertEquals(TEST_VALUE, result);
+        // Verify the secondary was updated with the internal key, not a converted string key
+        assertEquals(TEST_VALUE, secondaryCache.getViaInternalKey(cacheKeyInstance, String.class));
+    }
+
+    @Test
+    @DisplayName("OVERWRITE strategy via internal key: string backfill to secondary when primary is null")
+    void testOverwriteStrategyViaInternalKeyStringBackfillSecondary() {
+        // Given primary is null but secondary has a string value
+        secondaryCache.putViaInternalKey(cacheKeyInstance, TEST_VALUE);
+        assertNull(primaryCache.getViaInternalKey(cacheKeyInstance, String.class));
+        assertEquals(TEST_VALUE, secondaryCache.getViaInternalKey(cacheKeyInstance, String.class));
+
+        CacheReplacementStrategy strategy = CacheReplacementStrategy.OVERWRITE;
+        String primaryValue = primaryCache.getViaInternalKey(cacheKeyInstance, String.class);
+        String secondaryValue = secondaryCache.getViaInternalKey(cacheKeyInstance, String.class);
+
+        // When resolving via internal key
+        String result = strategy.resolveViaInternalKey(
+                cacheKeyInstance, primaryValue, primaryCache, secondaryValue, secondaryCache);
+
+        // Then the secondary value is backfilled to primary using internal key
+        assertEquals(TEST_VALUE, result);
+        assertEquals(TEST_VALUE, primaryCache.getViaInternalKey(cacheKeyInstance, String.class));
+    }
     // ==================== Helper Classes ====================
 
     static class TestObject {
@@ -285,14 +375,18 @@ class CacheReplacementStrategyTest {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (!(o instanceof TestObject)) return false;
-            TestObject that = (TestObject) o;
+            if (!(o instanceof TestObject that)) return false;
             return value == that.value && Objects.equals(name, that.name);
         }
 
         @Override
         public int hashCode() {
             return Objects.hash(name, value);
+        }
+
+        @Override
+        public String toString() {
+            return "TestObject{" + "name='" + name + '\'' + ", value=" + value + '}';
         }
     }
 
@@ -310,12 +404,12 @@ class CacheReplacementStrategyTest {
         }
 
         @Override
-        public String toJsonKey() {
+        public String localKey() {
             return keyValue;
         }
 
         @Override
-        public String localKey() {
+        public String toString() {
             return keyValue;
         }
     }

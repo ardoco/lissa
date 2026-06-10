@@ -105,13 +105,13 @@ public interface Cache<K extends CacheKey> {
         if (jsonData == null) {
             return null;
         }
-        if (clazz == String.class) {
-            return (T) jsonData;
-        }
-
         try {
             return mapper.readValue(jsonData, clazz);
         } catch (JsonProcessingException e) {
+            // Backward compatibility for unserialized String values
+            if (clazz == String.class) {
+                return (T) jsonData;
+            }
             throw new IllegalArgumentException("Could not deserialize object", e);
         }
     }

@@ -24,8 +24,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 class LocalCache<K extends CacheKey> implements Cache<K> {
 
-    public static final String LOCAL_CACHE_NAME = "local";
-
     private final ObjectMapper mapper;
 
     /**
@@ -145,14 +143,7 @@ class LocalCache<K extends CacheKey> implements Cache<K> {
     @Override
     public synchronized void put(String key, String value) {
         K cacheKey = cacheParameter.createCacheKey(key);
-        String old = cache.put(cacheKey.localKey(), value);
-        if (old == null || !old.equals(value)) {
-            dirty++;
-        }
-
-        if (dirty > MAX_DIRTY) {
-            write();
-        }
+        putViaInternalKey(cacheKey, value);
     }
 
     /**
@@ -167,37 +158,26 @@ class LocalCache<K extends CacheKey> implements Cache<K> {
     @Override
     @Deprecated(forRemoval = false)
     public synchronized <T> void putViaInternalKey(K cacheKey, T value) {
+        String jsonValue;
         try {
-            String jsonValue = mapper.writeValueAsString(Objects.requireNonNull(value));
-            String old = cache.put(cacheKey.localKey(), jsonValue);
-            if (old == null || !old.equals(jsonValue)) {
-                dirty++;
-            }
-
-            if (dirty > MAX_DIRTY) {
-                write();
-            }
+            jsonValue = mapper.writeValueAsString(Objects.requireNonNull(value));
         } catch (JsonProcessingException e) {
             throw new IllegalArgumentException("Could not serialize object", e);
+        }
+        String old = cache.put(cacheKey.localKey(), jsonValue);
+        if (old == null || !old.equals(jsonValue)) {
+            dirty++;
+        }
+
+        if (dirty > MAX_DIRTY) {
+            write();
         }
     }
 
     @Override
     public synchronized <T> void put(String key, T value) {
-        try {
-            String jsonValue = mapper.writeValueAsString(Objects.requireNonNull(value));
-            K cacheKey = cacheParameter.createCacheKey(key);
-            String old = cache.put(cacheKey.localKey(), jsonValue);
-            if (old == null || !old.equals(jsonValue)) {
-                dirty++;
-            }
-
-            if (dirty > MAX_DIRTY) {
-                write();
-            }
-        } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException("Could not serialize object", e);
-        }
+        K cacheKey = cacheParameter.createCacheKey(key);
+        putViaInternalKey(cacheKey, value);
     }
 
     @Override
