@@ -120,7 +120,10 @@ public final class Environment {
      */
     public static synchronized void overwrite(Path path) {
         if (Files.exists(path)) {
-            dotenv = Dotenv.configure().filename(path.toString()).load();
+            dotenv = Dotenv.configure()
+                    .directory(path.getParent().toAbsolutePath().toString())
+                    .filename(path.getFileName().toString())
+                    .load();
         } else {
             logger.warn("No .env file found at '{}', using system environment variables", path);
         }
