@@ -71,6 +71,10 @@ class CacheRecoveryIntegrationTest {
     @BeforeEach
     void setUp() throws IOException {
         deleteDir("src/test/resources/warc/temp/");
+        try (var jedis = new redis.clients.jedis.Jedis(redisContainer.getHost(), redisContainer.getMappedPort(6379))) {
+            jedis.flushAll();
+            assertEquals(0, jedis.dbSize(), "Redis should be empty before test");
+        }
     }
 
     @AfterAll
@@ -105,6 +109,98 @@ class CacheRecoveryIntegrationTest {
         assertCacheFilesIdentical(
                 Path.of("src/test/resources/warc/cache/OpenAiEmbeddingCreator_text-embedding-3-large.json"),
                 Path.of("src/test/resources/warc/temp/cache/OpenAiEmbeddingCreator_text-embedding-3-large.json"));
+    }
+
+    /**
+     * This test fills the missing entries in a partial local cache from Redis.
+     * This test simulates a scenario where the local cache already holds some values while others get backfilled
+     * from the remote redis cache.
+     */
+    @Test
+    @DisplayName("Cache completion: Partial local cache completed from Redis")
+    void testPartialCacheCompletionIntegration() throws Exception {
+        // ===== PHASE 1: Fill Redis from complete local cache =====
+        runEvaluation("src/test/resources/warc/config.json", toRedisEnv);
+
+        // ===== SETUP: Copy complete cache to temp dir and remove some entries =====
+        Path sourceCacheFile =
+                Path.of("src/test/resources/warc/cache/SimpleClassifier_gpt-4o-mini-2024-07-18_133742243.json");
+        Path tempCacheDir = Path.of("src/test/resources/warc/temp/cache");
+        Files.createDirectories(tempCacheDir);
+        Path tempCacheFile = tempCacheDir.resolve("SimpleClassifier_gpt-4o-mini-2024-07-18_133742243.json");
+        Files.copy(sourceCacheFile, tempCacheFile);
+
+        // Remove some entries to simulate a partial cache
+        ObjectMapper mapper = new ObjectMapper();
+        TypeReference<Map<String, String>> typeRef = new TypeReference<>() {};
+        Map<String, String> cacheData = new LinkedHashMap<>(mapper.readValue(tempCacheFile.toFile(), typeRef));
+        List<String> keys = new ArrayList<>(cacheData.keySet());
+        // Remove the last third of entries
+        for (String key : keys.subList(keys.size() - keys.size() / 3, keys.size())) {
+            cacheData.remove(key);
+        }
+        assertTrue(keys.size() > cacheData.size(), "Partial cache should not contain all cache keys");
+        mapper.writeValue(tempCacheFile.toFile(), cacheData);
+
+        // ===== PHASE 2: Complete partial local cache from Redis =====
+        runEvaluation("src/test/resources/warc/config-without-cache.json", toLocalEnv);
+
+        // ===== ASSERT: Partial local cache is now complete =====
+        assertCacheFilesIdentical(sourceCacheFile, tempCacheFile);
+    }
+
+    /**
+     * This test ensures that no cache values are removed when the local cache is already complete and the Redis cache
+     * is used as secondary.
+     */
+    @Test
+    @DisplayName("Cache preservation: Existing entries are not removed")
+    void testCacheStabilityIntegration() throws Exception {
+        // ===== SETUP: Copy complete cache to temp dir and add extra entries =====
+        Path sourceCacheFile =
+                Path.of("src/test/resources/warc/cache/SimpleClassifier_gpt-4o-mini-2024-07-18_133742243.json");
+        Path tempCacheDir = Path.of("src/test/resources/warc/temp/cache");
+        Files.createDirectories(tempCacheDir);
+        Path tempCacheFile = tempCacheDir.resolve("SimpleClassifier_gpt-4o-mini-2024-07-18_133742243.json");
+        Files.copy(sourceCacheFile, tempCacheFile);
+
+        // Add extra entries to simulate a cache with additional values
+        ObjectMapper mapper = new ObjectMapper();
+        TypeReference<Map<String, String>> typeRef = new TypeReference<>() {};
+        Map<String, String> cacheData = new LinkedHashMap<>(mapper.readValue(tempCacheFile.toFile(), typeRef));
+        int keys = cacheData.size();
+        cacheData.put("extra-key-1", "\"extra-value-1\"");
+        cacheData.put("extra-key-2", "\"extra-value-2\"");
+        assertTrue(keys < cacheData.size(), "Larger cache should contain additional keys");
+        mapper.writeValue(tempCacheFile.toFile(), cacheData);
+
+        // ===== PHASE 1: Fill Redis from complete local cache =====
+        runEvaluation("src/test/resources/warc/config.json", toRedisEnv);
+
+        // ===== PHASE 2: Run evaluation against fully populated local cache =====
+        runEvaluation("src/test/resources/warc/config-without-cache.json", toLocalEnv);
+
+        // ===== ASSERT: All original entries still present including extra ones =====
+        Map<String, String> resultData = mapper.readValue(tempCacheFile.toFile(), typeRef);
+        assertEquals(cacheData.size(), resultData.size(), "Cache should have same number of entries");
+        for (String rawKey : cacheData.keySet()) {
+            RecoveryCacheKey key = RecoveryCacheKey.of(new RecoveryCacheParameter(), rawKey);
+            LocalCache<RecoveryCacheKey> cache1 =
+                    new LocalCache<>(tempCacheFile.toString(), new RecoveryCacheParameter());
+            String value1 = cache1.getViaInternalKey(key, String.class);
+            assertNotNull(value1, "Value should not be null for key: " + rawKey);
+        }
+        // Extra keys should still be present
+        LocalCache<RecoveryCacheKey> resultCache =
+                new LocalCache<>(tempCacheFile.toString(), new RecoveryCacheParameter());
+        assertEquals(
+                "extra-value-1",
+                resultCache.getViaInternalKey(
+                        RecoveryCacheKey.of(new RecoveryCacheParameter(), "extra-key-1"), String.class));
+        assertEquals(
+                "extra-value-2",
+                resultCache.getViaInternalKey(
+                        RecoveryCacheKey.of(new RecoveryCacheParameter(), "extra-key-2"), String.class));
     }
 
     /**
