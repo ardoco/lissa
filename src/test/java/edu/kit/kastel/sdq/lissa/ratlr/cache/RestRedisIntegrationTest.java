@@ -34,6 +34,9 @@ public class RestRedisIntegrationTest {
         restCache = new RestRedisCache<>(cacheParameter, new ObjectMapper());
     }
 
+    /**
+     * Tests that a connection to the redis client can be established.
+     */
     @Test
     @DisplayName("Test REST Redis client connection")
     void testRestRedisConnection() {
@@ -41,6 +44,9 @@ public class RestRedisIntegrationTest {
                 CacheType.REST_REDIS, new ClassifierCacheParameter("test", 1, 0.0), null, new ObjectMapper());
     }
 
+    /**
+     * Tests that the REST Redis cache can successfully set and get values, and that it returns null for non-existing keys.
+     */
     @Test
     @DisplayName("Test REST Redis cache set and get")
     void testRestRedisCacheSetAndGet() {
@@ -51,6 +57,11 @@ public class RestRedisIntegrationTest {
         assertNull(nonExistingValue);
     }
 
+    /**
+     * Tests that the hierarchical cache correctly handles conflicts between a local file cache and a REST Redis cache
+     * when using the NONE strategy, ensuring that the primary cache value is returned and the secondary cache remains
+     * unchanged.
+     */
     @Test
     @DisplayName("Test HierarchicalCache with local and REST Redis cache")
     void testHierarchicalCacheWithLocalAndRestRedis() {
@@ -79,6 +90,10 @@ public class RestRedisIntegrationTest {
         assertEquals(redisValue, redisCache.get(testKey, String.class));
     }
 
+    /**
+     * Tests that the overwrite strategy correctly overwrites the secondary REST Redis cache with the primary local
+     * cache value when there is a conflict.
+     */
     @Test
     @DisplayName("Test HierarchicalCache OVERWRITE strategy with REST Redis")
     void testHierarchicalCacheOverwriteStrategyWithRestRedis() {
@@ -110,6 +125,9 @@ public class RestRedisIntegrationTest {
         assertEquals(primaryValue, redisCache.get(testKey, String.class));
     }
 
+    /**
+     * Tests the error strategy for conflicting values in the remote REST cache and local file cache.
+     */
     @Test
     @DisplayName("Test HierarchicalCache ERROR strategy detects conflicts with REST Redis")
     void testHierarchicalCacheErrorStrategyWithRestRedis() {
@@ -137,6 +155,9 @@ public class RestRedisIntegrationTest {
                 .contains("Cache inconsistency"));
     }
 
+    /**
+     * Tests backfilling from REST Redis to local cache when primary cache is missing a value.
+     */
     @Test
     @DisplayName("Test HierarchicalCache backfill with REST Redis cache")
     void testHierarchicalCacheBackfillWithRestRedis() {

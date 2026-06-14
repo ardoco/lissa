@@ -8,6 +8,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.kit.kastel.sdq.lissa.ratlr.utils.Environment;
 
+/**
+ * Implements a Redis-based cache for storing and retrieving values using a REST interface.
+ *
+ * @param <K> The type of cache key used in this cache
+ */
 public class RestRedisCache<K extends CacheKey> extends RedisCache<K> {
 
     /**
@@ -22,6 +27,10 @@ public class RestRedisCache<K extends CacheKey> extends RedisCache<K> {
         super(cacheParameter, mapper, createRedisConnection());
     }
 
+    /**
+     * Initiates the REST Redis connection
+     * TODO: Consider usefulness of defaults
+     */
     private static UnifiedRedisClient createRedisConnection() {
         String restRedisUri = "localhost";
         if (Environment.getenv("REST_REDIS_URI") != null) {
