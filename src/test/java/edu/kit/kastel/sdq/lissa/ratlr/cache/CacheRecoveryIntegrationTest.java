@@ -218,7 +218,7 @@ class CacheRecoveryIntegrationTest {
         Assertions.assertTrue(config.exists());
 
         Evaluation evaluation = new Evaluation(config.toPath());
-        var traceLinks = evaluation.run();
+        evaluation.run();
     }
 
     /**
