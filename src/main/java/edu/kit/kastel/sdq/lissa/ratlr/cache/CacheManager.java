@@ -208,7 +208,6 @@ public final class CacheManager {
     private <K extends CacheKey> Cache<K> buildCacheHierarchy(String cacheName, CacheParameter<K> parameters) {
         ObjectMapper mapper = new ObjectMapper();
         String cacheFilePath = directoryOfCaches.resolve(cacheName + ".json").toString();
-        // Create cache instances for each type, skipping those that fail to initialize
         List<Cache<K>> createdCaches = new ArrayList<>();
         for (CacheType cacheType : hierarchyConfig) {
             Cache<K> cache = Cache.createByType(cacheType, parameters, cacheFilePath, mapper);
