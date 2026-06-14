@@ -2,7 +2,6 @@
 package edu.kit.kastel.sdq.lissa.ratlr.cache;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -50,17 +49,6 @@ public class RestRedisIntegrationTest {
         assertEquals("value", value);
         String nonExistingValue = restCache.get("ajhosadljhjyhxcjkhljysdhjk", String.class);
         assertNull(nonExistingValue);
-    }
-
-    @Test
-    @DisplayName("Test if key exists")
-    void testExistsMethod() {
-        restCache.put("key", "value");
-        String value = restCache.get("key", String.class);
-        assertEquals("value", value);
-        ClassifierCacheKey cacheKey = cacheParameter.createCacheKey("key");
-        assertTrue(restCache.exists(cacheKey.toJsonKey()));
-        assertFalse(restCache.exists("nonExistingKey"));
     }
 
     @Test

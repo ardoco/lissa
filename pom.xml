@@ -138,11 +138,6 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
     </dependency>
-    <dependency>
-      <groupId>redis.clients</groupId>
-      <artifactId>jedis</artifactId>
-      <version>7.5.0</version>
-    </dependency>
   </dependencies>
   <repositories>
     <repository>
