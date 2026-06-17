@@ -28,22 +28,21 @@ public class RestRedisCache<K extends CacheKey> extends RedisCache<K> {
     }
 
     /**
-     * Initiates the REST Redis connection
-     * TODO: Consider usefulness of defaults
+     * Initiates the REST Redis connection using environment variables for configuration. The following environment variables are used:
+     * <ul>
+     *     <li>{@code REST_REDIS_URI}: The URI of the REST Redis server (default: {@code http://localhost:8080})</li>
+     *     <li>{@code REST_REDIS_USERNAME}: The username for authentication (optional)</li>
+     *     <li>{@code REST_REDIS_PASSWORD}: The password for authentication (optional)</li>
+     * </ul>
      */
     private static UnifiedRedisClient createRedisConnection() {
-        String restRedisUri = "localhost";
-        if (Environment.getenv("REST_REDIS_URI") != null) {
-            restRedisUri = Environment.getenv("REST_REDIS_URI");
+        String restRedisUri = "http://localhost:8080";
+        String restRedisUriEnv = Environment.getenv("REST_REDIS_URI");
+        if (restRedisUriEnv != null) {
+            restRedisUri = restRedisUriEnv;
         }
-        String restRedisUsername = "admin";
-        if (Environment.getenv("REST_REDIS_USERNAME") != null) {
-            restRedisUsername = Environment.getenv("REST_REDIS_USERNAME");
-        }
-        String restRedisPassword = "dummy";
-        if (Environment.getenv("REST_REDIS_PASSWORD") != null) {
-            restRedisPassword = Environment.getenv("REST_REDIS_PASSWORD");
-        }
+        String restRedisUsername = Environment.getenv("REST_REDIS_USERNAME");
+        String restRedisPassword = Environment.getenv("REST_REDIS_PASSWORD");
 
         ClientConfiguration config = new ClientConfiguration(restRedisUri, restRedisUsername, restRedisPassword);
         UnifiedRedisClient redis = new RestRedisAdapter(new Client(config));
