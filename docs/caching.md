@@ -26,6 +26,9 @@ LiSSA implements a sophisticated caching system to improve performance and ensur
    - [`RedisCache`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/RedisCache.java): Redis-based cache implementation
      - Uses Redis for high-performance caching
      - Supports both string and object serialization
+   - [`RestRedisCache`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/RestRedisCache.java): REST-based Redis cache implementation
+     - Uses REST API to interact with Redis server
+     - Provides an alternative to direct Redis connections, useful for shared caches
 3. **Cache Management**
    - [`CacheManager`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/CacheManager.java): Central manager for cache instances
      - Manages cache directory configuration
@@ -98,14 +101,17 @@ The `Cache` interface provides two API levels:
 
    The caching system supports the following environment variables:
    - **CACHE_HIERARCHY**: Comma-separated list of cache types in order (e.g., "LOCAL,REDIS")
-   - Default: "REDIS, LOCAL"
-   - Supported values: "LOCAL", "REDIS"
+   - Default: "LOCAL"
+   - Supported values: "LOCAL", "REDIS", "REST_REDIS"
    - **CACHE_REPLACEMENT_STRATEGY**: Strategy for handling conflicts between cache layers
    - Default: "NONE"
    - Supported values: "NONE", "ERROR", "OVERWRITE"
    - **REDIS_URL**: Redis connection URL for RedisCache
    - Default: "redis://localhost:6379"
    - Example: "redis://redis-server:6379"
+   - **REST_REDIS_URI**: URI for REST Redis server (if using REST_REDIS cache type)
+   - **REST_REDIS_USERNAME**: Username for REST Redis authentication
+   - **REST_REDIS_PASSWORD**: Password for REST Redis authentication
 
 3. **Redis Setup**
    To use Redis for caching, you need to set up a Redis server. Here's a recommended Docker Compose configuration:
