@@ -28,8 +28,7 @@ public class RedisAdapter implements UnifiedRedisClient {
      */
     @Override
     public boolean ping() {
-        // TODO Find out what ping should return
-        return jedis.ping() != null;
+        return jedis.ping().equals("PONG");
     }
 
     /**

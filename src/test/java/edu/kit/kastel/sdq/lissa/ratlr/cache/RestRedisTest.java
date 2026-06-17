@@ -5,32 +5,104 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
+import org.fuchss.restredis.client.Client;
+import org.fuchss.restredis.client.ClientConfiguration;
+import org.fuchss.restredis.server.Server;
+import org.fuchss.restredis.server.ServerConfiguration;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.kit.kastel.sdq.lissa.ratlr.cache.classifier.ClassifierCacheKey;
 import edu.kit.kastel.sdq.lissa.ratlr.cache.classifier.ClassifierCacheParameter;
+import edu.kit.kastel.sdq.lissa.ratlr.utils.Environment;
+
+import kong.unirest.core.Unirest;
 
 /**
- * Integration test for the REST Redis interface.
- * TODO: maybe testcontainer or something?
+ * Integration test for the REST Redis interface, using a Testcontainers-managed Redis instance.
  */
-public class RestRedisIntegrationTest {
+@Testcontainers
+public class RestRedisTest {
+
+    @Container
+    private static final GenericContainer<?> REDIS =
+            new GenericContainer<>(DockerImageName.parse("redis:latest")).withExposedPorts(6379);
 
     RestRedisCache<ClassifierCacheKey> restCache;
     private final ClassifierCacheParameter cacheParameter = new ClassifierCacheParameter("test", 1, 0.0);
 
+    private static Path envFile;
+    private static Thread serverThread;
+    private static Client client;
+
     @TempDir
-    private Path tempCacheDir;
+    private static Path tempCacheDir;
+
+    @BeforeAll
+    static void startServer() throws Exception {
+        int httpPort = findFreePort();
+        Path configFile = tempCacheDir.resolve("server_config.json");
+        new ObjectMapper()
+                .writeValue(
+                        configFile.toFile(),
+                        new ServerConfiguration(REDIS.getHost(), REDIS.getMappedPort(6379), httpPort));
+
+        serverThread = new Thread(
+                () -> {
+                    try {
+                        Server.main(new String[] {configFile.toString()});
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                },
+                "rest-redis-test-server");
+        serverThread.setDaemon(true);
+        serverThread.start();
+
+        String baseUrl = "http://localhost:" + httpPort;
+        waitForServerReady(baseUrl);
+        envFile = tempCacheDir.resolve(".env-rest");
+
+        Files.writeString(envFile, """
+                REST_REDIS_URI=%s
+                REST_REDIS_USERNAME=
+                REST_REDIS_PASSWORD=
+                """.formatted(baseUrl));
+
+        Environment.overwrite(envFile);
+        client = new Client(new ClientConfiguration(baseUrl, null, null));
+    }
+
+    @AfterAll
+    static void stopServer() throws InterruptedException {
+        if (client != null) {
+            client.close();
+        }
+        if (serverThread != null) {
+            serverThread.interrupt();
+            serverThread.join(5000);
+        }
+    }
 
     @BeforeEach
     public void setup() {
+        Environment.overwrite(envFile);
         restCache = new RestRedisCache<>(cacheParameter, new ObjectMapper());
     }
 
@@ -40,7 +112,7 @@ public class RestRedisIntegrationTest {
     @Test
     @DisplayName("Test REST Redis client connection")
     void testRestRedisConnection() {
-        Cache<ClassifierCacheKey> cache = Cache.createByType(
+        Cache.createByType(
                 CacheType.REST_REDIS, new ClassifierCacheParameter("test", 1, 0.0), null, new ObjectMapper());
     }
 
@@ -149,7 +221,7 @@ public class RestRedisIntegrationTest {
                 new HierarchicalCache<>(cacheParameter, localCache, redisCache, CacheReplacementStrategy.ERROR);
 
         // Then: Getting conflicting values throws an exception
-        assertTrue(org.junit.jupiter.api.Assertions.assertThrows(
+        assertTrue(Assertions.assertThrows(
                         IllegalStateException.class, () -> hierarchicalCacheError.get(testKey, String.class))
                 .getMessage()
                 .contains("Cache inconsistency"));
@@ -186,5 +258,31 @@ public class RestRedisIntegrationTest {
         // And: Primary cache is backfilled with the value
         hierarchicalCache.flush();
         assertEquals(redisValue, localCache.get(testKey, String.class));
+    }
+
+    private static int findFreePort() throws IOException {
+        try (ServerSocket socket = new ServerSocket(0)) {
+            return socket.getLocalPort();
+        }
+    }
+
+    private static void waitForServerReady(String baseUrl) throws InterruptedException {
+        long deadline = System.currentTimeMillis() + 30000;
+        while (System.currentTimeMillis() < deadline) {
+            if (isServerResponding(baseUrl)) {
+                return;
+            }
+            Thread.sleep(150);
+        }
+        throw new IllegalStateException("REST-Redis server did not become ready in time");
+    }
+
+    private static boolean isServerResponding(String baseUrl) {
+        try {
+            var response = Unirest.get(baseUrl + "/").asString();
+            return response.getStatus() >= 200 && response.getStatus() < 600;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

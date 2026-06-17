@@ -83,7 +83,9 @@ class RedisCache<K extends CacheKey> implements Cache<K> {
         }
         redis = new RedisAdapter(RedisClient.create(redisUrl));
         // Check if connection is working
-        redis.ping();
+        if (!redis.ping()) {
+            throw new IllegalStateException("Could not connect to Redis. Make sure the container is up and running.");
+        }
     }
 
     /**
