@@ -367,7 +367,7 @@ class ArchitectureTest {
     @ArchTest
     static final ArchRule cacheManagerResetOnlyInTests = noClasses()
             .that()
-            .haveNameNotMatching(".*Test*")
+            .haveNameNotMatching(".*Test.*")
             .should()
             .callMethod(CacheManager.class, "resetDefaultInstance")
             .because(
