@@ -382,7 +382,7 @@ class ArchitectureTest {
     @ArchTest
     static final ArchRule environmentOverwriteOnlyInTests = noClasses()
             .that()
-            .haveNameNotMatching(".*Test*")
+            .haveNameNotMatching(".*Test.*")
             .should()
             .callMethod(Environment.class, "overwrite", Path.class)
             .because(
