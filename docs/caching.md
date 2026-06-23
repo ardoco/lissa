@@ -98,7 +98,7 @@ The `Cache` interface provides two API levels:
 
    The caching system supports the following environment variables:
    - **CACHE_HIERARCHY**: Comma-separated list of cache types in order (e.g., "LOCAL,REDIS")
-   - Default: "REDIS, LOCAL"
+   - Default: "LOCAL"
    - Supported values: "LOCAL", "REDIS"
    - **CACHE_REPLACEMENT_STRATEGY**: Strategy for handling conflicts between cache layers
    - Default: "NONE"
