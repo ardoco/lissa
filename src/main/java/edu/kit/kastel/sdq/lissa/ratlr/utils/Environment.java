@@ -120,8 +120,15 @@ public final class Environment {
      */
     public static synchronized void overwrite(Path path) {
         if (Files.exists(path)) {
+            String directory;
+            if (path.getParent() != null) {
+                directory = path.getParent().toAbsolutePath().toString();
+            } else {
+                directory = Path.of("").toAbsolutePath().toString();
+            }
+
             dotenv = Dotenv.configure()
-                    .directory(path.getParent().toAbsolutePath().toString())
+                    .directory(directory)
                     .filename(path.getFileName().toString())
                     .load();
         } else {

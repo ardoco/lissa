@@ -120,10 +120,12 @@ public interface Cache<K extends CacheKey> {
      * Factory method to create a cache instance by type name.
      * Supported types:
      * <ul>
-     *     <li>"local" - LocalCache for file-based storage</li>
-     *     <li>"redis" - RedisCache for Redis-based storage</li>
-     *     <li>"rest_redis" - RestRedisCache for REST-based Redis storage</li>
+     *     <li>{@link CacheType#LOCAL} - file-based storage</li>
+     *     <li>{@link CacheType#REDIS} - Redis-based storage</li>
+     *     <li>{@link CacheType#REST_REDIS} - REST-based Redis storage</li>
      * </ul>
+     *
+     * @see CacheType
      *
      * @param <K>        The type of cache key
      * @param type       The cache type name (case-insensitive)

@@ -29,7 +29,7 @@ class RedisCache<K extends CacheKey> implements Cache<K> {
     /**
      * Redis client instance.
      */
-    private UnifiedRedisClient redis;
+    private final UnifiedRedisClient redis;
 
     /**
      * Creates a new Redis cache instance.
@@ -40,12 +40,7 @@ class RedisCache<K extends CacheKey> implements Cache<K> {
      * @throws IllegalArgumentException If Redis connection cannot be established
      */
     RedisCache(CacheParameter<K> cacheParameter, ObjectMapper mapper) {
-        this.cacheParameter = Objects.requireNonNull(cacheParameter);
-        this.mapper = Objects.requireNonNull(mapper);
-        createRedisConnection();
-        if (redis == null) {
-            throw new IllegalArgumentException("Could not connect to Redis");
-        }
+        this(cacheParameter, mapper, createRedisConnection());
     }
 
     /**
@@ -53,12 +48,12 @@ class RedisCache<K extends CacheKey> implements Cache<K> {
      *
      * @param cacheParameter The cache parameter configuration
      * @param mapper The ObjectMapper for JSON operations
-     * @param jedis The connected redis instance
+     * @param redis The connected redis instance
      */
-    protected RedisCache(CacheParameter<K> cacheParameter, ObjectMapper mapper, UnifiedRedisClient jedis) {
+    protected RedisCache(CacheParameter<K> cacheParameter, ObjectMapper mapper, UnifiedRedisClient redis) {
         this.cacheParameter = Objects.requireNonNull(cacheParameter);
         this.mapper = Objects.requireNonNull(mapper);
-        this.redis = Objects.requireNonNull(jedis);
+        this.redis = Objects.requireNonNull(redis);
     }
 
     @Override
@@ -76,16 +71,18 @@ class RedisCache<K extends CacheKey> implements Cache<K> {
      * Establishes a connection to the Redis server.
      * The Redis URL can be configured through the REDIS_URL environment variable.
      */
-    private void createRedisConnection() {
+    private static RedisAdapter createRedisConnection() {
         String redisUrl = "redis://localhost:6379";
         if (Environment.getenv("REDIS_URL") != null) {
             redisUrl = Environment.getenv("REDIS_URL");
         }
-        redis = new RedisAdapter(RedisClient.create(redisUrl));
+        RedisAdapter redis = new RedisAdapter(RedisClient.create(redisUrl));
         // Check if connection is working
         if (!redis.ping()) {
+            redis.close();
             throw new IllegalStateException("Could not connect to Redis. Make sure the container is up and running.");
         }
+        return redis;
     }
 
     /**

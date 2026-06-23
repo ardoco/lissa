@@ -42,14 +42,21 @@ public class RestRedisCache<K extends CacheKey> extends RedisCache<K> {
             restRedisUri = restRedisUriEnv;
         }
         String restRedisUsername = Environment.getenv("REST_REDIS_USERNAME");
+        if (restRedisUsername != null && restRedisUsername.isBlank()) {
+            restRedisUsername = null;
+        }
         String restRedisPassword = Environment.getenv("REST_REDIS_PASSWORD");
+        if (restRedisPassword != null && restRedisPassword.isBlank()) {
+            restRedisPassword = null;
+        }
 
         ClientConfiguration config = new ClientConfiguration(restRedisUri, restRedisUsername, restRedisPassword);
         UnifiedRedisClient redis = new RestRedisAdapter(new Client(config));
 
         // Check if connection is working
         if (!redis.ping()) {
-            throw new IllegalStateException("Could not connect to redis");
+            redis.close();
+            throw new IllegalStateException("Could not connect to redis at " + restRedisUri);
         }
 
         return redis;

@@ -14,7 +14,7 @@ public enum CacheType {
      */
     REDIS,
     /**
-     * Remote Redis instance accessible via an REST api
+     * Remote Redis instance accessible via a REST API
      */
     REST_REDIS
 }
