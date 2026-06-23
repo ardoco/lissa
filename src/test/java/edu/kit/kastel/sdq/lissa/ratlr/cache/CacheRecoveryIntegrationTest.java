@@ -49,7 +49,6 @@ class CacheRecoveryIntegrationTest {
 
     @BeforeAll
     static void setUpRedis() throws IOException {
-        redisContainer.start();
         String redisUrl = "redis://" + redisContainer.getHost() + ":" + redisContainer.getMappedPort(6379);
 
         String baseEnv = """
@@ -79,7 +78,6 @@ class CacheRecoveryIntegrationTest {
 
     @AfterAll
     static void tearDown() throws IOException {
-        redisContainer.close();
         deleteDir("src/test/resources/warc/temp/");
     }
 
@@ -183,12 +181,11 @@ class CacheRecoveryIntegrationTest {
         // ===== ASSERT: All original entries still present including extra ones =====
         Map<String, String> resultData = mapper.readValue(tempCacheFile.toFile(), typeRef);
         assertEquals(cacheData.size(), resultData.size(), "Cache should have same number of entries");
+        LocalCache<RecoveryCacheKey> cache = new LocalCache<>(tempCacheFile.toString(), new RecoveryCacheParameter());
         for (String rawKey : cacheData.keySet()) {
             RecoveryCacheKey key = RecoveryCacheKey.of(new RecoveryCacheParameter(), rawKey);
-            LocalCache<RecoveryCacheKey> cache1 =
-                    new LocalCache<>(tempCacheFile.toString(), new RecoveryCacheParameter());
-            String value1 = cache1.getViaInternalKey(key, String.class);
-            assertNotNull(value1, "Value should not be null for key: " + rawKey);
+            String value = cache.getViaInternalKey(key, String.class);
+            assertNotNull(value, "Value should not be null for key: " + rawKey);
         }
         // Extra keys should still be present
         LocalCache<RecoveryCacheKey> resultCache =
@@ -263,7 +260,7 @@ class CacheRecoveryIntegrationTest {
                         .map(Path::toFile)
                         .toList();
                 for (File file : files) {
-                    file.delete();
+                    Files.deleteIfExists(file.toPath());
                 }
             }
         }
