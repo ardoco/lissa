@@ -34,7 +34,7 @@ import io.github.cdimascio.dotenv.Dotenv;
 public final class Environment {
     private static final Logger logger = LoggerFactory.getLogger(Environment.class);
     /** The loaded .env configuration, or null if no .env file exists */
-    private static @Nullable Dotenv dotenv = load();
+    private static volatile @Nullable Dotenv dotenv = load();
 
     private Environment() {
         throw new IllegalAccessError("Utility class");
