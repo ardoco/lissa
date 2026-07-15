@@ -12,7 +12,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.kit.kastel.sdq.lissa.ratlr.utils.Environment;
 
 import redis.clients.jedis.RedisClient;
-import redis.clients.jedis.UnifiedJedis;
 
 /**
  * Implements a Redis-based cache for storing and retrieving values. For multi-layer caching with
@@ -30,7 +29,7 @@ class RedisCache<K extends CacheKey> implements Cache<K> {
     /**
      * Redis client instance.
      */
-    private UnifiedJedis jedis;
+    private final UnifiedRedisClient redis;
 
     /**
      * Creates a new Redis cache instance.
@@ -38,15 +37,23 @@ class RedisCache<K extends CacheKey> implements Cache<K> {
      *
      * @param cacheParameter The cache parameter configuration
      * @param mapper The ObjectMapper for JSON operations
-     * @throws IllegalArgumentException If Redis connection cannot be established
+     * @throws IllegalStateException If Redis connection cannot be established
      */
     RedisCache(CacheParameter<K> cacheParameter, ObjectMapper mapper) {
+        this(cacheParameter, mapper, createRedisConnection());
+    }
+
+    /**
+     * Creates a Redis Cache instance with a custom redis connection
+     *
+     * @param cacheParameter The cache parameter configuration
+     * @param mapper The ObjectMapper for JSON operations
+     * @param redis The connected redis instance
+     */
+    protected RedisCache(CacheParameter<K> cacheParameter, ObjectMapper mapper, UnifiedRedisClient redis) {
         this.cacheParameter = Objects.requireNonNull(cacheParameter);
         this.mapper = Objects.requireNonNull(mapper);
-        createRedisConnection();
-        if (jedis == null) {
-            throw new IllegalArgumentException("Could not connect to Redis");
-        }
+        this.redis = Objects.requireNonNull(redis);
     }
 
     @Override
@@ -57,21 +64,27 @@ class RedisCache<K extends CacheKey> implements Cache<K> {
     @Override
     public boolean containsKey(String key) {
         K cacheKey = cacheParameter.createCacheKey(key);
-        return jedis.exists(cacheKey.toJsonKey());
+        return redis.exists(cacheKey.toJsonKey());
     }
 
     /**
      * Establishes a connection to the Redis server.
      * The Redis URL can be configured through the REDIS_URL environment variable.
+     *
+     * @throws IllegalStateException if Redis connection could not be established
      */
-    private void createRedisConnection() {
+    private static RedisAdapter createRedisConnection() {
         String redisUrl = "redis://localhost:6379";
         if (Environment.getenv("REDIS_URL") != null) {
             redisUrl = Environment.getenv("REDIS_URL");
         }
-        jedis = RedisClient.create(redisUrl);
+        RedisAdapter redis = new RedisAdapter(RedisClient.create(redisUrl));
         // Check if connection is working
-        jedis.ping();
+        if (!redis.ping()) {
+            redis.close();
+            throw new IllegalStateException("Could not connect to Redis. Make sure the container is up and running.");
+        }
+        return redis;
     }
 
     /**
@@ -85,14 +98,14 @@ class RedisCache<K extends CacheKey> implements Cache<K> {
     @Override
     public synchronized <T> @Nullable T get(String key, Class<T> clazz) {
         K cacheKey = cacheParameter.createCacheKey(key);
-        String jsonData = jedis.hget(cacheKey.toJsonKey(), "data");
+        String jsonData = redis.hget(cacheKey.toJsonKey(), "data");
         return Cache.convert(jsonData, clazz, mapper);
     }
 
     @Override
     @SuppressWarnings("deprecation")
     public synchronized <T> @Nullable T getViaInternalKey(K cacheKey, Class<T> clazz) {
-        String jsonData = jedis.hget(cacheKey.toJsonKey(), "data");
+        String jsonData = redis.hget(cacheKey.toJsonKey(), "data");
         return Cache.convert(jsonData, clazz, mapper);
     }
 
@@ -107,8 +120,8 @@ class RedisCache<K extends CacheKey> implements Cache<K> {
     public synchronized void put(String key, String value) {
         K cacheKey = cacheParameter.createCacheKey(key);
         String jsonKey = cacheKey.toJsonKey();
-        jedis.hset(jsonKey, "data", value);
-        jedis.hset(jsonKey, "timestamp", String.valueOf(Instant.now().getEpochSecond()));
+        redis.hset(jsonKey, "data", value);
+        redis.hset(jsonKey, "timestamp", String.valueOf(Instant.now().getEpochSecond()));
     }
 
     /**
@@ -140,8 +153,8 @@ class RedisCache<K extends CacheKey> implements Cache<K> {
             throw new IllegalArgumentException("Could not serialize object", e);
         }
         String jsonKey = key.toJsonKey();
-        jedis.hset(jsonKey, "data", data);
-        jedis.hset(jsonKey, "timestamp", String.valueOf(Instant.now().getEpochSecond()));
+        redis.hset(jsonKey, "data", data);
+        redis.hset(jsonKey, "timestamp", String.valueOf(Instant.now().getEpochSecond()));
     }
 
     @Override
