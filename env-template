@@ -11,3 +11,16 @@ OLLAMA_HOST=
 
 OPENAI_ORGANIZATION_ID=
 OPENAI_API_KEY=
+
+# Cache strategy for handling conflicts between different cache levels
+# Valid values: NONE, ERROR, OVERWRITE
+#CACHE_REPLACEMENT_STRATEGY=ERROR
+
+# Cache hierarchy - ascending comma-separated list of cache types to use
+# Examples:
+#   LOCAL - only local file-based cache
+#   LOCAL,REDIS - local cache as primary, Redis as secondary fallback
+#   REDIS,LOCAL - Redis as primary, local cache as secondary fallback
+# Valid cache types: LOCAL, REDIS
+#CACHE_HIERARCHY=REDIS,LOCAL
+

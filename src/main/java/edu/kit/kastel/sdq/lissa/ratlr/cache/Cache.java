@@ -3,6 +3,9 @@ package edu.kit.kastel.sdq.lissa.ratlr.cache;
 
 import org.jspecify.annotations.Nullable;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * Interface for cache implementations in the LiSSA framework.
  * This interface defines the contract for caching mechanisms that store and retrieve
@@ -14,8 +17,8 @@ public interface Cache<K extends CacheKey> {
     /**
      * Retrieves a value from the cache and deserializes it to the specified type.
      *
-     * @param <T> The type to deserialize the cached value to
-     * @param key The cache key to look up
+     * @param <T>   The type to deserialize the cached value to
+     * @param key   The cache key to look up
      * @param clazz The class of the type to deserialize to
      * @return The deserialized value, or null if not found
      */
@@ -25,8 +28,8 @@ public interface Cache<K extends CacheKey> {
      * Retrieves a value from the cache and deserializes it to the specified type.
      * <b>DO NOT USE UNLESS YOU KNOW WHAT YOU ARE DOING.</b>
      *
-     * @param <T> The type to deserialize the cached value to
-     * @param key The cache key to look up
+     * @param <T>   The type to deserialize the cached value to
+     * @param key   The cache key to look up
      * @param clazz The class of the type to deserialize to
      * @return The deserialized value, or null if not found
      * @deprecated This method exposes internal cache key handling and should not be used in general code.
@@ -37,7 +40,7 @@ public interface Cache<K extends CacheKey> {
     /**
      * Stores a string value in the cache.
      *
-     * @param key The cache key to store the value under
+     * @param key   The cache key to store the value under
      * @param value The string value to store
      */
     void put(String key, String value);
@@ -45,8 +48,8 @@ public interface Cache<K extends CacheKey> {
     /**
      * Stores a string value in the cache.
      *
-     * @param <T> The type of the value to store
-     * @param key The cache key to store the value under
+     * @param <T>   The type of the value to store
+     * @param key   The cache key to store the value under
      * @param value The value to store
      * @deprecated This method exposes internal cache key handling and should not be used in general code.
      */
@@ -57,8 +60,8 @@ public interface Cache<K extends CacheKey> {
      * Stores an object value in the cache.
      * The object will be serialized before storage.
      *
-     * @param <T> The type of the value to store
-     * @param key The cache key to store the value under
+     * @param <T>   The type of the value to store
+     * @param key   The cache key to store the value under
      * @param value The object value to store
      */
     <T> void put(String key, T value);
@@ -85,4 +88,55 @@ public interface Cache<K extends CacheKey> {
      * @return The cache parameters
      */
     CacheParameter<K> getCacheParameter();
+
+    /**
+     * Converts a JSON string to an object of the specified type.
+     * If the target type is String, the JSON string is returned as is.
+     *
+     * @param <T>      The type to convert to
+     * @param jsonData The JSON string to convert
+     * @param clazz    The class of the target type
+     * @param mapper   The ObjectMapper instance to use for deserialization
+     * @return The converted object, or null if jsonData is null
+     * @throws IllegalArgumentException If the JSON cannot be deserialized to the target type
+     */
+    @SuppressWarnings("unchecked")
+    static <T> @Nullable T convert(@Nullable String jsonData, Class<T> clazz, ObjectMapper mapper) {
+        if (jsonData == null) {
+            return null;
+        }
+        try {
+            return mapper.readValue(jsonData, clazz);
+        } catch (JsonProcessingException e) {
+            // Backward compatibility for unserialized String values
+            if (clazz == String.class) {
+                return (T) jsonData;
+            }
+            throw new IllegalArgumentException("Could not deserialize object", e);
+        }
+    }
+
+    /**
+     * Factory method to create a cache instance by type name.
+     * Supported types:
+     * <ul>
+     *     <li>"local" - LocalCache for file-based storage</li>
+     *     <li>"redis" - RedisCache for Redis-based storage</li>
+     * </ul>
+     *
+     * @param <K>        The type of cache key
+     * @param type       The cache type name (case-insensitive)
+     * @param cacheDir   The directory for local cache storage
+     * @param parameters The cache parameters
+     * @param mapper     The ObjectMapper for JSON operations
+     * @return A cache instance of the specified type
+     * @throws IllegalArgumentException If the type is not recognized or the cache cannot be created
+     */
+    static <K extends CacheKey> Cache<K> createByType(
+            CacheType type, CacheParameter<K> parameters, @Nullable String cacheDir, @Nullable ObjectMapper mapper) {
+        return switch (type) {
+            case LOCAL -> new LocalCache<>(cacheDir, parameters);
+            case REDIS -> new RedisCache<>(parameters, mapper);
+        };
+    }
 }

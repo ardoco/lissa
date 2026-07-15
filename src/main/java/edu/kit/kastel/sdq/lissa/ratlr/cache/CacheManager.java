@@ -4,10 +4,20 @@ package edu.kit.kastel.sdq.lissa.ratlr.cache;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import edu.kit.kastel.sdq.lissa.ratlr.utils.Environment;
 
 /**
  * Manages caching operations in the LiSSA framework.
@@ -22,14 +32,22 @@ public final class CacheManager {
     public static final String DEFAULT_CACHE_DIRECTORY = "cache";
 
     /**
-     * The default strategy for handling cache conflicts between local and Redis caches.
-     * When true, Redis values take precedence over local cache values in case of conflicts.
+     * The default cache hierarchy: LOCAL only.
      */
-    private static final boolean DEFAULT_REPLACE_LOCAL_CACHE_ON_CONFLICT = true;
+    private static final String DEFAULT_CACHE_HIERARCHY = "LOCAL";
+
+    /**
+     * The default strategy for handling cache conflicts between local and Redis caches.
+     */
+    private static final CacheReplacementStrategy DEFAULT_REPLACEMENT_STRATEGY = CacheReplacementStrategy.NONE;
 
     private static @Nullable CacheManager defaultInstanceManager;
     private final Path directoryOfCaches;
-    private final Map<String, RedisCache<?>> caches = new HashMap<>();
+    private final CacheReplacementStrategy replacementStrategy;
+    private final List<CacheType> hierarchyConfig;
+    private final Map<String, Cache<?>> caches = new HashMap<>();
+
+    private static final Logger logger = LoggerFactory.getLogger(CacheManager.class);
 
     /**
      * Sets the cache directory for the default cache manager instance.
@@ -43,6 +61,46 @@ public final class CacheManager {
     }
 
     /**
+     * Reads the cache replacement strategy from environment variables.
+     * This method:
+     * <ol>
+     *     <li>First checks the environment variable CACHE_REPLACEMENT_STRATEGY</li>
+     *     <li>If not found, uses the default strategy ({@link #DEFAULT_REPLACEMENT_STRATEGY})</li>
+     * </ol>
+     *
+     * @return The cache replacement strategy
+     * @throws IllegalArgumentException If the environment variable value is set but invalid
+     */
+    private static CacheReplacementStrategy readCacheReplacementStrategy() {
+        String strategyValue = Environment.getenv("CACHE_REPLACEMENT_STRATEGY");
+        if (strategyValue == null) {
+            return DEFAULT_REPLACEMENT_STRATEGY;
+        }
+
+        try {
+            return CacheReplacementStrategy.valueOf(strategyValue.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(
+                    "Invalid CACHE_REPLACEMENT_STRATEGY value: " + strategyValue + ".\n"
+                            + Arrays.toString(CacheReplacementStrategy.values()) + " are valid options.",
+                    e);
+        }
+    }
+
+    /**
+     * Reads the cache hierarchy configuration from environment variables or uses the default if it's not set.
+     *
+     * @return The cache hierarchy configuration string
+     */
+    private static String readHierarchyString() {
+        String hierarchyString = Environment.getenv("CACHE_HIERARCHY");
+        if (hierarchyString == null) {
+            return DEFAULT_CACHE_HIERARCHY;
+        }
+        return hierarchyString;
+    }
+
+    /**
      * Creates a new cache manager instance using the specified cache directory.
      * The directory will be created if it doesn't exist.
      *
@@ -51,11 +109,33 @@ public final class CacheManager {
      * @throws IllegalArgumentException If the path exists but is not a directory
      */
     public CacheManager(Path cacheDir) throws IOException {
+        this(cacheDir, readCacheReplacementStrategy(), parseCacheHierarchy(readHierarchyString()));
+    }
+
+    /**
+     * Creates a new cache manager instance with the specified cache directory, replacement strategy, and cache
+     * hierarchy configuration.
+     * The directory will be created if it doesn't exist.
+     *
+     * @param cacheDir The path to the cache directory
+     * @param replacementStrategy The strategy for handling conflicts between cache layers
+     * @param hierarchyConfig Non-empty list of cache types in the hierarchy order.
+     * @throws IOException If the cache directory cannot be created
+     * @throws IllegalArgumentException If the path exists but is not a directory
+     */
+    public CacheManager(Path cacheDir, CacheReplacementStrategy replacementStrategy, List<CacheType> hierarchyConfig)
+            throws IOException {
         if (!Files.exists(cacheDir)) Files.createDirectories(cacheDir);
         if (!Files.isDirectory(cacheDir)) {
             throw new IllegalArgumentException("path is not a directory: " + cacheDir);
         }
-        this.directoryOfCaches = cacheDir;
+
+        this.directoryOfCaches = Objects.requireNonNull(cacheDir);
+        this.replacementStrategy = Objects.requireNonNull(replacementStrategy);
+        if (hierarchyConfig.isEmpty()) {
+            throw new IllegalArgumentException("Cache hierarchy configuration must contain at least one cache type");
+        }
+        this.hierarchyConfig = hierarchyConfig;
     }
 
     /**
@@ -108,10 +188,68 @@ public final class CacheManager {
             return cached;
         }
 
-        LocalCache<K> localCache = new LocalCache<>(directoryOfCaches + "/" + name + ".json", parameters);
-        RedisCache<K> cache = new RedisCache<>(parameters, localCache, DEFAULT_REPLACE_LOCAL_CACHE_ON_CONFLICT);
+        Cache<K> cache = buildCacheHierarchy(name, parameters);
         caches.put(name, cache);
         return cache;
+    }
+
+    /**
+     * Builds a cache hierarchy based on the configured cache types.
+     * The hierarchy is read from the CACHE_HIERARCHY environment variable.
+     * Caches are layered in the order specified: the first cache is the primary layer,
+     * the second is the secondary layer, etc.
+     * If only one cache type is specified, it is returned directly without layering.
+     *
+     * @param <K> The type of cache key
+     * @param cacheName The name of the cache
+     * @param parameters The cache parameters
+     * @return The configured cache instance
+     */
+    private <K extends CacheKey> Cache<K> buildCacheHierarchy(String cacheName, CacheParameter<K> parameters) {
+        ObjectMapper mapper = new ObjectMapper();
+        String cacheFilePath = directoryOfCaches.resolve(cacheName + ".json").toString();
+        List<Cache<K>> createdCaches = new ArrayList<>();
+        for (CacheType cacheType : hierarchyConfig) {
+            Cache<K> cache = Cache.createByType(cacheType, parameters, cacheFilePath, mapper);
+            createdCaches.add(cache);
+            logger.debug("Created cache type: {}", cacheType);
+        }
+
+        Cache<K> layeredCache = createdCaches.getFirst();
+        for (int i = 1; i < createdCaches.size(); i++) {
+            layeredCache = new HierarchicalCache<>(parameters, layeredCache, createdCaches.get(i), replacementStrategy);
+        }
+        return layeredCache;
+    }
+
+    /**
+     * Parses the cache hierarchy configuration string into a list of cache types.
+     * The input should be a comma-separated list of cache types (case-insensitive).
+     * Supports quoted strings to handle spaces: e.g., 'REDIS, LOCAL' or "LOCAL, REDIS".
+     *
+     * @param hierarchyConfig The hierarchy configuration string
+     * @return A list of cache types in order
+     * @throws IllegalArgumentException If the configuration is empty or invalid
+     */
+    private static List<CacheType> parseCacheHierarchy(String hierarchyConfig) {
+        String[] types = hierarchyConfig.replace("'", "").replace('"', ' ').split(",");
+        List<CacheType> cacheTypes = new ArrayList<>();
+
+        for (String type : types) {
+            String trimmed = type.trim();
+            if (trimmed.isEmpty()) {
+                throw new IllegalArgumentException("Cache hierarchy contains empty cache type");
+            }
+            try {
+                cacheTypes.add(CacheType.valueOf(trimmed.toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException(
+                        "Invalid CACHE_HIERARCHY value: " + trimmed + ".\n" + Arrays.toString(CacheType.values())
+                                + " are valid options.",
+                        e);
+            }
+        }
+        return cacheTypes;
     }
 
     /**
@@ -122,5 +260,18 @@ public final class CacheManager {
         for (Cache<?> cache : caches.values()) {
             cache.flush();
         }
+    }
+
+    /**
+     * Resets the default cache manager instance.
+     * This method is intended for testing purposes only to allow clean state between tests.
+     * After calling this method, {@link #setCacheDir(String)}
+     * must be called again before using the default instance.
+     */
+    static synchronized void resetDefaultInstance() {
+        if (defaultInstanceManager != null) {
+            defaultInstanceManager.flush();
+        }
+        defaultInstanceManager = null;
     }
 }

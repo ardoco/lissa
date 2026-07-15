@@ -15,13 +15,16 @@ LiSSA implements a sophisticated caching system to improve performance and ensur
      - [`ClassifierCacheParameter`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/classifier/ClassifierCacheParameter.java): Configuration for classifier caches (model name, seed, temperature)
      - [`EmbeddingCacheParameter`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/embedding/EmbeddingCacheParameter.java): Configuration for embedding caches (model name)
 2. **Cache Implementations**
+   - [`Hierarchical Cache`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/HierarchicalCache.java): Two cache levels with a synchronization mechanism
+     - Changes are applied to both levels
+     - Reads use a Conflict Resolution Strategy to ensure consistent results
+     - If a cache entry is missing in one level during a read, it is also written to the other level
    - [`LocalCache`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/LocalCache.java): File-based cache implementation that stores data in JSON format
      - Implements dirty tracking to optimize writes
      - Automatically saves changes on shutdown
      - Supports atomic writes using temporary files
-   - [`RedisCache`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/RedisCache.java): Redis-based cache implementation with fallback to local cache
+   - [`RedisCache`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/RedisCache.java): Redis-based cache implementation
      - Uses Redis for high-performance caching
-     - Falls back to local cache if Redis is unavailable
      - Supports both string and object serialization
 3. **Cache Management**
    - [`CacheManager`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/CacheManager.java): Central manager for cache instances
@@ -59,6 +62,16 @@ Parameters are used to:
 2. Create cache keys from content (via `createCacheKey()` method)
 3. Validate cache consistency when retrieving existing caches
 
+### Cache Replacement Strategies
+
+When using hierarchical caches with multiple layers (e.g., Redis and local cache), the system detects and resolves conflicts between layers:
+
+- **NONE** (default): Does not replace conflicting values; leaves both cache layers as they are. Primary value is returned on read.
+- **ERROR**: Throws an exception if a cache conflict is detected, ensuring data consistency by failing fast.
+- **OVERWRITE**: Automatically overwrites the secondary cache value with the primary cache value when a conflict is detected, and logs a warning.
+
+The replacement strategy for cache conflicts is configured via the `CACHE_REPLACEMENT_STRATEGY` environment variable.
+
 ### Cache API
 
 The `Cache` interface provides two API levels:
@@ -81,7 +94,20 @@ The `Cache` interface provides two API levels:
      "cache_dir": "./cache/path"  // Directory for cache storage
    }
    ```
-2. **Redis Setup**
+2. **Environment Variables**
+
+   The caching system supports the following environment variables:
+   - **CACHE_HIERARCHY**: Comma-separated list of cache types in order (e.g., "LOCAL,REDIS")
+   - Default: "LOCAL"
+   - Supported values: "LOCAL", "REDIS"
+   - **CACHE_REPLACEMENT_STRATEGY**: Strategy for handling conflicts between cache layers
+   - Default: "NONE"
+   - Supported values: "NONE", "ERROR", "OVERWRITE"
+   - **REDIS_URL**: Redis connection URL for RedisCache
+   - Default: "redis://localhost:6379"
+   - Example: "redis://redis-server:6379"
+
+3. **Redis Setup**
    To use Redis for caching, you need to set up a Redis server. Here's a recommended Docker Compose configuration:
 
    ```yaml
@@ -101,10 +127,12 @@ The `Cache` interface provides two API levels:
 
    To use Redis with LiSSA:
    1. Start the Redis server using Docker Compose
-   2. The system will automatically use Redis if available
-   3. If Redis is unavailable, it will fall back to local file-based caching (useful for replication packages)
+   2. Set environment variables if needed:
+   - `CACHE_HIERARCHY=REDIS,LOCAL` to use Redis with local fallback
+   - `REDIS_URL=redis://your-redis-host:6379` if not using the default
+   3. If Redis is unavailable, but configured to be used the system will fail.
 
-3. **Best Practices**
+4. **Best Practices**
 
    - Use the cache directory specified in the configuration
    - Clear the cache directory if you encounter issues

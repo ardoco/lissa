@@ -1,4 +1,4 @@
-/* Licensed under MIT 2025. */
+/* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.utils;
 
 import java.nio.file.Files;
@@ -34,7 +34,7 @@ import io.github.cdimascio.dotenv.Dotenv;
 public final class Environment {
     private static final Logger logger = LoggerFactory.getLogger(Environment.class);
     /** The loaded .env configuration, or null if no .env file exists */
-    private static final @Nullable Dotenv DOTENV = load();
+    private static volatile @Nullable Dotenv dotenv = load();
 
     private Environment() {
         throw new IllegalAccessError("Utility class");
@@ -53,7 +53,7 @@ public final class Environment {
      * @return The value of the environment variable, or null if not found
      */
     public static @Nullable String getenv(String key) {
-        String dotenvValue = DOTENV == null ? null : DOTENV.get(key);
+        String dotenvValue = dotenv == null ? null : dotenv.get(key);
         if (dotenvValue != null) return dotenvValue;
         return System.getenv(key);
     }
@@ -93,8 +93,8 @@ public final class Environment {
      * @return The loaded Dotenv configuration, or null if no .env file exists
      */
     private static synchronized @Nullable Dotenv load() {
-        if (DOTENV != null) {
-            return DOTENV;
+        if (dotenv != null) {
+            return dotenv;
         }
 
         if (Files.exists(Path.of(".env"))) {
@@ -102,6 +102,27 @@ public final class Environment {
         } else {
             logger.info("No .env file found, using system environment variables");
             return null;
+        }
+    }
+
+    /**
+     * Overwrites the current .env configuration with a new one from the specified path.
+     * This method:
+     * <ol>
+     *     <li>Checks if a .env file exists at the given path</li>
+     *     <li>If found, loads and sets the new configuration</li>
+     *     <li>If not found, logs a warning and retains the existing configuration</li>
+     * </ol>
+     *
+     * The method is synchronized to ensure thread safety when updating the configuration.
+     *
+     * @param path The path to the new .env file
+     */
+    public static synchronized void overwrite(Path path) {
+        if (Files.exists(path)) {
+            dotenv = Dotenv.configure().filename(path.toString()).load();
+        } else {
+            logger.warn("No .env file found at '{}', using system environment variables", path);
         }
     }
 }
