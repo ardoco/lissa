@@ -192,9 +192,7 @@ class LocalCache<K extends CacheKey> implements Cache<K> {
      * @return true if this map contains a mapping for the specified key
      */
     @Override
-    public boolean containsKey(String key) {
-        K cacheKey = cacheParameter.createCacheKey(key);
-        return cache.containsKey(cacheKey.localKey());
+public synchronized boolean containsKey(String key) {
     }
 
     @Override
