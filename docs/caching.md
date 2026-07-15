@@ -137,8 +137,7 @@ The `Cache` interface provides two API levels:
    2. Set environment variables if needed:
    - `CACHE_HIERARCHY=REDIS,LOCAL` to use Redis with local fallback
    - `REDIS_URL=redis://your-redis-host:6379` if not using the default
-   3. The system will automatically use Redis if available
-   4. If Redis is unavailable, it will fall back to local file-based caching (useful for replication packages)
+   3. If Redis is unavailable, but configured to be used the system will fail.
 
 4. **Best Practices**
 

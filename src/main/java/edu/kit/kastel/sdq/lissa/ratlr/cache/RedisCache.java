@@ -93,7 +93,7 @@ class RedisCache<K extends CacheKey> implements Cache<K> {
      * @param <T> The type to deserialize the value to
      * @param key The cache key to look up
      * @param clazz The class of the type to deserialize to
-     * @return The deserialized value, or null if not found or Redis is unavailable
+     * @return The deserialized value, or null if not found
      */
     @Override
     public synchronized <T> @Nullable T get(String key, Class<T> clazz) {
