@@ -29,6 +29,7 @@ LiSSA implements a sophisticated caching system to improve performance and ensur
    - [`RestRedisCache`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/RestRedisCache.java): REST-based Redis cache implementation
      - Uses REST API to interact with Redis server
      - Provides an alternative to direct Redis connections, useful for shared caches
+     - Configuration through environment variables, see [Usage Instructions](#usage-instructions)
 3. **Cache Management**
    - [`CacheManager`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/CacheManager.java): Central manager for cache instances
      - Manages cache directory configuration

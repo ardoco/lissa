@@ -362,7 +362,6 @@ class ArchitectureTest {
      * Rule that enforces that CacheManager.resetDefaultInstance() is only called from Test classes.
      * <p>
      * The resetDefaultInstance() method should only be used to reset the singleton state between tests.
-     * It must never be called from production code or other test classes.
      */
     @ArchTest
     static final ArchRule cacheManagerResetOnlyInTests = noClasses()
@@ -371,7 +370,7 @@ class ArchitectureTest {
             .should()
             .callMethod(CacheManager.class, "resetDefaultInstance")
             .because(
-                    "CacheManager.resetDefaultInstance() is only intended for testing purposes in CacheTest and must not be used elsewhere");
+                    "CacheManager.resetDefaultInstance() is only intended for testing purposes and must not be used elsewhere");
 
     /**
      * Rule that enforces that Environment.overwrite() is only called from test classes.

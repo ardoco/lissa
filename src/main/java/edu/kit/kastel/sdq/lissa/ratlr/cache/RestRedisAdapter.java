@@ -12,7 +12,7 @@ import org.fuchss.restredis.client.Client;
  *
  * @see UnifiedRedisClient
  */
-public class RestRedisAdapter implements UnifiedRedisClient {
+/*package-private*/ class RestRedisAdapter implements UnifiedRedisClient {
 
     /** The underlying REST-based Redis client to which all calls are delegated. */
     private final Client restRedisClient;
@@ -22,7 +22,7 @@ public class RestRedisAdapter implements UnifiedRedisClient {
      *
      * @param restRedisClient the REST Redis client to delegate to. Must not be {@code null}
      */
-    RestRedisAdapter(Client restRedisClient) {
+    /*package-private*/ RestRedisAdapter(Client restRedisClient) {
         this.restRedisClient = Objects.requireNonNull(restRedisClient);
     }
 

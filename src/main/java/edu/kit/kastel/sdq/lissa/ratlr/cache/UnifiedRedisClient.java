@@ -7,7 +7,7 @@ package edu.kit.kastel.sdq.lissa.ratlr.cache;
  *
  * <p>Instances should be closed after use to release any held resources.
  */
-public interface UnifiedRedisClient {
+public interface UnifiedRedisClient extends AutoCloseable {
 
     /**
      * Sends a {@code PING} command to the Redis server.

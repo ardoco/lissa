@@ -13,7 +13,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.utils.Environment;
  *
  * @param <K> The type of cache key used in this cache
  */
-public class RestRedisCache<K extends CacheKey> extends RedisCache<K> {
+/*package-private*/ class RestRedisCache<K extends CacheKey> extends RedisCache<K> {
 
     /**
      * Creates a new Rest Redis cache instance.
@@ -23,7 +23,7 @@ public class RestRedisCache<K extends CacheKey> extends RedisCache<K> {
      * @param mapper The ObjectMapper for JSON operations
      * @throws IllegalArgumentException If Redis connection cannot be established
      */
-    RestRedisCache(CacheParameter<K> cacheParameter, ObjectMapper mapper) {
+    /*package-private*/ RestRedisCache(CacheParameter<K> cacheParameter, ObjectMapper mapper) {
         super(cacheParameter, mapper, createRedisConnection());
     }
 
@@ -56,7 +56,7 @@ public class RestRedisCache<K extends CacheKey> extends RedisCache<K> {
         // Check if connection is working
         if (!redis.ping()) {
             redis.close();
-            throw new IllegalStateException("Could not connect to redis at " + restRedisUri);
+            throw new IllegalStateException("Could not connect to Redis at " + restRedisUri);
         }
 
         return redis;

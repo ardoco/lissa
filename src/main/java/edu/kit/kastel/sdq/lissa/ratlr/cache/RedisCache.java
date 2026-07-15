@@ -37,7 +37,7 @@ class RedisCache<K extends CacheKey> implements Cache<K> {
      *
      * @param cacheParameter The cache parameter configuration
      * @param mapper The ObjectMapper for JSON operations
-     * @throws IllegalArgumentException If Redis connection cannot be established
+     * @throws IllegalStateException If Redis connection cannot be established
      */
     RedisCache(CacheParameter<K> cacheParameter, ObjectMapper mapper) {
         this(cacheParameter, mapper, createRedisConnection());
@@ -70,6 +70,8 @@ class RedisCache<K extends CacheKey> implements Cache<K> {
     /**
      * Establishes a connection to the Redis server.
      * The Redis URL can be configured through the REDIS_URL environment variable.
+     *
+     * @throws IllegalStateException if Redis connection could not be established
      */
     private static RedisAdapter createRedisConnection() {
         String redisUrl = "redis://localhost:6379";

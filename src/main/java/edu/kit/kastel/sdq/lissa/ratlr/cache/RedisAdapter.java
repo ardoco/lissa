@@ -8,7 +8,7 @@ import redis.clients.jedis.UnifiedJedis;
 /**
  * Adapter class that wraps a Jedis client to conform to the UnifiedRedisClient interface.
  */
-public class RedisAdapter implements UnifiedRedisClient {
+/*package-private*/ class RedisAdapter implements UnifiedRedisClient {
 
     private final UnifiedJedis jedis;
 
@@ -17,7 +17,7 @@ public class RedisAdapter implements UnifiedRedisClient {
      *
      * @param jedis The Jedis client to wrap
      */
-    RedisAdapter(UnifiedJedis jedis) {
+    /*package-private*/ RedisAdapter(UnifiedJedis jedis) {
         this.jedis = Objects.requireNonNull(jedis);
     }
 

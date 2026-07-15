@@ -40,6 +40,8 @@ import kong.unirest.core.Unirest;
 @Testcontainers
 public class RestRedisTest {
 
+    private static final Path BASELINE_ENV = Path.of("src/test/resources/.env-test");
+
     @Container
     private static final GenericContainer<?> REDIS =
             new GenericContainer<>(DockerImageName.parse("redis:latest")).withExposedPorts(6379);
@@ -98,6 +100,8 @@ public class RestRedisTest {
             serverThread.interrupt();
             serverThread.join(5000);
         }
+        Environment.overwrite(BASELINE_ENV);
+        Unirest.shutDown();
     }
 
     @BeforeEach
