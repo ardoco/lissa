@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -142,7 +143,9 @@ public final class Statistics {
 
         logger.info("Storing results to {}", resultFile.getName());
         try {
-            Files.writeString(resultFile.toPath(), result.toString(), StandardOpenOption.CREATE);
+            Path path = resultFile.toPath();
+            Files.deleteIfExists(path);
+            Files.writeString(path, result.toString(), StandardOpenOption.CREATE);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -224,7 +227,9 @@ public final class Statistics {
                 .map(it -> it.sourceId() + "," + it.targetId())
                 .collect(Collectors.joining("\n"));
         try {
-            Files.writeString(new File(destination).toPath(), csvResult, StandardOpenOption.CREATE);
+            Path path = new File(destination).toPath();
+            Files.deleteIfExists(path);
+            Files.writeString(path, csvResult, StandardOpenOption.CREATE);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
