@@ -2,50 +2,21 @@
 
 ## Overview
 
-LiSSA implements a sophisticated caching system to improve performance and ensure reproducibility of results. The caching system consists of the following components:
+LiSSA relies on the caching subsystem provided by the [`io.github.ardoco:llm-access`](https://github.com/ardoco/llm-access) library to improve performance and ensure reproducibility of results. That library owns the cache abstraction and its implementations, so LiSSA no longer ships its own copies:
 
-1. **Cache Interface** (`cache` package)
-   - [`Cache`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/Cache.java): Core generic interface defining cache operations, parameterized by cache key type
-   - [`CacheKey`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/CacheKey.java): Base interface for cache keys with JSON serialization support and local key generation
-   - [`CacheParameter`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/CacheParameter.java): Interface defining cache configuration and key creation logic
-   - **Specialized Cache Keys**:
-     - [`ClassifierCacheKey`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/classifier/ClassifierCacheKey.java): Cache key for classifier operations (model name, seed, temperature, mode, content)
-     - [`EmbeddingCacheKey`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/embedding/EmbeddingCacheKey.java): Cache key for embedding operations (model name, content)
-   - **Cache Parameters**:
-     - [`ClassifierCacheParameter`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/classifier/ClassifierCacheParameter.java): Configuration for classifier caches (model name, seed, temperature)
-     - [`EmbeddingCacheParameter`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/embedding/EmbeddingCacheParameter.java): Configuration for embedding caches (model name)
-2. **Cache Implementations**
-   - [`Hierarchical Cache`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/HierarchicalCache.java): Two cache levels with a synchronization mechanism
-     - Changes are applied to both levels
-     - Reads use a Conflict Resolution Strategy to ensure consistent results
-     - If a cache entry is missing in one level during a read, it is also written to the other level
-   - [`LocalCache`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/LocalCache.java): File-based cache implementation that stores data in JSON format
-     - Implements dirty tracking to optimize writes
-     - Automatically saves changes on shutdown
-     - Supports atomic writes using temporary files
-   - [`RedisCache`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/RedisCache.java): Redis-based cache implementation
-     - Uses Redis for high-performance caching
-     - Supports both string and object serialization
-   - [`RestRedisCache`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/RestRedisCache.java): REST-based Redis cache implementation
-     - Uses REST API to interact with Redis server
-     - Provides an alternative to direct Redis connections, useful for shared caches
-     - Configuration through environment variables, see [Usage Instructions](#usage-instructions)
-3. **Cache Management**
-   - [`CacheManager`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/CacheManager.java): Central manager for cache instances
-     - Manages cache directory configuration
-     - Provides singleton access to cache instances
-     - Handles cache creation and retrieval based on origin and cache parameters
-     - Ensures cache uniqueness by validating parameters
-4. **Caching Usage**
-   The caching system is used in several key components:
-   - **Embedding Creators**: Caches vector embeddings to avoid recalculating them
-     - Uses `EmbeddingCacheParameter` to identify unique embedding configurations
-     - Cache keys are automatically generated based on content using the model name
-   - **Classifiers**: Caches LLM responses for classification tasks
-     - Uses `ClassifierCacheParameter` to identify unique classifier configurations
-     - Cache keys include model name, seed, temperature, and content
-   - **Preprocessors**: Caches preprocessing results for text summarization and other operations
-     - Uses `ClassifierCacheParameter` for LLM-based preprocessing
+1. **Cache abstraction**: `Cache`, `CacheKey`, and `CacheParameter`, plus typed keys/parameters for chat (`ChatCacheKey` / `ChatCacheParameter`) and embedding (`EmbeddingCacheKey` / `EmbeddingCacheParameter`) operations.
+2. **Cache implementations**: a hierarchical (two-level) cache with a conflict-resolution strategy, a file-based `LocalCache` (JSON, atomic writes, dirty tracking), a `RedisCache`, and a REST-based `RestRedisCache`.
+3. **Cache management**: a `CacheManager` that configures the cache directory and provides cache instances keyed by origin and parameters.
+
+See the [llm-access documentation](https://github.com/ardoco/llm-access) for the cache internals. The rest of this page describes how LiSSA configures and uses the cache (the configuration and environment variables are unchanged).
+
+### Caching Usage
+
+The caching system is used in several key components:
+
+- **Embedding Creators**: cache vector embeddings to avoid recalculating them (keyed by `EmbeddingCacheParameter`: model name).
+- **Classifiers**: cache LLM responses for classification tasks (keyed by `ChatCacheParameter`: model name, seed, temperature, content).
+- **Preprocessors**: cache results of LLM-based preprocessing (keyed by `ChatCacheParameter`).
 
 ## Key Concepts
 
@@ -58,7 +29,7 @@ Cache keys uniquely identify cached items and consist of two parts:
 ### Cache Parameters
 
 Cache parameters define the configuration that makes a cache unique:
-- **ClassifierCacheParameter**: Model name, seed, and temperature for reproducible LLM results
+- **ChatCacheParameter**: Model name, seed, and temperature for reproducible LLM results
 - **EmbeddingCacheParameter**: Model name only (embeddings are deterministic)
 
 Parameters are used to:

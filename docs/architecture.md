@@ -24,14 +24,8 @@ The project follows a modular architecture with the following main components:
      - [`SummarizePreprocessor`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/preprocessor/SummarizePreprocessor.java): Uses LLMs to generate concise summaries of artifacts while preserving key information, with configurable templates for different artifact types.
      - [`SentencePreprocessor`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/preprocessor/SentencePreprocessor.java): Splits text documents into individual sentences while maintaining the original document as a parent element.
 3. **Embedding Creators** (`embeddingcreator` package)
-   - [`EmbeddingCreator`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/embeddingcreator/EmbeddingCreator.java): Base class for creating embeddings
-   - Implementations:
-     - [`OpenAiEmbeddingCreator`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/embeddingcreator/OpenAiEmbeddingCreator.java): Uses OpenAI's embedding models to create vector representations of text, supporting various models like text-embedding-3-large.
-     - [`OllamaEmbeddingCreator`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/embeddingcreator/OllamaEmbeddingCreator.java): Integrates with Ollama's local embedding models, providing an alternative to cloud-based solutions.
-     - [`OpenWebUiEmbeddingCreator`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/embeddingcreator/OpenWebUiEmbeddingCreator.java): Integrates with Open WebUI servers for embedding generation, supporting local deployment with OpenAI-compatible APIs.
-     - [`OnnxEmbeddingCreator`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/embeddingcreator/OnnxEmbeddingCreator.java): Uses ONNX models for local embedding generation, offering high performance and offline capabilities.
-     - [`MockEmbeddingCreator`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/embeddingcreator/MockEmbeddingCreator.java): Provides zero vectors for testing purposes, useful for development and testing scenarios.
-     - All extend [`CachedEmbeddingCreator`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/embeddingcreator/CachedEmbeddingCreator.java) for caching support, improving performance by storing and reusing embeddings.
+   - [`EmbeddingCreator`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/embeddingcreator/EmbeddingCreator.java): LiSSA-side adapter that maps LiSSA `Element`s and configuration to the framework-neutral embedding creators of the [`io.github.ardoco:llm-access`](https://github.com/ardoco/llm-access) library.
+   - The library provides the actual implementations (OpenAI, Ollama, ONNX, Open WebUI, and a mock), all with transparent caching and token-length handling. The `openai` creator uses OpenAI embedding models such as `text-embedding-3-large`; `ollama`/`openwebui` integrate with local/OpenAI-compatible endpoints; `onnx` runs models locally for offline use.
 4. **Element Stores** (`elementstore` package)
    - [`ElementStore`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/elementstore/ElementStore.java): Manages storage and retrieval of processed elements with their embeddings, supporting similarity-based search and hierarchical relationships.
    - **Retrieval Strategies** (`elementstore/strategy` package):
