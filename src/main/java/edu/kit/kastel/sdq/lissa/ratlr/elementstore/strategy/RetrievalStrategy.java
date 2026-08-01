@@ -6,9 +6,9 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.kit.kastel.mcse.ardoco.llm.util.Pair;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
-import edu.kit.kastel.sdq.lissa.ratlr.utils.Pair;
 
 /**
  * Interface defining the contract for retrieval strategies used to find similar elements based on their vector representations.

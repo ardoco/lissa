@@ -4,12 +4,12 @@ package edu.kit.kastel.sdq.lissa.ratlr.classifier;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import edu.kit.kastel.mcse.ardoco.llm.util.Pair;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.elementstore.SourceElementStore;
 import edu.kit.kastel.sdq.lissa.ratlr.elementstore.TargetElementStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
-import edu.kit.kastel.sdq.lissa.ratlr.utils.Pair;
 
 /**
  * A classifier that processes elements through a pipeline of multiple classifier stages.

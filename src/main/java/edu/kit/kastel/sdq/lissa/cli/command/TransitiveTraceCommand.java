@@ -10,12 +10,12 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.kit.kastel.mcse.ardoco.llm.util.KeyGenerator;
 import edu.kit.kastel.sdq.lissa.ratlr.Evaluation;
 import edu.kit.kastel.sdq.lissa.ratlr.Statistics;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.EvaluationConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.GoldStandardConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
-import edu.kit.kastel.sdq.lissa.ratlr.utils.KeyGenerator;
 
 import picocli.CommandLine;
 

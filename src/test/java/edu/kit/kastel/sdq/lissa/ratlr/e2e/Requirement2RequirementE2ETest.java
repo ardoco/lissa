@@ -18,11 +18,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import edu.kit.kastel.mcse.ardoco.llm.util.Environment;
 import edu.kit.kastel.mcse.ardoco.metrics.ClassificationMetricsCalculator;
 import edu.kit.kastel.sdq.lissa.ratlr.Evaluation;
 import edu.kit.kastel.sdq.lissa.ratlr.Optimization;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
-import edu.kit.kastel.sdq.lissa.ratlr.utils.Environment;
 
 class Requirement2RequirementE2ETest {
 

@@ -1,4 +1,4 @@
-/* Licensed under MIT 2025. */
+/* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.elementstore;
 
 import java.util.ArrayList;
@@ -9,8 +9,8 @@ import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
 
+import edu.kit.kastel.mcse.ardoco.llm.util.Pair;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
-import edu.kit.kastel.sdq.lissa.ratlr.utils.Pair;
 
 /**
  * A store for elements and their embeddings in the LiSSA framework.

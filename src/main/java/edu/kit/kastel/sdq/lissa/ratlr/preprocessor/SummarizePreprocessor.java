@@ -5,15 +5,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
-import edu.kit.kastel.sdq.lissa.ratlr.cache.Cache;
-import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager;
-import edu.kit.kastel.sdq.lissa.ratlr.cache.classifier.ClassifierCacheKey;
+import edu.kit.kastel.mcse.ardoco.llm.cache.Cache;
+import edu.kit.kastel.mcse.ardoco.llm.cache.CacheManager;
+import edu.kit.kastel.mcse.ardoco.llm.cache.chat.ChatCacheKey;
+import edu.kit.kastel.mcse.ardoco.llm.util.Futures;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.ChatLanguageModelProvider;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
-import edu.kit.kastel.sdq.lissa.ratlr.utils.Futures;
 
 import dev.langchain4j.model.chat.ChatModel;
 
@@ -51,7 +51,7 @@ public class SummarizePreprocessor extends Preprocessor {
     /** Number of threads to use for parallel processing */
     private final int threads;
     /** Cache for storing and retrieving summaries */
-    private final Cache<ClassifierCacheKey> cache;
+    private final Cache<ChatCacheKey> cache;
 
     /**
      * Creates a new summarize preprocessor with the specified configuration and context store.

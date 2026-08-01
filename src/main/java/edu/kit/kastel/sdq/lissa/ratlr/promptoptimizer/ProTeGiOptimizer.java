@@ -1,10 +1,10 @@
 /* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer;
 
+import static edu.kit.kastel.mcse.ardoco.llm.chat.ChatModelUtils.nCachedRequest;
 import static edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.PromptOptimizationUtils.getClassificationTasks;
 import static edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.PromptOptimizationUtils.parseTaggedText;
 import static edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.PromptOptimizationUtils.sanitizePrompts;
-import static edu.kit.kastel.sdq.lissa.ratlr.utils.ChatLanguageModelUtils.nCachedRequest;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.kit.kastel.mcse.ardoco.llm.util.Pair;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.ClassificationTask;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.elementstore.SourceElementStore;
@@ -28,7 +29,6 @@ import edu.kit.kastel.sdq.lissa.ratlr.elementstore.TargetElementStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.Metric;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptselector.Selector;
-import edu.kit.kastel.sdq.lissa.ratlr.utils.Pair;
 
 /**
  * This class implements an automatic prompt optimizer based on the approach by Pryzant et al. (2023).
