@@ -82,12 +82,16 @@ public class ChatLanguageModelProvider {
      * @return The number of threads to use
      */
     public static int threads(ModuleConfiguration configuration) {
-        return platform(configuration).getThreads();
+        return switch (platform(configuration)) {
+            case OPENAI, BLABLADOR, DEEPSEEK -> 100;
+            case OPENWEBUI -> 10;
+            case OLLAMA -> 1;
+        };
     }
 
     private static LlmConfiguration toLlmConfiguration(ModuleConfiguration configuration) {
         ChatModelPlatform platform = platform(configuration);
-        String model = configuration.argumentAsString("model", platform.getDefaultModel());
+        String model = configuration.argumentAsString("model");
         int seed = configuration.argumentAsInt("seed", LlmConfiguration.DEFAULT_SEED);
         double temperature = configuration.argumentAsDouble("temperature", LlmConfiguration.DEFAULT_TEMPERATURE);
         return LlmConfiguration.builder(platform)
