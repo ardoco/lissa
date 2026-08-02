@@ -82,7 +82,8 @@ public class EmbeddingCreator {
                         .build();
             // The mock creator ignores the model, so do not read a "model" argument here: that way a stray
             // "model" on a mock configuration is reported as an unread (misconfigured) parameter.
-            case "mock" -> EmbeddingConfiguration.builder(EmbeddingPlatform.MOCK).build();
+            case "mock" ->
+                EmbeddingConfiguration.builder(EmbeddingPlatform.MOCK).build();
             default -> throw new IllegalStateException("Unexpected value: " + configuration.name());
         };
     }
