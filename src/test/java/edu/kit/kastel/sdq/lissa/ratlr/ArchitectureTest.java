@@ -28,9 +28,9 @@ import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.Metric;
 /**
  * Architecture tests for the LiSSA framework using ArchUnit.
  * <p>
- * These rules help maintain code quality, consistency, and architectural integrity. Rules that used to
- * enforce invariants of the LLM/cache utilities now live in the {@code llm-access} library, which owns
- * those classes.
+ * These rules help maintain code quality, consistency, and architectural integrity. The invariants of the
+ * LLM/cache utility classes that were extracted into the {@code llm-access} library are checked by the
+ * companion {@link LlmAccessArchitectureTest}, which analyzes the library package that LiSSA depends on.
  */
 @AnalyzeClasses(packages = "edu.kit.kastel.sdq.lissa")
 class ArchitectureTest {
