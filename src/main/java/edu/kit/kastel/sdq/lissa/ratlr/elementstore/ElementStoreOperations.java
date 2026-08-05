@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import edu.kit.kastel.mcse.ardoco.llm.util.Pair;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
+import edu.kit.kastel.sdq.lissa.ratlr.utils.Pair;
 
 /**
  * A utility class for operations related to ElementStores.

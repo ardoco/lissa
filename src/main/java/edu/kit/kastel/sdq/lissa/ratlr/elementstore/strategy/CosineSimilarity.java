@@ -4,9 +4,9 @@ package edu.kit.kastel.sdq.lissa.ratlr.elementstore.strategy;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.kit.kastel.mcse.ardoco.llm.util.Pair;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
+import edu.kit.kastel.sdq.lissa.ratlr.utils.Pair;
 
 /**
  * A retrieval strategy that computes the cosine similarity between a query vector and
