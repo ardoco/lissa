@@ -3,7 +3,7 @@ package edu.kit.kastel.sdq.lissa.ratlr.configuration;
 
 import java.util.Objects;
 
-import edu.kit.kastel.sdq.lissa.ratlr.utils.KeyGenerator;
+import edu.kit.kastel.mcse.ardoco.llm.util.KeyGenerator;
 
 /**
  * Base interface for all configuration types in the LiSSA-RATLR framework.

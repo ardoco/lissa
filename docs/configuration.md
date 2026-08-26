@@ -13,8 +13,7 @@ Configuration options in LiSSA are defined in the code through several mechanism
 1. **Component Classes**: Each component (e.g., `ArtifactProvider`, `Preprocessor`, `Classifier`) has a corresponding class that defines its configuration options. For example:
    - [`TextArtifactProvider`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/artifactprovider/TextArtifactProvider.java) defines options for text-based artifact loading
    - [`CodeTreePreprocessor`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/preprocessor/CodeTreePreprocessor.java) defines options for code tree processing
-   - [`OpenAiEmbeddingCreator`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/embeddingcreator/OpenAiEmbeddingCreator.java) defines options for OpenAI embedding generation
-   - [`OpenWebUiEmbeddingCreator`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/embeddingcreator/OpenWebUiEmbeddingCreator.java) defines options for Open WebUI embedding generation
+   - the [`EmbeddingCreator`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/embeddingcreator/EmbeddingCreator.java) adapter maps the `embedding_creator` configuration (e.g. `openai`, `ollama`, `onnx`, `openwebui`, `mock`) to the embedding creators provided by the [`io.github.ardoco:llm-access`](https://github.com/ardoco/llm-access) library
 2. **Configuration Classes**: The [`Configuration`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/configuration/Configuration.java) class serves as the central configuration container, defining the structure of the configuration file.
 3. **Example Configurations**: You can find example configurations in the `example-configs` directory, which demonstrate different configuration setups for various use cases.
 4. **Configuration Template**: The `config-template.json` file provides a template with all available configuration options and their default values.

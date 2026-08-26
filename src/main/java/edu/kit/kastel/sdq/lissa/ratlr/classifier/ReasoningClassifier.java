@@ -9,9 +9,9 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import edu.kit.kastel.sdq.lissa.ratlr.cache.Cache;
-import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager;
-import edu.kit.kastel.sdq.lissa.ratlr.cache.classifier.ClassifierCacheKey;
+import edu.kit.kastel.mcse.ardoco.llm.cache.Cache;
+import edu.kit.kastel.mcse.ardoco.llm.cache.CacheManager;
+import edu.kit.kastel.mcse.ardoco.llm.cache.chat.ChatCacheKey;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
@@ -36,7 +36,7 @@ public class ReasoningClassifier extends Classifier {
      */
     private static final String CLASSIFICATION_PROMPT_KEY = "prompt";
 
-    private final Cache<ClassifierCacheKey> cache;
+    private final Cache<ChatCacheKey> cache;
 
     /**
      * Provider for the language model used in classification.
@@ -96,7 +96,7 @@ public class ReasoningClassifier extends Classifier {
      */
     private ReasoningClassifier(
             int threads,
-            Cache<ClassifierCacheKey> cache,
+            Cache<ChatCacheKey> cache,
             ChatLanguageModelProvider provider,
             String prompt,
             boolean useOriginalArtifacts,
