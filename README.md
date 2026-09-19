@@ -16,9 +16,10 @@ LiSSA aims to provide a generic solution for Traceability Link Recovery (TLR) by
 
 The concept and evaluation of LiSSA are detailed in our paper:
 
-> Fuchß, D., Hey, T., Keim, J., Liu, H., Ewald, N., Thirolf, T., & Koziolek, A. (2025). LiSSA: Toward Generic Traceability Link Recovery through Retrieval-Augmented Generation. In Proceedings of the IEEE/ACM 47th International Conference on Software Engineering, Ottawa, Canada.
+> Fuchß, D., Hey, T., Keim, J., Liu, H., Ewald, N., Thirolf, T., & Koziolek, A. (2025). LiSSA: Toward Generic Traceability Link Recovery Through Retrieval-Augmented Generation. In *2025 IEEE/ACM 47th International Conference on Software Engineering (ICSE)* (pp. 1396–1408). IEEE. <https://doi.org/10.1109/ICSE55347.2025.00186>
 
 You can access the paper [here](https://ardoco.de/c/icse25).
+If you use LiSSA in your research, please cite this paper; a machine-readable citation is provided in [`CITATION.cff`](CITATION.cff).
 
 ## Features
 
