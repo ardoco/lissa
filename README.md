@@ -82,7 +82,7 @@ To get started with LiSSA, follow these steps:
 2. Configure your API keys for the language model platforms you plan to use. Copy the `env-template` file to `.env` and fill in the keys, or export them as environment variables. See the [configuration documentation](docs/configuration.md#supported-platforms-and-environment-variables) for details on supported platforms (OpenAI, Open WebUI, Ollama, Blablador, DeepSeek) and their required environment variables.
 
    > [!IMPORTANT]
-   > The `.env` file is read from the **current working directory** — the directory you run LiSSA from — and its values take **precedence** over the process environment.
+   > The `.env` file is read from the **current working directory** — the directory you run LiSSA from — and it only fills in variables that are **not** already exported: a value present in the process environment wins over the same key in `.env`.
    > `OPENAI_ORGANIZATION_ID` and `OPENAI_API_KEY` must be set even for a run that is served entirely from the cache, because they are validated when the OpenAI client is constructed, before any cache is consulted. Dummy values are sufficient for such a run and open no connection.
 
 3. LiSSA caches requests in order to be reproducible. The cache is located in the cache folder that can be specified in the configuration.

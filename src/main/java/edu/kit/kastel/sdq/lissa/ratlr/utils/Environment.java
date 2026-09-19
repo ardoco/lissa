@@ -21,11 +21,15 @@ import io.github.cdimascio.dotenv.Dotenv;
  *
  * The class uses the following precedence for environment variables:
  * <ol>
- *     <li>Values from the .env file (if it exists)</li>
  *     <li>Values from system environment variables</li>
+ *     <li>Values from the .env file (if it exists)</li>
  * </ol>
  *
- * The .env file should be placed in the root directory of the project and should
+ * Note that the system environment wins: dotenv-java resolves {@code System.getenv(key)}
+ * first and only falls back to the parsed .env file, so a .env entry is used only when
+ * that variable is not already exported.
+ *
+ * The .env file is read from the current working directory and should
  * contain key-value pairs in the format:
  * <pre>
  * KEY=value
@@ -44,10 +48,12 @@ public final class Environment {
      * Retrieves an environment variable value.
      * This method:
      * <ol>
-     *     <li>First checks the .env file for the variable</li>
-     *     <li>If not found, falls back to system environment variables</li>
+     *     <li>Queries the loaded .env handle, which itself resolves {@code System.getenv(key)}
+     *         first and falls back to the parsed .env file</li>
+     *     <li>If no .env is loaded, falls back to system environment variables</li>
      *     <li>Returns null if the variable is not found in either location</li>
      * </ol>
+     * The effective precedence is therefore: system environment first, .env second.
      *
      * @param key The name of the environment variable to retrieve
      * @return The value of the environment variable, or null if not found

@@ -26,7 +26,7 @@ cp env-template .env
 Two things are easy to get wrong here:
 
 - The `.env` file is read from the **current working directory** — the directory you run LiSSA from, which is not necessarily the repository root.
-- Values from `.env` take **precedence** over the process environment, not the other way round.
+- The process environment takes **precedence** over `.env`. A key in `.env` is used only when that variable is not already exported, so an exported `OPENAI_API_KEY` silently overrides the one in your `.env`.
 
 `OPENAI_ORGANIZATION_ID` and `OPENAI_API_KEY` must be set even for a run that is served entirely from the cache: the OpenAI embedding creator and chat model provider both validate them at construction time, before any cache is consulted. Dummy values are sufficient and open no connection — this is what `src/test/resources/.env-test` does for the offline end-to-end test.
 
@@ -84,7 +84,7 @@ Please ensure your code follows the project's coding standards and includes appr
   - DeepSeek: Check `DEEPSEEK_API_KEY`
   - Ollama (chat): Check `OLLAMA_HOST` (required), `OLLAMA_USER`, `OLLAMA_PASSWORD` (optional)
   - Ollama (embeddings): Check `OLLAMA_EMBEDDING_HOST` (required), `OLLAMA_EMBEDDING_USER`, `OLLAMA_EMBEDDING_PASSWORD` (optional)
-- If a variable looks set but LiSSA disagrees, check for a stale `.env` in the working directory — it overrides the process environment
+- If a variable looks set in `.env` but LiSSA uses a different value, check whether it is also exported in your shell — the process environment wins (`unset <VAR>` to fall back to `.env`)
 - If `RestRedisTest` is reported as skipped, Docker is not available — start the Docker daemon to run it
 - Check the console output for detailed error messages
 

@@ -308,7 +308,7 @@ Chat language models are configured by prefixing the classifier name with the pl
   - `DEEPSEEK_API_KEY`: Your DeepSeek API key
 
 > [!IMPORTANT]
-> These variables are validated when the client is constructed, before any cache is consulted. A run that is served entirely from the cache therefore still needs them to be set — dummy values are sufficient and open no connection. Variables are read through a `.env` file in the **current working directory** first, and only then from the process environment, so a stale `.env` silently overrides an exported variable.
+> These variables are validated when the client is constructed, before any cache is consulted. A run that is served entirely from the cache therefore still needs them to be set — dummy values are sufficient and open no connection. Variables may be supplied through a `.env` file in the **current working directory**, but the process environment wins: `.env` only fills in variables that are not already exported.
 
 ### Example Configuration with Open WebUI
 

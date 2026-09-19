@@ -126,6 +126,13 @@ OPENAI_API_KEY=DUMMY
 
 This is exactly what `src/test/resources/.env-test` does for the offline end-to-end test. Using deliberately invalid values is recommended: it turns an unnoticed cache miss into a visible failure instead of a live API call.
 
+> [!WARNING]
+> Putting dummy values in `.env` is not enough if a real key is exported in your shell — the process environment wins over `.env`. Unset the real values first, or the replay will quietly call the live API on a cache miss:
+>
+> ```bash
+> unset OPENAI_API_KEY OPENAI_ORGANIZATION_ID
+> ```
+
 ## Where Results Are Written
 
 Results are always written into the **current working directory**, never into `cache_dir`:
@@ -173,7 +180,7 @@ The `Cache` interface provides two API levels:
 
 2. **Environment Variables**
 
-   All variables below are read through `Environment`, which loads a `.env` file from the **current working directory in preference to** the real process environment — a stale `.env` silently overrides an exported variable.
+   All variables below are read through `Environment`, which loads a `.env` file from the **current working directory**. The real process environment takes precedence: `.env` only supplies variables that are not already exported.
 
    The caching system supports the following environment variables:
    - **CACHE_HIERARCHY**: Comma-separated list of cache types in order (e.g., "LOCAL,REDIS")
