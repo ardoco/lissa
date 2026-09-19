@@ -11,10 +11,9 @@ import org.jspecify.annotations.Nullable;
  * (e.g., Redis and local file cache), providing a unified view across the cache hierarchy.
  * <p>
  * The cache hierarchy operates as follows:
- * 1. Attempts to retrieve/store values in the primary cache
- * 2. Falls back to secondary cache if missing in the primary
- * 3. Automatically synchronizes values between layers when needed
- * 4. Applies conflict resolution strategy when values differ between layers
+ * 1. Reads query both layers and resolve the two results with the configured conflict resolution strategy
+ * 2. Writes are applied to both layers
+ * 3. A value missing from one layer is backfilled from the other during resolution
  *
  * @param <K> The type of cache key used in this cache
  */

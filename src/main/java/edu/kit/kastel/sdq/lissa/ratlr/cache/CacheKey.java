@@ -30,18 +30,18 @@ public interface CacheKey {
     }
 
     /**
-     * Returns a local key for in-memory cache identification and logging purposes.
+     * Returns the key used to address this entry in file-based caches and in log output.
      * <p>
      * This key is:
      * <ul>
      *     <li>Excluded from JSON serialization (annotated with {@link com.fasterxml.jackson.annotation.JsonIgnore @JsonIgnore})</li>
-     *     <li>Used for human-readable logging and debugging</li>
+     *     <li>The key under which {@code LocalCache} stores entries in its JSON file</li>
      * </ul>
      * <p>
-     * The local key is separate from the JSON key ({@link #toJsonKey()}) because it enables custom key generation
-     * strategies for special cases
+     * The local key is separate from the JSON key ({@link #toJsonKey()}): Redis-backed caches address entries by
+     * {@link #toJsonKey()}, while file-based caches use this key, which is derived from the cached content only.
      *
-     * @return A string representing the local key, typically a UUID derived from the cache key's content
+     * @return A string representing the local key, a deterministic UUID derived from the cache key's content
      */
     String localKey();
 }

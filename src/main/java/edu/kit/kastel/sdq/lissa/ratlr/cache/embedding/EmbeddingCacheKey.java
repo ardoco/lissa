@@ -13,8 +13,9 @@ import edu.kit.kastel.sdq.lissa.ratlr.utils.KeyGenerator;
 
 /**
  * Represents a key for embedding caching operations in the LiSSA framework.
- * This class is used to uniquely identify cached values based on various parameters
- * such as the model used, seed value, operation mode, and content.
+ * This class is used to uniquely identify cached values based on the model used, the fixed
+ * {@code EMBEDDING} operation mode and the content. Seed and temperature are pinned to -1 for
+ * backward compatibility and carry no information.
  * <p>
  * The key can be serialized to JSON for storage and retrieval from the cache.
  */

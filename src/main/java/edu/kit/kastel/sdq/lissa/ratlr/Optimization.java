@@ -23,11 +23,11 @@ import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptselector.Selector;
 
 /**
  * Represents a single prompt optimization run of the LiSSA framework.
- * This class utilizes the general {@link Evaluation} pipeline and extends it by an optimization step at the end.
- * The pipeline adds these steps:
- * <ol>
- *     <li>Optimizes the prompt</li>
- * </ol>
+ * This class reuses the first half of the {@link Evaluation} pipeline (artifact loading, preprocessing,
+ * embeddings and element stores) and then runs a
+ * {@link edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.PromptOptimizer} in place of the classification,
+ * aggregation and statistics stages. It writes {@code results-prompt-optimization-*.md} rather than
+ * {@code results-*.md} and {@code traceLinks-*.csv}.
  */
 public class Optimization {
 

@@ -21,8 +21,8 @@ LiSSA implements a sophisticated caching system to improve performance and ensur
      - If a cache entry is missing in one level during a read, it is also written to the other level
    - [`LocalCache`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/LocalCache.java): File-based cache implementation that stores data in JSON format
      - Implements dirty tracking to optimize writes
-     - Automatically saves changes on shutdown
-     - Supports atomic writes using temporary files
+     - Writes to disk when more than 50 entries have changed since the last write, and when the pipeline flushes the cache at the end of a run. There is **no shutdown hook** — if the JVM is killed mid-run, up to 50 new entries are lost
+     - Writes via a temporary file that is then copied over the cache file (`REPLACE_EXISTING`); note this is a copy, not an atomic move
    - [`RedisCache`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/RedisCache.java): Redis-based cache implementation
      - Uses Redis for high-performance caching
      - Supports both string and object serialization
@@ -43,17 +43,53 @@ LiSSA implements a sophisticated caching system to improve performance and ensur
      - Cache keys are automatically generated based on content using the model name
    - **Classifiers**: Caches LLM responses for classification tasks
      - Uses `ClassifierCacheParameter` to identify unique classifier configurations
-     - Cache keys include model name, seed, temperature, and content
+     - Model name, seed and temperature are encoded in the cache **file name**; the entry key inside a file-based cache is derived from the content alone. The Redis backends key entries by the full JSON key instead (see [Cache Keys](#cache-keys))
    - **Preprocessors**: Caches preprocessing results for text summarization and other operations
      - Uses `ClassifierCacheParameter` for LLM-based preprocessing
 
 ## Key Concepts
 
+### Cache File Names
+
+Each file-based cache is a single JSON file at `<cache_dir>/<SimpleClassName>_<parameters>.json`, where `<SimpleClassName>` is the **calling class** — `CacheManager.getCache(origin, params)` uses `origin.getClass().getSimpleName()` — and `<parameters>` comes from `CacheParameter.parameters()`:
+
+- classifiers, summarizing preprocessors and prompt optimizers: `<model>_<seed>`, or `<model>_<seed>_<temperature>` when `temperature != 0.0` (the temperature is omitted at `0.0` for backward compatibility);
+- embedding creators: `<model>`.
+
+Any `:` in the resulting name is replaced by `__`. Examples:
+
+```text
+SimpleClassifier_gpt-4o-mini-2024-07-18_133742243.json
+ReasoningClassifier_gpt-4o-mini_133742243_0.7.json
+OpenAiEmbeddingCreator_text-embedding-3-large.json
+```
+
+Because the Java class name is part of the file name, renaming a class orphans its cache, and classifiers sharing an implementation class share a cache file. If `cache_dir` is absent from the configuration, `./cache` relative to the current working directory is used.
+
 ### Cache Keys
 
-Cache keys uniquely identify cached items and consist of two parts:
-- **JSON Key**: Serialized representation including all cache parameters (model, seed, temperature, content, mode)
-- **Local Key**: Generated UUID-based key for in-memory identification and logging
+A cache key has two representations, and **which one is used depends on the backend**:
+
+- **Local key** — `UUID.nameUUIDFromBytes(content.replace("\r\n", "\n").getBytes(UTF_8))`, i.e. a name-based UUID (version 3, MD5) over the request content only. This is the key under which entries are stored in the JSON files of `LocalCache`. Model, seed and temperature are **not** part of it; they are encoded in the file name (see above).
+- **JSON key** — the full key object serialized with Jackson (model, seed, temperature, mode, content). This is the key used by `RedisCache` and `RestRedisCache`.
+
+Consequence for replay: an entry in a shipped cache file matches only if the request text is byte-identical after CRLF normalization. Any whitespace, template or content change produces a different UUID and therefore a silent miss.
+
+### What Goes Into a Classifier Cache Key
+
+`SimpleClassifier` hashes the template after `{source_type}`, `{source_content}`, `{target_type}` and `{target_content}` have been substituted — nothing else.
+
+`ReasoningClassifier` hashes a rendering of the whole chat message list, of the form
+
+```text
+[SystemMessage { text = "..." }, UserMessage { name = null contents = [TextContent { text = "..." }] }]
+```
+
+built with `dev.langchain4j.internal.Utils.quoted` — an **internal**, non-API class of langchain4j.
+
+> [!WARNING]
+> Reasoning-classifier cache keys change — and every entry then silently misses — if any of the following change: the langchain4j version (pinned in `pom.xml`; `Utils.quoted` carries no stability guarantee), the hard-coded system message, `use_system_message`, the prompt template (including edits to the built-in prompt enum, since `prompt` is an index into it), or the `artifact_type` values substituted into `{source_type}`/`{target_type}`.
+> The key contains **no format-version field and no salt**, so an incompatible change cannot be detected — it only produces misses. When replaying an archived cache, do not upgrade langchain4j and do not reformat prompts.
 
 ### Cache Parameters
 
@@ -65,6 +101,40 @@ Parameters are used to:
 1. Generate unique cache file names (via `parameters()` method)
 2. Create cache keys from content (via `createCacheKey()` method)
 3. Validate cache consistency when retrieving existing caches
+
+## Cache Misses Are Silent
+
+A classifier cache miss is not an error. `Classifier.parallelClassify` runs up to 100 virtual threads (OpenAI and Blablador; 10 for Open WebUI, 1 for Ollama and DeepSeek) with **no per-task exception handling**, so a failed LLM call — for example an HTTP 401 from a placeholder API key — kills that worker thread. The remaining workers finish, the result list is silently short, and `results-*.md` / `traceLinks-*.csv` are still written, with degraded precision and recall. `EvaluateCommand` then catches every per-configuration exception and logs a warning, and the CLI never sets a non-zero exit code. **A run that fell back to the network and got 401s looks like a successful run.**
+
+An embedding miss fails differently but is equally misleading: any embedding exception is rerouted through `tryToFixWithLength`, which reports `Token length was not too long. Don't know how to handle previous exception`. Read that as "the embedding call failed", usually a missing or invalid key.
+
+To verify that a replay really came from the cache:
+
+1. Compare the metrics against the published values.
+2. Grep the log for `Classifying (` and `Calculating embedding for` — both are logged at INFO **only on a miss**. A fully cached run emits neither.
+3. Confirm that the cache files' modification times and sizes are unchanged.
+4. Check stderr for uncaught `Exception in thread ...` traces.
+
+## Credentials Are Required Even for a Fully Cached Run
+
+Provider clients are constructed eagerly, before any cache is consulted, and they validate their environment variables at construction time. A 100% cache-hit replay therefore still requires the provider's variables to be **present**, although their values are never used. For the OpenAI-based configurations, set:
+
+```bash
+OPENAI_ORGANIZATION_ID=DUMMY
+OPENAI_API_KEY=DUMMY
+```
+
+This is exactly what `src/test/resources/.env-test` does for the offline end-to-end test. Using deliberately invalid values is recommended: it turns an unnoticed cache miss into a visible failure instead of a live API call.
+
+## Where Results Are Written
+
+Results are always written into the **current working directory**, never into `cache_dir`:
+
+- `results-<config-file-name>_<uuid>.md`
+- `traceLinks-<config-file-name>_<uuid>.csv`
+- `results-prompt-optimization-<config-file-name>_<uuid>.md`
+
+The `<uuid>` is a deterministic hash over the fully-resolved configuration, with all defaults filled in. Replaying the same configuration with the same build therefore produces exactly the same file names and **overwrites the existing files without warning**. Run replays from a scratch directory, not from a directory that holds published results. Conversely, if a code-level default changes between releases, the uuid changes and you silently get a *new* file instead of an updated one.
 
 ### Cache Replacement Strategies
 
@@ -95,10 +165,15 @@ The `Cache` interface provides two API levels:
 
    ```json
    {
-     "cache_dir": "./cache/path"  // Directory for cache storage
+     "cache_dir": "./cache/path"
    }
    ```
+
+   `cache_dir` is the directory for cache storage. It may be omitted, in which case `./cache` relative to the current working directory is used.
+
 2. **Environment Variables**
+
+   All variables below are read through `Environment`, which loads a `.env` file from the **current working directory in preference to** the real process environment — a stale `.env` silently overrides an exported variable.
 
    The caching system supports the following environment variables:
    - **CACHE_HIERARCHY**: Comma-separated list of cache types in order (e.g., "LOCAL,REDIS")
@@ -111,6 +186,7 @@ The `Cache` interface provides two API levels:
    - Default: "redis://localhost:6379"
    - Example: "redis://redis-server:6379"
    - **REST_REDIS_URI**: URI for REST Redis server (if using REST_REDIS cache type)
+   - Default: "http://localhost:8080"
    - **REST_REDIS_USERNAME**: Username for REST Redis authentication
    - **REST_REDIS_PASSWORD**: Password for REST Redis authentication
 
@@ -137,7 +213,7 @@ The `Cache` interface provides two API levels:
    2. Set environment variables if needed:
    - `CACHE_HIERARCHY=REDIS,LOCAL` to use Redis with local fallback
    - `REDIS_URL=redis://your-redis-host:6379` if not using the default
-   3. If Redis is unavailable, but configured to be used the system will fail.
+   3. If Redis is configured but unavailable, cache construction throws. Under the `eval` CLI this aborts that configuration only: the error is logged as a warning, the remaining configurations still run, and the process exits 0 — check the log, not the exit code.
 
 4. **Best Practices**
 

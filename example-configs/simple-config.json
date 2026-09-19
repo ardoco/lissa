@@ -10,7 +10,7 @@
     "name" : "text",
     "args" : {
       "artifact_type" : "requirement",
-      "path" : "./datasets/req2code/eANCI/req"
+      "path" : "./datasets/req2code/eANCI/UC"
     }
   },
 
@@ -18,7 +18,7 @@
     "name" : "text",
     "args" : {
       "artifact_type" : "source code",
-      "path" : "./datasets/req2code/eANCI/code"
+      "path" : "./datasets/req2code/eANCI/CC"
     }
   },
 

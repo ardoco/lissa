@@ -22,8 +22,8 @@ import edu.kit.kastel.sdq.lissa.ratlr.utils.Environment;
 /**
  * Manages caching operations in the LiSSA framework.
  * This class provides a centralized way to create and access caches for different purposes,
- * such as storing embeddings or chat responses. It supports both local file-based caching
- * and Redis-based caching with automatic synchronization.
+ * such as storing embeddings or chat responses. It supports local file-based caching, Redis caching,
+ * and Redis over a REST API, layered according to the {@code CACHE_HIERARCHY} environment variable.
  */
 public final class CacheManager {
     /**

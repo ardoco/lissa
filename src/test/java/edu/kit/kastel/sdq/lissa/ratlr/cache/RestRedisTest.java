@@ -36,8 +36,12 @@ import kong.unirest.core.Unirest;
 
 /**
  * Integration test for the REST Redis interface, using a Testcontainers-managed Redis instance.
+ * <p>
+ * The whole class is skipped when no Docker daemon is available, so that {@code mvn package} and
+ * {@code mvn verify} still succeed on a machine without Docker (for example when building from an
+ * archived source copy).
  */
-@Testcontainers
+@Testcontainers(disabledWithoutDocker = true)
 public class RestRedisTest {
 
     private static final Path BASELINE_ENV = Path.of("src/test/resources/.env-test");

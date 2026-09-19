@@ -156,7 +156,7 @@ public class ChatLanguageModelProvider {
 
     /**
      * Determines the number of threads to use based on the platform.
-     * OpenAI and Blablador platforms use 100 threads, while others use 1.
+     * OpenAI and Blablador use 100 threads, Open WebUI uses 10, Ollama and DeepSeek use 1.
      *
      * @param configuration The module configuration
      * @return The number of threads to use
@@ -306,7 +306,7 @@ public class ChatLanguageModelProvider {
      * Returns the parameters used to create the cache key for this model.
      * This method is used to identify the cache uniquely.
      *
-     * @return An array of strings representing the cache parameters
+     * @return The {@link ClassifierCacheParameter} (model name, seed, temperature) identifying this model's cache
      * @see edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager#getCache(Object, CacheParameter)
      */
     public ClassifierCacheParameter cacheParameters() {

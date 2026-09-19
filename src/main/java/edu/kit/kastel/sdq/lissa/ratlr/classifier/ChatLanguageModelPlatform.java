@@ -14,6 +14,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
  *   <li>OLLAMA: Ollama platform (1 thread)</li>
  *   <li>BLABLADOR: Blablador platform (100 threads)</li>
  *   <li>DEEPSEEK: DeepSeek platform (1 thread)</li>
+ *   <li>OPENWEBUI: Open WebUI platform (10 threads)</li>
  * </ul>
  *
  * @see ChatLanguageModelProvider
@@ -36,7 +37,7 @@ public enum ChatLanguageModelPlatform {
      */
     DEEPSEEK(1, "deepseek-chat"),
     /**
-     * Open WebUI platform (1 thread, default model: "llama3:8b").
+     * Open WebUI platform (10 threads, default model: "llama3:8b").
      */
     OPENWEBUI(10, "llama3:8b");
 

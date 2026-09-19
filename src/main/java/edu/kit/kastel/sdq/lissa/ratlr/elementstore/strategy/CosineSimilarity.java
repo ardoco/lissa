@@ -17,7 +17,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.utils.Pair;
 public class CosineSimilarity implements RetrievalStrategy {
     /**
      * Special value for the maximum number of results that indicates no limit.
-     * Only applicable for target stores (similarityRetriever = true) in LiSSA's similarity search.
+     * Only applicable for target stores in LiSSA's similarity search.
      */
     public static final String MAX_RESULTS_INFINITY_ARGUMENT = "infinity";
 

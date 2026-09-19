@@ -1,4 +1,4 @@
-/* Licensed under MIT 2025. */
+/* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.elementstore;
 
 import java.util.List;
@@ -11,7 +11,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.utils.Pair;
 /**
  * A store for target elements and their embeddings in the LiSSA framework.
  * Providing functionality for similarity search and element retrieval
- * <b>Target Store</b> (similarityRetriever = true):
+ * <b>Target Store</b> (performs similarity search):
  * <ul>
  *      <li>Used to store target elements that will be searched for similarity in LiSSA's classification phase</li>
  *      <li>Cannot retrieve all elements at once</li>

@@ -11,7 +11,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.utils.KeyGenerator;
 public interface Configuration {
     /**
      * Separator used in configuration names to split different parts of the name.
-     * For example, "iterative_gpt" would be split into ["iterative", "gpt"].
+     * For example, "iterative_openai" would be split into ["iterative", "openai"].
      */
     String CONFIG_NAME_SEPARATOR = "_";
 

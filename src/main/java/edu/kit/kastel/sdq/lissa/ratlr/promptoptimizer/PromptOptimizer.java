@@ -17,7 +17,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptselector.Selector;
 
 /**
  * Interface for prompt optimizers in the LiSSA framework.
- * This class provides the foundation for implementing different prompt optimization strategies
+ * This interface defines the contract for implementing different prompt optimization strategies
  * for trace link analysis.
  */
 public interface PromptOptimizer {
