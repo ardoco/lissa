@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 import edu.kit.kastel.mcse.ardoco.llm.cache.Cache;
 import edu.kit.kastel.mcse.ardoco.llm.cache.CacheManager;
 import edu.kit.kastel.mcse.ardoco.llm.cache.chat.ChatCacheKey;
+import edu.kit.kastel.mcse.ardoco.llm.util.EnvironmentProvider;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
@@ -68,10 +69,12 @@ public class ReasoningClassifier extends Classifier {
      *
      * @param configuration The module configuration containing classifier settings
      * @param contextStore The shared context store for pipeline components
+     * @param environment The environment provider for credentials and other environment variables
      */
-    public ReasoningClassifier(ModuleConfiguration configuration, ContextStore contextStore) {
+    public ReasoningClassifier(
+            ModuleConfiguration configuration, ContextStore contextStore, EnvironmentProvider environment) {
         super(ChatLanguageModelProvider.threads(configuration), contextStore);
-        this.provider = new ChatLanguageModelProvider(configuration);
+        this.provider = new ChatLanguageModelProvider(configuration, environment);
         this.cache = CacheManager.getDefaultInstance().getCache(this, provider.cacheParameters());
         this.prompt = configuration.argumentAsStringByEnumIndex(
                 CLASSIFICATION_PROMPT_KEY,

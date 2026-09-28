@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.kit.kastel.mcse.ardoco.llm.cache.CacheManager;
+import edu.kit.kastel.mcse.ardoco.llm.util.SystemEnvironment;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.OptimizerConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.PromptOptimizer;
@@ -91,8 +92,8 @@ public class Optimization {
             selector = Selector.createSelector(configuration.selector());
         }
 
-        promptOptimizer =
-                PromptOptimizer.createOptimizer(configuration.promptOptimizer(), goldStandard, metric, selector);
+        promptOptimizer = PromptOptimizer.createOptimizer(
+                configuration.promptOptimizer(), goldStandard, metric, selector, SystemEnvironment.getInstance());
         configuration.serializeAndDestroyConfiguration();
     }
 

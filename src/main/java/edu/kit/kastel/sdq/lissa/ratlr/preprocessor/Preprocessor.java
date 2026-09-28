@@ -9,6 +9,7 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.kit.kastel.mcse.ardoco.llm.util.EnvironmentProvider;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
@@ -83,11 +84,13 @@ public abstract class Preprocessor {
      *
      * @param configuration The module configuration specifying the type of preprocessor
      * @param contextStore The shared context store for pipeline components
+     * @param environment The environment provider for credentials and other environment variables
      * @return A new preprocessor instance
      * @throws IllegalArgumentException if the preprocessor name is not supported
      * @throws IllegalStateException if the configuration name is not recognized
      */
-    public static Preprocessor createPreprocessor(ModuleConfiguration configuration, ContextStore contextStore) {
+    public static Preprocessor createPreprocessor(
+            ModuleConfiguration configuration, ContextStore contextStore, EnvironmentProvider environment) {
         return switch (configuration.name().split(CONFIG_NAME_SEPARATOR)[0]) {
             case "sentence" -> new SentencePreprocessor(configuration, contextStore);
             case "code" ->
@@ -104,7 +107,7 @@ public abstract class Preprocessor {
                     default ->
                         throw new IllegalArgumentException("Unsupported preprocessor name: " + configuration.name());
                 };
-            case "summarize" -> new SummarizePreprocessor(configuration, contextStore);
+            case "summarize" -> new SummarizePreprocessor(configuration, contextStore, environment);
             case "artifact" -> new SingleArtifactPreprocessor(contextStore);
             default -> throw new IllegalStateException("Unexpected value: " + configuration.name());
         };

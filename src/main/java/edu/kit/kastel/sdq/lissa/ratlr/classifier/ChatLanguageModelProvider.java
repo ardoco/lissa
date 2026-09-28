@@ -7,6 +7,7 @@ import edu.kit.kastel.mcse.ardoco.llm.cache.chat.ChatCacheParameter;
 import edu.kit.kastel.mcse.ardoco.llm.chat.ChatModelPlatform;
 import edu.kit.kastel.mcse.ardoco.llm.chat.ChatModelProvider;
 import edu.kit.kastel.mcse.ardoco.llm.chat.LlmConfiguration;
+import edu.kit.kastel.mcse.ardoco.llm.util.EnvironmentProvider;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 
 import dev.langchain4j.model.chat.ChatModel;
@@ -25,9 +26,10 @@ public class ChatLanguageModelProvider {
      * Creates a provider for the given module configuration.
      *
      * @param configuration The module configuration ({@code <mode>_<platform>} with optional model/seed/temperature args)
+     * @param environmentProvider The environment provider for credentials and other environment variables
      */
-    public ChatLanguageModelProvider(ModuleConfiguration configuration) {
-        this.delegate = new ChatModelProvider(toLlmConfiguration(configuration));
+    public ChatLanguageModelProvider(ModuleConfiguration configuration, EnvironmentProvider environmentProvider) {
+        this.delegate = new ChatModelProvider(toLlmConfiguration(configuration, environmentProvider));
     }
 
     /**
@@ -89,7 +91,8 @@ public class ChatLanguageModelProvider {
         };
     }
 
-    private static LlmConfiguration toLlmConfiguration(ModuleConfiguration configuration) {
+    private static LlmConfiguration toLlmConfiguration(
+            ModuleConfiguration configuration, EnvironmentProvider environment) {
         ChatModelPlatform platform = platform(configuration);
         String model = configuration.argumentAsString("model");
         int seed = configuration.argumentAsInt("seed", LlmConfiguration.DEFAULT_SEED);
@@ -98,6 +101,7 @@ public class ChatLanguageModelProvider {
                 .modelName(model)
                 .seed(seed)
                 .temperature(temperature)
+                .environment(environment)
                 .build();
     }
 

@@ -17,9 +17,9 @@ import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
 
 import edu.kit.kastel.mcse.ardoco.llm.cache.CacheManager;
-import edu.kit.kastel.mcse.ardoco.llm.util.Environment;
 import edu.kit.kastel.mcse.ardoco.llm.util.Futures;
 import edu.kit.kastel.mcse.ardoco.llm.util.KeyGenerator;
+import edu.kit.kastel.mcse.ardoco.llm.util.SystemEnvironment;
 import edu.kit.kastel.sdq.lissa.cli.command.OptimizeCommand;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.Classifier;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.PromptOptimizer;
@@ -47,13 +47,13 @@ class ArchitectureTest {
     /**
      * Rule that enforces environment variable access restrictions.
      * <p>
-     * Only the {@link Environment} utility class may call {@code System.getenv()}.
-     * All other classes must use the {@link Environment} class for environment variable access.
+     * Only the {@link SystemEnvironment} utility class may call {@code System.getenv()}.
+     * All other classes must use the {@link SystemEnvironment} class for environment variable access.
      */
     @ArchTest
-    static final ArchRule noDirectEnvironmentAccess = noClasses()
+    static final ArchRule noDirectSystemEnvironmentAccess = noClasses()
             .that()
-            .haveNameNotMatching(Environment.class.getName())
+            .haveNameNotMatching(SystemEnvironment.class.getName())
             .and()
             .resideOutsideOfPackage("..e2e..")
             .should()
@@ -144,7 +144,7 @@ class ArchitectureTest {
                     "CacheManager.resetDefaultInstance() is only intended for testing purposes and must not be used elsewhere");
 
     /**
-     * Rule that enforces that Environment.overwrite() is only called from test classes.
+     * Rule that enforces that SystemEnvironment.overwrite() is only called from test classes.
      * <p>
      * The overwrite() method is intended for testing purposes to override environment variables.
      * For production usage the regular .env file shall be used.
@@ -154,7 +154,7 @@ class ArchitectureTest {
             .that()
             .haveNameNotMatching(".*Test.*")
             .should()
-            .callMethod(Environment.class, "overwrite", Path.class)
+            .callMethod(SystemEnvironment.class, "overwrite", Path.class)
             .because(
-                    "Environment.overwrite() is only intended for testing purposes and may not be used elsewhere. Use the regular .env instead.");
+                    "SystemEnvironment.overwrite() is only intended for testing purposes and may not be used elsewhere. Use the regular .env instead.");
 }

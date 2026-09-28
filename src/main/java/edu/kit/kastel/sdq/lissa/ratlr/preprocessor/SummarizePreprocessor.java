@@ -8,6 +8,7 @@ import java.util.concurrent.*;
 import edu.kit.kastel.mcse.ardoco.llm.cache.Cache;
 import edu.kit.kastel.mcse.ardoco.llm.cache.CacheManager;
 import edu.kit.kastel.mcse.ardoco.llm.cache.chat.ChatCacheKey;
+import edu.kit.kastel.mcse.ardoco.llm.util.EnvironmentProvider;
 import edu.kit.kastel.mcse.ardoco.llm.util.Futures;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.ChatLanguageModelProvider;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
@@ -58,11 +59,13 @@ public class SummarizePreprocessor extends Preprocessor {
      *
      * @param moduleConfiguration The module configuration containing template and model settings
      * @param contextStore The shared context store for pipeline components
+     * @param environment The environment provider for credentials and other environment variables
      */
-    public SummarizePreprocessor(ModuleConfiguration moduleConfiguration, ContextStore contextStore) {
+    public SummarizePreprocessor(
+            ModuleConfiguration moduleConfiguration, ContextStore contextStore, EnvironmentProvider environment) {
         super(contextStore);
         this.template = moduleConfiguration.argumentAsString("template", "Summarize the following {type}: {content}");
-        this.provider = new ChatLanguageModelProvider(moduleConfiguration);
+        this.provider = new ChatLanguageModelProvider(moduleConfiguration, environment);
         this.threads = ChatLanguageModelProvider.threads(moduleConfiguration);
         this.cache = CacheManager.getDefaultInstance().getCache(this, provider.cacheParameters());
     }

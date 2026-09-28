@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.kit.kastel.mcse.ardoco.llm.cache.CacheManager;
+import edu.kit.kastel.mcse.ardoco.llm.util.SystemEnvironment;
 import edu.kit.kastel.sdq.lissa.ratlr.artifactprovider.ArtifactProvider;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.Classifier;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.EvaluationConfiguration;
@@ -207,13 +208,15 @@ public class Evaluation {
         targetArtifactProvider =
                 ArtifactProvider.createArtifactProvider(configuration.targetArtifactProvider(), contextStore);
 
-        sourcePreprocessor = Preprocessor.createPreprocessor(configuration.sourcePreprocessor(), contextStore);
-        targetPreprocessor = Preprocessor.createPreprocessor(configuration.targetPreprocessor(), contextStore);
+        sourcePreprocessor = Preprocessor.createPreprocessor(
+                configuration.sourcePreprocessor(), contextStore, SystemEnvironment.getInstance());
+        targetPreprocessor = Preprocessor.createPreprocessor(
+                configuration.targetPreprocessor(), contextStore, SystemEnvironment.getInstance());
 
         embeddingCreator = EmbeddingCreator.createEmbeddingCreator(configuration.embeddingCreator(), contextStore);
         sourceStore = new SourceElementStore(configuration.sourceStore());
         targetStore = new TargetElementStore(configuration.targetStore());
-        classifier = configuration.createClassifier(contextStore);
+        classifier = configuration.createClassifier(contextStore, SystemEnvironment.getInstance());
         aggregator = ResultAggregator.createResultAggregator(configuration.resultAggregator(), contextStore);
 
         traceLinkIdPostProcessor = TraceLinkIdPostprocessor.createTraceLinkIdPostprocessor(
