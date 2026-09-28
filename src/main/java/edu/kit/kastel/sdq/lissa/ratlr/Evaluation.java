@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.kit.kastel.mcse.ardoco.llm.cache.CacheManager;
+import edu.kit.kastel.mcse.ardoco.llm.util.EnvironmentProvider;
 import edu.kit.kastel.mcse.ardoco.llm.util.SystemEnvironment;
 import edu.kit.kastel.sdq.lissa.ratlr.artifactprovider.ArtifactProvider;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.Classifier;
@@ -67,6 +68,7 @@ public class Evaluation {
     private final @Nullable Path configFile;
 
     private final EvaluationConfiguration configuration;
+    private final EnvironmentProvider environment;
 
     /** Provider for source artifacts */
     private ArtifactProvider sourceArtifactProvider;
@@ -112,7 +114,26 @@ public class Evaluation {
      * @throws NullPointerException If configFile is null
      */
     public Evaluation(Path configFile) throws IOException {
+        this(configFile, SystemEnvironment.getInstance());
+    }
+
+    /**
+     * Creates a new evaluation instance with the specified configuration file.
+     * This constructor:
+     * <ol>
+     *     <li>Validates the configuration file path</li>
+     *     <li>Loads and initializes the configuration</li>
+     *     <li>Sets up all required components for the pipeline, sharing a {@link ContextStore}</li>
+     * </ol>
+     *
+     * @param configFile Path to the configuration file
+     * @param environment The environment provider for credentials and other environment variables
+     * @throws IOException If there are issues reading the configuration file
+     * @throws NullPointerException If configFile is null
+     */
+    public Evaluation(Path configFile, EnvironmentProvider environment) throws IOException {
         this.configFile = Objects.requireNonNull(configFile);
+        this.environment = Objects.requireNonNull(environment);
         configuration = new ObjectMapper().readValue(configFile.toFile(), EvaluationConfiguration.class);
         setup();
     }
@@ -135,7 +156,30 @@ public class Evaluation {
      * @throws NullPointerException If configFile is null
      */
     public Evaluation(Path configFile, String prompt) throws IOException {
+        this(configFile, prompt, SystemEnvironment.getInstance());
+    }
+
+    /**
+     * Creates a new evaluation instance with the specified configuration file. The classification prompt in the
+     * configuration will internally be overwritten with the provided {@code prompt}. The original configuration file is not
+     * modified. Results of the {@link #run()} method will also include the overwritten prompt instead of the original one.
+     * This constructor:
+     * <ol>
+     *     <li>Validates the configuration file path</li>
+     *     <li>Loads and initializes the configuration</li>
+     *     <li>Overwrites the classification prompt in the configuration with the provided prompt</li>
+     *     <li>Sets up all required components for the pipeline, sharing a {@link ContextStore}</li>
+     * </ol>
+     *
+     * @param configFile Path to the configuration file
+     * @param prompt The prompt to use for classification
+     * @param environment The environment provider for credentials and other environment variables
+     * @throws IOException If there are issues reading the configuration file
+     * @throws NullPointerException If configFile is null
+     */
+    public Evaluation(Path configFile, String prompt, EnvironmentProvider environment) throws IOException {
         this.configFile = Objects.requireNonNull(configFile);
+        this.environment = Objects.requireNonNull(environment);
         EvaluationConfiguration loadedConfiguration =
                 new ObjectMapper().readValue(configFile.toFile(), EvaluationConfiguration.class);
         configuration = modifyConfigurationWithPrompt(prompt, loadedConfiguration);
@@ -176,8 +220,24 @@ public class Evaluation {
      * @throws IOException If there are issues setting up the cache
      */
     public Evaluation(EvaluationConfiguration config) throws IOException {
+        this(config, SystemEnvironment.getInstance());
+    }
+
+    /**
+     * Creates a new evaluation instance with the specified configuration object.
+     * This constructor:
+     * <ol>
+     *     <li>Initializes the configuration</li>
+     *     <li>Sets up all required components for the pipeline, sharing a {@link ContextStore}</li>
+     * </ol>
+     * @param config The configuration object
+     * @param environment The environment provider for credentials and other environment variables
+     * @throws IOException If there are issues setting up the cache
+     */
+    public Evaluation(EvaluationConfiguration config, EnvironmentProvider environment) throws IOException {
         this.configuration = config;
         this.configFile = null;
+        this.environment = Objects.requireNonNull(environment);
         setup();
     }
 
@@ -208,15 +268,15 @@ public class Evaluation {
         targetArtifactProvider =
                 ArtifactProvider.createArtifactProvider(configuration.targetArtifactProvider(), contextStore);
 
-        sourcePreprocessor = Preprocessor.createPreprocessor(
-                configuration.sourcePreprocessor(), contextStore, SystemEnvironment.getInstance());
-        targetPreprocessor = Preprocessor.createPreprocessor(
-                configuration.targetPreprocessor(), contextStore, SystemEnvironment.getInstance());
+        sourcePreprocessor =
+                Preprocessor.createPreprocessor(configuration.sourcePreprocessor(), contextStore, this.environment);
+        targetPreprocessor =
+                Preprocessor.createPreprocessor(configuration.targetPreprocessor(), contextStore, this.environment);
 
         embeddingCreator = EmbeddingCreator.createEmbeddingCreator(configuration.embeddingCreator(), contextStore);
         sourceStore = new SourceElementStore(configuration.sourceStore());
         targetStore = new TargetElementStore(configuration.targetStore());
-        classifier = configuration.createClassifier(contextStore, SystemEnvironment.getInstance());
+        classifier = configuration.createClassifier(contextStore, this.environment);
         aggregator = ResultAggregator.createResultAggregator(configuration.resultAggregator(), contextStore);
 
         traceLinkIdPostProcessor = TraceLinkIdPostprocessor.createTraceLinkIdPostprocessor(
