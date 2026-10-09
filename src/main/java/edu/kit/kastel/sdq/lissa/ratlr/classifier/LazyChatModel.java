@@ -4,6 +4,7 @@ package edu.kit.kastel.sdq.lissa.ratlr.classifier;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
 import org.jspecify.annotations.Nullable;
@@ -99,5 +100,35 @@ public final class LazyChatModel implements ChatModel {
     @Override
     public Set<Capability> supportedCapabilities() {
         return delegate().supportedCapabilities();
+    }
+
+    @Override
+    public CompletableFuture<ChatResponse> chatAsync(ChatRequest chatRequest) {
+        return delegate().chatAsync(chatRequest);
+    }
+
+    @Override
+    public CompletableFuture<ChatResponse> chatAsync(ChatRequest chatRequest, ChatRequestOptions options) {
+        return delegate().chatAsync(chatRequest, options);
+    }
+
+    @Override
+    public CompletableFuture<ChatResponse> doChatAsync(ChatRequest chatRequest) {
+        return delegate().doChatAsync(chatRequest);
+    }
+
+    @Override
+    public CompletableFuture<String> chatAsync(String userMessage) {
+        return delegate().chatAsync(userMessage);
+    }
+
+    @Override
+    public CompletableFuture<ChatResponse> chatAsync(ChatMessage... messages) {
+        return delegate().chatAsync(messages);
+    }
+
+    @Override
+    public CompletableFuture<ChatResponse> chatAsync(List<ChatMessage> messages) {
+        return delegate().chatAsync(messages);
     }
 }
