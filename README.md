@@ -84,7 +84,7 @@ To get started with LiSSA, follow these steps:
 
    > [!IMPORTANT]
    > The `.env` file is read from the **current working directory** — the directory you run LiSSA from — and it only fills in variables that are **not** already exported: a value present in the process environment wins over the same key in `.env`.
-   > `OPENAI_ORGANIZATION_ID` and `OPENAI_API_KEY` must be set even for a run that is served entirely from the cache, because they are validated when the OpenAI client is constructed, before any cache is consulted. Dummy values are sufficient for such a run and open no connection.
+   > `OPENAI_API_KEY` must be set even for a run that is served entirely from the cache (`OPENAI_ORGANIZATION_ID` is optional), because it is validated when the OpenAI client is constructed, before any cache is consulted. Dummy values are sufficient for such a run and open no connection.
 
 3. LiSSA caches requests in order to be reproducible. The cache is located in the cache folder that can be specified in the configuration.
 4. Run `java -jar target/lissa-*-jar-with-dependencies.jar eval -c config.json` to run the evaluation. You can provide a JSON or a directory containing JSON configurations.

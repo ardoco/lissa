@@ -15,9 +15,10 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.kit.kastel.sdq.lissa.ratlr.cache.Cache;
-import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager;
-import edu.kit.kastel.sdq.lissa.ratlr.cache.classifier.ClassifierCacheKey;
+import edu.kit.kastel.mcse.ardoco.llm.cache.Cache;
+import edu.kit.kastel.mcse.ardoco.llm.cache.CacheManager;
+import edu.kit.kastel.mcse.ardoco.llm.cache.chat.ChatCacheKey;
+import edu.kit.kastel.mcse.ardoco.llm.chat.ChatModelUtils;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.ChatLanguageModelProvider;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.ClassificationTask;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
@@ -26,7 +27,6 @@ import edu.kit.kastel.sdq.lissa.ratlr.elementstore.TargetElementStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.Metric;
-import edu.kit.kastel.sdq.lissa.ratlr.utils.ChatLanguageModelUtils;
 
 import dev.langchain4j.model.chat.ChatModel;
 
@@ -124,7 +124,7 @@ public class IterativeOptimizer implements PromptOptimizer {
     /**
      * The cache used to store and retrieve prompt optimization LLM requests.
      */
-    protected final Cache<ClassifierCacheKey> cache;
+    protected final Cache<ChatCacheKey> cache;
 
     /**
      * Provider for the language model used in classification.
@@ -258,7 +258,7 @@ public class IterativeOptimizer implements PromptOptimizer {
         logger.debug("Sending request to LLM (iteration {})...", iteration);
         logger.trace("Full LLM Request:\n{}", request);
 
-        String response = ChatLanguageModelUtils.cachedRequest(request, llm, cache);
+        String response = ChatModelUtils.cachedRequest(request, llm, cache);
 
         logger.debug("Received response from LLM (iteration {})", iteration);
         logger.trace("Full LLM Response:\n{}", response);
@@ -278,7 +278,7 @@ public class IterativeOptimizer implements PromptOptimizer {
      * @return The optimized prompt extracted from the response
      */
     protected String cachedSanitizedRequest(String request) {
-        String response = ChatLanguageModelUtils.cachedRequest(request, llm, cache);
+        String response = ChatModelUtils.cachedRequest(request, llm, cache);
         return sanitizePrompt(parseTaggedTextFirst(response, PROMPT_START, PROMPT_END));
     }
 
