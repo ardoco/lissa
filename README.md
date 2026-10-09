@@ -16,9 +16,10 @@ LiSSA aims to provide a generic solution for Traceability Link Recovery (TLR) by
 
 The concept and evaluation of LiSSA are detailed in our paper:
 
-> Fuchß, D., Hey, T., Keim, J., Liu, H., Ewald, N., Thirolf, T., & Koziolek, A. (2025). LiSSA: Toward Generic Traceability Link Recovery through Retrieval-Augmented Generation. In Proceedings of the IEEE/ACM 47th International Conference on Software Engineering, Ottawa, Canada.
+> Fuchß, D., Hey, T., Keim, J., Liu, H., Ewald, N., Thirolf, T., & Koziolek, A. (2025). LiSSA: Toward Generic Traceability Link Recovery Through Retrieval-Augmented Generation. In *2025 IEEE/ACM 47th International Conference on Software Engineering (ICSE)* (pp. 1396–1408). IEEE. <https://doi.org/10.1109/ICSE55347.2025.00186>
 
 You can access the paper [here](https://ardoco.de/c/icse25).
+If you use LiSSA in your research, please cite this paper; a machine-readable citation is provided in [`CITATION.cff`](CITATION.cff).
 
 ## Features
 
@@ -37,6 +38,7 @@ The documentation is organized into several sections:
 - [Configuration](docs/configuration.md): Guide for configuring LiSSA
 - [CLI Usage](docs/cli.md): Information about using the command line interface
 - [Caching](docs/caching.md): Information about the caching system and Redis setup
+- [Prompt Optimization](docs/prompt-optimization.md): Guide to the prompt optimization pipeline
 - [Development](docs/development.md): Development setup and contribution guidelines
 
 ## Getting Started
@@ -55,7 +57,20 @@ To get started with LiSSA, follow these steps:
    ```bash
    mvn clean package
    ```
-3. **Run LiSSA**:
+
+   Docker is optional: the REST Redis integration test starts a container when a Docker daemon is
+   available and is skipped automatically when it is not.
+
+3. **Create a Configuration**:
+   A fresh clone contains no `config.json`. Copy the template and replace its `<<PLACEHOLDER>>` values:
+
+   ```bash
+   cp config-template.json config.json
+   ```
+
+   See the [configuration documentation](docs/configuration.md) for all available options.
+
+4. **Run LiSSA**:
    Execute the main application:
 
    ```bash
@@ -64,23 +79,28 @@ To get started with LiSSA, follow these steps:
 
 ### Configuration
 
-1. Create a configuration you want to use for evaluation / execution. E.g., you can find configurations [here](https://github.com/ArDoCo/ReplicationPackage-ICSE25_LiSSA-Toward-Generic-Traceability-Link-Recovery-through-RAG/tree/main/LiSSA-RATLR-V2/lissa/configs/req2code-significance). You can also provide a directory containing multiple configurations.
-2. Configure your API keys for the language model platforms you plan to use as environment variables. See the [configuration documentation](docs/configuration.md#supported-platforms-and-environment-variables) for details on supported platforms (OpenAI, Open WebUI, Ollama, Blablador, DeepSeek) and their required environment variables.
+1. Create a configuration you want to use for evaluation / execution, e.g. by copying `config-template.json`. You can find published configurations [here](https://github.com/ardoco/Replication-Package-ICSE25_LiSSA-Toward-Generic-Traceability-Link-Recovery-through-RAG/tree/main/LiSSA-RATLR-V2/lissa/configs/req2code-significance). You can also provide a directory containing multiple configurations.
+2. Configure your API keys for the language model platforms you plan to use. Copy the `env-template` file to `.env` and fill in the keys, or export them as environment variables. See the [configuration documentation](docs/configuration.md#supported-platforms-and-environment-variables) for details on supported platforms (OpenAI, Open WebUI, Ollama, Blablador, DeepSeek) and their required environment variables.
+
+   > [!IMPORTANT]
+   > The `.env` file is read from the **current working directory** — the directory you run LiSSA from — and it only fills in variables that are **not** already exported: a value present in the process environment wins over the same key in `.env`.
+   > `OPENAI_API_KEY` must be set even for a run that is served entirely from the cache (`OPENAI_ORGANIZATION_ID` is optional), because it is validated when the OpenAI client is constructed, before any cache is consulted. Dummy values are sufficient for such a run and open no connection.
+
 3. LiSSA caches requests in order to be reproducible. The cache is located in the cache folder that can be specified in the configuration.
-4. Run `java -jar target/lissa-*-jar-with-dependencies.jar eval -c configs/....` to run the evaluation. You can provide a JSON or a directory containing JSON configurations.
-5. The results will be printed to the console and saved to a file in the current directory. The name is also printed to the console.
+4. Run `java -jar target/lissa-*-jar-with-dependencies.jar eval -c config.json` to run the evaluation. You can provide a JSON or a directory containing JSON configurations.
+5. The results will be printed to the console and written into the **current working directory** as `results-<config>_<uuid>.md` and `traceLinks-<config>_<uuid>.csv`. The names are also printed to the console. Files with the same name are overwritten, so do not replay a run inside a directory that holds results you want to keep.
 
 ### Results of Evaluation / Execution
 
 The results will be stored as markdown files.
 A result file can look like below.
 It contains the configuration and the results of the evaluation.
-Additionally, the LiSSA generate CSV files that contain the traceability links as pairs of identifiers.
+Additionally, LiSSA generates CSV files that contain the traceability links as pairs of identifiers.
 
 <details>
 <summary>Example Result</summary>
 
-```json
+```markdown
 ## Configuration
 {
   "cache_dir" : "./cache-r2c/dronology-dd--102959883",
@@ -92,9 +112,9 @@ Additionally, the LiSSA generate CSV files that contain the traceability links a
 }
 
 ## Stats
-* # TraceLinks (GS): 740
-* # Source Artifacts: 211
-* # Target Artifacts: 423
+* #TraceLinks (GS): 740
+* #Source Artifacts: 211
+* #Target Artifacts: 423
 ## Results
 * True Positives: 283
 * False Positives: 1286

@@ -10,10 +10,18 @@
 
   <groupId>io.github.ardoco</groupId>
   <artifactId>lissa</artifactId>
-  <version>0.2.0-SNAPSHOT</version>
+  <version>1.1.0-SNAPSHOT</version>
 
   <name>LiSSA - Linking Software System Artifacts</name>
   <description>LiSSA (Linking Software System Artifacts) is an LLM-based approach that aims to be generic across artifact types. The key idea is to use a Large Language Model (LLM) together with information retrieval (IR) to find trace links. For a given source artifact (e.g., a requirement or a sentence in documentation), LiSSA first uses IR techniques to retrieve a small set of potentially relevant target artifacts (code files, model elements, etc.). It then queries the LLM with the retrieved context to generate or suggest the most likely trace link.</description>
+
+  <url>https://github.com/ardoco/lissa</url>
+
+  <scm>
+    <connection>scm:git:git://github.com/ardoco/lissa.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/ardoco/lissa.git</developerConnection>
+    <url>https://github.com/ardoco/lissa/tree/main</url>
+  </scm>
 
   <properties>
     <maven.compiler.source>21</maven.compiler.source>
@@ -21,7 +29,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <picocli.version>4.7.7</picocli.version>
     <record-builder.version>53</record-builder.version>
-    <metrics.version>0.2.1</metrics.version>
+    <metrics.version>0.3.0</metrics.version>
   </properties>
 
   <dependencyManagement>
@@ -29,7 +37,7 @@
       <dependency>
         <groupId>dev.langchain4j</groupId>
         <artifactId>langchain4j-bom</artifactId>
-        <version>1.16.3</version>
+        <version>1.22.0</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -55,7 +63,7 @@
     <dependency>
       <groupId>com.tngtech.archunit</groupId>
       <artifactId>archunit-junit5</artifactId>
-      <version>1.4.2</version>
+      <version>1.5.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -97,7 +105,7 @@
     <dependency>
       <groupId>io.github.ardoco.tlr</groupId>
       <artifactId>model-provider</artifactId>
-      <version>2.0.1</version>
+      <version>2.1.0</version>
     </dependency>
     <dependency>
       <groupId>io.github.bonede</groupId>
@@ -128,7 +136,7 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-junit-jupiter</artifactId>
-      <version>5.7.0</version>
+      <version>5.24.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -152,32 +160,12 @@
       <name>Maven Central</name>
       <url>https://repo.maven.apache.org/maven2/</url>
     </repository>
-    <repository>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <id>maven_snapshot</id>
-      <url>https://central.sonatype.com/repository/maven-snapshots/</url>
-    </repository>
   </repositories>
   <pluginRepositories>
     <pluginRepository>
       <id>maven_central</id>
       <name>Maven Central</name>
       <url>https://repo.maven.apache.org/maven2/</url>
-    </pluginRepository>
-    <pluginRepository>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <id>maven_snapshot</id>
-      <url>https://central.sonatype.com/repository/maven-snapshots/</url>
     </pluginRepository>
   </pluginRepositories>
   <build>
@@ -192,7 +180,7 @@
               <on>@formatter:on</on>
             </toggleOffOn>
             <palantirJavaFormat>
-              <version>2.83.0</version>
+              <version>2.102.0</version>
               <style>PALANTIR</style>
               <formatJavadoc>false</formatJavadoc>
             </palantirJavaFormat>

@@ -77,6 +77,7 @@ public class ChatLanguageModelProvider {
 
     /**
      * Determines the number of threads to use for the platform of the given configuration.
+     * OpenAI, Blablador and DeepSeek use 100 threads, Open WebUI uses 10, Ollama uses 1.
      *
      * @param configuration The module configuration
      * @return The number of threads to use
