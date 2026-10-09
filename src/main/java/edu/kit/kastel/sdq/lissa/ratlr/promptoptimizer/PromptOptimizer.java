@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
 
+import edu.kit.kastel.mcse.ardoco.llm.util.EnvironmentProvider;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.elementstore.SourceElementStore;
 import edu.kit.kastel.sdq.lissa.ratlr.elementstore.TargetElementStore;
@@ -42,23 +43,25 @@ public interface PromptOptimizer {
      * @param goldStandard The gold standard trace links for evaluation
      * @param metric The metric used to evaluate the prompt performance
      * @param selector The selector used to assess the optimization results (nullable, only required for {@link ProTeGiOptimizer})
+     * @param environment The environment provider for credentials and other environment variables
      * @return An instance of PromptOptimizer based on the configuration
      */
     static PromptOptimizer createOptimizer(
             ModuleConfiguration configuration,
             Set<TraceLink> goldStandard,
             Metric metric,
-            @Nullable Selector selector) {
+            @Nullable Selector selector,
+            EnvironmentProvider environment) {
         return switch (configuration.name().split(CONFIG_NAME_SEPARATOR)[0]) {
             case "mock" -> new MockOptimizer();
-            case "simple" -> new IterativeOptimizer(configuration, goldStandard, metric, 1);
-            case "iterative" -> new IterativeOptimizer(configuration, goldStandard, metric);
-            case "feedback" -> new IterativeFeedbackOptimizer(configuration, goldStandard, metric);
+            case "simple" -> new IterativeOptimizer(configuration, goldStandard, metric, environment, 1);
+            case "iterative" -> new IterativeOptimizer(configuration, goldStandard, metric, environment);
+            case "feedback" -> new IterativeFeedbackOptimizer(configuration, goldStandard, metric, environment);
             case "gradient", "protegi" -> {
                 if (selector == null) {
                     throw new IllegalArgumentException("Selector must not be null for ProTeGi optimizers");
                 }
-                yield new ProTeGiOptimizer(configuration, goldStandard, metric, selector);
+                yield new ProTeGiOptimizer(configuration, goldStandard, metric, selector, environment);
             }
             default -> throw new IllegalStateException("Unexpected value: " + configuration.name());
         };

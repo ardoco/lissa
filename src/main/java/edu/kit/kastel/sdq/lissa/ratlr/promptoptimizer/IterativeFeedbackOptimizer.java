@@ -11,6 +11,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.kit.kastel.mcse.ardoco.llm.util.EnvironmentProvider;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.ClassificationTask;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
@@ -75,9 +76,14 @@ public class IterativeFeedbackOptimizer extends IterativeOptimizer {
      *
      * @param configuration The module configuration containing optimizer settings
      * @param goldStandard The set of trace links that represent the gold standard for evaluation
+     * @param environment The environment provider for credentials and other environment variables
      */
-    public IterativeFeedbackOptimizer(ModuleConfiguration configuration, Set<TraceLink> goldStandard, Metric metric) {
-        super(configuration, goldStandard, metric);
+    public IterativeFeedbackOptimizer(
+            ModuleConfiguration configuration,
+            Set<TraceLink> goldStandard,
+            Metric metric,
+            EnvironmentProvider environment) {
+        super(configuration, goldStandard, metric, environment);
         this.feedbackPrompt =
                 configuration.argumentAsString(FEEDBACK_PROMPT_CONFIGURATION_KEY, FEEDBACK_PROMPT_TEMPLATE);
         this.feedbackSize = configuration.argumentAsInt(FEEDBACK_SIZE_CONFIGURATION_KEY, FEEDBACK_SIZE);

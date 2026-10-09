@@ -18,7 +18,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import edu.kit.kastel.mcse.ardoco.llm.util.Environment;
+import edu.kit.kastel.mcse.ardoco.llm.util.SystemEnvironment;
 import edu.kit.kastel.mcse.ardoco.metrics.ClassificationMetricsCalculator;
 import edu.kit.kastel.sdq.lissa.ratlr.Evaluation;
 import edu.kit.kastel.sdq.lissa.ratlr.Optimization;
@@ -28,7 +28,7 @@ class Requirement2RequirementE2ETest {
 
     @BeforeAll
     static void init() {
-        Environment.overwrite(Path.of("src/test/resources/.env-test"));
+        SystemEnvironment.getInstance().overwrite(Path.of("src/test/resources/.env-test"));
     }
 
     @Test

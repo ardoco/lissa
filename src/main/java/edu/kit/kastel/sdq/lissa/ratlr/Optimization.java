@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.kit.kastel.mcse.ardoco.llm.cache.CacheManager;
+import edu.kit.kastel.mcse.ardoco.llm.util.EnvironmentProvider;
+import edu.kit.kastel.mcse.ardoco.llm.util.SystemEnvironment;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.OptimizerConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.PromptOptimizer;
@@ -33,6 +35,7 @@ public class Optimization {
 
     private static final Logger logger = LoggerFactory.getLogger(Optimization.class);
     private final Path configFile;
+    private final EnvironmentProvider environment;
 
     private OptimizerConfiguration configuration;
 
@@ -60,7 +63,26 @@ public class Optimization {
      * @throws NullPointerException If configFile is null
      */
     public Optimization(Path configFile) throws IOException {
+        this(configFile, SystemEnvironment.getInstance());
+    }
+
+    /**
+     * Creates a new evaluation instance with the specified configuration file.
+     * This constructor:
+     * <ol>
+     *     <li>Validates the configuration file path</li>
+     *     <li>Loads and initializes the configuration</li>
+     *     <li>Sets up all required components for the pipeline</li>
+     * </ol>
+     *
+     * @param configFile Path to the configuration file
+     * @param environment The environment provider for credentials and other environment variables
+     * @throws IOException          If there are issues reading the configuration file
+     * @throws NullPointerException If configFile is null
+     */
+    public Optimization(Path configFile, EnvironmentProvider environment) throws IOException {
         this.configFile = Objects.requireNonNull(configFile);
+        this.environment = Objects.requireNonNull(environment);
         setup();
     }
 
@@ -91,8 +113,8 @@ public class Optimization {
             selector = Selector.createSelector(configuration.selector());
         }
 
-        promptOptimizer =
-                PromptOptimizer.createOptimizer(configuration.promptOptimizer(), goldStandard, metric, selector);
+        promptOptimizer = PromptOptimizer.createOptimizer(
+                configuration.promptOptimizer(), goldStandard, metric, selector, this.environment);
         configuration.serializeAndDestroyConfiguration();
     }
 

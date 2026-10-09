@@ -12,6 +12,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+import edu.kit.kastel.mcse.ardoco.llm.util.EnvironmentProvider;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.Classifier;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 
@@ -131,16 +132,17 @@ public record EvaluationConfiguration(
      * depending on which configuration is set. The shared {@link ContextStore} is passed to all classifiers.
      *
      * @param contextStore The shared context store for pipeline components
+     * @param environment The environment provider for credentials and other environment variables
      * @return A classifier instance
      * @throws IllegalStateException If neither or both classifier configurations are set
      */
-    public Classifier createClassifier(ContextStore contextStore) {
+    public Classifier createClassifier(ContextStore contextStore, EnvironmentProvider environment) {
         if ((classifier == null) == (classifiers == null)) {
             throw new IllegalStateException("Either 'classifier' or 'classifiers' must be set, but not both.");
         }
 
         return classifier != null
-                ? Classifier.createClassifier(classifier, contextStore)
-                : Classifier.createMultiStageClassifier(classifiers, contextStore);
+                ? Classifier.createClassifier(classifier, contextStore, environment)
+                : Classifier.createMultiStageClassifier(classifiers, contextStore, environment);
     }
 }

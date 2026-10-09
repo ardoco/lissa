@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.kit.kastel.mcse.ardoco.llm.cache.CacheManager;
+import edu.kit.kastel.mcse.ardoco.llm.util.SystemEnvironment;
 import edu.kit.kastel.sdq.lissa.ratlr.artifactprovider.ArtifactProvider;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.Classifier;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.EvaluationConfiguration;
@@ -80,17 +81,17 @@ public class Main {
         ArtifactProvider targetArtifactProvider =
                 ArtifactProvider.createArtifactProvider(configuration.targetArtifactProvider(), contextStore);
 
-        Preprocessor sourcePreprocessor =
-                Preprocessor.createPreprocessor(configuration.sourcePreprocessor(), contextStore);
-        Preprocessor targetPreprocessor =
-                Preprocessor.createPreprocessor(configuration.targetPreprocessor(), contextStore);
+        Preprocessor sourcePreprocessor = Preprocessor.createPreprocessor(
+                configuration.sourcePreprocessor(), contextStore, SystemEnvironment.getInstance());
+        Preprocessor targetPreprocessor = Preprocessor.createPreprocessor(
+                configuration.targetPreprocessor(), contextStore, SystemEnvironment.getInstance());
 
         EmbeddingCreator embeddingCreator =
                 EmbeddingCreator.createEmbeddingCreator(configuration.embeddingCreator(), contextStore);
         SourceElementStore sourceStore = new SourceElementStore(configuration.sourceStore());
         TargetElementStore targetStore = new TargetElementStore(configuration.targetStore());
 
-        Classifier classifier = configuration.createClassifier(contextStore);
+        Classifier classifier = configuration.createClassifier(contextStore, SystemEnvironment.getInstance());
         ResultAggregator aggregator =
                 ResultAggregator.createResultAggregator(configuration.resultAggregator(), contextStore);
 

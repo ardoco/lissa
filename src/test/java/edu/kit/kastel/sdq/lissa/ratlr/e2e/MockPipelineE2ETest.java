@@ -10,7 +10,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
-import edu.kit.kastel.mcse.ardoco.llm.util.Environment;
+import edu.kit.kastel.mcse.ardoco.llm.util.SystemEnvironment;
 import edu.kit.kastel.sdq.lissa.ratlr.Evaluation;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
 
@@ -24,7 +24,7 @@ class MockPipelineE2ETest {
 
     @BeforeAll
     void init() {
-        Environment.overwrite(Path.of("src/test/resources/.env-test"));
+        SystemEnvironment.getInstance().overwrite(Path.of("src/test/resources/.env-test"));
     }
 
     @Test
