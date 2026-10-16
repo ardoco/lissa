@@ -28,7 +28,7 @@ Two things are easy to get wrong here:
 - The `.env` file is read from the **current working directory** — the directory you run LiSSA from, which is not necessarily the repository root.
 - The process environment takes **precedence** over `.env`. A key in `.env` is used only when that variable is not already exported, so an exported `OPENAI_API_KEY` silently overrides the one in your `.env`.
 
-`OPENAI_ORGANIZATION_ID` and `OPENAI_API_KEY` must be set even for a run that is served entirely from the cache: the OpenAI embedding creator and chat model provider both validate them at construction time, before any cache is consulted. Dummy values are sufficient and open no connection — this is what `src/test/resources/.env-test` does for the offline end-to-end test.
+`OPENAI_API_KEY` must be set even for a run that is served entirely from the cache (`OPENAI_ORGANIZATION_ID` is optional): the OpenAI embedding creator and chat model provider both validate it at construction time, before any cache is consulted. Dummy values are sufficient and open no connection — this is what `src/test/resources/.env-test` does for the offline end-to-end test.
 
 ### Building the Project
 

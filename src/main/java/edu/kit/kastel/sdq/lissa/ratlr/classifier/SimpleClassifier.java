@@ -3,9 +3,9 @@ package edu.kit.kastel.sdq.lissa.ratlr.classifier;
 
 import java.util.Optional;
 
-import edu.kit.kastel.sdq.lissa.ratlr.cache.Cache;
-import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager;
-import edu.kit.kastel.sdq.lissa.ratlr.cache.classifier.ClassifierCacheKey;
+import edu.kit.kastel.mcse.ardoco.llm.cache.Cache;
+import edu.kit.kastel.mcse.ardoco.llm.cache.CacheManager;
+import edu.kit.kastel.mcse.ardoco.llm.cache.chat.ChatCacheKey;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
@@ -47,7 +47,7 @@ public class SimpleClassifier extends Classifier {
     /**
      * The cache used for storing classification results.
      */
-    private final Cache<ClassifierCacheKey> cache;
+    private final Cache<ChatCacheKey> cache;
 
     /**
      * Provider for the language model used in classification.
@@ -89,7 +89,7 @@ public class SimpleClassifier extends Classifier {
      */
     private SimpleClassifier(
             int threads,
-            Cache<ClassifierCacheKey> cache,
+            Cache<ChatCacheKey> cache,
             ChatLanguageModelProvider provider,
             String template,
             ContextStore contextStore) {

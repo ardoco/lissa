@@ -24,14 +24,8 @@ The project follows a modular architecture with the following main components:
      - [`SummarizePreprocessor`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/preprocessor/SummarizePreprocessor.java): Uses LLMs to generate concise summaries of artifacts while preserving key information, with configurable templates for different artifact types.
      - [`SentencePreprocessor`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/preprocessor/SentencePreprocessor.java): Splits text documents into individual sentences while maintaining the original document as a parent element.
 3. **Embedding Creators** (`embeddingcreator` package)
-   - [`EmbeddingCreator`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/embeddingcreator/EmbeddingCreator.java): Base class for creating embeddings
-   - Implementations:
-     - [`OpenAiEmbeddingCreator`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/embeddingcreator/OpenAiEmbeddingCreator.java): Uses OpenAI's embedding models to create vector representations of text, supporting various models like text-embedding-3-large.
-     - [`OllamaEmbeddingCreator`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/embeddingcreator/OllamaEmbeddingCreator.java): Integrates with Ollama's local embedding models, providing an alternative to cloud-based solutions.
-     - [`OpenWebUiEmbeddingCreator`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/embeddingcreator/OpenWebUiEmbeddingCreator.java): Integrates with Open WebUI servers for embedding generation, supporting local deployment with OpenAI-compatible APIs.
-     - [`OnnxEmbeddingCreator`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/embeddingcreator/OnnxEmbeddingCreator.java): Uses ONNX models for local embedding generation, offering high performance and offline capabilities.
-     - [`MockEmbeddingCreator`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/embeddingcreator/MockEmbeddingCreator.java): Provides zero vectors for testing purposes, useful for development and testing scenarios.
-     - All real embedding creators extend [`CachedEmbeddingCreator`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/embeddingcreator/CachedEmbeddingCreator.java) for caching support, improving performance by storing and reusing embeddings. `MockEmbeddingCreator` extends `EmbeddingCreator` directly and is not cached.
+   - [`EmbeddingCreator`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/embeddingcreator/EmbeddingCreator.java): LiSSA-side adapter that maps LiSSA `Element`s and configuration to the framework-neutral embedding creators of the [`io.github.ardoco:llm-access`](https://github.com/ardoco/llm-access) library.
+   - The library provides the actual implementations (OpenAI, Ollama, ONNX, Open WebUI, and a mock), with token-length handling; all real creators cache their embeddings transparently, while the mock creator is not cached. The `openai` creator uses OpenAI embedding models such as `text-embedding-3-large`; `ollama`/`openwebui` integrate with local/OpenAI-compatible endpoints; `onnx` runs models locally for offline use.
 4. **Element Stores** (`elementstore` package)
    - [`ElementStore`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/elementstore/ElementStore.java): Abstract base holding elements with their embeddings, plus lookup by id and by parent id.
    - [`SourceElementStore`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/elementstore/SourceElementStore.java): Holds the query side. It returns all elements (optionally only those flagged for comparison) and performs no similarity search. Configured via `source_store`, whose name must be `custom`.
@@ -102,6 +96,6 @@ Supporting classes that do not appear in the component list:
 - `Optimization` — reuses steps 1–4 and then runs a `PromptOptimizer` instead of steps 5–9. See [Prompt Optimization](prompt-optimization.md).
 - `Statistics` — metric computation and result/trace-link output.
 - The `cli` package — `MainCLI` and the `eval`, `transitive` and `optimize` subcommands. See [CLI Usage](cli.md).
-- The `cache` package — see [Caching](caching.md).
+- Caching — provided by the `llm-access` library (`CacheManager` and friends); see [Caching](caching.md).
 - The `promptoptimizer` package — optimizers, metrics, selectors and sampling strategies.
 

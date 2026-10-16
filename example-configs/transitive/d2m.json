@@ -45,6 +45,7 @@
   "classifier" : {
     "name" : "reasoning_openai",
     "args" : {
+      "model" : "gpt-4o-mini"
     }
   },
   "result_aggregator" : {

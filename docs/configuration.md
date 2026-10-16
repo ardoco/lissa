@@ -25,8 +25,7 @@ Configuration options in LiSSA are defined in the code through several mechanism
 1. **Component Classes**: Each component (e.g., `ArtifactProvider`, `Preprocessor`, `Classifier`) has a corresponding class that defines its configuration options. For example:
    - [`TextArtifactProvider`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/artifactprovider/TextArtifactProvider.java) defines options for text-based artifact loading
    - [`CodeTreePreprocessor`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/preprocessor/CodeTreePreprocessor.java) defines options for code tree processing
-   - [`OpenAiEmbeddingCreator`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/embeddingcreator/OpenAiEmbeddingCreator.java) defines options for OpenAI embedding generation
-   - [`OpenWebUiEmbeddingCreator`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/embeddingcreator/OpenWebUiEmbeddingCreator.java) defines options for Open WebUI embedding generation
+   - the [`EmbeddingCreator`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/embeddingcreator/EmbeddingCreator.java) adapter maps the `embedding_creator` configuration (e.g. `openai`, `ollama`, `onnx`, `openwebui`, `mock`) to the embedding creators provided by the [`io.github.ardoco:llm-access`](https://github.com/ardoco/llm-access) library
 2. **Configuration Classes**: The [`EvaluationConfiguration`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/configuration/EvaluationConfiguration.java) class is the central configuration container, defining the structure of an evaluation configuration file. [`OptimizerConfiguration`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/configuration/OptimizerConfiguration.java) does the same for prompt-optimization configurations, and [`Configuration`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/configuration/Configuration.java) is the marker interface both implement.
 3. **Example Configurations**: You can find example configurations in the `example-configs` directory, which demonstrate different configuration setups for various use cases.
 4. **Configuration Template**: The `config-template.json` file provides a starting point for a requirement-to-requirement pipeline with placeholder paths. It is not an exhaustive list of options and cannot be run before its `<<PLACEHOLDER>>` values are replaced.
@@ -205,11 +204,11 @@ Classifier names are `mock`, `simple_<platform>` or `reasoning_<platform>`, wher
 
 **Arguments common to `simple_*` and `reasoning_*`:**
 
-|   Argument    |  Type  |                                                                   Default                                                                   |
-|---------------|--------|---------------------------------------------------------------------------------------------------------------------------------------------|
-| `model`       | string | per platform: `gpt-4o-mini` (openai), `llama3:8b` (ollama, openwebui), `2 - Llama 3.3 70B instruct` (blablador), `deepseek-chat` (deepseek) |
-| `seed`        | int    | `133742243`                                                                                                                                 |
-| `temperature` | double | `0.0`                                                                                                                                       |
+|   Argument    |  Type  |                                    Default                                    |
+|---------------|--------|-------------------------------------------------------------------------------|
+| `model`       | string | **required** — the `llm-access` library defines no per-platform default model |
+| `seed`        | int    | `133742243`                                                                   |
+| `temperature` | double | `0.0`                                                                         |
 
 **`reasoning_*` only:**
 
@@ -276,7 +275,7 @@ LiSSA supports multiple platforms for embedding creation and language model clas
 ### Embedding Creators
 
 - **openai**: OpenAI's embedding models
-  - `OPENAI_ORGANIZATION_ID`: Your OpenAI organization ID
+  - `OPENAI_ORGANIZATION_ID`: Your OpenAI organization ID (optional; sent only when set)
   - `OPENAI_API_KEY`: Your OpenAI API key
 - **ollama**: Local Ollama embedding models
   - `OLLAMA_EMBEDDING_HOST`: The host URL for the Ollama server (required)
@@ -293,7 +292,7 @@ LiSSA supports multiple platforms for embedding creation and language model clas
 Chat language models are configured by prefixing the classifier name with the platform. For example, `simple_openai`, `reasoning_ollama`, `simple_openwebui`, etc.
 
 - **OpenAI** (`*_openai`): Uses OpenAI's chat models
-  - `OPENAI_ORGANIZATION_ID`: Your OpenAI organization ID
+  - `OPENAI_ORGANIZATION_ID`: Your OpenAI organization ID (optional; sent only when set)
   - `OPENAI_API_KEY`: Your OpenAI API key
 - **Ollama** (`*_ollama`): Uses local Ollama chat models
   - `OLLAMA_HOST`: The host URL for the Ollama server (required)
