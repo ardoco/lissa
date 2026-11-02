@@ -259,7 +259,8 @@ public class Evaluation {
         targetPreprocessor =
                 Preprocessor.createPreprocessor(configuration.targetPreprocessor(), contextStore, this.environment);
 
-        embeddingCreator = EmbeddingCreator.createEmbeddingCreator(configuration.embeddingCreator(), contextStore);
+        embeddingCreator = EmbeddingCreator.createEmbeddingCreator(
+                configuration.embeddingCreator(), contextStore, this.environment);
         sourceStore = new SourceElementStore(configuration.sourceStore());
         targetStore = new TargetElementStore(configuration.targetStore());
         classifier = configuration.createClassifier(contextStore, this.environment);

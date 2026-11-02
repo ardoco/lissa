@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.kit.kastel.mcse.ardoco.llm.cache.CacheManager;
+import edu.kit.kastel.mcse.ardoco.llm.util.EnvironmentProvider;
 import edu.kit.kastel.mcse.ardoco.llm.util.SystemEnvironment;
 import edu.kit.kastel.sdq.lissa.ratlr.artifactprovider.ArtifactProvider;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.Classifier;
@@ -54,6 +55,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.resultaggregator.ResultAggregator;
  */
 public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
+    private static final EnvironmentProvider environment = new SystemEnvironment();
 
     /**
      * Main entry point for the LiSSA framework.
@@ -81,17 +83,17 @@ public class Main {
         ArtifactProvider targetArtifactProvider =
                 ArtifactProvider.createArtifactProvider(configuration.targetArtifactProvider(), contextStore);
 
-        Preprocessor sourcePreprocessor = Preprocessor.createPreprocessor(
-                configuration.sourcePreprocessor(), contextStore, new SystemEnvironment());
-        Preprocessor targetPreprocessor = Preprocessor.createPreprocessor(
-                configuration.targetPreprocessor(), contextStore, new SystemEnvironment());
+        Preprocessor sourcePreprocessor =
+                Preprocessor.createPreprocessor(configuration.sourcePreprocessor(), contextStore, environment);
+        Preprocessor targetPreprocessor =
+                Preprocessor.createPreprocessor(configuration.targetPreprocessor(), contextStore, environment);
 
         EmbeddingCreator embeddingCreator =
-                EmbeddingCreator.createEmbeddingCreator(configuration.embeddingCreator(), contextStore);
+                EmbeddingCreator.createEmbeddingCreator(configuration.embeddingCreator(), contextStore, environment);
         SourceElementStore sourceStore = new SourceElementStore(configuration.sourceStore());
         TargetElementStore targetStore = new TargetElementStore(configuration.targetStore());
 
-        Classifier classifier = configuration.createClassifier(contextStore, new SystemEnvironment());
+        Classifier classifier = configuration.createClassifier(contextStore, environment);
         ResultAggregator aggregator =
                 ResultAggregator.createResultAggregator(configuration.resultAggregator(), contextStore);
 

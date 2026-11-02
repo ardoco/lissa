@@ -7,6 +7,8 @@ import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import edu.kit.kastel.mcse.ardoco.llm.util.EnvironmentProvider;
+import edu.kit.kastel.mcse.ardoco.llm.util.MapEnvironment;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
@@ -15,6 +17,8 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
  * Tests the mock embedding configuration: it needs no {@code model} argument and produces zero vectors.
  */
 class EmbeddingCreatorTest {
+
+    private static final EnvironmentProvider environment = new MapEnvironment(Map.of());
 
     private Element element(String id, String content) {
         return new Element(id, "requirement", content, 0, null, true);
@@ -25,7 +29,8 @@ class EmbeddingCreatorTest {
         // No "model" argument: the mock creator ignores it, so none is required (and a stray one would be
         // reported as an unread parameter by ModuleConfiguration).
         ModuleConfiguration configuration = new ModuleConfiguration("mock", Map.of());
-        EmbeddingCreator creator = EmbeddingCreator.createEmbeddingCreator(configuration, new ContextStore());
+        EmbeddingCreator creator =
+                EmbeddingCreator.createEmbeddingCreator(configuration, new ContextStore(), environment);
 
         Assertions.assertArrayEquals(
                 new float[] {0}, creator.calculateEmbedding(element("R1", "the system shall log in")));

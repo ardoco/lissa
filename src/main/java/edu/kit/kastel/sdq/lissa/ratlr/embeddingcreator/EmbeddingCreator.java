@@ -6,6 +6,7 @@ import java.util.Objects;
 
 import edu.kit.kastel.mcse.ardoco.llm.embedding.EmbeddingConfiguration;
 import edu.kit.kastel.mcse.ardoco.llm.embedding.EmbeddingPlatform;
+import edu.kit.kastel.mcse.ardoco.llm.util.EnvironmentProvider;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
@@ -54,31 +55,37 @@ public class EmbeddingCreator {
      * @return An embedding creator adapter
      */
     public static EmbeddingCreator createEmbeddingCreator(
-            ModuleConfiguration configuration, ContextStore contextStore) {
+            ModuleConfiguration configuration, ContextStore contextStore, EnvironmentProvider environment) {
         Objects.requireNonNull(contextStore);
-        EmbeddingConfiguration embeddingConfiguration = toEmbeddingConfiguration(configuration);
+        EmbeddingConfiguration embeddingConfiguration = toEmbeddingConfiguration(configuration, environment);
         return new EmbeddingCreator(
                 edu.kit.kastel.mcse.ardoco.llm.embedding.EmbeddingCreator.create(embeddingConfiguration));
     }
 
-    private static EmbeddingConfiguration toEmbeddingConfiguration(ModuleConfiguration configuration) {
+    private static EmbeddingConfiguration toEmbeddingConfiguration(
+            ModuleConfiguration configuration, EnvironmentProvider environment) {
         return switch (configuration.name()) {
             case "ollama" ->
                 EmbeddingConfiguration.builder(EmbeddingPlatform.OLLAMA)
                         .modelName(configuration.argumentAsString("model", "nomic-embed-text:v1.5"))
+                        .environment(environment)
                         .build();
             case "openai" ->
                 EmbeddingConfiguration.builder(EmbeddingPlatform.OPENAI)
                         .modelName(configuration.argumentAsString("model", "text-embedding-ada-002"))
+                        .environment(environment)
                         .build();
             case "onnx" ->
-                EmbeddingConfiguration.onnx(
-                        configuration.argumentAsString("model"),
-                        configuration.argumentAsString("path_to_model"),
-                        configuration.argumentAsString("path_to_tokenizer"));
+                EmbeddingConfiguration.builder(EmbeddingPlatform.ONNX)
+                        .modelName(configuration.argumentAsString("model"))
+                        .pathToModel(configuration.argumentAsString("path_to_model"))
+                        .pathToTokenizer(configuration.argumentAsString("path_to_tokenizer"))
+                        .environment(environment)
+                        .build();
             case "openwebui" ->
                 EmbeddingConfiguration.builder(EmbeddingPlatform.OPENWEBUI)
                         .modelName(configuration.argumentAsString("model", "nomic-embed-text:v1.5"))
+                        .environment(environment)
                         .build();
             // The mock creator ignores the model, so do not read a "model" argument here: that way a stray
             // "model" on a mock configuration is reported as an unread (misconfigured) parameter.
