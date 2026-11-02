@@ -1,0 +1,74 @@
+cff-version: 1.2.0
+title: "LiSSA: Linking Software System Artifacts"
+message: >-
+  If you use LiSSA in your research, please cite the ICSE'25 paper
+  listed under "preferred-citation".
+type: software
+authors:
+  - family-names: "Fuchß"
+    given-names: "Dominik"
+    affiliation: "Karlsruhe Institute of Technology (KIT)"
+  - family-names: "Hey"
+    given-names: "Tobias"
+    affiliation: "Karlsruhe Institute of Technology (KIT)"
+  - family-names: "Keim"
+    given-names: "Jan"
+    affiliation: "Karlsruhe Institute of Technology (KIT)"
+  - family-names: "Liu"
+    given-names: "Haoyu"
+    affiliation: "Karlsruhe Institute of Technology (KIT)"
+  - family-names: "Ewald"
+    given-names: "Niklas"
+    affiliation: "Karlsruhe Institute of Technology (KIT)"
+  - family-names: "Thirolf"
+    given-names: "Tobias"
+    affiliation: "Karlsruhe Institute of Technology (KIT)"
+  - family-names: "Koziolek"
+    given-names: "Anne"
+    affiliation: "Karlsruhe Institute of Technology (KIT)"
+abstract: >-
+  LiSSA is a framework for generic traceability link recovery. It combines
+  Large Language Models with Retrieval-Augmented Generation to recover trace
+  links between software artifacts such as requirements, code, architecture
+  documentation and architecture models.
+repository-code: "https://github.com/ardoco/lissa"
+url: "https://ardoco.de"
+license: MIT
+version: 1.0.0
+date-released: "2026-09-19"
+keywords:
+  - traceability link recovery
+  - retrieval-augmented generation
+  - large language models
+  - software engineering
+preferred-citation:
+  type: conference-paper
+  title: "LiSSA: Toward Generic Traceability Link Recovery Through Retrieval-Augmented Generation"
+  authors:
+    - family-names: "Fuchß"
+      given-names: "Dominik"
+    - family-names: "Hey"
+      given-names: "Tobias"
+    - family-names: "Keim"
+      given-names: "Jan"
+    - family-names: "Liu"
+      given-names: "Haoyu"
+    - family-names: "Ewald"
+      given-names: "Niklas"
+    - family-names: "Thirolf"
+      given-names: "Tobias"
+    - family-names: "Koziolek"
+      given-names: "Anne"
+  collection-title: "2025 IEEE/ACM 47th International Conference on Software Engineering (ICSE)"
+  conference:
+    name: "47th International Conference on Software Engineering (ICSE '25)"
+    city: "Ottawa"
+    country: CA
+  publisher:
+    name: "IEEE"
+  year: 2025
+  month: 4
+  start: 1396
+  end: 1408
+  doi: "10.1109/ICSE55347.2025.00186"
+  url: "https://doi.org/10.1109/ICSE55347.2025.00186"

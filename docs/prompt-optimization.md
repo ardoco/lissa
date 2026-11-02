@@ -76,7 +76,7 @@ Custom selectors can be added by implementing the [`Selector`](../src/main/java/
 
 #### Available Selectors
 
-- **[`Simple Selector`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/promptselector/SimpleSelector.java)** (`simple`):
+- **[`Simple Selector`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/promptselector/SimpleSelector.java)** (`simple` or `bruteforce`):
   Evaluates all provided candidate prompts against a subset of examples.
   The sample size is determined by dividing the evaluation budget by the number of prompts.
   Examples are shuffled randomly before selection to ensure diverse evaluation.
@@ -94,8 +94,9 @@ Optimization approaches will usually utilize an iterative process.
 Prompts are refined over multiple iterations based on the feedback provided through the selected prompt metric.
 They are highly configurable with the optimization configuration file.
 
-Prompt optimizers utilize the usual stages of the evaluation pipeline as well.
-They utilize LiSSA's caching mechanism to provide consistent and reproducible results across different runs.
+Prompt optimizers reuse the front half of the evaluation pipeline — artifact loading, preprocessing, embedding creation and element stores — plus the configured classifier, aggregator and postprocessor as the metric's scoring machinery.
+They do not run the evaluation's own classification, aggregation and statistics stages, and they write `results-prompt-optimization-*.md` rather than `results-*.md` and `traceLinks-*.csv`.
+Both halves share LiSSA's caching mechanism, so repeated optimizer runs are consistent and reproducible.
 
 Custom optimizers can be added by implementing the [`Prompt Optimizer`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/PromptOptimizer.java) interface.
 
@@ -112,7 +113,7 @@ Custom optimizers can be added by implementing the [`Prompt Optimizer`](../src/m
   In each iteration, it queries the model with an additional feedback text on the current prompt.
   The optimizer carries the optimized prompt to the next iteration naively.
   Trace links that were incorrectly classified in previous iterations are highlighted in the feedback text to guide the model towards better performance.
-- **[`ProTeGi Optimizer`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/ProTeGiOptimizer.java)** (`protegi`):
+- **[`ProTeGi Optimizer`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/promptoptimizer/ProTeGiOptimizer.java)** (`protegi` or `gradient`):
   An advanced optimizer based on textual gradient descent for large language models, following the approach by Pryzant et al. (2023).
   Uses textual gradients derived from error analysis to systematically refine prompts.
   In each iteration:
@@ -137,26 +138,38 @@ Modules of the evaluation configuration file will also need to be configured in 
 This excerpt shows the additional configuration options specific to prompt optimization.
 
 ```json
-
 {
-  [...]
-  "metric" : {
-    "name" : "mock",
-    "args" : {}
+  "metric": {
+    "name": "mock",
+    "args": {}
+  },
+  "selector": {
+    "name": "ucb",
+    "args": {
+      "samples_per_eval": 16
+    }
   },
   "prompt_optimizer": {
-    "name" : "simple_openai",
-    "args" : {
+    "name": "simple_openai",
+    "args": {
       "prompt": "Question: Here are two parts of software development artifacts.\n\n            {source_type}: '''{source_content}'''\n\n            {target_type}: '''{target_content}'''\n            Are they related?\n\n            Answer with 'yes' or 'no'.",
       "model": "gpt-4o-mini-2024-07-18"
     }
   }
 }
-
 ```
+
+These three keys are added to the modules of a regular evaluation configuration; the snippet above shows only the additions.
+
+`selector` is optional in general but **required** for the `protegi` / `gradient` optimizer — omitting it aborts the run with `Selector must not be null for ProTeGi optimizers`.
+
+The ProTeGi optimizer accepts a large set of arguments; the ones most often set are `maximum_iterations`, `minibatch_size` (default `64`), `beam_size` (default `4`), `max_expansion_factor` (default `8`) and `number_of_gradients` (default `4`). See `example-configs/gradient-optimizer-config.json` for a working example.
 
 To see detailed configurable fields for any of the modules refer to a prompt optimization result file.
 After executing a minimal configuration the resulting file will contain the full configuration with all default values filled in.
+
+> [!NOTE]
+> An optimization configuration is a different schema from an evaluation configuration: it is accepted by `lissa optimize` and rejected by `lissa eval`. See the [Configuration Guide](configuration.md).
 
 ## Usage
 
@@ -174,5 +187,5 @@ The optimization process generally follows these steps:
 
 ### Result Files
 
-The prompt optimization results will be stored as `results-prompt-optimization-<config_filename>.md` just as regular evaluation results.
+The prompt optimization results will be stored as `results-prompt-optimization-<config-file-name>_<uuid>.md` in the current working directory, just as regular evaluation results. The `<uuid>` is a hash over the fully-resolved configuration, so re-running the same configuration overwrites the previous file.
 They include the full configuration used for optimization as well as the optimized prompt.

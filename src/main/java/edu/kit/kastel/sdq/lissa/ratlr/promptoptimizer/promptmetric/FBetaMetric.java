@@ -49,7 +49,7 @@ public class FBetaMetric extends GlobalMetric {
         ClassificationMetricsCalculator cmc = ClassificationMetricsCalculator.getInstance();
         var classification = cmc.calculateMetrics(items, groundTruth, null);
 
-        return classification.fBeta(beta);
+        return classification.fbeta(beta);
     }
 
     @Override
