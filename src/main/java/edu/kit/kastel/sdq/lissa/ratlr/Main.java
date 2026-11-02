@@ -82,16 +82,16 @@ public class Main {
                 ArtifactProvider.createArtifactProvider(configuration.targetArtifactProvider(), contextStore);
 
         Preprocessor sourcePreprocessor = Preprocessor.createPreprocessor(
-                configuration.sourcePreprocessor(), contextStore, SystemEnvironment.getInstance());
+                configuration.sourcePreprocessor(), contextStore, new SystemEnvironment());
         Preprocessor targetPreprocessor = Preprocessor.createPreprocessor(
-                configuration.targetPreprocessor(), contextStore, SystemEnvironment.getInstance());
+                configuration.targetPreprocessor(), contextStore, new SystemEnvironment());
 
         EmbeddingCreator embeddingCreator =
                 EmbeddingCreator.createEmbeddingCreator(configuration.embeddingCreator(), contextStore);
         SourceElementStore sourceStore = new SourceElementStore(configuration.sourceStore());
         TargetElementStore targetStore = new TargetElementStore(configuration.targetStore());
 
-        Classifier classifier = configuration.createClassifier(contextStore, SystemEnvironment.getInstance());
+        Classifier classifier = configuration.createClassifier(contextStore, new SystemEnvironment());
         ResultAggregator aggregator =
                 ResultAggregator.createResultAggregator(configuration.resultAggregator(), contextStore);
 

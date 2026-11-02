@@ -114,7 +114,7 @@ public class Evaluation {
      * @throws NullPointerException If configFile is null
      */
     public Evaluation(Path configFile) throws IOException {
-        this(configFile, SystemEnvironment.getInstance());
+        this(configFile, new SystemEnvironment());
     }
 
     /**
@@ -156,7 +156,7 @@ public class Evaluation {
      * @throws NullPointerException If configFile is null
      */
     public Evaluation(Path configFile, String prompt) throws IOException {
-        this(configFile, prompt, SystemEnvironment.getInstance());
+        this(configFile, prompt, new SystemEnvironment());
     }
 
     /**
@@ -217,20 +217,6 @@ public class Evaluation {
      *     <li>Sets up all required components for the pipeline, sharing a {@link ContextStore}</li>
      * </ol>
      * @param config The configuration object
-     * @throws IOException If there are issues setting up the cache
-     */
-    public Evaluation(EvaluationConfiguration config) throws IOException {
-        this(config, SystemEnvironment.getInstance());
-    }
-
-    /**
-     * Creates a new evaluation instance with the specified configuration object.
-     * This constructor:
-     * <ol>
-     *     <li>Initializes the configuration</li>
-     *     <li>Sets up all required components for the pipeline, sharing a {@link ContextStore}</li>
-     * </ol>
-     * @param config The configuration object
      * @param environment The environment provider for credentials and other environment variables
      * @throws IOException If there are issues setting up the cache
      */
@@ -259,7 +245,7 @@ public class Evaluation {
      * @throws IOException If there are issues reading the configuration
      */
     private void setup() throws IOException {
-        CacheManager.setCacheDir(configuration.cacheDir());
+        CacheManager.setCacheDir(configuration.cacheDir(), this.environment);
 
         ContextStore contextStore = new ContextStore();
 

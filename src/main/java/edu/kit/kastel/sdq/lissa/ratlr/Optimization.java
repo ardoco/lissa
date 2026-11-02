@@ -63,7 +63,7 @@ public class Optimization {
      * @throws NullPointerException If configFile is null
      */
     public Optimization(Path configFile) throws IOException {
-        this(configFile, SystemEnvironment.getInstance());
+        this(configFile, new SystemEnvironment());
     }
 
     /**
@@ -99,7 +99,7 @@ public class Optimization {
      */
     private void setup() throws IOException {
         configuration = new ObjectMapper().readValue(configFile.toFile(), OptimizerConfiguration.class);
-        evaluationPipeline = new Evaluation(configuration.evaluationConfiguration());
+        evaluationPipeline = new Evaluation(configuration.evaluationConfiguration(), this.environment);
         Set<TraceLink> goldStandard = getTraceLinksFromGoldStandard(
                 configuration.evaluationConfiguration().goldStandardConfiguration());
 

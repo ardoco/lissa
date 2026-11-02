@@ -6,10 +6,10 @@ import java.nio.file.Path;
 import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
+import edu.kit.kastel.mcse.ardoco.llm.util.EnvironmentProvider;
 import edu.kit.kastel.mcse.ardoco.llm.util.SystemEnvironment;
 import edu.kit.kastel.sdq.lissa.ratlr.Evaluation;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
@@ -22,17 +22,15 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class MockPipelineE2ETest {
 
-    @BeforeAll
-    void init() {
-        SystemEnvironment.getInstance().overwrite(Path.of("src/test/resources/.env-test"));
-    }
+    private static final EnvironmentProvider environment =
+            new SystemEnvironment(Path.of("src/test/resources/.env-test"));
 
     @Test
     void testMockPipelineRuns() throws Exception {
         File config = new File("src/test/resources/warc/config-mock.json");
         Assertions.assertTrue(config.exists(), "mock config missing at " + config.getAbsolutePath());
 
-        Evaluation evaluation = new Evaluation(config.toPath());
+        Evaluation evaluation = new Evaluation(config.toPath(), environment);
         Set<TraceLink> traceLinks = evaluation.run();
 
         Assertions.assertNotNull(traceLinks);
