@@ -8,6 +8,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -18,7 +19,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import edu.kit.kastel.mcse.ardoco.llm.util.EnvironmentProvider;
-import edu.kit.kastel.mcse.ardoco.llm.util.SystemEnvironment;
+import edu.kit.kastel.mcse.ardoco.llm.util.MapEnvironment;
 import edu.kit.kastel.mcse.ardoco.metrics.ClassificationMetricsCalculator;
 import edu.kit.kastel.sdq.lissa.ratlr.Evaluation;
 import edu.kit.kastel.sdq.lissa.ratlr.Optimization;
@@ -26,8 +27,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
 
 class Requirement2RequirementE2ETest {
 
-    private static final EnvironmentProvider environment =
-            new SystemEnvironment(Path.of("src/test/resources/" + ".env-test"));
+    private static final EnvironmentProvider environment = new MapEnvironment(Map.of("OPENAI_API_KEY", "DUMMY"));
 
     @Test
     void testEnd2End() throws Exception {
