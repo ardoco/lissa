@@ -142,5 +142,4 @@ class ArchitectureTest {
             .callMethod(CacheManager.class, "resetDefaultInstance")
             .because(
                     "CacheManager.resetDefaultInstance() is only intended for testing purposes and must not be used elsewhere");
-
 }
