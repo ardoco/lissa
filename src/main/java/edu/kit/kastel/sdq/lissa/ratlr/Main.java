@@ -74,7 +74,7 @@ public class Main {
         var configFilePath = args.length == 0 ? "config.json" : args[0];
         var configFile = new File(configFilePath);
         EvaluationConfiguration configuration = new ObjectMapper().readValue(configFile, EvaluationConfiguration.class);
-        CacheManager.setCacheDir(configuration.cacheDir());
+        CacheManager.setCacheDir(configuration.cacheDir(), environment);
 
         ContextStore contextStore = new ContextStore();
 
