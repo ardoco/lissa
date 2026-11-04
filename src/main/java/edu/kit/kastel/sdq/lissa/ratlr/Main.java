@@ -9,8 +9,10 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.kit.kastel.mcse.ardoco.llm.cache.CacheManager;
+import edu.kit.kastel.mcse.ardoco.llm.util.EnvironmentProvider;
+import edu.kit.kastel.mcse.ardoco.llm.util.SystemEnvironment;
 import edu.kit.kastel.sdq.lissa.ratlr.artifactprovider.ArtifactProvider;
-import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.Classifier;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.EvaluationConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
@@ -71,9 +73,11 @@ public class Main {
         var configFilePath = args.length == 0 ? "config.json" : args[0];
         var configFile = new File(configFilePath);
         EvaluationConfiguration configuration = new ObjectMapper().readValue(configFile, EvaluationConfiguration.class);
-        CacheManager.setCacheDir(configuration.cacheDir());
+        // API keys, hosts and cache settings: system environment variables, then a .env file in the working directory
+        EnvironmentProvider environment = new SystemEnvironment();
+        CacheManager.setCacheDir(configuration.cacheDir(), environment);
 
-        ContextStore contextStore = new ContextStore();
+        ContextStore contextStore = new ContextStore(environment);
 
         ArtifactProvider sourceArtifactProvider =
                 ArtifactProvider.createArtifactProvider(configuration.sourceArtifactProvider(), contextStore);

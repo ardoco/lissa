@@ -14,8 +14,10 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.kit.kastel.mcse.ardoco.llm.cache.CacheManager;
+import edu.kit.kastel.mcse.ardoco.llm.util.EnvironmentProvider;
+import edu.kit.kastel.mcse.ardoco.llm.util.SystemEnvironment;
 import edu.kit.kastel.sdq.lissa.ratlr.artifactprovider.ArtifactProvider;
-import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.Classifier;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.EvaluationConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.EvaluationConfigurationBuilder;
@@ -59,6 +61,11 @@ import edu.kit.kastel.sdq.lissa.ratlr.resultaggregator.ResultAggregator;
  *     <li>Postprocess trace link IDs</li>
  *     <li>Generate and save statistics</li>
  * </ol>
+ * <p>
+ * API keys, hosts and cache settings are read from an {@link EnvironmentProvider}. The constructors without an
+ * environment use a {@link SystemEnvironment} (system environment variables, then a {@code .env} file in the
+ * working directory).
+ * </p>
  */
 public class Evaluation {
 
@@ -66,6 +73,8 @@ public class Evaluation {
     private final @Nullable Path configFile;
 
     private final EvaluationConfiguration configuration;
+    /** Environment providing API keys, hosts and cache settings to all components of the pipeline */
+    private final EnvironmentProvider environment;
 
     /** Provider for source artifacts */
     private ArtifactProvider sourceArtifactProvider;
@@ -111,7 +120,21 @@ public class Evaluation {
      * @throws NullPointerException If configFile is null
      */
     public Evaluation(Path configFile) throws IOException {
+        this(configFile, new SystemEnvironment());
+    }
+
+    /**
+     * Creates a new evaluation instance with the specified configuration file that reads API keys, hosts and cache
+     * settings from the given environment.
+     *
+     * @param configFile Path to the configuration file
+     * @param environment The environment providing API keys, hosts and cache settings
+     * @throws IOException If there are issues reading the configuration file
+     * @throws NullPointerException If configFile or environment is null
+     */
+    public Evaluation(Path configFile, EnvironmentProvider environment) throws IOException {
         this.configFile = Objects.requireNonNull(configFile);
+        this.environment = Objects.requireNonNull(environment);
         configuration = new ObjectMapper().readValue(configFile.toFile(), EvaluationConfiguration.class);
         setup();
     }
@@ -135,6 +158,7 @@ public class Evaluation {
      */
     public Evaluation(Path configFile, String prompt) throws IOException {
         this.configFile = Objects.requireNonNull(configFile);
+        this.environment = new SystemEnvironment();
         EvaluationConfiguration loadedConfiguration =
                 new ObjectMapper().readValue(configFile.toFile(), EvaluationConfiguration.class);
         configuration = modifyConfigurationWithPrompt(prompt, loadedConfiguration);
@@ -175,8 +199,22 @@ public class Evaluation {
      * @throws IOException If there are issues setting up the cache
      */
     public Evaluation(EvaluationConfiguration config) throws IOException {
+        this(config, new SystemEnvironment());
+    }
+
+    /**
+     * Creates a new evaluation instance with the specified configuration object that reads API keys, hosts and cache
+     * settings from the given environment.
+     *
+     * @param config The configuration object
+     * @param environment The environment providing API keys, hosts and cache settings
+     * @throws IOException If there are issues setting up the cache
+     * @throws NullPointerException If environment is null
+     */
+    public Evaluation(EvaluationConfiguration config, EnvironmentProvider environment) throws IOException {
         this.configuration = config;
         this.configFile = null;
+        this.environment = Objects.requireNonNull(environment);
         setup();
     }
 
@@ -198,9 +236,9 @@ public class Evaluation {
      * @throws IOException If there are issues reading the configuration
      */
     private void setup() throws IOException {
-        CacheManager.setCacheDir(configuration.cacheDir());
+        CacheManager.setCacheDir(configuration.cacheDir(), environment);
 
-        ContextStore contextStore = new ContextStore();
+        ContextStore contextStore = new ContextStore(environment);
 
         sourceArtifactProvider =
                 ArtifactProvider.createArtifactProvider(configuration.sourceArtifactProvider(), contextStore);

@@ -1,10 +1,10 @@
 /* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer;
 
+import static edu.kit.kastel.mcse.ardoco.llm.chat.ChatModelUtils.nCachedRequest;
 import static edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.PromptOptimizationUtils.getClassificationTasks;
 import static edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.PromptOptimizationUtils.parseTaggedText;
 import static edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.PromptOptimizationUtils.sanitizePrompts;
-import static edu.kit.kastel.sdq.lissa.ratlr.utils.ChatLanguageModelUtils.nCachedRequest;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.kit.kastel.mcse.ardoco.llm.util.EnvironmentProvider;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.ClassificationTask;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.elementstore.SourceElementStore;
@@ -52,8 +53,12 @@ public class ProTeGiOptimizer extends IterativeOptimizer {
     private final ProTeGiOptimizerConfig config;
 
     public ProTeGiOptimizer(
-            ModuleConfiguration configuration, Set<TraceLink> goldStandard, Metric metric, Selector selector) {
-        super(configuration, goldStandard, metric);
+            ModuleConfiguration configuration,
+            Set<TraceLink> goldStandard,
+            Metric metric,
+            Selector selector,
+            EnvironmentProvider environment) {
+        super(configuration, goldStandard, metric, environment);
         this.config = new ProTeGiOptimizerConfig(configuration, selector);
     }
 

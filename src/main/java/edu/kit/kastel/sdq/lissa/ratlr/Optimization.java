@@ -14,7 +14,9 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager;
+import edu.kit.kastel.mcse.ardoco.llm.cache.CacheManager;
+import edu.kit.kastel.mcse.ardoco.llm.util.EnvironmentProvider;
+import edu.kit.kastel.mcse.ardoco.llm.util.SystemEnvironment;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.OptimizerConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.PromptOptimizer;
@@ -33,6 +35,8 @@ public class Optimization {
 
     private static final Logger logger = LoggerFactory.getLogger(Optimization.class);
     private final Path configFile;
+    /** Environment providing API keys, hosts and cache settings to the evaluation pipeline and the optimizer */
+    private final EnvironmentProvider environment;
 
     private OptimizerConfiguration configuration;
 
@@ -55,12 +59,29 @@ public class Optimization {
      *     <li>Sets up all required components for the pipeline</li>
      * </ol>
      *
+     * API keys, hosts and cache settings are read from a {@link SystemEnvironment} (system environment variables,
+     * then a {@code .env} file in the working directory).
+     *
      * @param configFile Path to the configuration file
      * @throws IOException          If there are issues reading the configuration file
      * @throws NullPointerException If configFile is null
      */
     public Optimization(Path configFile) throws IOException {
+        this(configFile, new SystemEnvironment());
+    }
+
+    /**
+     * Creates a new optimization instance with the specified configuration file that reads API keys, hosts and cache
+     * settings from the given environment.
+     *
+     * @param configFile Path to the configuration file
+     * @param environment The environment providing API keys, hosts and cache settings
+     * @throws IOException          If there are issues reading the configuration file
+     * @throws NullPointerException If configFile or environment is null
+     */
+    public Optimization(Path configFile, EnvironmentProvider environment) throws IOException {
         this.configFile = Objects.requireNonNull(configFile);
+        this.environment = Objects.requireNonNull(environment);
         setup();
     }
 
@@ -77,7 +98,7 @@ public class Optimization {
      */
     private void setup() throws IOException {
         configuration = new ObjectMapper().readValue(configFile.toFile(), OptimizerConfiguration.class);
-        evaluationPipeline = new Evaluation(configuration.evaluationConfiguration());
+        evaluationPipeline = new Evaluation(configuration.evaluationConfiguration(), environment);
         Set<TraceLink> goldStandard = getTraceLinksFromGoldStandard(
                 configuration.evaluationConfiguration().goldStandardConfiguration());
 
@@ -91,8 +112,8 @@ public class Optimization {
             selector = Selector.createSelector(configuration.selector());
         }
 
-        promptOptimizer =
-                PromptOptimizer.createOptimizer(configuration.promptOptimizer(), goldStandard, metric, selector);
+        promptOptimizer = PromptOptimizer.createOptimizer(
+                configuration.promptOptimizer(), goldStandard, metric, selector, environment);
         configuration.serializeAndDestroyConfiguration();
     }
 

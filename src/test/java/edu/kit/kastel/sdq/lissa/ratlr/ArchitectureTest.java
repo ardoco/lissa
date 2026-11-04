@@ -1,58 +1,39 @@
 /* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr;
 
-import static com.tngtech.archunit.lang.SimpleConditionEvent.violated;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.*;
 
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 
-import com.tngtech.archunit.base.DescribedPredicate;
-import com.tngtech.archunit.core.domain.JavaClass;
-import com.tngtech.archunit.core.domain.JavaConstructorCall;
-import com.tngtech.archunit.core.domain.JavaMethod;
-import com.tngtech.archunit.core.domain.JavaModifier;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
-import com.tngtech.archunit.lang.ArchCondition;
 import com.tngtech.archunit.lang.ArchRule;
-import com.tngtech.archunit.lang.ConditionEvents;
-import com.tngtech.archunit.lang.SimpleConditionEvent;
 
+import edu.kit.kastel.mcse.ardoco.llm.cache.CacheManager;
+import edu.kit.kastel.mcse.ardoco.llm.util.EnvironmentProvider;
+import edu.kit.kastel.mcse.ardoco.llm.util.Futures;
+import edu.kit.kastel.mcse.ardoco.llm.util.KeyGenerator;
+import edu.kit.kastel.mcse.ardoco.llm.util.MapEnvironment;
+import edu.kit.kastel.mcse.ardoco.llm.util.SystemEnvironment;
 import edu.kit.kastel.sdq.lissa.cli.command.OptimizeCommand;
-import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheKey;
-import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheManager;
-import edu.kit.kastel.sdq.lissa.ratlr.cache.CacheParameter;
-import edu.kit.kastel.sdq.lissa.ratlr.cache.classifier.ClassifierCacheParameter;
-import edu.kit.kastel.sdq.lissa.ratlr.cache.embedding.EmbeddingCacheParameter;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.Classifier;
-import edu.kit.kastel.sdq.lissa.ratlr.classifier.LazyChatModel;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.PromptOptimizer;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.Metric;
-import edu.kit.kastel.sdq.lissa.ratlr.utils.Environment;
-import edu.kit.kastel.sdq.lissa.ratlr.utils.Futures;
-import edu.kit.kastel.sdq.lissa.ratlr.utils.KeyGenerator;
-
-import dev.langchain4j.model.chat.ChatModel;
 
 /**
  * Architecture tests for the LiSSA framework using ArchUnit.
  * <p>
- * This class defines architectural rules to enforce:
- * <ul>
- *   <li>Centralized environment variable access</li>
- *   <li>Centralized UUID generation</li>
- *   <li>Functional programming practices (avoid forEach for side effects)</li>
- * </ul>
- * These rules help maintain code quality, consistency, and architectural integrity.
+ * These rules help maintain code quality, consistency, and architectural integrity. The invariants of the
+ * LLM/cache classes that were extracted into the {@code llm-access} library are checked in that library;
+ * the rules here only cover how LiSSA uses it.
  */
 @AnalyzeClasses(packages = "edu.kit.kastel.sdq.lissa")
 class ArchitectureTest {
@@ -69,13 +50,14 @@ class ArchitectureTest {
     /**
      * Rule that enforces environment variable access restrictions.
      * <p>
-     * Only the {@link Environment} utility class may call {@code System.getenv()}.
-     * All other classes must use the {@link Environment} class for environment variable access.
+     * Only {@link SystemEnvironment} may call {@code System.getenv()}.
+     * All other classes must read environment variables through the {@link EnvironmentProvider} that is passed
+     * down from the entry points (e.g., via the {@link edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore}).
      */
     @ArchTest
     static final ArchRule noDirectEnvironmentAccess = noClasses()
             .that()
-            .haveNameNotMatching(Environment.class.getName())
+            .haveNameNotMatching(SystemEnvironment.class.getName())
             .and()
             .resideOutsideOfPackage("..e2e..")
             .should()
@@ -116,29 +98,6 @@ class ArchitectureTest {
             .because("Lambdas should be functional. ForEach is typically used for side-effects.");
 
     /**
-     * Rule that enforces that CacheKey implementations should only be created via static factory methods.
-     * <p>
-     * External code should not directly instantiate CacheKey implementations. Instead, they should use
-     * the static factory methods (typically 'of()') provided by each CacheKey implementation or let the
-     * CacheParameter.createCacheKey() method handle key creation.
-     * <p>
-     * This rule checks that constructors of classes implementing CacheKey are not called from outside
-     * those classes themselves (constructors are private and only called from static factory methods).
-     */
-    @ArchTest
-    static final ArchRule cacheKeysShouldBeCreatedUsingKeyGenerator = noClasses()
-            .that()
-            .doNotImplement(CacheKey.class) // Exclude CacheKey implementations themselves
-            .should()
-            .callConstructorWhere(
-                    new DescribedPredicate<JavaConstructorCall>("calls CacheKey implementation constructor") {
-                        @Override
-                        public boolean test(JavaConstructorCall javaConstructorCall) {
-                            return javaConstructorCall.getTarget().getOwner().isAssignableTo(CacheKey.class);
-                        }
-                    });
-
-    /**
      * Prompts for classifiers should only be modified by optimizers or metric scorers. Otherwise, there will be
      * inconsistencies with the configuration file.
      */
@@ -175,190 +134,6 @@ class ArchitectureTest {
             .callMethod(Future.class, "resultNow");
 
     /**
-     * Rule that enforces that each CacheKey implementation has a static of() method.
-     * <p>
-     * Each class implementing CacheKey must provide a static factory method named 'of'
-     * that takes a specific CacheParameter and a String as parameters. The method must
-     * access all record components (accessor methods) of the corresponding CacheParameter.
-     * <p>
-     * This ensures that all configuration parameters (model name, seed, temperature, etc.)
-     * are properly used when creating cache keys, making the cache keys complete and unique.
-     *
-     * @see edu.kit.kastel.sdq.lissa.ratlr.cache.classifier.ClassifierCacheKey#of(ClassifierCacheParameter, String)
-     * @see edu.kit.kastel.sdq.lissa.ratlr.cache.embedding.EmbeddingCacheKey#of(EmbeddingCacheParameter, String)
-     */
-    @ArchTest
-    static final ArchRule cacheKeysMustHaveOfMethodWithCacheParameter = classes()
-            .that()
-            .implement(CacheKey.class)
-            .and()
-            .areNotInterfaces()
-            .should(
-                    new ArchCondition<>(
-                            "have a static 'of' method that takes a CacheParameter and String, and reads all CacheParameter attributes") {
-                        @Override
-                        public void check(JavaClass javaClass, ConditionEvents events) {
-                            // Check for static 'of' method
-                            var ofMethods = javaClass.getMethods().stream()
-                                    .filter(m -> m.getName().equals("of"))
-                                    .filter(m -> m.getModifiers().contains(JavaModifier.STATIC))
-                                    .filter(m -> m.getRawParameterTypes().size() == 2)
-                                    .filter(m -> m.getRawParameterTypes()
-                                            .get(0)
-                                            .isAssignableTo(edu.kit.kastel.sdq.lissa.ratlr.cache.CacheParameter.class))
-                                    .filter(m -> m.getRawParameterTypes().get(1).isAssignableTo(String.class))
-                                    .toList();
-
-                            if (ofMethods.isEmpty()) {
-                                String message = String.format(
-                                        "Class %s does not have a static 'of' method with signature: of(CacheParameter, String)",
-                                        javaClass.getFullName());
-                                events.add(violated(javaClass, message));
-                                return;
-                            }
-
-                            // Check that the 'of' method reads all CacheParameter attributes
-                            for (var ofMethod : ofMethods) {
-                                var cacheParameterType =
-                                        ofMethod.getRawParameterTypes().get(0);
-
-                                // Get all accessor methods of the CacheParameter record components
-                                // Exclude inherited methods, utility methods, and factory methods
-                                var parameterMethods = cacheParameterType.getMethods().stream()
-                                        .filter(m -> !m.getOwner().isEquivalentTo(Object.class))
-                                        // parameters() generates cache file name, not used in key creation
-                                        .filter(m -> !m.getName().equals("parameters"))
-                                        // createCacheKey() is the factory method called by Cache, not by of()
-                                        .filter(m -> !m.getName().equals("createCacheKey"))
-                                        // Default methods from Object
-                                        .filter(m -> !m.getName().equals("equals"))
-                                        .filter(m -> !m.getName().equals("hashCode"))
-                                        .filter(m -> !m.getName().equals("toString"))
-                                        .toList();
-
-                                // Get all method calls in the 'of' method
-                                var methodCallsInOf = ofMethod.getMethodCallsFromSelf();
-                                Set<String> calledMethodNames = methodCallsInOf.stream()
-                                        .map(call -> call.getTarget().getName())
-                                        .collect(Collectors.toSet());
-
-                                // Check if all parameter methods are called
-                                for (var paramMethod : parameterMethods) {
-                                    boolean isCalled = calledMethodNames.contains(paramMethod.getName());
-
-                                    if (!isCalled) {
-                                        String message = String.format(
-                                                "Method %s.of() does not read CacheParameter attribute '%s'",
-                                                javaClass.getSimpleName(), paramMethod.getName());
-                                        events.add(violated(javaClass, message));
-                                    }
-                                }
-                            }
-                        }
-                    });
-
-    /**
-     * Rule that enforces that the parameters() method in each CacheParameter implementation accesses all fields.
-     * <p>
-     * Each class implementing CacheParameter must have a parameters() method that uses all record components/fields
-     * to ensure the cache key is unique and complete.
-     */
-    @ArchTest
-    static final ArchRule cacheParametersMustUseAllFieldsInParametersMethod = classes()
-            .that()
-            .implement(CacheParameter.class)
-            .and()
-            .areNotInterfaces()
-            .should(new ArchCondition<>("have a parameters() method that accesses all fields") {
-                @Override
-                public void check(JavaClass javaClass, ConditionEvents events) {
-                    // Find the parameters() method
-                    var parametersMethod = javaClass.getMethods().stream()
-                            .filter(m -> m.getName().equals("parameters"))
-                            .filter(m -> m.getRawParameterTypes().isEmpty())
-                            .findFirst();
-
-                    if (parametersMethod.isEmpty()) {
-                        String message =
-                                String.format("Class %s does not have a parameters() method", javaClass.getFullName());
-                        events.add(violated(javaClass, message));
-                        return;
-                    }
-
-                    // Get all fields of the CacheParameter (record components)
-                    var fields = javaClass.getAllFields().stream()
-                            .filter(f -> !f.getModifiers().contains(JavaModifier.STATIC))
-                            .toList();
-
-                    if (fields.isEmpty()) {
-                        return; // No fields to check
-                    }
-
-                    var method = parametersMethod.get();
-
-                    // Get all field accesses in the parameters() method
-                    var fieldAccesses = method.getFieldAccesses();
-                    Set<String> accessedFieldNames = fieldAccesses.stream()
-                            .map(access -> access.getTarget().getName())
-                            .collect(Collectors.toSet());
-
-                    // Also check for method calls (record accessor methods)
-                    var methodCalls = method.getMethodCallsFromSelf();
-                    Set<String> calledMethodNames = methodCalls.stream()
-                            .map(call -> call.getTarget().getName())
-                            .collect(Collectors.toSet());
-
-                    // Check if all fields are accessed (either directly or via accessor methods)
-                    for (var field : fields) {
-                        String fieldName = field.getName();
-                        boolean isAccessed =
-                                accessedFieldNames.contains(fieldName) || calledMethodNames.contains(fieldName);
-
-                        if (!isAccessed) {
-                            String message = String.format(
-                                    "Method %s.parameters() does not access field '%s'",
-                                    javaClass.getSimpleName(), fieldName);
-                            events.add(violated(javaClass, message));
-                        }
-                    }
-                }
-            });
-
-    /**
-     * Rule that enforces that LazyChatModel must override all methods declared in ChatModel, including default methods.
-     * <p>
-     * This ensures that LazyChatModel provides its own implementation for all ChatModel methods, preventing accidental
-     * usage of default implementations that may not be suitable for the lazy loading behavior of LazyChatModel.
-     */
-    @ArchTest
-    static final ArchRule lazyChatModelMustOverrideAllChatModelMethods = classes()
-            .that()
-            .haveFullyQualifiedName(LazyChatModel.class.getName())
-            .should()
-            .implement(ChatModel.class)
-            .andShould(new ArchCondition<>("override all methods declared in ChatModel (including default methods)") {
-                @Override
-                public void check(JavaClass clazz, ConditionEvents events) {
-                    JavaClass chatModel = clazz.getRawInterfaces().stream()
-                            .filter(i -> i.getName().equals(ChatModel.class.getName()))
-                            .findFirst()
-                            .orElseThrow();
-
-                    for (JavaMethod interfaceMethod : chatModel.getMethods()) {
-                        boolean overridden = clazz.getMethods().stream()
-                                .filter(m -> m.getOwner().equals(clazz)) // only methods declared in this class
-                                .anyMatch(m -> m.getName().equals(interfaceMethod.getName())
-                                        && m.getRawParameterTypes().equals(interfaceMethod.getRawParameterTypes()));
-
-                        if (!overridden) {
-                            events.add(SimpleConditionEvent.violated(
-                                    clazz, "Does not override method: " + interfaceMethod.getFullName()));
-                        }
-                    }
-                }
-            });
-
-    /**
      * Rule that enforces that CacheManager.resetDefaultInstance() is only called from Test classes.
      * <p>
      * The resetDefaultInstance() method should only be used to reset the singleton state between tests.
@@ -373,17 +148,20 @@ class ArchitectureTest {
                     "CacheManager.resetDefaultInstance() is only intended for testing purposes and must not be used elsewhere");
 
     /**
-     * Rule that enforces that Environment.overwrite() is only called from test classes.
+     * Rule that enforces that custom environment sources are only created in test classes.
      * <p>
-     * The overwrite() method is intended for testing purposes to override environment variables.
-     * For production usage the regular .env file shall be used.
+     * Tests may inject a {@link SystemEnvironment} with an explicit {@code .env} file or a {@link MapEnvironment}.
+     * For production usage the regular {@code .env} file in the working directory shall be used, i.e.,
+     * {@code new SystemEnvironment()}.
      */
     @ArchTest
-    static final ArchRule environmentOverwriteOnlyInTests = noClasses()
+    static final ArchRule customEnvironmentOnlyInTests = noClasses()
             .that()
             .haveNameNotMatching(".*Test.*")
             .should()
-            .callMethod(Environment.class, "overwrite", Path.class)
+            .callConstructor(SystemEnvironment.class, Path.class)
+            .orShould()
+            .callConstructor(MapEnvironment.class, Map.class)
             .because(
-                    "Environment.overwrite() is only intended for testing purposes and may not be used elsewhere. Use the regular .env instead.");
+                    "Custom environment sources are only intended for testing purposes and may not be used elsewhere. Use the regular .env instead.");
 }

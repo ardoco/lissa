@@ -25,8 +25,7 @@ Configuration options in LiSSA are defined in the code through several mechanism
 1. **Component Classes**: Each component (e.g., `ArtifactProvider`, `Preprocessor`, `Classifier`) has a corresponding class that defines its configuration options. For example:
    - [`TextArtifactProvider`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/artifactprovider/TextArtifactProvider.java) defines options for text-based artifact loading
    - [`CodeTreePreprocessor`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/preprocessor/CodeTreePreprocessor.java) defines options for code tree processing
-   - [`OpenAiEmbeddingCreator`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/embeddingcreator/OpenAiEmbeddingCreator.java) defines options for OpenAI embedding generation
-   - [`OpenWebUiEmbeddingCreator`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/embeddingcreator/OpenWebUiEmbeddingCreator.java) defines options for Open WebUI embedding generation
+   - the [`EmbeddingCreator`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/embeddingcreator/EmbeddingCreator.java) adapter maps the `embedding_creator` configuration (e.g. `openai`, `ollama`, `onnx`, `openwebui`, `bifrost`, `mock`) to the embedding creators provided by the [`io.github.ardoco:llm-access`](https://github.com/ardoco/llm-access) library
 2. **Configuration Classes**: The [`EvaluationConfiguration`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/configuration/EvaluationConfiguration.java) class is the central configuration container, defining the structure of an evaluation configuration file. [`OptimizerConfiguration`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/configuration/OptimizerConfiguration.java) does the same for prompt-optimization configurations, and [`Configuration`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/configuration/Configuration.java) is the marker interface both implement.
 3. **Example Configurations**: You can find example configurations in the `example-configs` directory, which demonstrate different configuration setups for various use cases.
 4. **Configuration Template**: The `config-template.json` file provides a starting point for a requirement-to-requirement pipeline with placeholder paths. It is not an exhaustive list of options and cannot be run before its `<<PLACEHOLDER>>` values are replaced.
@@ -167,13 +166,14 @@ This section describes how to configure the embedding creation and classificatio
 
 ### Embedding Creators
 
-|    Name     |                            Arguments                             |      Default model       |
-|-------------|------------------------------------------------------------------|--------------------------|
-| `openai`    | `model`                                                          | `text-embedding-ada-002` |
-| `ollama`    | `model`                                                          | `nomic-embed-text:v1.5`  |
-| `openwebui` | `model`                                                          | `nomic-embed-text:v1.5`  |
-| `onnx`      | `model`, `path_to_model`, `path_to_tokenizer` — all **required** | –                        |
-| `mock`      | none — use `"args": {}`                                          | –                        |
+|    Name     |                            Arguments                             |          Default model          |
+|-------------|------------------------------------------------------------------|---------------------------------|
+| `openai`    | `model`                                                          | `text-embedding-ada-002`        |
+| `ollama`    | `model`                                                          | `nomic-embed-text:v1.5`         |
+| `openwebui` | `model`                                                          | `nomic-embed-text:v1.5`         |
+| `bifrost`   | `model` (provider-prefixed)                                      | `openai/text-embedding-3-large` |
+| `onnx`      | `model`, `path_to_model`, `path_to_tokenizer` — all **required** | –                               |
+| `mock`      | none — use `"args": {}`                                          | –                               |
 
 ### Single Classifier
 
@@ -201,15 +201,15 @@ Use the `classifier` field to configure a single classifier.
 }
 ```
 
-Classifier names are `mock`, `simple_<platform>` or `reasoning_<platform>`, where `<platform>` is one of `openai`, `ollama`, `openwebui`, `blablador`, `deepseek`. A `simple` or `reasoning` name without a platform suffix is rejected.
+Classifier names are `mock`, `simple_<platform>` or `reasoning_<platform>`, where `<platform>` is one of `openai`, `ollama`, `openwebui`, `blablador`, `bifrost`. A `simple` or `reasoning` name without a platform suffix is rejected.
 
 **Arguments common to `simple_*` and `reasoning_*`:**
 
-|   Argument    |  Type  |                                                                   Default                                                                   |
-|---------------|--------|---------------------------------------------------------------------------------------------------------------------------------------------|
-| `model`       | string | per platform: `gpt-4o-mini` (openai), `llama3:8b` (ollama, openwebui), `2 - Llama 3.3 70B instruct` (blablador), `deepseek-chat` (deepseek) |
-| `seed`        | int    | `133742243`                                                                                                                                 |
-| `temperature` | double | `0.0`                                                                                                                                       |
+|   Argument    |  Type  |                                    Default                                    |
+|---------------|--------|-------------------------------------------------------------------------------|
+| `model`       | string | **required** — the `llm-access` library defines no per-platform default model |
+| `seed`        | int    | `133742243`                                                                   |
+| `temperature` | double | `0.0`                                                                         |
 
 **`reasoning_*` only:**
 
@@ -276,7 +276,7 @@ LiSSA supports multiple platforms for embedding creation and language model clas
 ### Embedding Creators
 
 - **openai**: OpenAI's embedding models
-  - `OPENAI_ORGANIZATION_ID`: Your OpenAI organization ID
+  - `OPENAI_ORGANIZATION_ID`: Your OpenAI organization ID (optional; sent only when set)
   - `OPENAI_API_KEY`: Your OpenAI API key
 - **ollama**: Local Ollama embedding models
   - `OLLAMA_EMBEDDING_HOST`: The host URL for the Ollama server (required)
@@ -285,6 +285,9 @@ LiSSA supports multiple platforms for embedding creation and language model clas
 - **openwebui**: Open WebUI embedding models
   - `OPENWEBUI_URL`: The URL of the Open WebUI server
   - `OPENWEBUI_API_KEY`: Your Open WebUI API key
+- **bifrost**: Embedding models served through the Bifrost gateway (OpenAI-compatible); model names are provider-prefixed, e.g. `openai/text-embedding-3-large`
+  - `BIFROST_URL`: The base URL of the Bifrost API (e.g. `https://domain.tld/v1`)
+  - `BIFROST_API_KEY`: Your Bifrost virtual key
 - **onnx**: Local ONNX models (no environment variables required)
 - **mock**: Mock embedding creator for testing (no environment variables required)
 
@@ -293,7 +296,7 @@ LiSSA supports multiple platforms for embedding creation and language model clas
 Chat language models are configured by prefixing the classifier name with the platform. For example, `simple_openai`, `reasoning_ollama`, `simple_openwebui`, etc.
 
 - **OpenAI** (`*_openai`): Uses OpenAI's chat models
-  - `OPENAI_ORGANIZATION_ID`: Your OpenAI organization ID
+  - `OPENAI_ORGANIZATION_ID`: Your OpenAI organization ID (optional; sent only when set)
   - `OPENAI_API_KEY`: Your OpenAI API key
 - **Ollama** (`*_ollama`): Uses local Ollama chat models
   - `OLLAMA_HOST`: The host URL for the Ollama server (required)
@@ -304,8 +307,9 @@ Chat language models are configured by prefixing the classifier name with the pl
   - `OPENWEBUI_API_KEY`: Your Open WebUI API key
 - **Blablador** (`*_blablador`): Uses Blablador's chat models
   - `BLABLADOR_API_KEY`: Your Blablador API key
-- **DeepSeek** (`*_deepseek`): Uses DeepSeek's chat models
-  - `DEEPSEEK_API_KEY`: Your DeepSeek API key
+- **Bifrost** (`*_bifrost`): Uses chat models served through the Bifrost gateway (OpenAI-compatible); model names are provider-prefixed, e.g. `openai/gpt-4o-mini`
+  - `BIFROST_URL`: The base URL of the Bifrost API (e.g. `https://domain.tld/v1`)
+  - `BIFROST_API_KEY`: Your Bifrost virtual key
 
 > [!IMPORTANT]
 > These variables are validated when the client is constructed, before any cache is consulted. A run that is served entirely from the cache therefore still needs them to be set — dummy values are sufficient and open no connection. Variables may be supplied through a `.env` file in the **current working directory**, but the process environment wins: `.env` only fills in variables that are not already exported.

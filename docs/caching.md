@@ -2,50 +2,24 @@
 
 ## Overview
 
-LiSSA implements a sophisticated caching system to improve performance and ensure reproducibility of results. The caching system consists of the following components:
+LiSSA relies on the caching subsystem provided by the [`io.github.ardoco:llm-access`](https://github.com/ardoco/llm-access) library to improve performance and ensure reproducibility of results. That library owns the cache abstraction and its implementations, so LiSSA no longer ships its own copies:
 
-1. **Cache Interface** (`cache` package)
-   - [`Cache`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/Cache.java): Core generic interface defining cache operations, parameterized by cache key type
-   - [`CacheKey`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/CacheKey.java): Base interface for cache keys with JSON serialization support and local key generation
-   - [`CacheParameter`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/CacheParameter.java): Interface defining cache configuration and key creation logic
-   - **Specialized Cache Keys**:
-     - [`ClassifierCacheKey`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/classifier/ClassifierCacheKey.java): Cache key for classifier operations (model name, seed, temperature, mode, content)
-     - [`EmbeddingCacheKey`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/embedding/EmbeddingCacheKey.java): Cache key for embedding operations (model name, content)
-   - **Cache Parameters**:
-     - [`ClassifierCacheParameter`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/classifier/ClassifierCacheParameter.java): Configuration for classifier caches (model name, seed, temperature)
-     - [`EmbeddingCacheParameter`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/embedding/EmbeddingCacheParameter.java): Configuration for embedding caches (model name)
-2. **Cache Implementations**
-   - [`Hierarchical Cache`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/HierarchicalCache.java): Two cache levels with a synchronization mechanism
-     - Changes are applied to both levels
-     - Reads use a Conflict Resolution Strategy to ensure consistent results
-     - If a cache entry is missing in one level during a read, it is also written to the other level
-   - [`LocalCache`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/LocalCache.java): File-based cache implementation that stores data in JSON format
-     - Implements dirty tracking to optimize writes
-     - Writes to disk when more than 50 entries have changed since the last write, and when the pipeline flushes the cache at the end of a run. There is **no shutdown hook** — if the JVM is killed mid-run, up to 50 new entries are lost
-     - Writes via a temporary file that is then copied over the cache file (`REPLACE_EXISTING`); note this is a copy, not an atomic move
-   - [`RedisCache`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/RedisCache.java): Redis-based cache implementation
-     - Uses Redis for high-performance caching
-     - Supports both string and object serialization
-   - [`RestRedisCache`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/RestRedisCache.java): REST-based Redis cache implementation
-     - Uses REST API to interact with Redis server
-     - Provides an alternative to direct Redis connections, useful for shared caches
-     - Configuration through environment variables, see [Usage Instructions](#usage-instructions)
-3. **Cache Management**
-   - [`CacheManager`](../src/main/java/edu/kit/kastel/sdq/lissa/ratlr/cache/CacheManager.java): Central manager for cache instances
-     - Manages cache directory configuration
-     - Provides singleton access to cache instances
-     - Handles cache creation and retrieval based on origin and cache parameters
-     - Ensures cache uniqueness by validating parameters
-4. **Caching Usage**
-   The caching system is used in several key components:
-   - **Embedding Creators**: Caches vector embeddings to avoid recalculating them
-     - Uses `EmbeddingCacheParameter` to identify unique embedding configurations
-     - Cache keys are automatically generated based on content using the model name
-   - **Classifiers**: Caches LLM responses for classification tasks
-     - Uses `ClassifierCacheParameter` to identify unique classifier configurations
-     - Model name, seed and temperature are encoded in the cache **file name**; the entry key inside a file-based cache is derived from the content alone. The Redis backends key entries by the full JSON key instead (see [Cache Keys](#cache-keys))
-   - **Preprocessors**: Caches preprocessing results for text summarization and other operations
-     - Uses `ClassifierCacheParameter` for LLM-based preprocessing
+1. **Cache abstraction**: `Cache`, `CacheKey`, and `CacheParameter`, plus typed keys/parameters for chat (`ChatCacheKey` / `ChatCacheParameter`) and embedding (`EmbeddingCacheKey` / `EmbeddingCacheParameter`) operations.
+2. **Cache implementations**:
+   - a hierarchical (two-level) cache: writes are applied to both levels, reads query both levels and resolve differences with the configured conflict-resolution strategy, and an entry missing from one level is backfilled from the other;
+   - a file-based `LocalCache` (JSON, dirty tracking). It writes to disk when more than 50 entries have changed since the last write, and when the pipeline flushes the cache at the end of a run. There is **no shutdown hook** — if the JVM is killed mid-run, up to 50 new entries are lost. Writes go via a temporary file that is then copied over the cache file (`REPLACE_EXISTING`); note this is a copy, not an atomic move;
+   - a `RedisCache` and a REST-based `RestRedisCache` (configured through environment variables, see [Usage Instructions](#usage-instructions)).
+3. **Cache management**: a `CacheManager` that configures the cache directory and provides cache instances keyed by origin and parameters, layered according to `CACHE_HIERARCHY`.
+
+See the [llm-access documentation](https://github.com/ardoco/llm-access) for the cache internals. The rest of this page describes how LiSSA configures and uses the cache (the configuration and environment variables are unchanged).
+
+### Caching Usage
+
+The caching system is used in several key components:
+
+- **Embedding Creators**: cache vector embeddings to avoid recalculating them (keyed by `EmbeddingCacheParameter`: model name).
+- **Classifiers**: cache LLM responses for classification tasks (keyed by `ChatCacheParameter`: model name, seed, temperature). Model name, seed and temperature are encoded in the cache **file name**; the entry key inside a file-based cache is derived from the content alone. The Redis backends key entries by the full JSON key instead (see [Cache Keys](#cache-keys)).
+- **Preprocessors**: cache results of LLM-based preprocessing (keyed by `ChatCacheParameter`).
 
 ## Key Concepts
 
@@ -56,12 +30,13 @@ Each file-based cache is a single JSON file at `<cache_dir>/<SimpleClassName>_<p
 - classifiers, summarizing preprocessors and prompt optimizers: `<model>_<seed>`, or `<model>_<seed>_<temperature>` when `temperature != 0.0` (the temperature is omitted at `0.0` for backward compatibility);
 - embedding creators: `<model>`.
 
-Any `:` in the resulting name is replaced by `__`. Examples:
+Any `:` in the resulting name is replaced by `__`, and any `/` or `\` (e.g. in provider-prefixed Bifrost model names such as `openai/gpt-4o-mini`) by `--`; names without these characters are unchanged. Examples:
 
 ```text
 SimpleClassifier_gpt-4o-mini-2024-07-18_133742243.json
 ReasoningClassifier_gpt-4o-mini_133742243_0.7.json
 OpenAiEmbeddingCreator_text-embedding-3-large.json
+SimpleClassifier_openai--gpt-4o-mini_133742243.json
 ```
 
 Because the Java class name is part of the file name, renaming a class orphans its cache, and classifiers sharing an implementation class share a cache file. If `cache_dir` is absent from the configuration, `./cache` relative to the current working directory is used.
@@ -94,7 +69,7 @@ built with `dev.langchain4j.internal.Utils.quoted` — an **internal**, non-API 
 ### Cache Parameters
 
 Cache parameters define the configuration that makes a cache unique:
-- **ClassifierCacheParameter**: Model name, seed, and temperature for reproducible LLM results
+- **ChatCacheParameter**: Model name, seed, and temperature for reproducible LLM results
 - **EmbeddingCacheParameter**: Model name only (embeddings are deterministic)
 
 Parameters are used to:
@@ -104,7 +79,7 @@ Parameters are used to:
 
 ## Cache Misses Are Silent
 
-A classifier cache miss is not an error. `Classifier.parallelClassify` runs up to 100 virtual threads (OpenAI and Blablador; 10 for Open WebUI, 1 for Ollama and DeepSeek) with **no per-task exception handling**, so a failed LLM call — for example an HTTP 401 from a placeholder API key — kills that worker thread. The remaining workers finish, the result list is silently short, and `results-*.md` / `traceLinks-*.csv` are still written, with degraded precision and recall. `EvaluateCommand` then catches every per-configuration exception and logs a warning, and the CLI never sets a non-zero exit code. **A run that fell back to the network and got 401s looks like a successful run.**
+A classifier cache miss is not an error. `Classifier.parallelClassify` runs up to 100 virtual threads (OpenAI, Blablador and Bifrost; 10 for Open WebUI, 1 for Ollama) with **no per-task exception handling**, so a failed LLM call — for example an HTTP 401 from a placeholder API key — kills that worker thread. The remaining workers finish, the result list is silently short, and `results-*.md` / `traceLinks-*.csv` are still written, with degraded precision and recall. `EvaluateCommand` then catches every per-configuration exception and logs a warning, and the CLI never sets a non-zero exit code. **A run that fell back to the network and got 401s looks like a successful run.**
 
 An embedding miss fails differently but is equally misleading: any embedding exception is rerouted through `tryToFixWithLength`, which reports `Token length was not too long. Don't know how to handle previous exception`. Read that as "the embedding call failed", usually a missing or invalid key.
 
@@ -117,14 +92,14 @@ To verify that a replay really came from the cache:
 
 ## Credentials Are Required Even for a Fully Cached Run
 
-Provider clients are constructed eagerly, before any cache is consulted, and they validate their environment variables at construction time. A 100% cache-hit replay therefore still requires the provider's variables to be **present**, although their values are never used. For the OpenAI-based configurations, set:
+Provider clients are constructed eagerly, before any cache is consulted, and they validate their environment variables at construction time. A 100% cache-hit replay therefore still requires the provider's variables to be **present**, although their values are never used. For the OpenAI-based configurations, `OPENAI_API_KEY` is required (`OPENAI_ORGANIZATION_ID` is optional and only sent when set), for example:
 
 ```bash
 OPENAI_ORGANIZATION_ID=DUMMY
 OPENAI_API_KEY=DUMMY
 ```
 
-This is exactly what `src/test/resources/.env-test` does for the offline end-to-end test. Using deliberately invalid values is recommended: it turns an unnoticed cache miss into a visible failure instead of a live API call.
+This is exactly what `src/test/resources/.env-test` does for the offline end-to-end tests, which inject it as `new SystemEnvironment(Path.of("src/test/resources/.env-test"))` into `Evaluation`/`Optimization`. Using deliberately invalid values is recommended: it turns an unnoticed cache miss into a visible failure instead of a live API call.
 
 > [!WARNING]
 > Putting dummy values in `.env` is not enough if a real key is exported in your shell — the process environment wins over `.env`. Unset the real values first, or the replay will quietly call the live API on a cache miss:
@@ -180,7 +155,7 @@ The `Cache` interface provides two API levels:
 
 2. **Environment Variables**
 
-   All variables below are read through `Environment`, which loads a `.env` file from the **current working directory**. The real process environment takes precedence: `.env` only supplies variables that are not already exported.
+   All variables below are read through the `EnvironmentProvider` of the run — by default a `SystemEnvironment`, which loads a `.env` file from the **current working directory**. The real process environment takes precedence: `.env` only supplies variables that are not already exported.
 
    The caching system supports the following environment variables:
    - **CACHE_HIERARCHY**: Comma-separated list of cache types in order (e.g., "LOCAL,REDIS")
