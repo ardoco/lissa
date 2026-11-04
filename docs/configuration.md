@@ -171,7 +171,7 @@ This section describes how to configure the embedding creation and classificatio
 | `openai`    | `model`                                                          | `text-embedding-ada-002`        |
 | `ollama`    | `model`                                                          | `nomic-embed-text:v1.5`         |
 | `openwebui` | `model`                                                          | `nomic-embed-text:v1.5`         |
-| `bifrost`   | `model` (provider-prefixed)                                      | `openai/text-embedding-3-small` |
+| `bifrost`   | `model` (provider-prefixed)                                      | `openai/text-embedding-3-large` |
 | `onnx`      | `model`, `path_to_model`, `path_to_tokenizer` — all **required** | –                               |
 | `mock`      | none — use `"args": {}`                                          | –                               |
 
@@ -285,7 +285,7 @@ LiSSA supports multiple platforms for embedding creation and language model clas
 - **openwebui**: Open WebUI embedding models
   - `OPENWEBUI_URL`: The URL of the Open WebUI server
   - `OPENWEBUI_API_KEY`: Your Open WebUI API key
-- **bifrost**: Embedding models served through the Bifrost gateway (OpenAI-compatible); model names are provider-prefixed, e.g. `openai/text-embedding-3-small`
+- **bifrost**: Embedding models served through the Bifrost gateway (OpenAI-compatible); model names are provider-prefixed, e.g. `openai/text-embedding-3-large`
   - `BIFROST_URL`: The base URL of the Bifrost API (e.g. `https://domain.tld/v1`)
   - `BIFROST_API_KEY`: Your Bifrost virtual key
 - **onnx**: Local ONNX models (no environment variables required)

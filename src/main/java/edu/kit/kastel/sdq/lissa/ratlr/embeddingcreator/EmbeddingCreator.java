@@ -89,10 +89,10 @@ public class EmbeddingCreator {
                         .modelName(configuration.argumentAsString("model", "nomic-embed-text:v1.5"))
                         .environment(environment)
                         .build();
-            // Bifrost model names are provider-prefixed (e.g. "openai/text-embedding-3-small").
+            // Bifrost model names are provider-prefixed (e.g. "openai/text-embedding-3-large").
             case "bifrost" ->
                 EmbeddingConfiguration.builder(EmbeddingPlatform.BIFROST)
-                        .modelName(configuration.argumentAsString("model", "openai/text-embedding-3-small"))
+                        .modelName(configuration.argumentAsString("model", "openai/text-embedding-3-large"))
                         .environment(environment)
                         .build();
             // The mock creator ignores the model, so do not read a "model" argument here: that way a stray
