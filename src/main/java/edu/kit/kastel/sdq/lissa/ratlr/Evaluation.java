@@ -16,7 +16,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.kit.kastel.mcse.ardoco.llm.cache.CacheManager;
 import edu.kit.kastel.mcse.ardoco.llm.util.EnvironmentProvider;
-import edu.kit.kastel.mcse.ardoco.llm.util.SystemEnvironment;
 import edu.kit.kastel.sdq.lissa.ratlr.artifactprovider.ArtifactProvider;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.Classifier;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.EvaluationConfiguration;
@@ -62,9 +61,8 @@ import edu.kit.kastel.sdq.lissa.ratlr.resultaggregator.ResultAggregator;
  *     <li>Generate and save statistics</li>
  * </ol>
  * <p>
- * API keys, hosts and cache settings are read from an {@link EnvironmentProvider}. The constructors without an
- * environment use a {@link SystemEnvironment} (system environment variables, then a {@code .env} file in the
- * working directory).
+ * API keys, hosts and cache settings are read from an {@link EnvironmentProvider}. The environment is created by the
+ * entry points ({@code Main}, {@code MainCLI}) and passed in explicitly.
  * </p>
  */
 public class Evaluation {
@@ -107,23 +105,6 @@ public class Evaluation {
     private List<Element> targetElements = new ArrayList<>();
 
     /**
-     * Creates a new evaluation instance with the specified configuration file.
-     * This constructor:
-     * <ol>
-     *     <li>Validates the configuration file path</li>
-     *     <li>Loads and initializes the configuration</li>
-     *     <li>Sets up all required components for the pipeline, sharing a {@link ContextStore}</li>
-     * </ol>
-     *
-     * @param configFile Path to the configuration file
-     * @throws IOException If there are issues reading the configuration file
-     * @throws NullPointerException If configFile is null
-     */
-    public Evaluation(Path configFile) throws IOException {
-        this(configFile, new SystemEnvironment());
-    }
-
-    /**
      * Creates a new evaluation instance with the specified configuration file that reads API keys, hosts and cache
      * settings from the given environment.
      *
@@ -137,27 +118,6 @@ public class Evaluation {
         this.environment = Objects.requireNonNull(environment);
         configuration = new ObjectMapper().readValue(configFile.toFile(), EvaluationConfiguration.class);
         setup();
-    }
-
-    /**
-     * Creates a new evaluation instance with the specified configuration file. The classification prompt in the
-     * configuration will internally be overwritten with the provided {@code prompt}. The original configuration file is not
-     * modified. Results of the {@link #run()} method will also include the overwritten prompt instead of the original one.
-     * This constructor:
-     * <ol>
-     *     <li>Validates the configuration file path</li>
-     *     <li>Loads and initializes the configuration</li>
-     *     <li>Overwrites the classification prompt in the configuration with the provided prompt</li>
-     *     <li>Sets up all required components for the pipeline, sharing a {@link ContextStore}</li>
-     * </ol>
-     *
-     * @param configFile Path to the configuration file
-     * @param prompt The prompt to use for classification
-     * @throws IOException If there are issues reading the configuration file
-     * @throws NullPointerException If configFile is null
-     */
-    public Evaluation(Path configFile, String prompt) throws IOException {
-        this(configFile, prompt, new SystemEnvironment());
     }
 
     /**

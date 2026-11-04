@@ -105,9 +105,7 @@ public class EmbeddingCreator {
             // here: that way a stray {@value EMBEDDING_MODEL_CONFIGURATION_KEY} on a mock configuration is reported as
             // an unread (misconfigured) parameter.
             case "mock" ->
-                EmbeddingConfiguration.builder(EmbeddingPlatform.MOCK)
-                        .environment(environment)
-                        .build();
+                EmbeddingConfiguration.builder(EmbeddingPlatform.MOCK).build();
             default -> throw new IllegalStateException("Unexpected value: " + configuration.name());
         };
     }

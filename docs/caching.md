@@ -155,7 +155,7 @@ The `Cache` interface provides two API levels:
 
 2. **Environment Variables**
 
-   All variables below are read through the `EnvironmentProvider` of the run — by default a `SystemEnvironment`, which loads a `.env` file from the **current working directory**. The real process environment takes precedence: `.env` only supplies variables that are not already exported.
+   All variables below are read through the `EnvironmentProvider` of the run — created by `Main`/`MainCLI` as a `SystemEnvironment` (tests inject their own), which loads a `.env` file from the **current working directory**. The real process environment takes precedence: `.env` only supplies variables that are not already exported.
 
    The caching system supports the following environment variables:
    - **CACHE_HIERARCHY**: Comma-separated list of cache types in order (e.g., "LOCAL,REDIS")

@@ -16,7 +16,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.kit.kastel.mcse.ardoco.llm.cache.CacheManager;
 import edu.kit.kastel.mcse.ardoco.llm.util.EnvironmentProvider;
-import edu.kit.kastel.mcse.ardoco.llm.util.SystemEnvironment;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.OptimizerConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.PromptOptimizer;
@@ -49,26 +48,6 @@ public class Optimization {
      * Optimizer for prompt used in classification
      */
     private PromptOptimizer promptOptimizer;
-
-    /**
-     * Creates a new evaluation instance with the specified configuration file.
-     * This constructor:
-     * <ol>
-     *     <li>Validates the configuration file path</li>
-     *     <li>Loads and initializes the configuration</li>
-     *     <li>Sets up all required components for the pipeline</li>
-     * </ol>
-     *
-     * API keys, hosts and cache settings are read from a {@link SystemEnvironment} (system environment variables,
-     * then a {@code .env} file in the working directory).
-     *
-     * @param configFile Path to the configuration file
-     * @throws IOException          If there are issues reading the configuration file
-     * @throws NullPointerException If configFile is null
-     */
-    public Optimization(Path configFile) throws IOException {
-        this(configFile, new SystemEnvironment());
-    }
 
     /**
      * Creates a new optimization instance with the specified configuration file that reads API keys, hosts and cache
