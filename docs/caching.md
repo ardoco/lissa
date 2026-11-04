@@ -78,7 +78,7 @@ Parameters are used to:
 
 ## Cache Misses Are Silent
 
-A classifier cache miss is not an error. `Classifier.parallelClassify` runs up to 100 virtual threads (OpenAI, Blablador and DeepSeek; 10 for Open WebUI, 1 for Ollama) with **no per-task exception handling**, so a failed LLM call — for example an HTTP 401 from a placeholder API key — kills that worker thread. The remaining workers finish, the result list is silently short, and `results-*.md` / `traceLinks-*.csv` are still written, with degraded precision and recall. `EvaluateCommand` then catches every per-configuration exception and logs a warning, and the CLI never sets a non-zero exit code. **A run that fell back to the network and got 401s looks like a successful run.**
+A classifier cache miss is not an error. `Classifier.parallelClassify` runs up to 100 virtual threads (OpenAI and Blablador; 10 for Open WebUI, 1 for Ollama) with **no per-task exception handling**, so a failed LLM call — for example an HTTP 401 from a placeholder API key — kills that worker thread. The remaining workers finish, the result list is silently short, and `results-*.md` / `traceLinks-*.csv` are still written, with degraded precision and recall. `EvaluateCommand` then catches every per-configuration exception and logs a warning, and the CLI never sets a non-zero exit code. **A run that fell back to the network and got 401s looks like a successful run.**
 
 An embedding miss fails differently but is equally misleading: any embedding exception is rerouted through `tryToFixWithLength`, which reports `Token length was not too long. Don't know how to handle previous exception`. Read that as "the embedding call failed", usually a missing or invalid key.
 

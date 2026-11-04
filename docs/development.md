@@ -11,7 +11,6 @@
   - OpenAI: `OPENAI_ORGANIZATION_ID` and `OPENAI_API_KEY`
   - Open WebUI: `OPENWEBUI_URL` and `OPENWEBUI_API_KEY`
   - Blablador: `BLABLADOR_API_KEY`
-  - DeepSeek: `DEEPSEEK_API_KEY`
   - Ollama (chat): `OLLAMA_HOST` (required), `OLLAMA_USER`, `OLLAMA_PASSWORD` (optional)
   - Ollama (embeddings): `OLLAMA_EMBEDDING_HOST` (required), `OLLAMA_EMBEDDING_USER`, `OLLAMA_EMBEDDING_PASSWORD` (optional)
 
@@ -81,7 +80,6 @@ Please ensure your code follows the project's coding standards and includes appr
   - OpenAI: Check `OPENAI_ORGANIZATION_ID` and `OPENAI_API_KEY`
   - Open WebUI: Check `OPENWEBUI_URL` and `OPENWEBUI_API_KEY`
   - Blablador: Check `BLABLADOR_API_KEY`
-  - DeepSeek: Check `DEEPSEEK_API_KEY`
   - Ollama (chat): Check `OLLAMA_HOST` (required), `OLLAMA_USER`, `OLLAMA_PASSWORD` (optional)
   - Ollama (embeddings): Check `OLLAMA_EMBEDDING_HOST` (required), `OLLAMA_EMBEDDING_USER`, `OLLAMA_EMBEDDING_PASSWORD` (optional)
 - If a variable looks set in `.env` but LiSSA uses a different value, check whether it is also exported in your shell — the process environment wins (`unset <VAR>` to fall back to `.env`)

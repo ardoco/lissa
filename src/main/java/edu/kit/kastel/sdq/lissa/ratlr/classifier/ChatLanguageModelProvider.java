@@ -77,16 +77,18 @@ public class ChatLanguageModelProvider {
 
     /**
      * Determines the number of threads to use for the platform of the given configuration.
-     * OpenAI, Blablador and DeepSeek use 100 threads, Open WebUI uses 10, Ollama uses 1.
+     * OpenAI and Blablador use 100 threads, Open WebUI uses 10, Ollama uses 1.
      *
      * @param configuration The module configuration
      * @return The number of threads to use
      */
     public static int threads(ModuleConfiguration configuration) {
-        return switch (platform(configuration)) {
-            case OPENAI, BLABLADOR, DEEPSEEK -> 100;
+        ChatModelPlatform platform = platform(configuration);
+        return switch (platform) {
+            case OPENAI, BLABLADOR -> 100;
             case OPENWEBUI -> 10;
             case OLLAMA -> 1;
+            case DEEPSEEK -> throw unsupported(platform);
         };
     }
 
@@ -108,6 +110,14 @@ public class ChatLanguageModelProvider {
             throw new IllegalArgumentException("Invalid configuration name: '%s'. Expected format: <mode>%s<platform>"
                     .formatted(configuration.name(), CONFIG_NAME_SEPARATOR));
         }
-        return ChatModelPlatform.fromString(modeXplatform[1]);
+        ChatModelPlatform platform = ChatModelPlatform.fromString(modeXplatform[1]);
+        if (platform == ChatModelPlatform.DEEPSEEK) {
+            throw unsupported(platform);
+        }
+        return platform;
+    }
+
+    private static IllegalArgumentException unsupported(ChatModelPlatform platform) {
+        return new IllegalArgumentException("Chat model platform '%s' is not supported by LiSSA".formatted(platform));
     }
 }

@@ -80,7 +80,7 @@ To get started with LiSSA, follow these steps:
 ### Configuration
 
 1. Create a configuration you want to use for evaluation / execution, e.g. by copying `config-template.json`. You can find published configurations [here](https://github.com/ardoco/Replication-Package-ICSE25_LiSSA-Toward-Generic-Traceability-Link-Recovery-through-RAG/tree/main/LiSSA-RATLR-V2/lissa/configs/req2code-significance). You can also provide a directory containing multiple configurations.
-2. Configure your API keys for the language model platforms you plan to use. Copy the `env-template` file to `.env` and fill in the keys, or export them as environment variables. See the [configuration documentation](docs/configuration.md#supported-platforms-and-environment-variables) for details on supported platforms (OpenAI, Open WebUI, Ollama, Blablador, DeepSeek) and their required environment variables.
+2. Configure your API keys for the language model platforms you plan to use. Copy the `env-template` file to `.env` and fill in the keys, or export them as environment variables. See the [configuration documentation](docs/configuration.md#supported-platforms-and-environment-variables) for details on supported platforms (OpenAI, Open WebUI, Ollama, Blablador) and their required environment variables.
 
    > [!IMPORTANT]
    > The `.env` file is read from the **current working directory** — the directory you run LiSSA from — and it only fills in variables that are **not** already exported: a value present in the process environment wins over the same key in `.env`.

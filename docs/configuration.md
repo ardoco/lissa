@@ -200,7 +200,7 @@ Use the `classifier` field to configure a single classifier.
 }
 ```
 
-Classifier names are `mock`, `simple_<platform>` or `reasoning_<platform>`, where `<platform>` is one of `openai`, `ollama`, `openwebui`, `blablador`, `deepseek`. A `simple` or `reasoning` name without a platform suffix is rejected.
+Classifier names are `mock`, `simple_<platform>` or `reasoning_<platform>`, where `<platform>` is one of `openai`, `ollama`, `openwebui`, `blablador`. A `simple` or `reasoning` name without a platform suffix is rejected.
 
 **Arguments common to `simple_*` and `reasoning_*`:**
 
@@ -303,8 +303,6 @@ Chat language models are configured by prefixing the classifier name with the pl
   - `OPENWEBUI_API_KEY`: Your Open WebUI API key
 - **Blablador** (`*_blablador`): Uses Blablador's chat models
   - `BLABLADOR_API_KEY`: Your Blablador API key
-- **DeepSeek** (`*_deepseek`): Uses DeepSeek's chat models
-  - `DEEPSEEK_API_KEY`: Your DeepSeek API key
 
 > [!IMPORTANT]
 > These variables are validated when the client is constructed, before any cache is consulted. A run that is served entirely from the cache therefore still needs them to be set — dummy values are sufficient and open no connection. Variables may be supplied through a `.env` file in the **current working directory**, but the process environment wins: `.env` only fills in variables that are not already exported.
