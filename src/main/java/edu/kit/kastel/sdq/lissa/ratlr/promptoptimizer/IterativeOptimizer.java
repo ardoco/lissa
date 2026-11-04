@@ -19,6 +19,7 @@ import edu.kit.kastel.mcse.ardoco.llm.cache.Cache;
 import edu.kit.kastel.mcse.ardoco.llm.cache.CacheManager;
 import edu.kit.kastel.mcse.ardoco.llm.cache.chat.ChatCacheKey;
 import edu.kit.kastel.mcse.ardoco.llm.chat.ChatModelUtils;
+import edu.kit.kastel.mcse.ardoco.llm.util.EnvironmentProvider;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.ChatLanguageModelProvider;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.ClassificationTask;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
@@ -166,18 +167,37 @@ public class IterativeOptimizer implements PromptOptimizer {
      * @param configuration The module configuration containing optimizer settings
      * @param goldStandard The set of trace links that represent the gold standard for evaluation
      * @param metric The metric used to score prompt classification
+     * @param environment The environment providing the API keys and hosts of the optimizer's language model
      */
-    public IterativeOptimizer(ModuleConfiguration configuration, Set<TraceLink> goldStandard, Metric metric) {
+    public IterativeOptimizer(
+            ModuleConfiguration configuration,
+            Set<TraceLink> goldStandard,
+            Metric metric,
+            EnvironmentProvider environment) {
         this(
                 configuration,
                 goldStandard,
                 metric,
-                configuration.argumentAsInt(MAXIMUM_ITERATIONS_CONFIGURATION_KEY, DEFAULT_MAXIMUM_ITERATIONS));
+                configuration.argumentAsInt(MAXIMUM_ITERATIONS_CONFIGURATION_KEY, DEFAULT_MAXIMUM_ITERATIONS),
+                environment);
     }
 
+    /**
+     * Creates a new iterative optimizer with the specified configuration and default maximum number of iterations.
+     *
+     * @param configuration The module configuration containing optimizer settings
+     * @param goldStandard The set of trace links that represent the gold standard for evaluation
+     * @param metric The metric used to score prompt classification
+     * @param maximumIterations The maximum number of iterations, unless overridden by the configuration
+     * @param environment The environment providing the API keys and hosts of the optimizer's language model
+     */
     public IterativeOptimizer(
-            ModuleConfiguration configuration, Set<TraceLink> goldStandard, Metric metric, int maximumIterations) {
-        this.provider = new ChatLanguageModelProvider(configuration);
+            ModuleConfiguration configuration,
+            Set<TraceLink> goldStandard,
+            Metric metric,
+            int maximumIterations,
+            EnvironmentProvider environment) {
+        this.provider = new ChatLanguageModelProvider(configuration, environment);
         this.template =
                 configuration.argumentAsString(OPTIMIZATION_TEMPLATE_CONFIGURATION_KEY, DEFAULT_OPTIMIZATION_TEMPLATE);
         this.maximumIterations = configuration.argumentAsInt(MAXIMUM_ITERATIONS_CONFIGURATION_KEY, maximumIterations);

@@ -5,6 +5,7 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.*;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
@@ -17,9 +18,11 @@ import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
 
 import edu.kit.kastel.mcse.ardoco.llm.cache.CacheManager;
-import edu.kit.kastel.mcse.ardoco.llm.util.Environment;
+import edu.kit.kastel.mcse.ardoco.llm.util.EnvironmentProvider;
 import edu.kit.kastel.mcse.ardoco.llm.util.Futures;
 import edu.kit.kastel.mcse.ardoco.llm.util.KeyGenerator;
+import edu.kit.kastel.mcse.ardoco.llm.util.MapEnvironment;
+import edu.kit.kastel.mcse.ardoco.llm.util.SystemEnvironment;
 import edu.kit.kastel.sdq.lissa.cli.command.OptimizeCommand;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.Classifier;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.PromptOptimizer;
@@ -47,13 +50,14 @@ class ArchitectureTest {
     /**
      * Rule that enforces environment variable access restrictions.
      * <p>
-     * Only the {@link Environment} utility class may call {@code System.getenv()}.
-     * All other classes must use the {@link Environment} class for environment variable access.
+     * Only {@link SystemEnvironment} may call {@code System.getenv()}.
+     * All other classes must read environment variables through the {@link EnvironmentProvider} that is passed
+     * down from the entry points (e.g., via the {@link edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore}).
      */
     @ArchTest
     static final ArchRule noDirectEnvironmentAccess = noClasses()
             .that()
-            .haveNameNotMatching(Environment.class.getName())
+            .haveNameNotMatching(SystemEnvironment.class.getName())
             .and()
             .resideOutsideOfPackage("..e2e..")
             .should()
@@ -144,17 +148,20 @@ class ArchitectureTest {
                     "CacheManager.resetDefaultInstance() is only intended for testing purposes and must not be used elsewhere");
 
     /**
-     * Rule that enforces that Environment.overwrite() is only called from test classes.
+     * Rule that enforces that custom environment sources are only created in test classes.
      * <p>
-     * The overwrite() method is intended for testing purposes to override environment variables.
-     * For production usage the regular .env file shall be used.
+     * Tests may inject a {@link SystemEnvironment} with an explicit {@code .env} file or a {@link MapEnvironment}.
+     * For production usage the regular {@code .env} file in the working directory shall be used, i.e.,
+     * {@code new SystemEnvironment()}.
      */
     @ArchTest
-    static final ArchRule environmentOverwriteOnlyInTests = noClasses()
+    static final ArchRule customEnvironmentOnlyInTests = noClasses()
             .that()
             .haveNameNotMatching(".*Test.*")
             .should()
-            .callMethod(Environment.class, "overwrite", Path.class)
+            .callConstructor(SystemEnvironment.class, Path.class)
+            .orShould()
+            .callConstructor(MapEnvironment.class, Map.class)
             .because(
-                    "Environment.overwrite() is only intended for testing purposes and may not be used elsewhere. Use the regular .env instead.");
+                    "Custom environment sources are only intended for testing purposes and may not be used elsewhere. Use the regular .env instead.");
 }

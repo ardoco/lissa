@@ -30,12 +30,13 @@ Each file-based cache is a single JSON file at `<cache_dir>/<SimpleClassName>_<p
 - classifiers, summarizing preprocessors and prompt optimizers: `<model>_<seed>`, or `<model>_<seed>_<temperature>` when `temperature != 0.0` (the temperature is omitted at `0.0` for backward compatibility);
 - embedding creators: `<model>`.
 
-Any `:` in the resulting name is replaced by `__`. Examples:
+Any `:` in the resulting name is replaced by `__`, and any `/` or `\` (e.g. in provider-prefixed Bifrost model names such as `openai/gpt-4o-mini`) by `--`; names without these characters are unchanged. Examples:
 
 ```text
 SimpleClassifier_gpt-4o-mini-2024-07-18_133742243.json
 ReasoningClassifier_gpt-4o-mini_133742243_0.7.json
 OpenAiEmbeddingCreator_text-embedding-3-large.json
+SimpleClassifier_openai--gpt-4o-mini_133742243.json
 ```
 
 Because the Java class name is part of the file name, renaming a class orphans its cache, and classifiers sharing an implementation class share a cache file. If `cache_dir` is absent from the configuration, `./cache` relative to the current working directory is used.
@@ -78,7 +79,7 @@ Parameters are used to:
 
 ## Cache Misses Are Silent
 
-A classifier cache miss is not an error. `Classifier.parallelClassify` runs up to 100 virtual threads (OpenAI and Blablador; 10 for Open WebUI, 1 for Ollama) with **no per-task exception handling**, so a failed LLM call — for example an HTTP 401 from a placeholder API key — kills that worker thread. The remaining workers finish, the result list is silently short, and `results-*.md` / `traceLinks-*.csv` are still written, with degraded precision and recall. `EvaluateCommand` then catches every per-configuration exception and logs a warning, and the CLI never sets a non-zero exit code. **A run that fell back to the network and got 401s looks like a successful run.**
+A classifier cache miss is not an error. `Classifier.parallelClassify` runs up to 100 virtual threads (OpenAI, Blablador and Bifrost; 10 for Open WebUI, 1 for Ollama) with **no per-task exception handling**, so a failed LLM call — for example an HTTP 401 from a placeholder API key — kills that worker thread. The remaining workers finish, the result list is silently short, and `results-*.md` / `traceLinks-*.csv` are still written, with degraded precision and recall. `EvaluateCommand` then catches every per-configuration exception and logs a warning, and the CLI never sets a non-zero exit code. **A run that fell back to the network and got 401s looks like a successful run.**
 
 An embedding miss fails differently but is equally misleading: any embedding exception is rerouted through `tryToFixWithLength`, which reports `Token length was not too long. Don't know how to handle previous exception`. Read that as "the embedding call failed", usually a missing or invalid key.
 
@@ -98,7 +99,7 @@ OPENAI_ORGANIZATION_ID=DUMMY
 OPENAI_API_KEY=DUMMY
 ```
 
-This is exactly what `src/test/resources/.env-test` does for the offline end-to-end test. Using deliberately invalid values is recommended: it turns an unnoticed cache miss into a visible failure instead of a live API call.
+This is exactly what `src/test/resources/.env-test` does for the offline end-to-end tests, which inject it as `new SystemEnvironment(Path.of("src/test/resources/.env-test"))` into `Evaluation`/`Optimization`. Using deliberately invalid values is recommended: it turns an unnoticed cache miss into a visible failure instead of a live API call.
 
 > [!WARNING]
 > Putting dummy values in `.env` is not enough if a real key is exported in your shell — the process environment wins over `.env`. Unset the real values first, or the replay will quietly call the live API on a cache miss:
@@ -154,7 +155,7 @@ The `Cache` interface provides two API levels:
 
 2. **Environment Variables**
 
-   All variables below are read through `Environment`, which loads a `.env` file from the **current working directory**. The real process environment takes precedence: `.env` only supplies variables that are not already exported.
+   All variables below are read through the `EnvironmentProvider` of the run — by default a `SystemEnvironment`, which loads a `.env` file from the **current working directory**. The real process environment takes precedence: `.env` only supplies variables that are not already exported.
 
    The caching system supports the following environment variables:
    - **CACHE_HIERARCHY**: Comma-separated list of cache types in order (e.g., "LOCAL,REDIS")

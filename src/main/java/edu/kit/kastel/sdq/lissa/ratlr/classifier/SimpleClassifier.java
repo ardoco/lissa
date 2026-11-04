@@ -72,7 +72,7 @@ public class SimpleClassifier extends Classifier {
      */
     public SimpleClassifier(ModuleConfiguration configuration, ContextStore contextStore) {
         super(ChatLanguageModelProvider.threads(configuration), contextStore);
-        this.provider = new ChatLanguageModelProvider(configuration);
+        this.provider = new ChatLanguageModelProvider(configuration, contextStore.environment());
         this.template = configuration.argumentAsString(PROMPT_TEMPLATE_KEY, DEFAULT_TEMPLATE);
         this.cache = CacheManager.getDefaultInstance().getCache(this, provider.cacheParameters());
         this.llm = provider.createChatModel();

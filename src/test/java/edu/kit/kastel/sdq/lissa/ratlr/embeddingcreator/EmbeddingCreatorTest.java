@@ -7,6 +7,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import edu.kit.kastel.mcse.ardoco.llm.util.MapEnvironment;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
@@ -25,7 +26,8 @@ class EmbeddingCreatorTest {
         // No "model" argument: the mock creator ignores it, so none is required (and a stray one would be
         // reported as an unread parameter by ModuleConfiguration).
         ModuleConfiguration configuration = new ModuleConfiguration("mock", Map.of());
-        EmbeddingCreator creator = EmbeddingCreator.createEmbeddingCreator(configuration, new ContextStore());
+        EmbeddingCreator creator =
+                EmbeddingCreator.createEmbeddingCreator(configuration, new ContextStore(new MapEnvironment(Map.of())));
 
         Assertions.assertArrayEquals(
                 new float[] {0}, creator.calculateEmbedding(element("R1", "the system shall log in")));

@@ -62,7 +62,7 @@ public class SummarizePreprocessor extends Preprocessor {
     public SummarizePreprocessor(ModuleConfiguration moduleConfiguration, ContextStore contextStore) {
         super(contextStore);
         this.template = moduleConfiguration.argumentAsString("template", "Summarize the following {type}: {content}");
-        this.provider = new ChatLanguageModelProvider(moduleConfiguration);
+        this.provider = new ChatLanguageModelProvider(moduleConfiguration, contextStore.environment());
         this.threads = ChatLanguageModelProvider.threads(moduleConfiguration);
         this.cache = CacheManager.getDefaultInstance().getCache(this, provider.cacheParameters());
     }

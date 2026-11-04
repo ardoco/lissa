@@ -7,6 +7,7 @@ import edu.kit.kastel.mcse.ardoco.llm.cache.chat.ChatCacheParameter;
 import edu.kit.kastel.mcse.ardoco.llm.chat.ChatModelPlatform;
 import edu.kit.kastel.mcse.ardoco.llm.chat.ChatModelProvider;
 import edu.kit.kastel.mcse.ardoco.llm.chat.LlmConfiguration;
+import edu.kit.kastel.mcse.ardoco.llm.util.EnvironmentProvider;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 
 import dev.langchain4j.model.chat.ChatModel;
@@ -25,9 +26,10 @@ public class ChatLanguageModelProvider {
      * Creates a provider for the given module configuration.
      *
      * @param configuration The module configuration ({@code <mode>_<platform>} with optional model/seed/temperature args)
+     * @param environment The environment providing the API keys and hosts of the platform
      */
-    public ChatLanguageModelProvider(ModuleConfiguration configuration) {
-        this.delegate = new ChatModelProvider(toLlmConfiguration(configuration));
+    public ChatLanguageModelProvider(ModuleConfiguration configuration, EnvironmentProvider environment) {
+        this.delegate = new ChatModelProvider(toLlmConfiguration(configuration, environment));
     }
 
     /**
@@ -77,22 +79,24 @@ public class ChatLanguageModelProvider {
 
     /**
      * Determines the number of threads to use for the platform of the given configuration.
-     * OpenAI and Blablador use 100 threads, Open WebUI uses 10, Ollama uses 1.
+     * OpenAI, Blablador and Bifrost use 100 threads, Open WebUI uses 10, Ollama uses 1.
      *
      * @param configuration The module configuration
      * @return The number of threads to use
+     * @throws IllegalArgumentException If the platform is unknown or not supported by LiSSA (DeepSeek)
      */
     public static int threads(ModuleConfiguration configuration) {
         ChatModelPlatform platform = platform(configuration);
         return switch (platform) {
-            case OPENAI, BLABLADOR -> 100;
+            case OPENAI, BLABLADOR, BIFROST -> 100;
             case OPENWEBUI -> 10;
             case OLLAMA -> 1;
             case DEEPSEEK -> throw unsupported(platform);
         };
     }
 
-    private static LlmConfiguration toLlmConfiguration(ModuleConfiguration configuration) {
+    private static LlmConfiguration toLlmConfiguration(
+            ModuleConfiguration configuration, EnvironmentProvider environment) {
         ChatModelPlatform platform = platform(configuration);
         String model = configuration.argumentAsString("model");
         int seed = configuration.argumentAsInt("seed", LlmConfiguration.DEFAULT_SEED);
@@ -101,6 +105,7 @@ public class ChatLanguageModelProvider {
                 .modelName(model)
                 .seed(seed)
                 .temperature(temperature)
+                .environment(environment)
                 .build();
     }
 
