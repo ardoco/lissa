@@ -86,7 +86,6 @@ public class EmbeddingCreator {
                         .modelName(configuration.argumentAsString(EMBEDDING_MODEL_CONFIGURATION_KEY))
                         .pathToModel(configuration.argumentAsString("path_to_model"))
                         .pathToTokenizer(configuration.argumentAsString("path_to_tokenizer"))
-                        .environment(environment)
                         .build();
             case "openwebui" ->
                 EmbeddingConfiguration.builder(EmbeddingPlatform.OPENWEBUI)
