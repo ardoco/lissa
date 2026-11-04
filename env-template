@@ -1,6 +1,11 @@
 OPENWEBUI_URL=https://domain.tldr/api
 OPENWEBUI_API_KEY=
 
+# Bifrost (LLM gateway, OpenAI-compatible; chat and embeddings)
+# Model names are provider-prefixed, e.g. openai/gpt-4o-mini
+#BIFROST_URL=https://domain.tld/v1
+#BIFROST_API_KEY=
+
 OLLAMA_EMBEDDING_HOST=
 #OLLAMA_EMBEDDING_PASSWORD=
 #OLLAMA_EMBEDDING_USER=

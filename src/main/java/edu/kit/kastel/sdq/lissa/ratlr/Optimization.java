@@ -35,6 +35,7 @@ public class Optimization {
 
     private static final Logger logger = LoggerFactory.getLogger(Optimization.class);
     private final Path configFile;
+    /** Environment providing API keys, hosts and cache settings to the evaluation pipeline and the optimizer */
     private final EnvironmentProvider environment;
 
     private OptimizerConfiguration configuration;
@@ -58,6 +59,9 @@ public class Optimization {
      *     <li>Sets up all required components for the pipeline</li>
      * </ol>
      *
+     * API keys, hosts and cache settings are read from a {@link SystemEnvironment} (system environment variables,
+     * then a {@code .env} file in the working directory).
+     *
      * @param configFile Path to the configuration file
      * @throws IOException          If there are issues reading the configuration file
      * @throws NullPointerException If configFile is null
@@ -67,18 +71,13 @@ public class Optimization {
     }
 
     /**
-     * Creates a new evaluation instance with the specified configuration file.
-     * This constructor:
-     * <ol>
-     *     <li>Validates the configuration file path</li>
-     *     <li>Loads and initializes the configuration</li>
-     *     <li>Sets up all required components for the pipeline</li>
-     * </ol>
+     * Creates a new optimization instance with the specified configuration file that reads API keys, hosts and cache
+     * settings from the given environment.
      *
      * @param configFile Path to the configuration file
-     * @param environment The environment provider for credentials and other environment variables
+     * @param environment The environment providing API keys, hosts and cache settings
      * @throws IOException          If there are issues reading the configuration file
-     * @throws NullPointerException If configFile is null
+     * @throws NullPointerException If configFile or environment is null
      */
     public Optimization(Path configFile, EnvironmentProvider environment) throws IOException {
         this.configFile = Objects.requireNonNull(configFile);

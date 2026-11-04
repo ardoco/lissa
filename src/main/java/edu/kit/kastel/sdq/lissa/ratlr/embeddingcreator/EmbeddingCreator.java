@@ -49,10 +49,13 @@ public class EmbeddingCreator {
 
     /**
      * Creates an embedding creator based on the provided configuration.
-     * The type of creator is determined by the configuration's name field.
+     * The type of creator is determined by the configuration's name field. API keys and hosts are read from the
+     * given environment; embeddings are cached via the default
+     * {@link edu.kit.kastel.mcse.ardoco.llm.cache.CacheManager} (not needed for the mock creator).
      *
      * @param configuration The configuration specifying the embedding creator
      * @param contextStore The shared context store for pipeline components (kept for API compatibility)
+     * @param environment The environment providing the API keys and hosts of the platform
      * @return An embedding creator adapter
      */
     public static EmbeddingCreator createEmbeddingCreator(
@@ -69,7 +72,7 @@ public class EmbeddingCreator {
             case "ollama" ->
                 EmbeddingConfiguration.builder(EmbeddingPlatform.OLLAMA)
                         .modelName(configuration.argumentAsString(
-                                EMBEDDING_MODEL_CONFIGURATION_KEY, "nomic-embed-text" + ":v1.5"))
+                                EMBEDDING_MODEL_CONFIGURATION_KEY, "nomic-embed-text:v1.5"))
                         .environment(environment)
                         .build();
             case "openai" ->
@@ -91,11 +94,20 @@ public class EmbeddingCreator {
                                 EMBEDDING_MODEL_CONFIGURATION_KEY, "nomic-embed-text:v1.5"))
                         .environment(environment)
                         .build();
+            // Bifrost model names are provider-prefixed (e.g. "openai/text-embedding-3-large").
+            case "bifrost" ->
+                EmbeddingConfiguration.builder(EmbeddingPlatform.BIFROST)
+                        .modelName(configuration.argumentAsString(
+                                EMBEDDING_MODEL_CONFIGURATION_KEY, "openai/text-embedding-3-large"))
+                        .environment(environment)
+                        .build();
             // The mock creator ignores the model, so do not read a {@value EMBEDDING_MODEL_CONFIGURATION_KEY} argument
             // here: that way a stray {@value EMBEDDING_MODEL_CONFIGURATION_KEY} on a mock configuration is reported as
             // an unread (misconfigured) parameter.
             case "mock" ->
-                EmbeddingConfiguration.builder(EmbeddingPlatform.MOCK).build();
+                EmbeddingConfiguration.builder(EmbeddingPlatform.MOCK)
+                        .environment(environment)
+                        .build();
             default -> throw new IllegalStateException("Unexpected value: " + configuration.name());
         };
     }

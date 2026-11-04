@@ -76,7 +76,8 @@ public class IterativeFeedbackOptimizer extends IterativeOptimizer {
      *
      * @param configuration The module configuration containing optimizer settings
      * @param goldStandard The set of trace links that represent the gold standard for evaluation
-     * @param environment The environment provider for credentials and other environment variables
+     * @param metric The metric used to score prompt classification
+     * @param environment The environment providing the API keys and hosts of the optimizer's language model
      */
     public IterativeFeedbackOptimizer(
             ModuleConfiguration configuration,

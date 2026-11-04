@@ -11,7 +11,7 @@
   - OpenAI: `OPENAI_ORGANIZATION_ID` and `OPENAI_API_KEY`
   - Open WebUI: `OPENWEBUI_URL` and `OPENWEBUI_API_KEY`
   - Blablador: `BLABLADOR_API_KEY`
-  - DeepSeek: `DEEPSEEK_API_KEY`
+  - Bifrost: `BIFROST_URL` and `BIFROST_API_KEY` (model names are provider-prefixed, e.g. `openai/gpt-4o-mini`)
   - Ollama (chat): `OLLAMA_HOST` (required), `OLLAMA_USER`, `OLLAMA_PASSWORD` (optional)
   - Ollama (embeddings): `OLLAMA_EMBEDDING_HOST` (required), `OLLAMA_EMBEDDING_USER`, `OLLAMA_EMBEDDING_PASSWORD` (optional)
 
@@ -28,7 +28,7 @@ Two things are easy to get wrong here:
 - The `.env` file is read from the **current working directory** — the directory you run LiSSA from, which is not necessarily the repository root.
 - The process environment takes **precedence** over `.env`. A key in `.env` is used only when that variable is not already exported, so an exported `OPENAI_API_KEY` silently overrides the one in your `.env`.
 
-`OPENAI_API_KEY` must be set even for a run that is served entirely from the cache (`OPENAI_ORGANIZATION_ID` is optional): the OpenAI embedding creator and chat model provider both validate it at construction time, before any cache is consulted. Dummy values are sufficient and open no connection — this is what `src/test/resources/.env-test` does for the offline end-to-end test.
+`OPENAI_API_KEY` must be set even for a run that is served entirely from the cache (`OPENAI_ORGANIZATION_ID` is optional): the OpenAI embedding creator and chat model provider both validate it at construction time, before any cache is consulted. Dummy values are sufficient and open no connection — this is what the offline end-to-end tests do, which pass a `MapEnvironment` with dummy values (see [`E2ETestEnvironment`](../src/test/java/edu/kit/kastel/sdq/lissa/ratlr/e2e/E2ETestEnvironment.java)) explicitly to `Evaluation`/`Optimization`.
 
 ### Building the Project
 
@@ -81,7 +81,7 @@ Please ensure your code follows the project's coding standards and includes appr
   - OpenAI: Check `OPENAI_ORGANIZATION_ID` and `OPENAI_API_KEY`
   - Open WebUI: Check `OPENWEBUI_URL` and `OPENWEBUI_API_KEY`
   - Blablador: Check `BLABLADOR_API_KEY`
-  - DeepSeek: Check `DEEPSEEK_API_KEY`
+  - Bifrost: Check `BIFROST_URL` and `BIFROST_API_KEY`, and that the model name is provider-prefixed (e.g. `openai/gpt-4o-mini`)
   - Ollama (chat): Check `OLLAMA_HOST` (required), `OLLAMA_USER`, `OLLAMA_PASSWORD` (optional)
   - Ollama (embeddings): Check `OLLAMA_EMBEDDING_HOST` (required), `OLLAMA_EMBEDDING_USER`, `OLLAMA_EMBEDDING_PASSWORD` (optional)
 - If a variable looks set in `.env` but LiSSA uses a different value, check whether it is also exported in your shell — the process environment wins (`unset <VAR>` to fall back to `.env`)

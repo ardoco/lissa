@@ -43,7 +43,7 @@ public interface PromptOptimizer {
      * @param goldStandard The gold standard trace links for evaluation
      * @param metric The metric used to evaluate the prompt performance
      * @param selector The selector used to assess the optimization results (nullable, only required for {@link ProTeGiOptimizer})
-     * @param environment The environment provider for credentials and other environment variables
+     * @param environment The environment providing the API keys and hosts of the optimizer's language model
      * @return An instance of PromptOptimizer based on the configuration
      */
     static PromptOptimizer createOptimizer(
@@ -54,7 +54,7 @@ public interface PromptOptimizer {
             EnvironmentProvider environment) {
         return switch (configuration.name().split(CONFIG_NAME_SEPARATOR)[0]) {
             case "mock" -> new MockOptimizer();
-            case "simple" -> new IterativeOptimizer(configuration, goldStandard, metric, environment, 1);
+            case "simple" -> new IterativeOptimizer(configuration, goldStandard, metric, 1, environment);
             case "iterative" -> new IterativeOptimizer(configuration, goldStandard, metric, environment);
             case "feedback" -> new IterativeFeedbackOptimizer(configuration, goldStandard, metric, environment);
             case "gradient", "protegi" -> {

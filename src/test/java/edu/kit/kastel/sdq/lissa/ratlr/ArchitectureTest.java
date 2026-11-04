@@ -5,6 +5,7 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.*;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
@@ -17,8 +18,10 @@ import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
 
 import edu.kit.kastel.mcse.ardoco.llm.cache.CacheManager;
+import edu.kit.kastel.mcse.ardoco.llm.util.EnvironmentProvider;
 import edu.kit.kastel.mcse.ardoco.llm.util.Futures;
 import edu.kit.kastel.mcse.ardoco.llm.util.KeyGenerator;
+import edu.kit.kastel.mcse.ardoco.llm.util.MapEnvironment;
 import edu.kit.kastel.mcse.ardoco.llm.util.SystemEnvironment;
 import edu.kit.kastel.sdq.lissa.cli.command.OptimizeCommand;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.Classifier;
@@ -29,8 +32,8 @@ import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.promptmetric.Metric;
  * Architecture tests for the LiSSA framework using ArchUnit.
  * <p>
  * These rules help maintain code quality, consistency, and architectural integrity. The invariants of the
- * LLM/cache utility classes that were extracted into the {@code llm-access} library are checked by the
- * companion {@link LlmAccessArchitectureTest}, which analyzes the library package that LiSSA depends on.
+ * LLM/cache classes that were extracted into the {@code llm-access} library are checked in that library;
+ * the rules here only cover how LiSSA uses it.
  */
 @AnalyzeClasses(packages = "edu.kit.kastel.sdq.lissa")
 class ArchitectureTest {
@@ -47,11 +50,13 @@ class ArchitectureTest {
     /**
      * Rule that enforces environment variable access restrictions.
      * <p>
-     * Only the {@link SystemEnvironment} utility class may call {@code System.getenv()}.
-     * All other classes must use the {@link SystemEnvironment} class for environment variable access.
+     * Only {@link SystemEnvironment} may call {@code System.getenv()}.
+     * All other classes must read environment variables through the {@link EnvironmentProvider} that is passed
+     * down from the entry points as an explicit parameter (e.g., to the factories of classifiers, preprocessors and
+     * embedding creators).
      */
     @ArchTest
-    static final ArchRule noDirectSystemEnvironmentAccess = noClasses()
+    static final ArchRule noDirectEnvironmentAccess = noClasses()
             .that()
             .haveNameNotMatching(SystemEnvironment.class.getName())
             .and()
@@ -142,4 +147,22 @@ class ArchitectureTest {
             .callMethod(CacheManager.class, "resetDefaultInstance")
             .because(
                     "CacheManager.resetDefaultInstance() is only intended for testing purposes and must not be used elsewhere");
+
+    /**
+     * Rule that enforces that custom environment sources are only created in test classes.
+     * <p>
+     * Tests may inject a {@link SystemEnvironment} with an explicit {@code .env} file or a {@link MapEnvironment}.
+     * For production usage the regular {@code .env} file in the working directory shall be used, i.e.,
+     * {@code new SystemEnvironment()}.
+     */
+    @ArchTest
+    static final ArchRule customEnvironmentOnlyInTests = noClasses()
+            .that()
+            .haveNameNotMatching(".*Test.*")
+            .should()
+            .callConstructor(SystemEnvironment.class, Path.class)
+            .orShould()
+            .callConstructor(MapEnvironment.class, Map.class)
+            .because(
+                    "Custom environment sources are only intended for testing purposes and may not be used elsewhere. Use the regular .env instead.");
 }

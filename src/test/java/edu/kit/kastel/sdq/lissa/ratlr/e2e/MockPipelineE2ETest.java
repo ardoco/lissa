@@ -2,15 +2,11 @@
 package edu.kit.kastel.sdq.lissa.ratlr.e2e;
 
 import java.io.File;
-import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 
-import edu.kit.kastel.mcse.ardoco.llm.util.EnvironmentProvider;
-import edu.kit.kastel.mcse.ardoco.llm.util.MapEnvironment;
 import edu.kit.kastel.sdq.lissa.ratlr.Evaluation;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
 
@@ -19,17 +15,14 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
  * pipeline offline, without any model access. The mock classifier links every retrieved candidate, so the
  * run must produce trace links.
  */
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class MockPipelineE2ETest {
-
-    private static final EnvironmentProvider environment = new MapEnvironment(Map.of());
 
     @Test
     void testMockPipelineRuns() throws Exception {
         File config = new File("src/test/resources/warc/config-mock.json");
         Assertions.assertTrue(config.exists(), "mock config missing at " + config.getAbsolutePath());
 
-        Evaluation evaluation = new Evaluation(config.toPath(), environment);
+        Evaluation evaluation = new Evaluation(config.toPath(), E2ETestEnvironment.ENVIRONMENT);
         Set<TraceLink> traceLinks = evaluation.run();
 
         Assertions.assertNotNull(traceLinks);

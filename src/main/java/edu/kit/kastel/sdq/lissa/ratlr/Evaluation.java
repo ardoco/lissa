@@ -61,6 +61,11 @@ import edu.kit.kastel.sdq.lissa.ratlr.resultaggregator.ResultAggregator;
  *     <li>Postprocess trace link IDs</li>
  *     <li>Generate and save statistics</li>
  * </ol>
+ * <p>
+ * API keys, hosts and cache settings are read from an {@link EnvironmentProvider}. The constructors without an
+ * environment use a {@link SystemEnvironment} (system environment variables, then a {@code .env} file in the
+ * working directory).
+ * </p>
  */
 public class Evaluation {
 
@@ -68,6 +73,7 @@ public class Evaluation {
     private final @Nullable Path configFile;
 
     private final EvaluationConfiguration configuration;
+    /** Environment providing API keys, hosts and cache settings to all components of the pipeline */
     private final EnvironmentProvider environment;
 
     /** Provider for source artifacts */
@@ -118,18 +124,13 @@ public class Evaluation {
     }
 
     /**
-     * Creates a new evaluation instance with the specified configuration file.
-     * This constructor:
-     * <ol>
-     *     <li>Validates the configuration file path</li>
-     *     <li>Loads and initializes the configuration</li>
-     *     <li>Sets up all required components for the pipeline, sharing a {@link ContextStore}</li>
-     * </ol>
+     * Creates a new evaluation instance with the specified configuration file that reads API keys, hosts and cache
+     * settings from the given environment.
      *
      * @param configFile Path to the configuration file
-     * @param environment The environment provider for credentials and other environment variables
+     * @param environment The environment providing API keys, hosts and cache settings
      * @throws IOException If there are issues reading the configuration file
-     * @throws NullPointerException If configFile is null
+     * @throws NullPointerException If configFile or environment is null
      */
     public Evaluation(Path configFile, EnvironmentProvider environment) throws IOException {
         this.configFile = Objects.requireNonNull(configFile);

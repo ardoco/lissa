@@ -25,11 +25,11 @@ public class ChatLanguageModelProvider {
     /**
      * Creates a provider for the given module configuration.
      *
-     * @param configuration The module configuration ({@code <mode>_<platform>} with optional model/seed/temperature args)
-     * @param environmentProvider The environment provider for credentials and other environment variables
+     * @param configuration The module configuration ({@code <mode>_<platform>} with a required model and optional seed/temperature args)
+     * @param environment The environment providing the API keys and hosts of the platform
      */
-    public ChatLanguageModelProvider(ModuleConfiguration configuration, EnvironmentProvider environmentProvider) {
-        this.delegate = new ChatModelProvider(toLlmConfiguration(configuration, environmentProvider));
+    public ChatLanguageModelProvider(ModuleConfiguration configuration, EnvironmentProvider environment) {
+        this.delegate = new ChatModelProvider(toLlmConfiguration(configuration, environment));
     }
 
     /**
@@ -79,16 +79,19 @@ public class ChatLanguageModelProvider {
 
     /**
      * Determines the number of threads to use for the platform of the given configuration.
-     * OpenAI, Blablador and DeepSeek use 100 threads, Open WebUI uses 10, Ollama uses 1.
+     * OpenAI, Blablador and Bifrost use 100 threads, Open WebUI uses 10, Ollama uses 1.
      *
      * @param configuration The module configuration
      * @return The number of threads to use
+     * @throws IllegalArgumentException If the platform is unknown or not supported by LiSSA (DeepSeek)
      */
     public static int threads(ModuleConfiguration configuration) {
-        return switch (platform(configuration)) {
-            case OPENAI, BLABLADOR, DEEPSEEK -> 100;
+        ChatModelPlatform platform = platform(configuration);
+        return switch (platform) {
+            case OPENAI, BLABLADOR, BIFROST -> 100;
             case OPENWEBUI -> 10;
             case OLLAMA -> 1;
+            case DEEPSEEK -> throw unsupported(platform);
         };
     }
 
@@ -112,6 +115,14 @@ public class ChatLanguageModelProvider {
             throw new IllegalArgumentException("Invalid configuration name: '%s'. Expected format: <mode>%s<platform>"
                     .formatted(configuration.name(), CONFIG_NAME_SEPARATOR));
         }
-        return ChatModelPlatform.fromString(modeXplatform[1]);
+        ChatModelPlatform platform = ChatModelPlatform.fromString(modeXplatform[1]);
+        if (platform == ChatModelPlatform.DEEPSEEK) {
+            throw unsupported(platform);
+        }
+        return platform;
+    }
+
+    private static IllegalArgumentException unsupported(ChatModelPlatform platform) {
+        return new IllegalArgumentException("Chat model platform '%s' is not supported by LiSSA".formatted(platform));
     }
 }
