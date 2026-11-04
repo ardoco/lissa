@@ -25,7 +25,7 @@ public class ChatLanguageModelProvider {
     /**
      * Creates a provider for the given module configuration.
      *
-     * @param configuration The module configuration ({@code <mode>_<platform>} with optional model/seed/temperature args)
+     * @param configuration The module configuration ({@code <mode>_<platform>} with a required model and optional seed/temperature args)
      * @param environment The environment providing the API keys and hosts of the platform
      */
     public ChatLanguageModelProvider(ModuleConfiguration configuration, EnvironmentProvider environment) {
