@@ -52,6 +52,15 @@ public class ProTeGiOptimizer extends IterativeOptimizer {
 
     private final ProTeGiOptimizerConfig config;
 
+    /**
+     * Creates a new instance of the ProTeGiOptimizer.
+     *
+     * @param configuration The module configuration containing parameters for the optimizer
+     * @param goldStandard The set of trace links that represent the gold standard for evaluation
+     * @param metric The metric used to score prompt classification
+     * @param selector The selector used to choose prompts for further optimization steps
+     * @param environment The environment provider for credentials and other environment variables
+     */
     public ProTeGiOptimizer(
             ModuleConfiguration configuration,
             Set<TraceLink> goldStandard,

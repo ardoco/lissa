@@ -19,6 +19,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Element;
  */
 public class EmbeddingCreator {
 
+    private static final String EMBEDDING_MODEL_CONFIGURATION_KEY = "model";
     private final edu.kit.kastel.mcse.ardoco.llm.embedding.EmbeddingCreator delegate;
 
     private EmbeddingCreator(edu.kit.kastel.mcse.ardoco.llm.embedding.EmbeddingCreator delegate) {
@@ -49,17 +50,18 @@ public class EmbeddingCreator {
     /**
      * Creates an embedding creator based on the provided configuration.
      * The type of creator is determined by the configuration's name field. API keys and hosts are read from the
-     * {@linkplain ContextStore#environment() environment of the context store}; embeddings are cached via the
-     * default {@link edu.kit.kastel.mcse.ardoco.llm.cache.CacheManager} (not needed for the mock creator).
+     * given environment; embeddings are cached via the default
+     * {@link edu.kit.kastel.mcse.ardoco.llm.cache.CacheManager} (not needed for the mock creator).
      *
      * @param configuration The configuration specifying the embedding creator
-     * @param contextStore The shared context store for pipeline components, providing the environment
+     * @param contextStore The shared context store for pipeline components (kept for API compatibility)
+     * @param environment The environment providing the API keys and hosts of the platform
      * @return An embedding creator adapter
      */
     public static EmbeddingCreator createEmbeddingCreator(
-            ModuleConfiguration configuration, ContextStore contextStore) {
-        EmbeddingConfiguration embeddingConfiguration =
-                toEmbeddingConfiguration(configuration, contextStore.environment());
+            ModuleConfiguration configuration, ContextStore contextStore, EnvironmentProvider environment) {
+        Objects.requireNonNull(contextStore);
+        EmbeddingConfiguration embeddingConfiguration = toEmbeddingConfiguration(configuration, environment);
         return new EmbeddingCreator(
                 edu.kit.kastel.mcse.ardoco.llm.embedding.EmbeddingCreator.create(embeddingConfiguration));
     }
@@ -69,38 +71,40 @@ public class EmbeddingCreator {
         return switch (configuration.name()) {
             case "ollama" ->
                 EmbeddingConfiguration.builder(EmbeddingPlatform.OLLAMA)
-                        .modelName(configuration.argumentAsString("model", "nomic-embed-text:v1.5"))
+                        .modelName(configuration.argumentAsString(
+                                EMBEDDING_MODEL_CONFIGURATION_KEY, "nomic-embed-text:v1.5"))
                         .environment(environment)
                         .build();
             case "openai" ->
                 EmbeddingConfiguration.builder(EmbeddingPlatform.OPENAI)
-                        .modelName(configuration.argumentAsString("model", "text-embedding-ada-002"))
+                        .modelName(configuration.argumentAsString(
+                                EMBEDDING_MODEL_CONFIGURATION_KEY, "text-embedding-ada-002"))
                         .environment(environment)
                         .build();
             case "onnx" ->
                 EmbeddingConfiguration.builder(EmbeddingPlatform.ONNX)
-                        .modelName(configuration.argumentAsString("model"))
+                        .modelName(configuration.argumentAsString(EMBEDDING_MODEL_CONFIGURATION_KEY))
                         .pathToModel(configuration.argumentAsString("path_to_model"))
                         .pathToTokenizer(configuration.argumentAsString("path_to_tokenizer"))
-                        .environment(environment)
                         .build();
             case "openwebui" ->
                 EmbeddingConfiguration.builder(EmbeddingPlatform.OPENWEBUI)
-                        .modelName(configuration.argumentAsString("model", "nomic-embed-text:v1.5"))
+                        .modelName(configuration.argumentAsString(
+                                EMBEDDING_MODEL_CONFIGURATION_KEY, "nomic-embed-text:v1.5"))
                         .environment(environment)
                         .build();
             // Bifrost model names are provider-prefixed (e.g. "openai/text-embedding-3-large").
             case "bifrost" ->
                 EmbeddingConfiguration.builder(EmbeddingPlatform.BIFROST)
-                        .modelName(configuration.argumentAsString("model", "openai/text-embedding-3-large"))
+                        .modelName(configuration.argumentAsString(
+                                EMBEDDING_MODEL_CONFIGURATION_KEY, "openai/text-embedding-3-large"))
                         .environment(environment)
                         .build();
-            // The mock creator ignores the model, so do not read a "model" argument here: that way a stray
-            // "model" on a mock configuration is reported as an unread (misconfigured) parameter.
+            // The mock creator ignores the model, so do not read a {@value EMBEDDING_MODEL_CONFIGURATION_KEY} argument
+            // here: that way a stray {@value EMBEDDING_MODEL_CONFIGURATION_KEY} on a mock configuration is reported as
+            // an unread (misconfigured) parameter.
             case "mock" ->
-                EmbeddingConfiguration.builder(EmbeddingPlatform.MOCK)
-                        .environment(environment)
-                        .build();
+                EmbeddingConfiguration.builder(EmbeddingPlatform.MOCK).build();
             default -> throw new IllegalStateException("Unexpected value: " + configuration.name());
         };
     }

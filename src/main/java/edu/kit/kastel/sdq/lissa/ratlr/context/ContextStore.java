@@ -1,45 +1,19 @@
 /* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr.context;
 
-import java.util.Objects;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.jspecify.annotations.Nullable;
-
-import edu.kit.kastel.mcse.ardoco.llm.util.EnvironmentProvider;
 
 /**
  * Stores and manages {@link Context} objects for the LiSSA pipeline.
  * The {@code ContextStore} acts as a registry for context objects that can be shared
  * across different pipeline components (e.g., artifact providers, preprocessors, classifiers).
  * Contexts are identified by unique IDs and can be retrieved by type.
- * <p>
- * The store also carries the {@link EnvironmentProvider} of the run, so that components which access language
- * or embedding models (e.g., classifiers, preprocessors, embedding creators) read API keys and hosts from the
- * environment chosen by the entry point instead of from global state.
  */
 public class ContextStore {
     private final SortedMap<String, Context> contexts = new TreeMap<>();
-    private final EnvironmentProvider environment;
-
-    /**
-     * Creates a new, empty context store for a run that uses the given environment.
-     *
-     * @param environment the environment providing configuration values such as API keys and hosts
-     */
-    public ContextStore(EnvironmentProvider environment) {
-        this.environment = Objects.requireNonNull(environment, "environment must not be null");
-    }
-
-    /**
-     * Returns the environment of the run this store belongs to.
-     *
-     * @return the environment providing configuration values such as API keys and hosts
-     */
-    public EnvironmentProvider environment() {
-        return environment;
-    }
 
     /**
      * Registers a new context in the store.
