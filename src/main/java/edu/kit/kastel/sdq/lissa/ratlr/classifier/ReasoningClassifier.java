@@ -72,7 +72,7 @@ public class ReasoningClassifier extends Classifier {
     public ReasoningClassifier(ModuleConfiguration configuration, ContextStore contextStore) {
         super(ChatLanguageModelProvider.threads(configuration), contextStore);
         this.provider = new ChatLanguageModelProvider(configuration, contextStore.environment());
-        this.cache = CacheManager.getDefaultInstance().getCache(this, provider.cacheParameters());
+        this.cache = CacheManager.getDefaultInstance().getCache(provider.cacheParameters());
         this.prompt = configuration.argumentAsStringByEnumIndex(
                 CLASSIFICATION_PROMPT_KEY,
                 0,
