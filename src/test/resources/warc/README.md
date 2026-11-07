@@ -33,8 +33,8 @@ warc_tools_srs.pdf: original Software Requirements Specification document
 `config.json` runs the WARC req2req pipeline entirely from the recorded caches in `cache/`, so the
 end-to-end test needs no network access and no real credentials:
 
-- `cache/OpenAiEmbeddingCreator_text-embedding-3-large.json` — recorded `text-embedding-3-large` embeddings.
-- `cache/SimpleClassifier_gpt-4o-mini-2024-07-18_133742243.json` — recorded `gpt-4o-mini-2024-07-18`
+- `cache/Embedding_text-embedding-3-large.json` — recorded `text-embedding-3-large` embeddings.
+- `cache/Chat_gpt-4o-mini-2024-07-18_133742243.json` — recorded `gpt-4o-mini-2024-07-18`
   classifications (seed 133742243, temperature 0.0).
 - `cache/optimizerTests/{simple,iterative,feedback,gradient}/` — caches for the four prompt-optimizer
   configurations `WARC_simple_*.json`, `WARC_iterative_*.json`, `WARC_feedback_*.json`, `WARC_gradient_*.json`.

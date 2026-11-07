@@ -7,9 +7,9 @@ LiSSA relies on the caching subsystem provided by the [`io.github.ardoco:llm-acc
 1. **Cache abstraction**: `Cache`, `CacheKey`, and `CacheParameter`, plus typed keys/parameters for chat (`ChatCacheKey` / `ChatCacheParameter`) and embedding (`EmbeddingCacheKey` / `EmbeddingCacheParameter`) operations.
 2. **Cache implementations**:
    - a hierarchical (two-level) cache: writes are applied to both levels, reads query both levels and resolve differences with the configured conflict-resolution strategy, and an entry missing from one level is backfilled from the other;
-   - a file-based `LocalCache` (JSON, dirty tracking). It writes to disk when more than 50 entries have changed since the last write, and when the pipeline flushes the cache at the end of a run. There is **no shutdown hook** — if the JVM is killed mid-run, up to 50 new entries are lost. Writes go via a temporary file that is then copied over the cache file (`REPLACE_EXISTING`); note this is a copy, not an atomic move;
+   - a file-based `LocalCache` (JSON, dirty tracking). It writes to disk when more than 50 entries have changed since the last write, and when the pipeline flushes the cache at the end of a run. Pending entries are also written by a JVM shutdown hook; only a hard kill (e.g. `kill -9`) loses up to 50 new entries. All components using the same cache file share one `LocalCache` object. Writes go via a temporary file that is then copied over the cache file (`REPLACE_EXISTING`); note this is a copy, not an atomic move;
    - a `RedisCache` and a REST-based `RestRedisCache` (configured through environment variables, see [Usage Instructions](#usage-instructions)).
-3. **Cache management**: a `CacheManager` that configures the cache directory and provides cache instances keyed by origin and parameters, layered according to `CACHE_HIERARCHY`.
+3. **Cache management**: a `CacheManager` that configures the cache directory and provides cache instances keyed by their parameters, layered according to `CACHE_HIERARCHY`.
 
 See the [llm-access documentation](https://github.com/ardoco/llm-access) for the cache internals. The rest of this page describes how LiSSA configures and uses the cache (the configuration and environment variables are unchanged).
 
@@ -25,21 +25,31 @@ The caching system is used in several key components:
 
 ### Cache File Names
 
-Each file-based cache is a single JSON file at `<cache_dir>/<SimpleClassName>_<parameters>.json`, where `<SimpleClassName>` is the **calling class** — `CacheManager.getCache(origin, params)` uses `origin.getClass().getSimpleName()` — and `<parameters>` comes from `CacheParameter.parameters()`:
+Each file-based cache is a single JSON file at `<cache_dir>/<Mode>_<parameters>.json`, where `<Mode>` is `Chat` or `Embedding` and `<parameters>` comes from `CacheParameter.parameters()` (`CacheManager.getCache(params)`):
 
-- classifiers, summarizing preprocessors and prompt optimizers: `<model>_<seed>`, or `<model>_<seed>_<temperature>` when `temperature != 0.0` (the temperature is omitted at `0.0` for backward compatibility);
-- embedding creators: `<model>`.
+- chat caches (classifiers, summarizing preprocessors and prompt optimizers): `Chat_<model>_<seed>`, or `Chat_<model>_<seed>_<temperature>` when `temperature != 0.0` (the temperature is omitted at `0.0` for backward compatibility);
+- embedding caches (embedding creators): `Embedding_<model>`.
 
-Any `:` in the resulting name is replaced by `__`, and any `/` or `\` (e.g. in provider-prefixed Bifrost model names such as `openai/gpt-4o-mini`) by `--`; names without these characters are unchanged. Examples:
+Any `:` in the resulting name is replaced by `__`, and any `/` or `\` by `--`; names without these characters are unchanged. For Bifrost, the provider prefix of the model name (e.g. `openai/gpt-4o-mini`) is dropped from the cache identity (`gpt-4o-mini`); requests still use the prefixed name. Examples:
 
 ```text
-SimpleClassifier_gpt-4o-mini-2024-07-18_133742243.json
-ReasoningClassifier_gpt-4o-mini_133742243_0.7.json
-OpenAiEmbeddingCreator_text-embedding-3-large.json
-SimpleClassifier_openai--gpt-4o-mini_133742243.json
+Chat_gpt-4o-mini-2024-07-18_133742243.json
+Chat_gpt-4o-mini_133742243_0.7.json
+Embedding_text-embedding-3-large.json
 ```
 
-Because the Java class name is part of the file name, renaming a class orphans its cache, and classifiers sharing an implementation class share a cache file. If `cache_dir` is absent from the configuration, `./cache` relative to the current working directory is used.
+The calling class is not part of the file name: all components with equal parameters share one cache file. If `cache_dir` is absent from the configuration, `./cache` relative to the current working directory is used.
+
+### Migrating Existing Cache Directories
+
+Cache files written by llm-access before 0.3.0 are named `<CallerSimpleClassName>_<parameters>.json`. Merge them into the new names with the script from the [llm-access repository](https://github.com/ardoco/llm-access) (`scripts/migrate_cache_0_3_0.py`), once per cache directory (top level only):
+
+```bash
+python3 scripts/migrate_cache_0_3_0.py <cache_dir> --dry-run   # preview
+python3 scripts/migrate_cache_0_3_0.py <cache_dir>             # migrate
+```
+
+The old files are moved to `<cache_dir>/pre-0.3.0-backup`, never deleted. The script works on Linux, macOS and Windows (`python3`, or `py` on Windows). Redis keys are unchanged.
 
 ### Cache Keys
 
