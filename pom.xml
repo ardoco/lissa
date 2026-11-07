@@ -160,6 +160,17 @@
       <name>Maven Central</name>
       <url>https://repo.maven.apache.org/maven2/</url>
     </repository>
+    <repository>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <id>central_snapshots</id>
+      <name>Maven Central Snapshots</name>
+      <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+    </repository>
   </repositories>
   <pluginRepositories>
     <pluginRepository>
