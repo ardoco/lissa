@@ -21,9 +21,7 @@ final class E2ETestEnvironment {
             "CACHE_HIERARCHY", "LOCAL",
             "CACHE_REPLACEMENT_STRATEGY", "ERROR",
             "OPENAI_ORGANIZATION_ID", "DUMMY",
-            "OPENAI_API_KEY", "DUMMY",
-            "OLLAMA_HOST", "http://localhost:11434",
-            "OLLAMA_EMBEDDING_HOST", "http://localhost:11434"));
+            "OPENAI_API_KEY", "DUMMY"));
 
     private E2ETestEnvironment() {
         throw new IllegalAccessError("Utility class");
