@@ -99,7 +99,7 @@ OPENAI_ORGANIZATION_ID=DUMMY
 OPENAI_API_KEY=DUMMY
 ```
 
-This is exactly what `src/test/resources/.env-test` does for the offline end-to-end tests, which inject it as `new SystemEnvironment(Path.of("src/test/resources/.env-test"))` into `Evaluation`/`Optimization`. Using deliberately invalid values is recommended: it turns an unnoticed cache miss into a visible failure instead of a live API call.
+The offline end-to-end tests do exactly this: they pass a `MapEnvironment` with these dummy values (plus `CACHE_HIERARCHY=LOCAL` and `CACHE_REPLACEMENT_STRATEGY=ERROR`; see [`E2ETestEnvironment`](../src/test/java/edu/kit/kastel/sdq/lissa/ratlr/e2e/E2ETestEnvironment.java)) to `Evaluation`/`Optimization`. A `MapEnvironment` has no fallback to the process environment, so a real key exported in your shell cannot leak into the tests. Using deliberately invalid values is recommended: it turns an unnoticed cache miss into a visible failure instead of a live API call.
 
 > [!WARNING]
 > Putting dummy values in `.env` is not enough if a real key is exported in your shell — the process environment wins over `.env`. Unset the real values first, or the replay will quietly call the live API on a cache miss:
@@ -155,7 +155,7 @@ The `Cache` interface provides two API levels:
 
 2. **Environment Variables**
 
-   All variables below are read through the `EnvironmentProvider` of the run — by default a `SystemEnvironment`, which loads a `.env` file from the **current working directory**. The real process environment takes precedence: `.env` only supplies variables that are not already exported.
+   All variables below are read through the `EnvironmentProvider` of the run — created by `Main`/`MainCLI` as a `SystemEnvironment` (tests inject their own), which loads a `.env` file from the **current working directory**. The real process environment takes precedence: `.env` only supplies variables that are not already exported.
 
    The caching system supports the following environment variables:
    - **CACHE_HIERARCHY**: Comma-separated list of cache types in order (e.g., "LOCAL,REDIS")

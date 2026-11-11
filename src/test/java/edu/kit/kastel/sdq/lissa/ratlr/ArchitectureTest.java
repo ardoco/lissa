@@ -1,11 +1,11 @@
 /* Licensed under MIT 2025-2026. */
 package edu.kit.kastel.sdq.lissa.ratlr;
 
+import static com.tngtech.archunit.core.domain.JavaClass.Predicates.assignableTo;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.*;
 
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
@@ -13,6 +13,8 @@ import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 
+import com.tngtech.archunit.core.domain.JavaAccess;
+import com.tngtech.archunit.core.domain.properties.HasOwner.Predicates.With;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
@@ -23,6 +25,7 @@ import edu.kit.kastel.mcse.ardoco.llm.util.Futures;
 import edu.kit.kastel.mcse.ardoco.llm.util.KeyGenerator;
 import edu.kit.kastel.mcse.ardoco.llm.util.MapEnvironment;
 import edu.kit.kastel.mcse.ardoco.llm.util.SystemEnvironment;
+import edu.kit.kastel.sdq.lissa.cli.MainCLI;
 import edu.kit.kastel.sdq.lissa.cli.command.OptimizeCommand;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.Classifier;
 import edu.kit.kastel.sdq.lissa.ratlr.promptoptimizer.PromptOptimizer;
@@ -52,7 +55,8 @@ class ArchitectureTest {
      * <p>
      * Only {@link SystemEnvironment} may call {@code System.getenv()}.
      * All other classes must read environment variables through the {@link EnvironmentProvider} that is passed
-     * down from the entry points (e.g., via the {@link edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore}).
+     * down from the entry points as an explicit parameter (e.g., to the factories of classifiers, preprocessors and
+     * embedding creators).
      */
     @ArchTest
     static final ArchRule noDirectEnvironmentAccess = noClasses()
@@ -119,7 +123,7 @@ class ArchitectureTest {
             .that()
             .areNotAssignableTo(OptimizeCommand.class)
             .should()
-            .callConstructor(Evaluation.class, Path.class, String.class);
+            .callConstructor(Evaluation.class, Path.class, String.class, EnvironmentProvider.class);
 
     /**
      * Futures should be opened with a logger.
@@ -148,20 +152,24 @@ class ArchitectureTest {
                     "CacheManager.resetDefaultInstance() is only intended for testing purposes and must not be used elsewhere");
 
     /**
-     * Rule that enforces that custom environment sources are only created in test classes.
+     * Rule that enforces that environments are only created in the entry points and in tests.
      * <p>
-     * Tests may inject a {@link SystemEnvironment} with an explicit {@code .env} file or a {@link MapEnvironment}.
-     * For production usage the regular {@code .env} file in the working directory shall be used, i.e.,
-     * {@code new SystemEnvironment()}.
+     * Only {@link Main}, {@link MainCLI} and test classes may construct a {@link SystemEnvironment} (with any
+     * constructor) or a {@link MapEnvironment}. All other classes receive the {@link EnvironmentProvider} as an
+     * explicit parameter.
      */
     @ArchTest
-    static final ArchRule customEnvironmentOnlyInTests = noClasses()
+    static final ArchRule environmentsOnlyCreatedInEntryPointsAndTests = noClasses()
             .that()
             .haveNameNotMatching(".*Test.*")
+            .and()
+            .doNotHaveFullyQualifiedName(Main.class.getName())
+            .and()
+            .doNotHaveFullyQualifiedName(MainCLI.class.getName())
             .should()
-            .callConstructor(SystemEnvironment.class, Path.class)
+            .callConstructorWhere(JavaAccess.Predicates.target(With.owner(assignableTo(SystemEnvironment.class))))
             .orShould()
-            .callConstructor(MapEnvironment.class, Map.class)
+            .callConstructorWhere(JavaAccess.Predicates.target(With.owner(assignableTo(MapEnvironment.class))))
             .because(
-                    "Custom environment sources are only intended for testing purposes and may not be used elsewhere. Use the regular .env instead.");
+                    "Environments may only be created by the entry points (Main, MainCLI) and tests; everything else must receive the EnvironmentProvider as a parameter.");
 }

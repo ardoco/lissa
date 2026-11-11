@@ -4,6 +4,7 @@ package edu.kit.kastel.sdq.lissa.ratlr.classifier;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import edu.kit.kastel.mcse.ardoco.llm.util.EnvironmentProvider;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.elementstore.SourceElementStore;
@@ -34,12 +35,14 @@ public class PipelineClassifier extends Classifier {
      *
      * @param configs A list of configuration lists, where each inner list represents a stage
      * @param contextStore The shared context store for pipeline components
+     * @param environment The environment provider for credentials and other environment variables
      */
-    public PipelineClassifier(List<List<ModuleConfiguration>> configs, ContextStore contextStore) {
+    public PipelineClassifier(
+            List<List<ModuleConfiguration>> configs, ContextStore contextStore, EnvironmentProvider environment) {
         super(1, contextStore);
         this.classifiers = configs.stream()
                 .map(it -> it.stream()
-                        .map(config -> Classifier.createClassifier(config, contextStore))
+                        .map(config -> Classifier.createClassifier(config, contextStore, environment))
                         .toList())
                 .toList();
     }

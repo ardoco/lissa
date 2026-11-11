@@ -16,6 +16,7 @@ import java.util.concurrent.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.kit.kastel.mcse.ardoco.llm.util.EnvironmentProvider;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.elementstore.SourceElementStore;
@@ -240,14 +241,16 @@ public abstract class Classifier {
      *
      * @param configuration The module configuration for the classifier
      * @param contextStore The shared context store for pipeline components
+     * @param environment The environment provider for credentials and other environment variables
      * @return A new classifier instance
      * @throws IllegalStateException If the configuration name is not recognized
      */
-    public static Classifier createClassifier(ModuleConfiguration configuration, ContextStore contextStore) {
+    public static Classifier createClassifier(
+            ModuleConfiguration configuration, ContextStore contextStore, EnvironmentProvider environment) {
         return switch (configuration.name().split(CONFIG_NAME_SEPARATOR)[0]) {
             case MOCK_CLASSIFIER_NAME -> new MockClassifier(contextStore);
-            case SIMPLE_CLASSIFIER_NAME -> new SimpleClassifier(configuration, contextStore);
-            case REASONING_CLASSIFIER_NAME -> new ReasoningClassifier(configuration, contextStore);
+            case SIMPLE_CLASSIFIER_NAME -> new SimpleClassifier(configuration, contextStore, environment);
+            case REASONING_CLASSIFIER_NAME -> new ReasoningClassifier(configuration, contextStore, environment);
             default -> throw new IllegalStateException("Unexpected value: " + configuration.name());
         };
     }
@@ -277,10 +280,11 @@ public abstract class Classifier {
      *
      * @param configs A list of configuration lists, where each inner list represents a stage
      * @param contextStore The shared context store for pipeline components
+     * @param environment The environment provider for credentials and other environment variables
      * @return A new pipeline classifier instance
      */
     public static Classifier createMultiStageClassifier(
-            List<List<ModuleConfiguration>> configs, ContextStore contextStore) {
-        return new PipelineClassifier(configs, contextStore);
+            List<List<ModuleConfiguration>> configs, ContextStore contextStore, EnvironmentProvider environment) {
+        return new PipelineClassifier(configs, contextStore, environment);
     }
 }
