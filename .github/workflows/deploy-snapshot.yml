@@ -1,0 +1,13 @@
+name: Deploy Snapshot
+
+on:
+  # Manual trigger only: deploys the selected branch to the GitLab package registry
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    uses: ardoco/actions/.github/workflows/maven-snapshot.yml@main
+    with:
+      # Maven package registry of the read-only mirror on gitlab.kit.edu (kit/kastel/sdq/research-projects/ardoco/lissa)
+      gitlab-project-id: "203216"
+    secrets: inherit
