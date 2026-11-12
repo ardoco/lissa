@@ -160,6 +160,17 @@
       <name>Maven Central</name>
       <url>https://repo.maven.apache.org/maven2/</url>
     </repository>
+    <repository>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <!-- ARDoCo snapshot builds (public, read-only mirror group on gitlab.kit.edu) -->
+      <id>ardocoSnapshots</id>
+      <url>https://gitlab.kit.edu/api/v4/groups/253644/-/packages/maven</url>
+    </repository>
   </repositories>
   <pluginRepositories>
     <pluginRepository>
