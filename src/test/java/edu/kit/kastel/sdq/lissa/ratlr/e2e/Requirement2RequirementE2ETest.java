@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -24,12 +25,15 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
 
 class Requirement2RequirementE2ETest {
 
+    @TempDir
+    Path outputDirectory;
+
     @Test
     void testEnd2End() throws Exception {
         File config = new File("src/test/resources/warc/config.json");
         Assertions.assertTrue(config.exists());
 
-        Evaluation evaluation = new Evaluation(config.toPath(), E2ETestEnvironment.ENVIRONMENT);
+        Evaluation evaluation = new Evaluation(config.toPath(), E2ETestEnvironment.ENVIRONMENT, outputDirectory);
         var traceLinks = evaluation.run();
 
         Set<TraceLink> validTraceLinks =
@@ -80,7 +84,7 @@ class Requirement2RequirementE2ETest {
         File config = new File(configPath);
         Assertions.assertTrue(
                 config.exists(), "The configuration file should exist at %s".formatted(config.getAbsolutePath()));
-        Optimization optimization = new Optimization(config.toPath(), E2ETestEnvironment.ENVIRONMENT);
+        Optimization optimization = new Optimization(config.toPath(), E2ETestEnvironment.ENVIRONMENT, outputDirectory);
         List<String> optimizedPrompts = optimization.run();
         Assertions.assertFalse(
                 optimizedPrompts.isEmpty(),

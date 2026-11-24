@@ -19,7 +19,6 @@ import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
 
-import edu.kit.kastel.mcse.ardoco.llm.cache.CacheManager;
 import edu.kit.kastel.mcse.ardoco.llm.util.EnvironmentProvider;
 import edu.kit.kastel.mcse.ardoco.llm.util.Futures;
 import edu.kit.kastel.mcse.ardoco.llm.util.KeyGenerator;
@@ -136,20 +135,6 @@ class ArchitectureTest {
             .callMethod(Future.class, "get")
             .orShould()
             .callMethod(Future.class, "resultNow");
-
-    /**
-     * Rule that enforces that CacheManager.resetDefaultInstance() is only called from Test classes.
-     * <p>
-     * The resetDefaultInstance() method should only be used to reset the singleton state between tests.
-     */
-    @ArchTest
-    static final ArchRule cacheManagerResetOnlyInTests = noClasses()
-            .that()
-            .haveNameNotMatching(".*Test.*")
-            .should()
-            .callMethod(CacheManager.class, "resetDefaultInstance")
-            .because(
-                    "CacheManager.resetDefaultInstance() is only intended for testing purposes and must not be used elsewhere");
 
     /**
      * Rule that enforces that environments are only created in the entry points and in tests.

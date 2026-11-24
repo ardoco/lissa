@@ -42,6 +42,9 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
 public final class Statistics {
     private static final Logger logger = LoggerFactory.getLogger(Statistics.class);
 
+    /** The current working directory, the default location for all result files. */
+    private static final Path WORKING_DIRECTORY = Path.of("");
+
     private Statistics() {
         throw new IllegalAccessError("Utility class");
     }
@@ -71,12 +74,37 @@ public final class Statistics {
             int targetArtifacts)
             throws UncheckedIOException {
         generateStatistics(
+                traceLinks, configFileName, configuration, sourceArtifacts, targetArtifacts, WORKING_DIRECTORY);
+    }
+
+    /**
+     * Same as {@link #generateStatistics(Set, String, EvaluationConfiguration, int, int)}, but writes the report to
+     * {@code outputDirectory} instead of the current working directory.
+     *
+     * @param traceLinks Set of identified trace links
+     * @param configFileName  Evaluation configuration file name used for the analysis
+     * @param configuration Evaluation configuration object used for the analysis
+     * @param sourceArtifacts Number of source artifacts
+     * @param targetArtifacts Number of target artifacts
+     * @param outputDirectory Directory the report is written to
+     * @throws UncheckedIOException If there are issues writing the statistics file
+     */
+    public static void generateStatistics(
+            Set<TraceLink> traceLinks,
+            String configFileName,
+            EvaluationConfiguration configuration,
+            int sourceArtifacts,
+            int targetArtifacts,
+            Path outputDirectory)
+            throws UncheckedIOException {
+        generateStatistics(
                 configuration.getConfigurationIdentifierForFile(configFileName),
                 configuration.serializeAndDestroyConfiguration(),
                 traceLinks,
                 configuration.goldStandardConfiguration(),
                 sourceArtifacts,
-                targetArtifacts);
+                targetArtifacts,
+                outputDirectory);
     }
 
     /**
@@ -106,6 +134,38 @@ public final class Statistics {
             int sourceArtifacts,
             int targetArtifacts)
             throws UncheckedIOException {
+        generateStatistics(
+                configurationIdentifier,
+                configurationSummary,
+                traceLinks,
+                goldStandardConfiguration,
+                sourceArtifacts,
+                targetArtifacts,
+                WORKING_DIRECTORY);
+    }
+
+    /**
+     * Same as the variant without output directory, but writes the report to {@code outputDirectory} instead of the
+     * current working directory.
+     *
+     * @param configurationIdentifier Unique identifier for the configuration
+     * @param configurationSummary Summary of the configuration used
+     * @param traceLinks Set of identified trace links
+     * @param goldStandardConfiguration Gold standard configuration for comparison
+     * @param sourceArtifacts Number of source artifacts
+     * @param targetArtifacts Number of target artifacts
+     * @param outputDirectory Directory the report is written to
+     * @throws UncheckedIOException If there are issues writing the statistics file
+     */
+    public static void generateStatistics(
+            String configurationIdentifier,
+            String configurationSummary,
+            Set<TraceLink> traceLinks,
+            @Nullable GoldStandardConfiguration goldStandardConfiguration,
+            int sourceArtifacts,
+            int targetArtifacts,
+            Path outputDirectory)
+            throws UncheckedIOException {
 
         if (goldStandardConfiguration == null || goldStandardConfiguration.path() == null) {
             logger.info(
@@ -120,7 +180,7 @@ public final class Statistics {
         classification.prettyPrint();
 
         // Store information to one file (config and results)
-        var resultFile = new File("results-" + configurationIdentifier + ".md");
+        var resultFile = outputDirectory.resolve("results-" + configurationIdentifier + ".md");
         StringBuilder result = new StringBuilder();
         result.append(configurationToString(configurationIdentifier, configurationSummary));
         result.append("## Stats\n");
@@ -141,11 +201,11 @@ public final class Statistics {
         result.append("* Recall: ").append(classification.getRecall()).append("\n");
         result.append("* F1: ").append(classification.getF1()).append("\n");
 
-        logger.info("Storing results to {}", resultFile.getName());
+        logger.info("Storing results to {}", resultFile.getFileName());
         try {
-            Path path = resultFile.toPath();
-            Files.deleteIfExists(path);
-            Files.writeString(path, result.toString(), StandardOpenOption.CREATE);
+            Files.createDirectories(outputDirectory);
+            Files.deleteIfExists(resultFile);
+            Files.writeString(resultFile, result.toString(), StandardOpenOption.CREATE);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -200,8 +260,32 @@ public final class Statistics {
     public static void saveTraceLinks(
             Set<TraceLink> traceLinks, String configFileName, EvaluationConfiguration configuration)
             throws UncheckedIOException {
+        saveTraceLinks(traceLinks, configFileName, configuration, WORKING_DIRECTORY);
+    }
+
+    /**
+     * Same as {@link #saveTraceLinks(Set, String, EvaluationConfiguration)}, but writes the CSV file to
+     * {@code outputDirectory} instead of the current working directory.
+     *
+     * @param traceLinks Set of trace links to save
+     * @param configFileName Evaluation configuration file name used for the analysis
+     * @param configuration Evaluation configuration object used for the analysis
+     * @param outputDirectory Directory the CSV file is written to
+     * @throws UncheckedIOException If there are issues writing the trace links file
+     */
+    public static void saveTraceLinks(
+            Set<TraceLink> traceLinks,
+            String configFileName,
+            EvaluationConfiguration configuration,
+            Path outputDirectory)
+            throws UncheckedIOException {
         var fileName = "traceLinks-" + configuration.getConfigurationIdentifierForFile(configFileName) + ".csv";
-        saveTraceLinks(traceLinks, fileName);
+        try {
+            Files.createDirectories(outputDirectory);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        saveTraceLinks(traceLinks, outputDirectory.resolve(fileName).toString());
     }
 
     /**
@@ -250,10 +334,27 @@ public final class Statistics {
      */
     public static void generateOptimizationStatistics(
             File configFile, OptimizerConfiguration configuration, String prompt) throws UncheckedIOException {
+        generateOptimizationStatistics(configFile, configuration, prompt, WORKING_DIRECTORY);
+    }
+
+    /**
+     * Same as {@link #generateOptimizationStatistics(File, OptimizerConfiguration, String)}, but writes the report to
+     * {@code outputDirectory} instead of the current working directory.
+     *
+     * @param configFile EvaluationConfiguration file used for the optimization
+     * @param configuration EvaluationConfiguration object used for the optimization
+     * @param prompt Optimized prompt generated during the optimization
+     * @param outputDirectory Directory the report is written to
+     * @throws UncheckedIOException If there are issues writing the statistics file
+     */
+    public static void generateOptimizationStatistics(
+            File configFile, OptimizerConfiguration configuration, String prompt, Path outputDirectory)
+            throws UncheckedIOException {
         generateOptimizationStatistics(
                 configuration.getConfigurationIdentifierForFile(configFile.getName()),
                 configuration.serializeAndDestroyConfiguration(),
-                prompt);
+                prompt,
+                outputDirectory);
     }
 
     /**
@@ -272,17 +373,34 @@ public final class Statistics {
      */
     public static void generateOptimizationStatistics(
             String configurationIdentifier, String configurationSummary, String prompt) throws UncheckedIOException {
+        generateOptimizationStatistics(configurationIdentifier, configurationSummary, prompt, WORKING_DIRECTORY);
+    }
+
+    /**
+     * Same as the variant without output directory, but writes the report to {@code outputDirectory} instead of the
+     * current working directory.
+     *
+     * @param configurationIdentifier Unique identifier for the configuration
+     * @param configurationSummary Summary of the configuration used
+     * @param prompt Optimized prompt used in the analysis
+     * @param outputDirectory Directory the report is written to
+     * @throws UncheckedIOException If there are issues writing the statistics file
+     */
+    public static void generateOptimizationStatistics(
+            String configurationIdentifier, String configurationSummary, String prompt, Path outputDirectory)
+            throws UncheckedIOException {
 
         // Store information to one file (config and results)
-        var resultFile = new File("results-prompt-optimization-" + configurationIdentifier + ".md");
+        var resultFile = outputDirectory.resolve("results-prompt-optimization-" + configurationIdentifier + ".md");
         StringBuilder result = new StringBuilder();
         result.append(configurationToString(configurationIdentifier, configurationSummary));
         result.append("## Stats\n");
         result.append(" * Optimized Prompt: ").append(escapeMarkdown(prompt)).append("\n");
 
-        logger.info("Storing results to {}", resultFile.getName());
+        logger.info("Storing results to {}", resultFile.getFileName());
         try {
-            Files.writeString(resultFile.toPath(), result.toString(), StandardOpenOption.CREATE);
+            Files.createDirectories(outputDirectory);
+            Files.writeString(resultFile, result.toString(), StandardOpenOption.CREATE);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

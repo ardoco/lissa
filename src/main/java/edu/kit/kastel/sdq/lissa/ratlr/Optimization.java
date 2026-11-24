@@ -34,6 +34,8 @@ public class Optimization {
 
     private static final Logger logger = LoggerFactory.getLogger(Optimization.class);
     private final Path configFile;
+    /** Directory the result file is written to */
+    private final Path outputDirectory;
     /** Environment providing API keys, hosts and cache settings to the evaluation pipeline and the optimizer */
     private final EnvironmentProvider environment;
 
@@ -59,7 +61,22 @@ public class Optimization {
      * @throws NullPointerException If configFile or environment is null
      */
     public Optimization(Path configFile, EnvironmentProvider environment) throws IOException {
+        this(configFile, environment, Path.of(""));
+    }
+
+    /**
+     * Creates a new optimization instance like {@link #Optimization(Path, EnvironmentProvider)}, but writes the result
+     * file to the given directory instead of the current working directory.
+     *
+     * @param configFile Path to the configuration file
+     * @param environment The environment providing API keys, hosts and cache settings
+     * @param outputDirectory The directory the result file is written to
+     * @throws IOException          If there are issues reading the configuration file
+     * @throws NullPointerException If configFile, environment or outputDirectory is null
+     */
+    public Optimization(Path configFile, EnvironmentProvider environment, Path outputDirectory) throws IOException {
         this.configFile = Objects.requireNonNull(configFile);
+        this.outputDirectory = Objects.requireNonNull(outputDirectory);
         this.environment = Objects.requireNonNull(environment);
         setup();
     }
@@ -123,7 +140,8 @@ public class Optimization {
             return results;
         }
 
-        Statistics.generateOptimizationStatistics(configFile.toFile(), configuration, results.getLast());
+        Statistics.generateOptimizationStatistics(
+                configFile.toFile(), configuration, results.getLast(), outputDirectory);
 
         logger.info("Optimized prompt after {} steps: \n {}", results.size(), results.getLast());
         CacheManager.getDefaultInstance().flush();
