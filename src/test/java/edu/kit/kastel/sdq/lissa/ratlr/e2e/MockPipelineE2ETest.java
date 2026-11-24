@@ -2,10 +2,12 @@
 package edu.kit.kastel.sdq.lissa.ratlr.e2e;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import edu.kit.kastel.sdq.lissa.ratlr.Evaluation;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
@@ -17,12 +19,15 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
  */
 class MockPipelineE2ETest {
 
+    @TempDir
+    Path outputDirectory;
+
     @Test
     void testMockPipelineRuns() throws Exception {
         File config = new File("src/test/resources/warc/config-mock.json");
         Assertions.assertTrue(config.exists(), "mock config missing at " + config.getAbsolutePath());
 
-        Evaluation evaluation = new Evaluation(config.toPath(), E2ETestEnvironment.ENVIRONMENT);
+        Evaluation evaluation = new Evaluation(config.toPath(), E2ETestEnvironment.ENVIRONMENT, outputDirectory);
         Set<TraceLink> traceLinks = evaluation.run();
 
         Assertions.assertNotNull(traceLinks);

@@ -69,6 +69,8 @@ public class Evaluation {
 
     private static final Logger logger = LoggerFactory.getLogger(Evaluation.class);
     private final @Nullable Path configFile;
+    /** Directory the result files (statistics and trace links) are written to */
+    private final Path outputDirectory;
 
     private final EvaluationConfiguration configuration;
     /** Environment providing API keys, hosts and cache settings to all components of the pipeline */
@@ -114,7 +116,22 @@ public class Evaluation {
      * @throws NullPointerException If configFile or environment is null
      */
     public Evaluation(Path configFile, EnvironmentProvider environment) throws IOException {
+        this(configFile, environment, Path.of(""));
+    }
+
+    /**
+     * Creates a new evaluation instance like {@link #Evaluation(Path, EnvironmentProvider)}, but writes the result
+     * files to the given directory instead of the current working directory.
+     *
+     * @param configFile Path to the configuration file
+     * @param environment The environment providing API keys, hosts and cache settings
+     * @param outputDirectory The directory the result files are written to
+     * @throws IOException If there are issues reading the configuration file
+     * @throws NullPointerException If configFile, environment or outputDirectory is null
+     */
+    public Evaluation(Path configFile, EnvironmentProvider environment, Path outputDirectory) throws IOException {
         this.configFile = Objects.requireNonNull(configFile);
+        this.outputDirectory = Objects.requireNonNull(outputDirectory);
         this.environment = Objects.requireNonNull(environment);
         configuration = new ObjectMapper().readValue(configFile.toFile(), EvaluationConfiguration.class);
         setup();
@@ -140,6 +157,7 @@ public class Evaluation {
      */
     public Evaluation(Path configFile, String prompt, EnvironmentProvider environment) throws IOException {
         this.configFile = Objects.requireNonNull(configFile);
+        this.outputDirectory = Path.of("");
         this.environment = Objects.requireNonNull(environment);
         EvaluationConfiguration loadedConfiguration =
                 new ObjectMapper().readValue(configFile.toFile(), EvaluationConfiguration.class);
@@ -184,6 +202,7 @@ public class Evaluation {
     public Evaluation(EvaluationConfiguration config, EnvironmentProvider environment) throws IOException {
         this.configuration = config;
         this.configFile = null;
+        this.outputDirectory = Path.of("");
         this.environment = Objects.requireNonNull(environment);
         setup();
     }
@@ -267,8 +286,13 @@ public class Evaluation {
             configFileName = "in_memory_configuration.json";
         }
         Statistics.generateStatistics(
-                traceLinks, configFileName, configuration, getSourceArtifactCount(), getTargetArtifactCount());
-        Statistics.saveTraceLinks(traceLinks, configFileName, configuration);
+                traceLinks,
+                configFileName,
+                configuration,
+                getSourceArtifactCount(),
+                getTargetArtifactCount(),
+                outputDirectory);
+        Statistics.saveTraceLinks(traceLinks, configFileName, configuration, outputDirectory);
         CacheManager.getDefaultInstance().flush();
 
         return traceLinks;
