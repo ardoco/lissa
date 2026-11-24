@@ -67,7 +67,7 @@ public class SummarizePreprocessor extends Preprocessor {
         this.template = moduleConfiguration.argumentAsString("template", "Summarize the following {type}: {content}");
         this.provider = new ChatLanguageModelProvider(moduleConfiguration, environment);
         this.threads = ChatLanguageModelProvider.threads(moduleConfiguration);
-        this.cache = CacheManager.getDefaultInstance().getCache(this, provider.cacheParameters());
+        this.cache = CacheManager.getDefaultInstance().getCache(provider.cacheParameters());
     }
 
     /**
