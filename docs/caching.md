@@ -49,7 +49,7 @@ python3 scripts/migrate_cache_0_3_0.py <cache_dir> --dry-run   # preview
 python3 scripts/migrate_cache_0_3_0.py <cache_dir>             # migrate
 ```
 
-The old files are moved to `<cache_dir>/pre-0.3.0-backup`, never deleted. The script works on Linux, macOS and Windows (`python3`, or `py` on Windows). Redis keys are unchanged.
+The old files are moved to `<cache_dir>/pre-0.3.0-backup` (or `--backup-dir <path>`), never deleted. The script works on Linux, macOS and Windows (`python3`, or `py` on Windows). Old Bifrost chat files keep their provider prefix (e.g. `Chat_openai--gpt-4o-mini_…`) unless `--strip-provider-prefix` is given; the report lists every chat file that kept a possible prefix. Redis keys are unchanged, except for Bifrost models: entries written before 0.3.0 contain the provider prefix and are no longer hit.
 
 ### Cache Keys
 
