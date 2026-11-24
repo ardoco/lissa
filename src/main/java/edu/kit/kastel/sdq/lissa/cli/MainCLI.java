@@ -3,6 +3,8 @@ package edu.kit.kastel.sdq.lissa.cli;
 
 import java.nio.file.Path;
 
+import edu.kit.kastel.mcse.ardoco.llm.util.EnvironmentProvider;
+import edu.kit.kastel.mcse.ardoco.llm.util.SystemEnvironment;
 import edu.kit.kastel.sdq.lissa.cli.command.EvaluateCommand;
 import edu.kit.kastel.sdq.lissa.cli.command.OptimizeCommand;
 import edu.kit.kastel.sdq.lissa.cli.command.TransitiveTraceCommand;
@@ -25,17 +27,35 @@ import picocli.CommandLine;
 @CommandLine.Command(subcommands = {EvaluateCommand.class, TransitiveTraceCommand.class, OptimizeCommand.class})
 public final class MainCLI {
 
-    /**
-     * Private constructor to prevent instantiation of this utility class.
-     */
-    private MainCLI() {}
+    private final EnvironmentProvider environment;
 
     /**
-     * Main entry point for the CLI application.
+     * Creates the CLI with the given environment.
+     *
+     * @param environment the environment providing API keys, hosts and cache settings for all subcommands
+     */
+    private MainCLI(EnvironmentProvider environment) {
+        this.environment = environment;
+    }
+
+    /**
+     * Returns the environment that the subcommands pass to the pipelines they create.
+     *
+     * @return the environment created by {@link #main(String[])}
+     */
+    public EnvironmentProvider environment() {
+        return environment;
+    }
+
+    /**
+     * Main entry point for the CLI application. Creates the {@link SystemEnvironment} (process environment, then
+     * a {@code .env} file in the working directory) shared by all subcommands.
      *
      * @param args Command line arguments to be processed
      */
     public static void main(String[] args) {
-        new CommandLine(new MainCLI()).registerConverter(Path.class, Path::of).execute(args);
+        new CommandLine(new MainCLI(new SystemEnvironment()))
+                .registerConverter(Path.class, Path::of)
+                .execute(args);
     }
 }

@@ -5,7 +5,6 @@ import static edu.kit.kastel.sdq.lissa.ratlr.promptmetric.MetricTest.createFBeta
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -13,7 +12,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import edu.kit.kastel.mcse.ardoco.llm.util.MapEnvironment;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.ClassificationTask;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.MockClassifier;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
@@ -31,7 +29,7 @@ class GlobalMetricTest {
 
     @BeforeEach
     void setUp() {
-        ContextStore contextStore = new ContextStore(new MapEnvironment(Map.of()));
+        ContextStore contextStore = new ContextStore();
         mockClassifier = new MockClassifier(contextStore);
 
         // Create test elements

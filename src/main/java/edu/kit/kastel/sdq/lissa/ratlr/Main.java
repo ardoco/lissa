@@ -55,6 +55,7 @@ import edu.kit.kastel.sdq.lissa.ratlr.resultaggregator.ResultAggregator;
  */
 public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
+    private static final EnvironmentProvider environment = new SystemEnvironment();
 
     /**
      * Main entry point for the LiSSA framework.
@@ -73,11 +74,9 @@ public class Main {
         var configFilePath = args.length == 0 ? "config.json" : args[0];
         var configFile = new File(configFilePath);
         EvaluationConfiguration configuration = new ObjectMapper().readValue(configFile, EvaluationConfiguration.class);
-        // API keys, hosts and cache settings: system environment variables, then a .env file in the working directory
-        EnvironmentProvider environment = new SystemEnvironment();
         CacheManager.setCacheDir(configuration.cacheDir(), environment);
 
-        ContextStore contextStore = new ContextStore(environment);
+        ContextStore contextStore = new ContextStore();
 
         ArtifactProvider sourceArtifactProvider =
                 ArtifactProvider.createArtifactProvider(configuration.sourceArtifactProvider(), contextStore);
@@ -85,16 +84,16 @@ public class Main {
                 ArtifactProvider.createArtifactProvider(configuration.targetArtifactProvider(), contextStore);
 
         Preprocessor sourcePreprocessor =
-                Preprocessor.createPreprocessor(configuration.sourcePreprocessor(), contextStore);
+                Preprocessor.createPreprocessor(configuration.sourcePreprocessor(), contextStore, environment);
         Preprocessor targetPreprocessor =
-                Preprocessor.createPreprocessor(configuration.targetPreprocessor(), contextStore);
+                Preprocessor.createPreprocessor(configuration.targetPreprocessor(), contextStore, environment);
 
         EmbeddingCreator embeddingCreator =
-                EmbeddingCreator.createEmbeddingCreator(configuration.embeddingCreator(), contextStore);
+                EmbeddingCreator.createEmbeddingCreator(configuration.embeddingCreator(), contextStore, environment);
         SourceElementStore sourceStore = new SourceElementStore(configuration.sourceStore());
         TargetElementStore targetStore = new TargetElementStore(configuration.targetStore());
 
-        Classifier classifier = configuration.createClassifier(contextStore);
+        Classifier classifier = configuration.createClassifier(contextStore, environment);
         ResultAggregator aggregator =
                 ResultAggregator.createResultAggregator(configuration.resultAggregator(), contextStore);
 

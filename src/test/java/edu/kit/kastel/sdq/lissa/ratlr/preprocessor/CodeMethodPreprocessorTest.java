@@ -11,7 +11,6 @@ import java.util.Scanner;
 
 import org.junit.jupiter.api.Test;
 
-import edu.kit.kastel.mcse.ardoco.llm.util.MapEnvironment;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
 import edu.kit.kastel.sdq.lissa.ratlr.context.ContextStore;
 import edu.kit.kastel.sdq.lissa.ratlr.knowledge.Artifact;
@@ -57,8 +56,7 @@ class CodeMethodPreprocessorTest {
     @Test
     void preprocessSelf() throws IOException {
         CodeMethodPreprocessor codeMethodPreprocessor = new CodeMethodPreprocessor(
-                new ModuleConfiguration(null, Map.of("language", "JAVA")),
-                new ContextStore(new MapEnvironment(Map.of())));
+                new ModuleConfiguration(null, Map.of("language", "JAVA")), new ContextStore());
         String thisClassContent = new Scanner(new File(
                         "src/test/java/edu/kit/kastel/sdq/lissa/ratlr/preprocessor/CodeMethodPreprocessorTest.java"))
                 .useDelimiter("\\A")

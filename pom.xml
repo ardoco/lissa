@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.fuchss</groupId>
     <artifactId>maven-parent</artifactId>
-    <version>0.22.12</version>
+    <version>0.22.15</version>
   </parent>
 
   <groupId>io.github.ardoco</groupId>
@@ -170,6 +170,17 @@
       <id>central_snapshots</id>
       <name>Maven Central Snapshots</name>
       <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+    </repository>
+    <repository>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <!-- ARDoCo snapshot builds (public, read-only mirror group on gitlab.kit.edu) -->
+      <id>ardocoSnapshots</id>
+      <url>https://gitlab.kit.edu/api/v4/groups/253644/-/packages/maven</url>
     </repository>
   </repositories>
   <pluginRepositories>

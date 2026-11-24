@@ -17,8 +17,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import edu.kit.kastel.mcse.ardoco.llm.util.EnvironmentProvider;
-import edu.kit.kastel.mcse.ardoco.llm.util.SystemEnvironment;
 import edu.kit.kastel.mcse.ardoco.metrics.ClassificationMetricsCalculator;
 import edu.kit.kastel.sdq.lissa.ratlr.Evaluation;
 import edu.kit.kastel.sdq.lissa.ratlr.Optimization;
@@ -26,15 +24,12 @@ import edu.kit.kastel.sdq.lissa.ratlr.knowledge.TraceLink;
 
 class Requirement2RequirementE2ETest {
 
-    private static final EnvironmentProvider TEST_ENVIRONMENT =
-            new SystemEnvironment(Path.of("src/test/resources/.env-test"));
-
     @Test
     void testEnd2End() throws Exception {
         File config = new File("src/test/resources/warc/config.json");
         Assertions.assertTrue(config.exists());
 
-        Evaluation evaluation = new Evaluation(config.toPath(), TEST_ENVIRONMENT);
+        Evaluation evaluation = new Evaluation(config.toPath(), E2ETestEnvironment.ENVIRONMENT);
         var traceLinks = evaluation.run();
 
         Set<TraceLink> validTraceLinks =
@@ -85,7 +80,7 @@ class Requirement2RequirementE2ETest {
         File config = new File(configPath);
         Assertions.assertTrue(
                 config.exists(), "The configuration file should exist at %s".formatted(config.getAbsolutePath()));
-        Optimization optimization = new Optimization(config.toPath(), TEST_ENVIRONMENT);
+        Optimization optimization = new Optimization(config.toPath(), E2ETestEnvironment.ENVIRONMENT);
         List<String> optimizedPrompts = optimization.run();
         Assertions.assertFalse(
                 optimizedPrompts.isEmpty(),

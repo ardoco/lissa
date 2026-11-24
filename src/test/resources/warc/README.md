@@ -43,10 +43,11 @@ end-to-end test needs no network access and no real credentials:
 recall `0.6985294117647058` and F1 `0.49222797927461137`. `#testEnd2EndOptimizers` replays the four
 optimizer configurations against `src/test/resources/expected/*Expectation.txt`.
 
-`src/test/resources/.env-test` supplies placeholder credentials (`OPENAI_API_KEY=DUMMY`). They must be
-set even though no request is ever made, because the OpenAI clients validate them at construction
-time — and their invalidity is deliberate: it makes an accidental cache miss fail loudly instead of
-silently calling the API.
+The tests run with the `MapEnvironment` of `E2ETestEnvironment` (in `src/test/java/.../ratlr/e2e/`), which
+supplies placeholder credentials (`OPENAI_API_KEY=DUMMY`). They must be set even though no request is ever
+made, because the OpenAI clients validate them at construction time — and their invalidity is deliberate: it
+makes an accidental cache miss fail loudly instead of silently calling the API. A `MapEnvironment` does not
+fall back to the process environment, so a real key exported in your shell is never used.
 
 Do not edit the prompts, the `artifact_type` values, the module arguments in `config.json`, or upgrade
 langchain4j without re-recording the caches. Every one of those changes the derived cache keys, and a

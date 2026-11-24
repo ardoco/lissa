@@ -13,7 +13,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import edu.kit.kastel.mcse.ardoco.llm.util.MapEnvironment;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.ClassificationTask;
 import edu.kit.kastel.sdq.lissa.ratlr.classifier.MockClassifier;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.ModuleConfiguration;
@@ -77,7 +76,7 @@ class MetricTest {
      * @return Stream of Metric instances for testing
      */
     private static Stream<Arguments> metrics() {
-        ContextStore contextStore = new ContextStore(new MapEnvironment(Map.of()));
+        ContextStore contextStore = new ContextStore();
         MockClassifier mockClassifier = new MockClassifier(contextStore);
 
         return Stream.of(

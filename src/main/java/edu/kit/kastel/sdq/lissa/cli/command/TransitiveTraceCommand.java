@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.kit.kastel.mcse.ardoco.llm.util.KeyGenerator;
+import edu.kit.kastel.sdq.lissa.cli.MainCLI;
 import edu.kit.kastel.sdq.lissa.ratlr.Evaluation;
 import edu.kit.kastel.sdq.lissa.ratlr.Statistics;
 import edu.kit.kastel.sdq.lissa.ratlr.configuration.EvaluationConfiguration;
@@ -41,6 +42,9 @@ import picocli.CommandLine;
         mixinStandardHelpOptions = true,
         description = "Invokes the pipeline (transitive trace link) and evaluates it")
 public class TransitiveTraceCommand implements Runnable {
+    @CommandLine.ParentCommand
+    private MainCLI parent;
+
     private static final Logger logger = LoggerFactory.getLogger(TransitiveTraceCommand.class);
 
     /**
@@ -171,7 +175,7 @@ public class TransitiveTraceCommand implements Runnable {
         try {
             for (Path traceConfig : transitiveTraceConfigs) {
                 logger.info("Invoking the pipeline with '{}'", traceConfig);
-                Evaluation evaluation = new Evaluation(traceConfig);
+                Evaluation evaluation = new Evaluation(traceConfig, parent.environment());
                 evaluations.add(evaluation);
                 var traceLinksForRun = evaluation.run();
                 logger.info("Found {} trace links", traceLinksForRun.size());
